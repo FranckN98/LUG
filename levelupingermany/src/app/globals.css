@@ -1,0 +1,251 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground: #1a1a1a;
+  /* Fond type papier / plâtre chaud (aligné avec le thème premium) */
+  --background: #f4f1eb;
+  --paper-base: #f2efe8;
+  --paper-mid: #ebe6dd;
+  --paper-highlight: #faf8f4;
+  --primary: #8c1a1a;
+  --accent: #e98c0b;
+  --brand-grey: #c2c2c2;
+  /* Grain SVG (feTurbulence) — léger, répétable, pas d’image externe */
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/**
+ * Fond « papier artisanal / plâtre mat » : dégradés chauds + relief très doux + grain procédural.
+ * Calques sur ::before / ::after (z-index 0) + contenu dans .paper-texture-shell (z-index 10).
+ */
+body.paper-texture {
+  color: var(--foreground);
+  background-color: var(--paper-base);
+}
+
+body.paper-texture::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 130% 85% at 50% -25%, rgba(255, 255, 255, 0.72) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 55% at 12% 38%, rgba(0, 0, 0, 0.045) 0%, transparent 52%),
+    radial-gradient(ellipse 55% 45% at 88% 72%, rgba(0, 0, 0, 0.038) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 40% at 78% 12%, rgba(0, 0, 0, 0.028) 0%, transparent 48%),
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(140, 26, 26, 0.025) 0%, transparent 55%),
+    linear-gradient(
+      165deg,
+      var(--paper-highlight) 0%,
+      var(--paper-base) 38%,
+      var(--paper-mid) 72%,
+      #f5f2eb 100%
+    );
+  background-attachment: fixed;
+}
+
+body.paper-texture::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.48;
+  mix-blend-mode: multiply;
+  background-image: var(--paper-grain), radial-gradient(rgba(70, 62, 52, 0.085) 0.55px, transparent 0.55px);
+  background-repeat: repeat, repeat;
+  background-size: 280px 280px, 5px 5px;
+}
+
+@media (max-width: 768px) {
+  body.paper-texture::before {
+    background-attachment: scroll;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.paper-texture::before {
+    background-attachment: scroll;
+  }
+  body.paper-texture::after {
+    opacity: 0.26;
+  }
+}
+
+/* Contenu au-dessus des calques (voir .paper-texture-shell dans layout) */
+.paper-texture-shell {
+  position: relative;
+  z-index: 10;
+}
+
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Hero slider: rendu moderne + filtre couleur cinématique */
+.hero-slider-bg {
+  background-size: cover;
+  background-position: center;
+  /* Filtre couleur unifié: contraste, saturation, teinte légèrement chaude */
+  filter: brightness(0.98) contrast(1.08) saturate(1.12) sepia(0.06);
+}
+@media (min-width: 768px) {
+  .hero-slider-bg {
+    filter: brightness(1) contrast(1.1) saturate(1.15) sepia(0.04);
+  }
+}
+
+/* Overlay moderne: dégradé doux + léger voile pour lisibilité */
+.hero-slider-overlay {
+  background: linear-gradient(
+    110deg,
+    rgba(0, 0, 0, 0.82) 0%,
+    rgba(0, 0, 0, 0.5) 30%,
+    rgba(0, 0, 0, 0.25) 55%,
+    transparent 85%
+  );
+}
+
+/* Robust enter animations (work even without Tailwind rebuild) */
+@keyframes heroFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-hero-tagline {
+  animation: heroFadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-hero-title {
+  animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+.animate-hero-subtitle {
+  animation: heroFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+}
+
+.animate-hero-buttons {
+  animation: heroScaleIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+
+/* Scroll reveal */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-on-scroll-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-hover-lift {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(140, 26, 26, 0.12);
+}
+
+@keyframes statPop {
+  0% {
+    transform: scale(0.98);
+  }
+  60% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.stat-pop {
+  animation: statPop 0.45s ease-out;
+}
+
+@keyframes tabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-tab-fade-in {
+  animation: tabFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero-cta-glow {
+  box-shadow:
+    0 4px 24px rgba(140, 26, 26, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+.hero-cta-glow:hover {
+  box-shadow:
+    0 8px 32px rgba(233, 140, 11, 0.25),
+    0 12px 40px rgba(140, 26, 26, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-tab-fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-on-scroll,
+  .reveal-on-scroll-visible {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .card-hover-lift:hover {
+    transform: none;
+  }
+  .stat-pop {
+    animation: none;
+  }
+}
+

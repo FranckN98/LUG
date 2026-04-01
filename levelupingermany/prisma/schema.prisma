@@ -1,0 +1,22 @@
+// Newsletter leads (event PDF downloads). Local: DATABASE_URL="file:./dev.db"
+// Production: use PostgreSQL (Neon, etc.) — same schema, change provider + url.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  source    String
+  consent   Boolean  @default(false)
+  name      String?
+  tags      String?  @default("levelup_event")
+
+  @@map("newsletter_subscribers")
+}
