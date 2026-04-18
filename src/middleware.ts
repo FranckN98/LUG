@@ -21,6 +21,16 @@ function legacyLocalePathRedirect(request: NextRequest, pathnameNorm: string): N
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  /* ── Admin routes: hors locale, protégées par cookie ── */
+  if (pathname.startsWith('/admin')) {
+    if (pathname.startsWith('/admin/login')) return NextResponse.next();
+    const session = request.cookies.get('admin_session')?.value;
+    if (session !== 'authenticated') {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+    return NextResponse.next();
+  }
   /**
    * Fichiers sous public/ sont servis à la racine (/events/…, /downloads/…, /hero/…).
    * Ne pas les préfixer par /de|en|fr/ sinon les images renvoient 404.

@@ -17,12 +17,13 @@ interface HeroCarouselProps {
 const images = [
   '/hero-pic/leveluper1.jpg',
   '/hero-pic/leveluper2.jpg',
-  '/hero-pic/leveluper3.jpg',
   '/hero-pic/leveluper5.jpg',
-  '/hero-pic/leveluper6.jpg',
   '/hero-pic/leveluper7.jpg',
   '/hero-pic/leveluper8.jpeg',
-  '/hero-pic/leveluper9.png',
+  '/hero-pic/_DSC8828.JPG',
+  '/hero-pic/_DSC8987.JPG',
+  '/hero-pic/_DSC9034.JPG',
+  '/hero-pic/_DSC9293.JPG',
 ];
 
 export default function HeroCarousel({

@@ -162,9 +162,9 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale }: Props) {
               subtitle={t.profilesLead}
             />
           </RevealOnScroll>
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3 items-stretch">
             {t.profiles.map((p, i) => (
-              <RevealOnScroll key={p.title} delayMs={i * 90} className="h-full">
+              <RevealOnScroll key={p.title} delayMs={i * 90} className="h-full flex flex-col">
                 <PremiumSurfaceCard
                   title={p.title}
                   subtitle={p.role}
