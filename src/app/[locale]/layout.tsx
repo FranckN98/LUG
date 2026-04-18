@@ -8,6 +8,7 @@ import { CookieBanner } from '@/components/CookieBanner';
 import { ScrollToHash } from '@/components/ScrollToHash';
 import { JsonLdSite } from '@/components/JsonLdSite';
 import { DocumentLang } from '@/components/DocumentLang';
+import { PageTransitionShell } from '@/components/PageTransitionShell';
 import { buildLocaleLayoutMetadata } from '@/lib/seo';
 
 export function generateStaticParams() {
@@ -41,7 +42,9 @@ export default async function LocaleLayout({
       <JsonLdSite locale={validLocale} />
       <ScrollToHash />
       <Header locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} />
-      <main className="flex-1 w-full">{children}</main>
+      <main className="flex-1 w-full pt-16 sm:pt-20 md:pt-[5.5rem]">
+        <PageTransitionShell>{children}</PageTransitionShell>
+      </main>
       <Footer locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} />
       <CookieBanner locale={validLocale} />
     </div>

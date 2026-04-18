@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { DM_Sans, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { getSiteUrl } from '@/config/site';
+import { InitialBrandLoader } from '@/components/InitialBrandLoader';
+import { PageTransitionOverlay } from '@/components/PageTransitionOverlay';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -49,6 +51,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} ${cormorant.variable}`}>
       <body className="paper-texture antialiased min-h-screen font-sans">
+        <InitialBrandLoader />
+        <PageTransitionOverlay />
         <div className="paper-texture-shell min-h-screen">{children}</div>
       </body>
     </html>

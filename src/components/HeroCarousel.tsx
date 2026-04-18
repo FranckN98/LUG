@@ -57,7 +57,7 @@ export default function HeroCarousel({
 
   return (
     <section
-      className="relative w-full min-h-[88vh] sm:min-h-screen overflow-hidden"
+      className="relative w-full min-h-[88vh] sm:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
       aria-label="Hero carousel"
     >
       {/* ── Images: zoom + fade + slide transition ── */}
@@ -91,89 +91,87 @@ export default function HeroCarousel({
         );
       })}
 
-      {/* ── Overlay: branded cinematic scrim (primary red + accent orange) ── */}
-      {/* Base: angled primary-red wash */}
+      {/* ── Premium overlay: 3-layer branded system ── */}
+      {/* Layer 1 — Primary diagonal wash: brand red → brand dark, elegant depth */}
       <div
         className="absolute inset-0 z-[3] pointer-events-none"
         aria-hidden
         style={{
           background: `
-            linear-gradient(105deg,
-              rgba(60,10,10,0.68) 0%,
-              rgba(60,10,10,0.42) 30%,
-              rgba(40,8,8,0.18) 55%,
-              transparent 78%
+            linear-gradient(135deg,
+              rgba(140,26,26,0.52) 0%,
+              rgba(140,26,26,0.30) 25%,
+              rgba(26,26,26,0.22) 50%,
+              rgba(26,26,26,0.10) 70%,
+              transparent 90%
             )
           `,
         }}
       />
-      {/* Warm accent-orange tint blended softly */}
-      <div
-        className="absolute inset-0 z-[3] pointer-events-none mix-blend-soft-light"
-        aria-hidden
-        style={{
-          background: `
-            linear-gradient(95deg,
-              rgba(233,140,11,0.22) 0%,
-              rgba(233,140,11,0.10) 35%,
-              transparent 58%
-            )
-          `,
-        }}
-      />
-      {/* Bottom-left vignette: primary red depth */}
+      {/* Layer 2 — Warm accent radiance: subtle orange glow, visible but refined */}
       <div
         className="absolute inset-0 z-[3] pointer-events-none"
         aria-hidden
         style={{
           background: `
-            radial-gradient(ellipse 100% 80% at 0% 100%,
-              rgba(40,8,8,0.40) 0%,
+            radial-gradient(ellipse 80% 60% at 20% 80%,
+              rgba(233,140,11,0.18) 0%,
+              rgba(233,140,11,0.06) 40%,
+              transparent 70%
+            ),
+            radial-gradient(ellipse 50% 40% at 80% 20%,
+              rgba(233,140,11,0.08) 0%,
+              transparent 60%
+            )
+          `,
+        }}
+      />
+      {/* Layer 3 — Text-zone readability: soft bottom veil with brand depth */}
+      <div
+        className="absolute inset-0 z-[3] pointer-events-none"
+        aria-hidden
+        style={{
+          background: `
+            linear-gradient(to top,
+              rgba(26,26,26,0.58) 0%,
+              rgba(140,26,26,0.18) 30%,
               transparent 55%
             )
           `,
         }}
       />
-      {/* Bottom edge: soft ground shadow with primary */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-56 z-[3] pointer-events-none"
-        aria-hidden
-        style={{
-          background: `
-            linear-gradient(to top,
-              rgba(40,8,8,0.48) 0%,
-              rgba(40,8,8,0.20) 45%,
-              transparent 100%
-            )
-          `,
-        }}
-      />
 
-      {/* ── Text content — bottom-left, no card ── */}
-      <div className="absolute inset-0 z-10 flex items-center pb-0 pt-20 sm:pt-24 px-6 sm:px-10 md:px-16 lg:px-20">
-        <div className="max-w-4xl">
+      {/* ── Text content — bottom-left, cinematic anchoring ── */}
+      <div className="absolute inset-0 z-10 flex items-end pb-24 sm:pb-32 md:pb-36 px-6 sm:px-10 md:px-16 lg:px-20">
+        <div className="max-w-3xl">
           {tagline && (
-            <p className="animate-hero-tagline mb-5 text-sm sm:text-base font-semibold uppercase tracking-[0.22em] text-accent drop-shadow-md">
-              {tagline}
-            </p>
+            <div className="animate-hero-tagline flex items-center gap-3 mb-5">
+              <span className="h-px w-10 bg-accent" />
+              <p className="text-[0.7rem] sm:text-xs font-bold uppercase tracking-[0.3em] text-accent"
+                 style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
+                {tagline}
+              </p>
+            </div>
           )}
           {title && (
-            <h1 className="animate-hero-title text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-5 drop-shadow-xl tracking-tight leading-[1.02] whitespace-nowrap">
+            <h1 className="animate-hero-title font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-5 tracking-tight leading-[1.08]"
+                style={{ textShadow: '0 2px 20px rgba(26,26,26,0.5), 0 1px 3px rgba(0,0,0,0.3)' }}>
               {title}
             </h1>
           )}
           {subtitle && (
-            <p className="animate-hero-subtitle text-base sm:text-lg md:text-xl text-white/80 mb-10 max-w-xl leading-relaxed drop-shadow-md">
+            <p className="animate-hero-subtitle text-base sm:text-lg md:text-xl text-white/85 mb-10 max-w-xl leading-relaxed"
+               style={{ textShadow: '0 1px 12px rgba(0,0,0,0.35)' }}>
               {subtitle}
             </p>
           )}
 
           {(primaryButton || buttons.length > 0) && (
-            <div className="animate-hero-buttons flex flex-wrap items-center gap-3 sm:gap-4">
+            <div className="animate-hero-buttons flex flex-wrap items-center gap-4 sm:gap-5">
               {primaryButton && (() => {
                 const isExternal = /^https?:\/\//i.test(primaryButton.href);
                 const cls =
-                  'group inline-flex items-center justify-center gap-2 h-12 sm:h-14 px-7 rounded-full bg-primary text-white font-semibold shadow-lg hover:bg-primary-light hover:shadow-xl active:scale-[0.97] transition-all duration-200 text-sm sm:text-base';
+                  'group inline-flex items-center justify-center gap-2 h-12 sm:h-14 px-8 rounded-full bg-primary text-white font-semibold shadow-[0_4px_20px_rgba(140,26,26,0.35),0_1px_3px_rgba(0,0,0,0.2)] hover:bg-primary-light hover:shadow-[0_6px_28px_rgba(140,26,26,0.45),0_2px_6px_rgba(0,0,0,0.15)] hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base';
                 const inner = (
                   <>
                     {primaryButton.label}
@@ -189,7 +187,7 @@ export default function HeroCarousel({
               {buttons[0] && (
                 <Link
                   href={buttons[0].href}
-                  className="inline-flex items-center justify-center h-12 sm:h-14 px-7 rounded-full bg-white/10 text-white font-semibold backdrop-blur-sm border border-white/30 hover:bg-white hover:text-brand-dark hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base"
+                  className="inline-flex items-center justify-center h-12 sm:h-14 px-8 rounded-full bg-white/[0.12] text-white font-semibold backdrop-blur-md border border-white/25 shadow-[0_4px_16px_rgba(0,0,0,0.15)] hover:bg-white/95 hover:text-brand-dark hover:shadow-[0_6px_24px_rgba(0,0,0,0.12)] hover:scale-[1.03] active:scale-[0.97] transition-all duration-250 text-sm sm:text-base"
                 >
                   {buttons[0].label}
                 </Link>
@@ -197,7 +195,7 @@ export default function HeroCarousel({
               {buttons[1] && (
                 <Link
                   href={buttons[1].href}
-                  className="inline-flex items-center justify-center h-12 sm:h-14 px-7 rounded-full bg-accent text-white font-semibold shadow-lg hover:bg-accent-light hover:shadow-xl active:scale-[0.97] transition-all duration-200 text-sm sm:text-base"
+                  className="inline-flex items-center justify-center h-12 sm:h-14 px-8 rounded-full bg-accent text-white font-semibold shadow-[0_4px_20px_rgba(233,140,11,0.30),0_1px_3px_rgba(0,0,0,0.2)] hover:bg-accent-light hover:shadow-[0_6px_28px_rgba(233,140,11,0.40),0_2px_6px_rgba(0,0,0,0.12)] hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base"
                 >
                   {buttons[1].label}
                 </Link>

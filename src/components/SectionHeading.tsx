@@ -21,17 +21,17 @@ export function SectionHeading({
   const subColor = light ? 'text-white/80' : 'text-gray-600';
 
   return (
-    <div className={`max-w-3xl mb-10 sm:mb-12 ${alignClass}`}>
+    <div className={`max-w-3xl mb-12 sm:mb-16 ${alignClass}`}>
       {eyebrow && (
-        <p className={`text-xs sm:text-sm uppercase tracking-[0.2em] ${eyebrowColor} mb-3`}>
+        <p className={`text-[0.65rem] sm:text-xs uppercase tracking-[0.25em] ${eyebrowColor} mb-4`}>
           {eyebrow}
         </p>
       )}
-      <h2 className={`text-3xl sm:text-4xl md:text-[2.5rem] font-bold leading-tight ${titleColor} text-balance`}>
+      <h2 className={`font-display text-3xl sm:text-4xl md:text-[2.75rem] font-semibold leading-tight ${titleColor} text-balance`}>
         {title}
       </h2>
       {subtitle && (
-        <p className={`mt-4 text-base sm:text-lg leading-relaxed max-w-2xl ${align === 'center' ? 'mx-auto' : ''} ${subColor}`}>
+        <p className={`mt-5 text-base sm:text-lg leading-relaxed max-w-2xl ${align === 'center' ? 'mx-auto' : ''} ${subColor}`}>
           {subtitle}
         </p>
       )}

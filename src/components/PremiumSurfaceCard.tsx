@@ -45,7 +45,7 @@ export function PremiumSurfaceCard({
   );
 
   const shell =
-    'group relative rounded-2xl border border-gray-100/80 bg-white p-6 sm:p-7 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_-12px_rgba(140,26,26,0.12)] hover:-translate-y-1 hover:border-primary/15 transition-all duration-300';
+    'group relative rounded-2xl border border-gray-100/70 bg-white p-7 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_48px_-12px_rgba(140,26,26,0.12)] hover:-translate-y-1.5 hover:border-primary/15 transition-all duration-300';
 
   if (href) {
     return (

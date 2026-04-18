@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { locales, localeNames, type Locale } from '@/i18n/config';
@@ -47,13 +47,31 @@ const navItems: { href: string; de: string; en: string; fr: string }[] = [
 export function Header({ locale, joinWhatsAppUrl }: { locale: Locale; joinWhatsAppUrl: string }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Only use transparent/white-text mode on the home page (which has a dark hero behind)
+  const isHomePage = pathname === `/${locale}` || pathname === `/${locale}/`;
+  const useTransparent = isHomePage && !scrolled;
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 32);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const base = `/${locale}`;
   const contactHref = `${base}/contact`;
   const getLabel = (item: (typeof navItems)[0]) => item[locale];
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        useTransparent
+          ? 'bg-transparent border-b border-transparent shadow-none'
+          : 'bg-white/90 backdrop-blur-xl shadow-[0_1px_0_0_rgba(0,0,0,0.06),0_4px_24px_-4px_rgba(0,0,0,0.08)] border-b border-gray-200/60'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 md:h-[5.5rem]">
           <Link
             href={base}
@@ -76,19 +94,26 @@ export function Header({ locale, joinWhatsAppUrl }: { locale: Locale; joinWhatsA
                 <Link
                   key={item.href || 'home'}
                   href={href}
-                  className={`text-sm font-medium transition ${
+                  className={`relative text-sm font-medium transition-colors duration-200 py-1 ${
                     isActive
-                      ? 'text-primary border-b-2 border-primary'
-                      : 'text-gray-600 hover:text-primary'
+                      ? useTransparent ? 'text-white' : 'text-primary'
+                      : useTransparent
+                        ? 'text-white/90 hover:text-white'
+                        : 'text-gray-600 hover:text-primary'
                   }`}
                 >
                   {getLabel(item)}
+                  <span
+                    className={`absolute -bottom-0.5 left-0 h-[2px] bg-primary transition-all duration-300 ${
+                      isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`}
+                  />
                 </Link>
               );
             })}
             <Link
               href={contactHref}
-              className="ml-1 px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-light transition"
+              className="ml-2 px-4 py-2.5 rounded-full bg-primary text-white text-sm font-semibold shadow-md shadow-primary/20 hover:bg-primary-light hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
               {locale === 'de' && 'Mitglied werden'}
               {locale === 'en' && 'Join'}
@@ -96,7 +121,7 @@ export function Header({ locale, joinWhatsAppUrl }: { locale: Locale; joinWhatsA
             </Link>
             <Link
               href={`${base}/sponsor-donate`}
-              className="px-3 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-dark transition"
+              className="px-4 py-2.5 rounded-full bg-accent text-white text-sm font-semibold shadow-md shadow-accent/20 hover:bg-accent-light hover:shadow-lg hover:shadow-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
               {locale === 'de' && 'Sponsor / Spenden'}
               {locale === 'en' && 'Sponsor / Donate'}
@@ -111,7 +136,7 @@ export function Header({ locale, joinWhatsAppUrl }: { locale: Locale; joinWhatsA
             <button
               type="button"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+              className={`p-2 rounded-lg transition-colors ${useTransparent ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'}`}
               aria-label="Menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
