@@ -85,11 +85,6 @@ body.paper-texture::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-transition-shell,
-  .page-transition-shell.is-entered,
-  .page-transition-overlay__veil,
-  .page-transition-overlay__accent,
-  .page-transition-overlay__line,
   .brand-loader-orb,
   .brand-loader-kicker,
   .brand-loader-title,
@@ -116,93 +111,6 @@ body.paper-texture::after {
 .paper-texture-shell {
   position: relative;
   z-index: 10;
-}
-
-.page-transition-shell {
-  opacity: 0;
-  transform: translate3d(0, 14px, 0) scale(0.996);
-  filter: blur(4px);
-  transition:
-    opacity var(--page-reveal-duration) var(--page-transition-ease),
-    transform var(--page-reveal-duration) var(--page-transition-ease),
-    filter var(--page-reveal-duration) var(--page-transition-ease);
-  will-change: opacity, transform, filter;
-}
-
-.page-transition-shell.is-entered {
-  opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
-  filter: blur(0);
-}
-
-.page-transition-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 110;
-  pointer-events: none;
-  opacity: 0;
-}
-
-.page-transition-overlay__veil,
-.page-transition-overlay__accent,
-.page-transition-overlay__line {
-  position: absolute;
-  inset: 0;
-}
-
-.page-transition-overlay__veil {
-  background: linear-gradient(135deg, rgba(140, 26, 26, 0.92) 0%, rgba(140, 26, 26, 0.66) 36%, rgba(26, 26, 26, 0.92) 100%);
-  transform: translate3d(0, 100%, 0);
-  transition: transform var(--page-transition-duration) var(--page-transition-ease);
-  will-change: transform;
-}
-
-.page-transition-overlay__accent {
-  background:
-    radial-gradient(circle at 20% 78%, rgba(233, 140, 11, 0.30) 0%, transparent 42%),
-    radial-gradient(circle at 82% 18%, rgba(244, 241, 235, 0.14) 0%, transparent 34%);
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 420ms ease;
-}
-
-.page-transition-overlay__line {
-  top: auto;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 15%, rgba(233, 140, 11, 0.95) 50%, rgba(255, 255, 255, 0.18) 85%, transparent 100%);
-  transform: translate3d(0, calc(100vh - 2px), 0) scaleX(0.76);
-  transform-origin: center;
-  opacity: 0;
-  transition:
-    transform var(--page-transition-duration) var(--page-transition-ease),
-    opacity 360ms ease;
-}
-
-.page-transition-overlay.is-cover,
-.page-transition-overlay.is-reveal {
-  opacity: 1;
-}
-
-.page-transition-overlay.is-cover .page-transition-overlay__veil {
-  transform: translate3d(0, 0, 0);
-}
-
-.page-transition-overlay.is-cover .page-transition-overlay__accent {
-  opacity: 1;
-}
-
-.page-transition-overlay.is-cover .page-transition-overlay__line {
-  transform: translate3d(0, 0, 0) scaleX(1);
-  opacity: 1;
-}
-
-.page-transition-overlay.is-reveal .page-transition-overlay__veil {
-  transform: translate3d(0, -100%, 0);
-}
-
-.page-transition-overlay.is-reveal .page-transition-overlay__accent,
-.page-transition-overlay.is-reveal .page-transition-overlay__line {
-  opacity: 0;
 }
 
 .brand-loader-shell {
