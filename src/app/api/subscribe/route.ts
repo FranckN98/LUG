@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import type { EventEdition } from '@/content/events';
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { prisma } from '@/lib/prisma';
 import { sendNewsletterPdfEmail } from '@/lib/sendNewsletterPdfEmail';
@@ -14,8 +13,16 @@ function normalizeEmail(s: string) {
   return s.trim().toLowerCase();
 }
 
-function isEdition(v: unknown): v is EventEdition {
-  return v === '2025' || v === '2026';
+function isKnownEdition(value: string): value is keyof typeof EVENT_PDF_PATH {
+  return value === '2025' || value === '2026';
+}
+
+function isSafePdfPath(value: unknown): value is string {
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (trimmed.startsWith('/')) return true;
+  return /^https?:\/\//i.test(trimmed);
 }
 
 export async function POST(req: Request) {
@@ -23,6 +30,7 @@ export async function POST(req: Request) {
     const body = (await req.json()) as {
       email?: string;
       edition?: string;
+      pdfPath?: string;
       consent?: boolean;
       captchaToken?: string;
       website?: string;
@@ -45,9 +53,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: 'invalid_email' }, { status: 400 });
     }
 
-    const edition: EventEdition = isEdition(body.edition) ? body.edition : '2025';
-    const pdfPath = EVENT_PDF_PATH[edition];
-    const source = EVENT_SOURCE_LABEL[edition];
+    const edition = typeof body.edition === 'string' && body.edition.trim() ? body.edition.trim() : '2025';
+    const knownEdition = isKnownEdition(edition) ? edition : null;
+    const pdfPath = isSafePdfPath(body.pdfPath)
+      ? body.pdfPath.trim()
+      : knownEdition
+        ? EVENT_PDF_PATH[knownEdition]
+        : EVENT_PDF_PATH['2025'];
+    const source = knownEdition ? EVENT_SOURCE_LABEL[knownEdition] : `Event ${edition}`;
 
     const h = headers();
     const ip =
@@ -85,7 +98,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const pdfAbsolute = absolutePdfUrl(pdfPath);
+    const pdfAbsolute = /^https?:\/\//i.test(pdfPath) ? pdfPath : absolutePdfUrl(pdfPath);
     await sendNewsletterPdfEmail(email, pdfAbsolute);
 
     return NextResponse.json({ ok: true, pdfPath });

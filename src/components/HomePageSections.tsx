@@ -58,10 +58,17 @@ const momentsCopy: Record<Locale, { eyebrow: string; title: string; hint: string
   },
 };
 
-type Props = { t: HomeCopy; base: string; joinWhatsAppUrl: string; locale: Locale };
+type Props = {
+  t: HomeCopy;
+  base: string;
+  joinWhatsAppUrl: string;
+  locale: Locale;
+  communityPhotos?: Array<{ src: string; alt?: string }>;
+};
 
-export function HomePageSections({ t, base, joinWhatsAppUrl, locale }: Props) {
+export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPhotos }: Props) {
   const moments = momentsCopy[locale];
+  const photos = communityPhotos && communityPhotos.length > 0 ? communityPhotos : EVENT_2025_PHOTOS;
 
   return (
     <>
@@ -279,7 +286,7 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale }: Props) {
           {/* Right fade */}
           <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-24 z-10 bg-gradient-to-l from-brand-dark to-transparent" />
           <div className="pl-4 sm:pl-6">
-            <PhotoStrip photos={EVENT_2025_PHOTOS} />
+            <PhotoStrip photos={photos} />
           </div>
         </div>
 

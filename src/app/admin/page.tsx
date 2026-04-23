@@ -1,28 +1,14 @@
 import { prisma } from '@/lib/prisma';
 
 export default async function AdminDashboard() {
-  let totalContacts = 0, unreadContacts = 0, totalSubscribers = 0;
+  let totalSubscribers = 0;
   try {
-    totalContacts = await prisma.contactMessage.count();
-    unreadContacts = await prisma.contactMessage.count({ where: { read: false } });
     totalSubscribers = await prisma.newsletterSubscriber.count();
   } catch {
     // DB not yet available
   }
 
   const stats = [
-    {
-      label: 'Messages reçus',
-      value: totalContacts,
-      sub: `${unreadContacts} non lu${unreadContacts !== 1 ? 's' : ''}`,
-      color: 'text-primary',
-      bg: 'bg-primary/10 border-primary/20',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
     {
       label: 'Abonnés newsletter',
       value: totalSubscribers,

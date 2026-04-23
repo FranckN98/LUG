@@ -15,6 +15,7 @@ type MediaItem = {
 
 const CATEGORIES = [
   { value: 'all', label: 'Tous' },
+  { value: 'community', label: 'Communauté (Accueil)' },
   { value: 'blog', label: 'Blog' },
   { value: 'team', label: 'Équipe' },
   { value: 'hero', label: 'Carrousel' },
@@ -28,9 +29,18 @@ type Props = {
   onChange: (url: string) => void;
   label?: string;
   defaultCategory?: string;
+  placeholder?: string;
+  helperText?: string;
 };
 
-export function MediaPicker({ value, onChange, label = 'Image', defaultCategory = 'all' }: Props) {
+export function MediaPicker({
+  value,
+  onChange,
+  label = 'Image',
+  defaultCategory = 'all',
+  placeholder = '/media/... ou URL externe',
+  helperText,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -108,9 +118,10 @@ export function MediaPicker({ value, onChange, label = 'Image', defaultCategory 
               type="text"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              placeholder="/media/... ou URL externe"
+              placeholder={placeholder}
               className="w-full rounded-xl bg-white/[0.06] border border-white/10 text-white placeholder-white/25 px-3 py-2 text-sm focus:outline-none focus:border-accent/40 transition"
             />
+            {helperText && <p className="text-xs text-white/35">{helperText}</p>}
             <div className="flex gap-2">
               <button
                 type="button"

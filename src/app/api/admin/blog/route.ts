@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { normalizeBlogCoverImageUrl } from '@/lib/blogCoverImage';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
@@ -12,7 +13,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Titre et contenu requis.' }, { status: 400 });
   }
   const post = await prisma.blogPost.create({
-    data: { title, body, coverImage, author, category, published: published ?? false },
+    data: {
+      title,
+      body,
+      coverImage: normalizeBlogCoverImageUrl(coverImage),
+      author,
+      category,
+      published: published ?? false,
+    },
   });
   return NextResponse.json(post, { status: 201 });
 }

@@ -3,18 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-const FALLBACK_IMAGES = [
-  '/hero-pic/leveluper1.jpg',
-  '/hero-pic/leveluper2.jpg',
-  '/hero-pic/leveluper5.jpg',
-  '/hero-pic/leveluper7.jpg',
-  '/hero-pic/leveluper8.jpeg',
-  '/hero-pic/_DSC8828.JPG',
-  '/hero-pic/_DSC8987.JPG',
-  '/hero-pic/_DSC9034.JPG',
-  '/hero-pic/_DSC9293.JPG',
-];
+import { DEFAULT_HERO_IMAGES } from '@/lib/heroDefaults';
 
 interface HeroCarouselProps {
   title?: string;
@@ -36,7 +25,7 @@ export default function HeroCarousel({
   buttons = [],
   images: imagesProp,
 }: HeroCarouselProps) {
-  const images = imagesProp && imagesProp.length > 0 ? imagesProp : FALLBACK_IMAGES;
+  const images = imagesProp && imagesProp.length > 0 ? imagesProp : DEFAULT_HERO_IMAGES;
 
   const [current, setCurrent] = useState(0);
   const [leaving, setLeaving] = useState<number | null>(null);

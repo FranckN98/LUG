@@ -30,6 +30,8 @@ export type EventData = {
   theme?: string;
   tagline?: string;
   timeRange?: string;
+  programmeTitle?: string;
+  programmeSubtitle?: string;
   /** Si false, le prix n’est pas affiché (hero + encadré date). */
   showPrice?: boolean;
   /** Placeholder visuel flouté (ex. 2026 avant annonce officielle). */

@@ -151,7 +151,6 @@ function GalleryGrid({
   const showPagination = paths.length > GALLERY_PAGE_SIZE;
 
   const galleryImg = (src: string, className: string) => (
-    /* eslint-disable-next-line @next/next/no-img-element */
     <img
       src={src}
       alt=""
@@ -263,7 +262,7 @@ function GalleryGrid({
   );
 }
 
-function EditionContent({
+export function EditionContent({
   data,
   t,
   locale,
@@ -276,7 +275,7 @@ function EditionContent({
   locale: Locale;
   isEmpty: boolean;
   galleryMasonry?: boolean;
-  edition: EventEdition;
+  edition: string;
 }) {
   const [speakersExpanded, setSpeakersExpanded] = useState(false);
 
@@ -324,13 +323,18 @@ function EditionContent({
         </section>
       )}
 
-      {/* Programme */}
       {(hasBlocks || hasFlat) && (
         <section>
           <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
             <IconCalendar />
             {t.sections.programme}
           </h3>
+          {(data.programmeTitle || data.programmeSubtitle) && (
+            <div className="mb-5 rounded-2xl border border-primary/10 bg-primary/[0.03] px-5 py-4">
+              {data.programmeTitle && <p className="font-semibold text-brand-dark">{data.programmeTitle}</p>}
+              {data.programmeSubtitle && <p className="mt-1 text-sm text-gray-600">{data.programmeSubtitle}</p>}
+            </div>
+          )}
 
           {hasBlocks &&
             data.programmeBlocks!.map((block, bi) => (
@@ -509,7 +513,6 @@ function EditionContent({
                 className="group block overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
               >
                 <div className="relative aspect-video bg-gray-900">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`https://img.youtube.com/vi/${v.id}/mqdefault.jpg`}
                     alt=""
@@ -534,6 +537,7 @@ function EditionContent({
         <EventPdfDownloadCta
           locale={locale}
           edition={edition}
+          pdfPath={data.firstEditionBookUrl}
           title={t.downloadBookTitle}
           subtitle={t.downloadBookSubtitle}
           t={t}
@@ -545,12 +549,11 @@ function EditionContent({
 
 type Props = {
   locale: Locale;
-  /** Chemins lus sur le serveur depuis public/events/2025/ (prioritaires sur la liste du code). */
   gallery2025FromDisk?: string[];
-  /** Idem public/events/2026/ */
   gallery2026FromDisk?: string[];
-  /** Page d\u00e9di\u00e9e : une seule \u00e9dition (URLs /events/levelup2025 | levelup2026). */
   focusEdition?: EventEdition;
+  event2025Data?: EventData;
+  event2026Data?: EventData;
 };
 
 function mergeGallery(disk: string[] | undefined, fallback: string[]): string[] {
@@ -558,11 +561,9 @@ function mergeGallery(disk: string[] | undefined, fallback: string[]): string[] 
   return fallback;
 }
 
-export function EventsTabs({ locale, gallery2025FromDisk, gallery2026FromDisk, focusEdition }: Props) {
-  /** \u00c9dition affich\u00e9e par d\u00e9faut sur /events : 2026. */
+export function EventsTabs({ locale, gallery2025FromDisk, gallery2026FromDisk, focusEdition, event2025Data, event2026Data }: Props) {
   const [tabActive, setTabActive] = useState<EventEdition>('2026');
   const active = focusEdition ?? tabActive;
-  /** Surcharge après fetch API (meme liste disque, utile si les props SSR etaient vides). */
   const [apiGallery2025, setApiGallery2025] = useState<string[] | null>(null);
   const [apiGallery2026, setApiGallery2026] = useState<string[] | null>(null);
 
@@ -580,7 +581,6 @@ export function EventsTabs({ locale, gallery2025FromDisk, gallery2026FromDisk, f
         if (Array.isArray(j5.urls) && j5.urls.length > 0) setApiGallery2025(j5.urls);
         if (Array.isArray(j6.urls) && j6.urls.length > 0) setApiGallery2026(j6.urls);
       } catch {
-        /* ignore */
       }
     };
     void load();
@@ -591,19 +591,19 @@ export function EventsTabs({ locale, gallery2025FromDisk, gallery2026FromDisk, f
 
   const t = eventsCopy[locale];
   const data2025 = useMemo(() => {
-    const base = eventsCopy[locale].edition2025;
+    const base = event2025Data ?? eventsCopy[locale].edition2025;
     const fromProps = mergeGallery(gallery2025FromDisk, base.gallery);
     const gallery =
-      apiGallery2025 && apiGallery2025.length > 0 ? apiGallery2025 : fromProps;
+      event2025Data ? base.gallery : apiGallery2025 && apiGallery2025.length > 0 ? apiGallery2025 : fromProps;
     return { ...base, gallery };
-  }, [locale, gallery2025FromDisk, apiGallery2025]);
+  }, [locale, gallery2025FromDisk, apiGallery2025, event2025Data]);
   const data2026 = useMemo(() => {
-    const base = eventsCopy[locale].edition2026;
+    const base = event2026Data ?? eventsCopy[locale].edition2026;
     const fromProps = mergeGallery(gallery2026FromDisk, base.gallery);
     const gallery =
-      apiGallery2026 && apiGallery2026.length > 0 ? apiGallery2026 : fromProps;
+      event2026Data ? base.gallery : apiGallery2026 && apiGallery2026.length > 0 ? apiGallery2026 : fromProps;
     return { ...base, gallery };
-  }, [locale, gallery2026FromDisk, apiGallery2026]);
+  }, [locale, gallery2026FromDisk, apiGallery2026, event2026Data]);
 
   const isEmpty2026 =
     !data2026.gallery?.length && !data2026.programme?.length && !data2026.speakers?.length && !data2026.tagline;
@@ -625,7 +625,7 @@ export function EventsTabs({ locale, gallery2025FromDisk, gallery2026FromDisk, f
               aria-controls={`panel-${ed}`}
               id={`tab-${ed}`}
               onClick={() => setTabActive(ed)}
-              className={`flex-1 relative rounded-2xl px-6 py-4 font-semibold text-sm sm:text-base text-center transition-all duration-300 border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+              className={`flex-1 relative rounded-2xl px-6 py-4 font-semibold text-sm sm:text-base text-center transition-all duration-300 border ${
                 active === ed
                   ? 'bg-gradient-to-br from-primary via-primary to-primary-dark text-white border-primary shadow-lg shadow-primary/20'
                   : 'bg-white text-gray-600 border-gray-200 hover:border-primary/30 hover:text-primary hover:bg-gray-50'

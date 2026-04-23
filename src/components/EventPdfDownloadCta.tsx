@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Locale } from '@/i18n/config';
-import { eventsCopy, type EventEdition } from '@/content/events';
+import { eventsCopy } from '@/content/events';
 import { TurnstileField } from '@/components/TurnstileField';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? '';
@@ -84,13 +84,14 @@ const MODAL_I18N: Record<
 
 type Props = {
   locale: Locale;
-  edition: EventEdition;
+  edition: string;
+  pdfPath?: string;
   title: string;
   subtitle: string;
   t: EventsT;
 };
 
-export function EventPdfDownloadCta({ locale, edition, title, subtitle, t }: Props) {
+export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle, t }: Props) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
@@ -154,6 +155,7 @@ export function EventPdfDownloadCta({ locale, edition, title, subtitle, t }: Pro
         body: JSON.stringify({
           email: trimmed,
           edition,
+          pdfPath,
           consent,
           website: honeypot,
           startedAt,

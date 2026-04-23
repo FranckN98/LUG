@@ -23,8 +23,17 @@ const navItems = [
     ),
   },
   {
-    href: '/admin/contacts',
-    label: 'Messages',
+    href: '/admin/blog',
+    label: 'Blog & Impact',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/newsletter',
+    label: 'Newsletter',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -32,11 +41,11 @@ const navItems = [
     ),
   },
   {
-    href: '/admin/blog',
-    label: 'Blog & Impact',
+    href: '/admin/events',
+    label: 'Événements',
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
     ),
   },
@@ -63,10 +72,48 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen flex bg-[#0f0606]">
+    <div className="min-h-screen bg-[#0f0606] md:flex">
+
+      <div className="sticky top-0 z-40 border-b border-white/8 bg-[#130707]/95 backdrop-blur md:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div>
+            <p className="text-[0.58rem] font-bold uppercase tracking-[0.28em] text-accent/70">Level Up in Germany</p>
+            <p className="text-sm font-bold text-white">Admin</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 px-3 py-2 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Quitter
+          </button>
+        </div>
+
+        <nav className="scrollbar-none flex gap-2 overflow-x-auto px-4 pb-3">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={`mobile-${item.href}`}
+                href={item.href}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-all ${
+                  isActive
+                    ? 'border-primary/30 bg-primary/20 text-white'
+                    : 'border-white/8 bg-white/5 text-white/50'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
 
       {/* Sidebar */}
-      <aside className="w-60 shrink-0 flex flex-col border-r border-white/8 bg-[#130707]">
+      <aside className="hidden w-60 shrink-0 border-r border-white/8 bg-[#130707] md:flex md:flex-col">
 
         {/* Brand */}
         <div className="px-6 py-6 border-b border-white/8">
@@ -111,7 +158,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-auto">
+      <main className="min-w-0 flex-1 overflow-auto">
         {children}
       </main>
 

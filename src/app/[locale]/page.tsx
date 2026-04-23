@@ -6,6 +6,8 @@ import { homeContent } from '@/content/home';
 import { getWhatsAppJoinUrl } from '@/config/whatsapp';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
+import { getPublicCommunityGallery } from '@/lib/communityGallery';
+import { DEFAULT_HERO_IMAGES } from '@/lib/heroDefaults';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '');
@@ -23,12 +25,28 @@ export default async function LocaleHomePage({
   const joinWhatsAppUrl = getWhatsAppJoinUrl(loc);
 
   let heroImages: string[] = [];
+  const communityPhotos = getPublicCommunityGallery();
   try {
     const rows = await prisma.media.findMany({
       where: { category: 'hero' },
       orderBy: { createdAt: 'asc' },
     });
-    heroImages = rows.map((r) => r.url);
+
+    if (rows.length === 0) {
+      await prisma.media.createMany({
+        data: DEFAULT_HERO_IMAGES.map((url, index) => ({
+          filename: `hero-default-${index + 1}`,
+          url,
+          altText: '',
+          category: 'hero',
+          size: null,
+          mimeType: null,
+        })),
+      });
+      heroImages = DEFAULT_HERO_IMAGES;
+    } else {
+      heroImages = rows.map((r) => r.url);
+    }
   } catch {
     // DB not available — HeroCarousel will use its built-in fallback
   }
@@ -48,7 +66,13 @@ export default async function LocaleHomePage({
         ]}
         autoplayInterval={6000}
       />
-      <HomePageSections t={t} base={base} joinWhatsAppUrl={joinWhatsAppUrl} locale={loc} />
+      <HomePageSections
+        t={t}
+        base={base}
+        joinWhatsAppUrl={joinWhatsAppUrl}
+        locale={loc}
+        communityPhotos={communityPhotos}
+      />
     </>
   );
 }

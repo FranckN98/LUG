@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -37,7 +38,7 @@ export default function BlogPostList({ posts }: { posts: Post[] }) {
 
   if (posts.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/8 bg-white/[0.03] p-12 text-center">
+      <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-10 text-center sm:p-12">
         <p className="text-white/40 text-sm">Aucun article. Créez le premier.</p>
       </div>
     );
@@ -46,10 +47,12 @@ export default function BlogPostList({ posts }: { posts: Post[] }) {
   return (
     <div className="space-y-3">
       {posts.map((post) => (
-        <div key={post.id} className="rounded-2xl border border-white/8 bg-white/[0.03] p-5 flex items-start gap-4">
+        <div key={post.id} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4 sm:p-5">
+
+          <div className="flex items-start gap-3 sm:gap-4">
 
           {/* Category dot */}
-          <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${post.published ? 'bg-green-400' : 'bg-white/20'}`} />
+          <div className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${post.published ? 'bg-green-400' : 'bg-white/20'}`} />
 
           {/* Content */}
           <div className="flex-1 min-w-0">
@@ -70,13 +73,20 @@ export default function BlogPostList({ posts }: { posts: Post[] }) {
             <p className="font-semibold text-white text-sm leading-snug mb-1 truncate">{post.title}</p>
             <p className="text-xs text-white/35">{post.author} · {new Date(post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
           </div>
+          </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:mt-4 sm:grid-cols-3">
+            <Link
+              href={`/admin/blog/edit/${post.id}`}
+              className="flex h-10 items-center justify-center rounded-lg border border-white/10 px-3 text-xs font-semibold text-white/60 transition hover:border-white/20 hover:text-white focus:outline-none"
+            >
+              Modifier
+            </Link>
             <button
               onClick={() => togglePublish(post)}
               disabled={loading === post.id + '-toggle'}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition focus:outline-none disabled:opacity-50 ${
+              className={`h-10 rounded-lg border px-3 text-xs font-semibold transition focus:outline-none disabled:opacity-50 ${
                 post.published
                   ? 'border-white/10 text-white/45 hover:border-white/20 hover:text-white/70'
                   : 'border-green-500/30 text-green-400 hover:bg-green-500/10'
@@ -87,7 +97,7 @@ export default function BlogPostList({ posts }: { posts: Post[] }) {
             <button
               onClick={() => deletePost(post.id)}
               disabled={loading === post.id + '-delete'}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition focus:outline-none disabled:opacity-50"
+              className="h-10 rounded-lg border border-red-500/20 px-3 text-xs font-semibold text-red-400 transition hover:bg-red-500/10 focus:outline-none disabled:opacity-50"
             >
               {loading === post.id + '-delete' ? '…' : 'Supprimer'}
             </button>

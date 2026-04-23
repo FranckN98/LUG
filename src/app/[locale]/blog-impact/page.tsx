@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
+import { getBlogCoverImageSrc } from '@/lib/blogCoverImage';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 
@@ -151,6 +152,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
               {posts.map((post, i) => {
                 const excerpt = post.body.replace(/\*\*/g, '').slice(0, 160) + '…';
                 const catColor = post.category ? (CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-500 border-gray-200') : '';
+                const coverImageSrc = getBlogCoverImageSrc(post.coverImage);
                 return (
                   <RevealOnScroll key={post.id} delayMs={i * 80}>
                     <Link
@@ -159,8 +161,8 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                     >
                       {/* Cover */}
                       <div className="relative h-44 bg-gradient-to-br from-[#1a0808] to-[#2c1010] overflow-hidden">
-                        {post.coverImage ? (
-                          <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        {coverImageSrc ? (
+                          <img src={coverImageSrc} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center opacity-10">
                             <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -27,6 +27,28 @@ export async function POST(request: Request) {
   const uuid = crypto.randomUUID();
   const savedFilename = `${uuid}.${ext}`;
 
+  if (category === 'community') {
+    const communityDir = join(process.cwd(), 'public', 'community');
+    await mkdir(communityDir, { recursive: true });
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await writeFile(join(communityDir, savedFilename), buffer);
+
+    return NextResponse.json(
+      {
+        id: `community:${savedFilename}`,
+        filename: file.name,
+        url: `/community/${savedFilename}`,
+        altText,
+        category,
+        size: file.size,
+        mimeType: file.type,
+        createdAt: new Date().toISOString(),
+      },
+      { status: 201 }
+    );
+  }
+
   // Ensure /public/media/ exists
   const mediaDir = join(process.cwd(), 'public', 'media');
   await mkdir(mediaDir, { recursive: true });

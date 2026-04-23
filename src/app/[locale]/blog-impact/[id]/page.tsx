@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
+import { getBlogCoverImageSrc } from '@/lib/blogCoverImage';
 import { prisma } from '@/lib/prisma';
 
 const backLabel: Record<Locale, string> = {
@@ -21,15 +22,16 @@ export default async function ArticlePage({
   if (!post || !post.published) notFound();
 
   const paragraphs = post.body.split('\n').filter(Boolean);
+  const coverImageSrc = getBlogCoverImageSrc(post.coverImage);
 
   return (
     <div className="overflow-hidden">
 
       {/* ── HERO ── */}
       <section className="relative min-h-[42vh] flex items-end overflow-hidden">
-        {post.coverImage ? (
+        {coverImageSrc ? (
           <>
-            <img src={post.coverImage} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+            <img src={coverImageSrc} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0d0505] via-[#0d050580] to-transparent" />
           </>
         ) : (

@@ -5,6 +5,9 @@ import type { Locale } from '@/i18n/config';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { generateMetadataForPath } from '@/lib/seo';
 import { partners2025 } from '@/content/partners';
+import { prisma } from '@/lib/prisma';
+
+type PartnerRow = { id: string; name: string; logoUrl: string; websiteUrl: string | null; sortOrder: number };
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/partners');
@@ -70,6 +73,26 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
   const t = content[loc];
 
+  // Load partners from DB; fall back to static data if none yet
+  let dbPartners: PartnerRow[] = [];
+  try {
+    dbPartners = await prisma.partner.findMany({
+      where: { visible: true },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      select: { id: true, name: true, logoUrl: true, websiteUrl: true, sortOrder: true },
+    });
+  } catch { /* DB unavailable — fall back to static */ }
+
+  const useStatic = dbPartners.length === 0;
+  const staticPartners = partners2025.map((p, i) => ({
+    id: p.name,
+    name: p.name,
+    logoUrl: p.logo,
+    websiteUrl: p.website ?? null,
+    sortOrder: i,
+  }));
+  const displayPartners: PartnerRow[] = useStatic ? staticPartners : dbPartners;
+
   return (
     <div className="overflow-hidden">
 
@@ -99,20 +122,39 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
             </div>
           </RevealOnScroll>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-            {partners2025.map((partner, i) => (
-              <RevealOnScroll key={partner.name} delayMs={i * 40}>
-                <div
-                  className={`group h-20 sm:h-24 rounded-2xl border border-gray-100 bg-white shadow-sm flex items-center justify-center px-4 transition-all duration-300 hover:border-accent/40 hover:shadow-md card-hover-lift overflow-hidden ${i === 0 ? 'bg-white border-2 border-accent/60' : ''}`}
-                >
-                  <Image
-                    src={partner.logo}
-                    alt={partner.name}
-                    width={180}
-                    height={90}
-                    className={`max-h-24 w-auto object-contain ${i === 0 ? 'bg-white p-2 rounded-lg' : ''}`}
-                    priority={i < 3}
-                  />
-                </div>
+            {displayPartners.map((partner, i) => (
+              <RevealOnScroll key={partner.id} delayMs={i * 40}>
+                {partner.websiteUrl ? (
+                  <a
+                    href={partner.websiteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={partner.name}
+                    className={`group h-20 sm:h-24 rounded-2xl border border-gray-100 bg-white shadow-sm flex items-center justify-center px-4 transition-all duration-300 hover:border-accent/40 hover:shadow-md card-hover-lift overflow-hidden ${i === 0 ? 'border-2 border-accent/60' : ''}`}
+                  >
+                    <Image
+                      src={partner.logoUrl}
+                      alt={partner.name}
+                      width={180}
+                      height={90}
+                      className="max-h-24 w-auto object-contain"
+                      priority={i < 3}
+                    />
+                  </a>
+                ) : (
+                  <div
+                    className={`group h-20 sm:h-24 rounded-2xl border border-gray-100 bg-white shadow-sm flex items-center justify-center px-4 transition-all duration-300 hover:border-accent/40 hover:shadow-md card-hover-lift overflow-hidden ${i === 0 ? 'border-2 border-accent/60' : ''}`}
+                  >
+                    <Image
+                      src={partner.logoUrl}
+                      alt={partner.name}
+                      width={180}
+                      height={90}
+                      className="max-h-24 w-auto object-contain"
+                      priority={i < 3}
+                    />
+                  </div>
+                )}
               </RevealOnScroll>
             ))}
           </div>

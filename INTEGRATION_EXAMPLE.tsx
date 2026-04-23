@@ -19,7 +19,6 @@ export default function EventPage() {
         title="1ER SALON BUSINESS ET SOCIO-CULTUREL DE LA DIASPORA CAMEROUNAISE D'EUROPE"
         subtitle="La billetterie est ouverte !!!"
         autoplayInterval={5000}
-        redOpacity={0.4}
       />
 
       {/* Contenu supplémentaire */}
@@ -43,7 +42,6 @@ export function EventPageCustom() {
       title="Ton titre personnalisé"
       subtitle="Ton sous-titre"
       autoplayInterval={4000}      // Change la vitesse (4 secondes)
-      redOpacity={0.5}              // Renforce le filtre rouge
     />
   );
 }
@@ -60,18 +58,30 @@ export function EventPageMinimal() {
  *
  * Crée: src/app/[locale]/event/page.tsx
  */
-import { useTranslations } from 'next-intl';
+export function EventPageI18n({ locale = 'fr' }: { locale?: 'de' | 'en' | 'fr' }) {
+  const copy = {
+    de: {
+      title: 'Dein Eventtitel',
+      subtitle: 'Dein Untertitel',
+    },
+    en: {
+      title: 'Your event title',
+      subtitle: 'Your subtitle',
+    },
+    fr: {
+      title: 'Ton titre d\'événement',
+      subtitle: 'Ton sous-titre',
+    },
+  } as const;
 
-export default function EventPageI18n() {
-  const t = useTranslations('event');
+  const t = copy[locale];
 
   return (
     <main>
       <HeroCarousel
-        title={t('hero.title')}
-        subtitle={t('hero.subtitle')}
+        title={t.title}
+        subtitle={t.subtitle}
         autoplayInterval={5000}
-        redOpacity={0.4}
       />
       {/* Reste du contenu */}
     </main>

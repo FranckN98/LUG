@@ -6,6 +6,7 @@ import type { EventEdition } from '@/content/events';
 import { EventsTabs } from '@/components/EventsTabs';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { getPublicEventGallery } from '@/lib/eventGallery';
+import { getLandingEvents, mapEventToEventData } from '@/lib/events-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,11 +15,14 @@ type Props = {
   focusEdition?: EventEdition;
 };
 
-export function EventsLanding({ locale, focusEdition }: Props) {
+export async function EventsLanding({ locale, focusEdition }: Props) {
   const t = eventsCopy[locale];
   const base = `/${locale}`;
   const gallery2025FromDisk = getPublicEventGallery('2025');
   const gallery2026FromDisk = getPublicEventGallery('2026');
+  const landingEvents = await getLandingEvents().catch(() => []);
+  const event2025 = landingEvents.find((event) => event.year === 2025);
+  const event2026 = landingEvents.find((event) => event.year === 2026);
 
   const intro =
     focusEdition === '2025'
@@ -73,6 +77,8 @@ export function EventsLanding({ locale, focusEdition }: Props) {
             gallery2025FromDisk={gallery2025FromDisk}
             gallery2026FromDisk={gallery2026FromDisk}
             focusEdition={focusEdition}
+            event2025Data={event2025 ? mapEventToEventData(event2025, locale) : undefined}
+            event2026Data={event2026 ? mapEventToEventData(event2026, locale) : undefined}
           />
 
           <div className="mt-16 pt-8 border-t border-gray-200 text-center">
