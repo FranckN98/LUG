@@ -3,6 +3,10 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', '.prisma/client'],
   },
+  eslint: {
+    // ESLint runs locally and in CI; do not block production builds on lint errors.
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'levelupingermany.com', pathname: '/**' },
