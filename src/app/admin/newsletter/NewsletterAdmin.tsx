@@ -179,6 +179,8 @@ export default function NewsletterAdmin() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
   const [addLoading, setAddLoading] = useState(false);
+  const [quickEmail, setQuickEmail] = useState('');
+  const [quickLoading, setQuickLoading] = useState(false);
 
   // Campaign UI
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
@@ -258,6 +260,27 @@ export default function NewsletterAdmin() {
       await fetchAll();
     } finally {
       setAddLoading(false);
+    }
+  }
+
+  async function handleQuickAdd(e: React.FormEvent) {
+    e.preventDefault();
+    const email = quickEmail.trim();
+    if (!email) return;
+    setQuickLoading(true);
+    try {
+      const res = await fetch('/api/admin/newsletter/subscribers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || 'Erreur', 'error'); return; }
+      showToast('Abonné ajouté · enrichissement automatique appliqué');
+      setQuickEmail('');
+      await fetchAll();
+    } finally {
+      setQuickLoading(false);
     }
   }
 
@@ -615,7 +638,43 @@ export default function NewsletterAdmin() {
             </button>
           </div>
 
-          {/* Add form */}
+          {/* Quick-add row */}
+          <form
+            onSubmit={handleQuickAdd}
+            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/4 px-4 py-3"
+          >
+            <span className="hidden sm:inline text-[11px] font-bold uppercase tracking-widest text-white/30 whitespace-nowrap">
+              Ajout rapide
+            </span>
+            <div className="flex-1">
+              <input
+                type="email"
+                placeholder="email@exemple.com"
+                value={quickEmail}
+                onChange={(e) => setQuickEmail(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-white/30 focus:border-accent/40 focus:outline-none"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={quickLoading || !quickEmail.trim()}
+              className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-500 disabled:opacity-40 transition-colors whitespace-nowrap"
+            >
+              {quickLoading ? (
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              )}
+              Ajouter
+            </button>
+          </form>
+
+          {/* Add form (full) */}
           {showAddForm && (
             <form
               onSubmit={handleAddSubscriber}

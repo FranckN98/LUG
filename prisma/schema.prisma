@@ -91,6 +91,28 @@ model ContactMessage {
   @@map("contact_messages")
 }
 
+model Member {
+  id                String    @id @default(uuid())
+  firstName         String    @map("first_name")
+  lastName          String    @map("last_name")
+  birthDate         DateTime  @map("birth_date")
+  address           String
+  email             String    @unique
+  phone             String?
+  activityDomain    String    @map("activity_domain")
+  motivation        String?
+  helpDomains       String    @map("help_domains")
+  applicationStatus String    @default("pending") @map("application_status")
+  rejectionReason   String?   @map("rejection_reason")
+  membershipFeePaid Boolean   @default(false) @map("membership_fee_paid")
+  lastPaymentDate   DateTime? @map("last_payment_date")
+  consentGiven      Boolean   @default(true) @map("consent_given")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@map("members")
+}
+
 model BlogPost {
   id         String   @id @default(uuid())
   title      String
