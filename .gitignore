@@ -33,3 +33,6 @@ next-env.d.ts
 # Prisma (SQLite local)
 /prisma/dev.db
 /prisma/dev.db-journal
+
+# Local data dumps (contain secrets, never commit)
+prisma-dump.json
