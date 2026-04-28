@@ -17,32 +17,7 @@ export async function GET() {
   return NextResponse.json(buttons);
 }
 
-// POST /api/admin/buttons
-export async function POST(req: Request) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const body = await req.json();
-  const {
-    labelFr, labelDe, labelEn,
-    linkType, linkTarget, colorVariant,
-    displayOrder, isActive, isPrimary, openInNewTab,
-  } = body;
-
-  if (!labelFr || !labelEn || !labelDe || !linkTarget) {
-    return NextResponse.json({ error: 'labelFr, labelDe, labelEn, linkTarget required' }, { status: 400 });
-  }
-
-  const button = await prisma.homeButton.create({
-    data: {
-      labelFr, labelDe, labelEn,
-      linkType: linkType ?? 'internal',
-      linkTarget,
-      colorVariant: colorVariant ?? 'red',
-      displayOrder: displayOrder ?? 0,
-      isActive: isActive !== false,
-      isPrimary: !!isPrimary,
-      openInNewTab: !!openInNewTab,
-    },
-  });
-  return NextResponse.json(button, { status: 201 });
+// POST /api/admin/buttons — disabled: hero slots are fixed, use PATCH
+export async function POST() {
+  return NextResponse.json({ error: 'Fixed slots only — use PATCH to edit existing buttons.' }, { status: 405 });
 }

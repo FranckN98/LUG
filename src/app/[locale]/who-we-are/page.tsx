@@ -197,27 +197,27 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
                 {locale === 'de' && (
                   <>
                     Wir bauen die Brücke zwischen denen, die{' '}
-                    <span className="text-accent">bereits weiter sind</span>, und denen,
-                    die gerade ankommen — damit Erfahrung weitergeht,
+                    <span className="text-accent">schon weiter sind</span>, und denen,
+                    die gerade ankommen. Damit Erfahrung weitergeht,
                     Fehler kleiner werden und{' '}
                     <span className="text-accent">Chancen erreichbar</span> bleiben.
                   </>
                 )}
                 {locale === 'en' && (
                   <>
-                    We build the bridge between those who{' '}
-                    <span className="text-accent">have already moved forward</span> and
-                    those who are just arriving — so that experience is passed on,
-                    mistakes shrink, and{' '}
+                    We build the bridge between people who{' '}
+                    <span className="text-accent">are already further along</span> and
+                    people who are just arriving. So that experience gets passed on,
+                    mistakes get smaller, and{' '}
                     <span className="text-accent">opportunities stay within reach</span>.
                   </>
                 )}
                 {locale === 'fr' && (
                   <>
-                    Nous construisons le pont entre ceux qui{' '}
+                    Nous faisons le pont entre ceux qui{' '}
                     <span className="text-accent">ont déjà avancé</span> et ceux qui
-                    arrivent — pour que l&apos;expérience se transmette, que les erreurs
-                    se réduisent et que les{' '}
+                    arrivent. Pour que l&apos;expérience se partage, que les erreurs
+                    coûtent moins cher et que les{' '}
                     <span className="text-accent">opportunités restent accessibles</span>.
                   </>
                 )}

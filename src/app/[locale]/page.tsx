@@ -23,7 +23,7 @@ export default async function LocaleHomePage({
   const t = homeContent[loc];
   const base = `/${loc}`;
   const joinWhatsAppUrl = getWhatsAppJoinUrl(loc);
-  const communityPhotos = getPublicCommunityGallery();
+  const communityPhotos = await getPublicCommunityGallery();
 
   // ── Hero images ─────────────────────────────────────────────────────────────
   let heroImages: string[] = [];

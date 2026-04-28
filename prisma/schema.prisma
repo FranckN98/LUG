@@ -141,6 +141,7 @@ model HeroSlide {
 
 model HomeButton {
   id           String   @id @default(uuid())
+  slot         String   @default("hero") @map("slot") // "hero_1" | "hero_2" | "hero_3"
   labelFr      String   @map("label_fr")
   labelDe      String   @map("label_de")
   labelEn      String   @map("label_en")
@@ -154,6 +155,7 @@ model HomeButton {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  @@unique([slot])
   @@index([isActive, displayOrder])
   @@map("home_buttons")
 }
@@ -165,12 +167,16 @@ model SiteConfig {
   headerJoinLabelDe       String?  @map("header_join_label_de")
   headerJoinLabelEn       String?  @map("header_join_label_en")
   headerJoinLink          String?  @map("header_join_link")
-  headerJoinOpenInNewTab  Boolean  @default(false) @map("header_join_open_in_new_tab")
-  headerSponsorLabelFr    String?  @map("header_sponsor_label_fr")
+  headerJoinOpenInNewTab    Boolean  @default(false) @map("header_join_open_in_new_tab")
+  headerJoinColorVariant    String?  @default("red") @map("header_join_color_variant")
+  headerJoinIsActive        Boolean  @default(true) @map("header_join_is_active")
+  headerSponsorColorVariant String?  @default("yellow") @map("header_sponsor_color_variant")
+  headerSponsorLabelFr      String?  @map("header_sponsor_label_fr")
   headerSponsorLabelDe    String?  @map("header_sponsor_label_de")
   headerSponsorLabelEn    String?  @map("header_sponsor_label_en")
   headerSponsorLink       String?  @map("header_sponsor_link")
   headerSponsorOpenInNewTab Boolean @default(false) @map("header_sponsor_open_in_new_tab")
+  headerSponsorIsActive     Boolean  @default(true) @map("header_sponsor_is_active")
   membershipHeroHeadingFr String?  @map("membership_hero_heading_fr")
   membershipHeroHeadingDe String?  @map("membership_hero_heading_de")
   membershipHeroHeadingEn String?  @map("membership_hero_heading_en")

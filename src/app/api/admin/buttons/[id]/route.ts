@@ -23,6 +23,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
   if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // Protect hero_ slots — they are fixed and cannot be deleted
+  const existing = await prisma.homeButton.findUnique({ where: { id: params.id }, select: { slot: true } });
+  if (existing?.slot?.startsWith('hero_')) {
+    return NextResponse.json({ error: 'Hero slots are fixed and cannot be deleted.' }, { status: 403 });
+  }
+
   await prisma.homeButton.delete({ where: { id: params.id } });
   return NextResponse.json({ success: true });
 }

@@ -68,6 +68,8 @@ export function Header({
     headerSponsorLabelEn?: string | null;
     headerSponsorLink?: string | null;
     headerSponsorOpenInNewTab?: boolean;
+    headerJoinColorVariant?: string | null;
+    headerSponsorColorVariant?: string | null;
   } | null;
 }) {
   const pathname = usePathname();
@@ -106,6 +108,21 @@ export function Header({
       : locale === 'fr'
         ? siteConfig?.headerSponsorLabelFr || 'Sponsor / Don'
         : siteConfig?.headerSponsorLabelEn || 'Sponsor / Donate';
+
+  function colorVariantCls(variant: string | null | undefined, fallback: string): string {
+    switch (variant) {
+      case 'red':           return 'bg-[#8c1a1a] text-white shadow-[#8c1a1a]/20 hover:opacity-90';
+      case 'yellow':        return 'bg-[#e98c0b] text-white shadow-[#e98c0b]/20 hover:opacity-90';
+      case 'black':         return 'bg-[#0f0606] text-white hover:opacity-90';
+      case 'white':         return 'bg-white text-gray-900 hover:bg-gray-100';
+      case 'outline-white': return 'border-2 border-white text-white bg-transparent hover:bg-white/10';
+      case 'outline-red':   return 'border-2 border-[#8c1a1a] text-[#8c1a1a] bg-transparent hover:bg-[#8c1a1a]/10';
+      default:              return fallback;
+    }
+  }
+
+  const joinBtnCls = colorVariantCls(siteConfig?.headerJoinColorVariant, 'bg-primary text-white shadow-primary/20 hover:bg-primary-light');
+  const sponsorBtnCls = colorVariantCls(siteConfig?.headerSponsorColorVariant, 'bg-accent text-white shadow-accent/20 hover:bg-accent-light');
   const getLabel = (item: (typeof navItems)[0]) => item[locale];
   return (
     <header
@@ -159,7 +176,7 @@ export function Header({
               href={contactHref}
               target={siteConfig?.headerJoinOpenInNewTab ? '_blank' : undefined}
               rel={siteConfig?.headerJoinOpenInNewTab ? 'noopener noreferrer' : undefined}
-              className="ml-2 px-4 py-2.5 rounded-full bg-primary text-white text-sm font-semibold shadow-md shadow-primary/20 hover:bg-primary-light hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+              className={`ml-2 px-4 py-2.5 rounded-full text-sm font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ${joinBtnCls}`}
             >
               {joinLabel}
             </Link>
@@ -167,7 +184,7 @@ export function Header({
               href={sponsorHref}
               target={siteConfig?.headerSponsorOpenInNewTab ? '_blank' : undefined}
               rel={siteConfig?.headerSponsorOpenInNewTab ? 'noopener noreferrer' : undefined}
-              className="px-4 py-2.5 rounded-full bg-accent text-white text-sm font-semibold shadow-md shadow-accent/20 hover:bg-accent-light hover:shadow-lg hover:shadow-accent/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+              className={`px-4 py-2.5 rounded-full text-sm font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ${sponsorBtnCls}`}
             >
               {sponsorLabel}
             </Link>
@@ -219,7 +236,7 @@ export function Header({
                   target={siteConfig?.headerJoinOpenInNewTab ? '_blank' : undefined}
                   rel={siteConfig?.headerJoinOpenInNewTab ? 'noopener noreferrer' : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className="block py-2 px-3 rounded-lg bg-primary text-white font-medium"
+                  className={`block py-2 px-3 rounded-lg font-medium ${joinBtnCls}`}
                 >
                   {joinLabel}
                 </Link>
@@ -230,7 +247,7 @@ export function Header({
                   target={siteConfig?.headerSponsorOpenInNewTab ? '_blank' : undefined}
                   rel={siteConfig?.headerSponsorOpenInNewTab ? 'noopener noreferrer' : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className="block py-2 px-3 rounded-lg bg-accent text-white font-medium"
+                  className={`block py-2 px-3 rounded-lg font-medium ${sponsorBtnCls}`}
                 >
                   {sponsorLabel}
                 </Link>

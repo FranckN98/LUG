@@ -1,0 +1,76 @@
+# /etc/nginx/sites-available/levelupingermany.de
+# Reverse proxy: Nginx (ports 80/443) -> Node/Next.js (PM2, port 3000)
+#
+# After editing:
+#   sudo ln -s /etc/nginx/sites-available/levelupingermany.de /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+#   sudo certbot --nginx -d levelupingermany.de -d www.levelupingermany.de
+
+# ---- HTTP -> HTTPS redirect (certbot rewrites this block automatically) ----
+server {
+    listen 80;
+    listen [::]:80;
+    server_name levelupingermany.de www.levelupingermany.de;
+    return 301 https://$host$request_uri;
+}
+
+# ---- HTTPS ----
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name levelupingermany.de www.levelupingermany.de;
+
+    # Certbot will fill these:
+    # ssl_certificate     /etc/letsencrypt/live/levelupingermany.de/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/levelupingermany.de/privkey.pem;
+    # include /etc/letsencrypt/options-ssl-nginx.conf;
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Security headers
+    add_header X-Frame-Options           "SAMEORIGIN" always;
+    add_header X-Content-Type-Options    "nosniff"    always;
+    add_header Referrer-Policy           "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy        "geolocation=(), microphone=(), camera=()" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # Upload size (image admin uploads)
+    client_max_body_size 25m;
+
+    # Gzip
+    gzip on;
+    gzip_proxied any;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+    gzip_min_length 1024;
+
+    # Cache for /_next/static/* (immutable Next build assets)
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+    }
+
+    # Cache for /public files (images served by Next)
+    location ~* \.(jpg|jpeg|png|gif|ico|svg|webp|woff2?)$ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000";
+    }
+
+    # Everything else -> Next.js
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 60s;
+    }
+}

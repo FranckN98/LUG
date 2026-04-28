@@ -6,6 +6,27 @@ import { prisma } from '@/lib/prisma';
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 
+// On Vercel the filesystem is read-only at runtime. When BLOB_READ_WRITE_TOKEN is
+// present we upload to Vercel Blob instead of /public. Locally we keep writing to
+// /public so dev works without any extra service.
+const useBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+
+async function saveFile(buffer: Buffer, savedFilename: string, subfolder: 'media' | 'community'): Promise<string> {
+  if (useBlob) {
+    const { put } = await import('@vercel/blob');
+    const blob = await put(`${subfolder}/${savedFilename}`, buffer, {
+      access: 'public',
+      addRandomSuffix: false,
+    });
+    return blob.url; // absolute https URL
+  }
+
+  const dir = join(process.cwd(), 'public', subfolder);
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, savedFilename), buffer);
+  return `/${subfolder}/${savedFilename}`;
+}
+
 export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get('file') as File | null;
@@ -22,44 +43,41 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Fichier trop lourd (max 10 Mo).' }, { status: 400 });
   }
 
-  // Generate unique filename: uuid + original extension
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
   const uuid = crypto.randomUUID();
   const savedFilename = `${uuid}.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
 
   if (category === 'community') {
-    const communityDir = join(process.cwd(), 'public', 'community');
-    await mkdir(communityDir, { recursive: true });
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(join(communityDir, savedFilename), buffer);
-
-    return NextResponse.json(
-      {
-        id: `community:${savedFilename}`,
+    const url = await saveFile(buffer, savedFilename, 'community');
+    // Also persist in DB so the public gallery can pick it up in production
+    // (where filesystem listing of /public/community is read-only at runtime).
+    const media = await prisma.media.create({
+      data: {
         filename: file.name,
-        url: `/community/${savedFilename}`,
+        url,
         altText,
-        category,
+        category: 'community',
         size: file.size,
         mimeType: file.type,
-        createdAt: new Date().toISOString(),
+      },
+    });
+    return NextResponse.json(
+      {
+        id: media.id,
+        filename: media.filename,
+        url: media.url,
+        altText: media.altText,
+        category: media.category,
+        size: media.size,
+        mimeType: media.mimeType,
+        createdAt: media.createdAt.toISOString(),
       },
       { status: 201 }
     );
   }
 
-  // Ensure /public/media/ exists
-  const mediaDir = join(process.cwd(), 'public', 'media');
-  await mkdir(mediaDir, { recursive: true });
-
-  // Write file to disk
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(join(mediaDir, savedFilename), buffer);
-
-  const url = `/media/${savedFilename}`;
-
-  // Save metadata to DB
+  const url = await saveFile(buffer, savedFilename, 'media');
   const media = await prisma.media.create({
     data: {
       filename: file.name,
