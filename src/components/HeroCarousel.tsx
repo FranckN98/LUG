@@ -25,7 +25,7 @@ function AnimatedHeroTitle({ title }: { title: string }) {
 }
 
 // ── Button color variants (hero dark background context) ──────────────────────
-const BASE_BTN = 'group inline-flex items-center justify-center flex-1 sm:flex-none sm:w-auto h-11 sm:h-14 px-4 sm:px-8 rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-xs sm:text-base';
+const BASE_BTN = 'group inline-flex items-center justify-center flex-1 sm:flex-none sm:w-auto h-11 sm:h-14 px-4 sm:px-8 rounded-xl sm:rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-xs sm:text-base';
 
 function heroBtnCls(variant: string): string {
   switch (variant) {
@@ -80,7 +80,7 @@ export default function HeroCarousel({
 
   return (
     <section
-      className="relative w-full min-h-[100svh] sm:min-h-[88vh] md:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
+      className="relative w-full min-h-[90svh] sm:min-h-[88vh] md:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
       aria-label="Hero carousel"
     >
       {/* ── Images: zoom + fade + slide transition ── */}
