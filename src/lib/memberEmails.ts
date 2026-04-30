@@ -182,7 +182,7 @@ const FULL_WELCOME_HTML = (firstName: string) => `
     </ul>
     <p style="font-size:14px;color:#5a3030">
       💳 Pour régler ta cotisation, écris simplement à
-      <a href="mailto:info@levelupingermany.de" style="color:#8C1A1A;font-weight:600">info@levelupingermany.de</a>
+      <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a>
       — on te transmet les coordonnées bancaires et le reçu officiel.
     </p>
 
@@ -230,7 +230,7 @@ En tant que membre cotisant, tu profites en plus :
   • Du droit de vote en assemblée générale
   • D'une visibilité dédiée pour tes projets dans la communauté
 
-💳 Pour régler ta cotisation, écris-nous à info@levelupingermany.de — on te transmet les coordonnées bancaires et le reçu officiel.
+💳 Pour régler ta cotisation, écris-nous à info@levelupingermany.com — on te transmet les coordonnées bancaires et le reçu officiel.
 
 Tes 3 prochains pas :
   1. Rejoins notre communauté WhatsApp : https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst
@@ -306,7 +306,7 @@ const INFO_PACK_HTML = (firstName: string) => `
       accès anticipé aux inscriptions, droit de vote en AG et visibilité pour tes projets.
       <br/><br/>
       💳 Pour régler ta cotisation, écris-nous à
-      <a href="mailto:info@levelupingermany.de" style="color:#8C1A1A;font-weight:600">info@levelupingermany.de</a>
+      <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a>
       — on te transmet les coordonnées bancaires et le reçu officiel.
     </div>
 
@@ -353,7 +353,7 @@ Une petite contribution qui fait une grande différence : elle nous permet de lo
 
 En tant que cotisant, tu profites en plus : tarif préférentiel sur la Mega Conference, accès anticipé aux inscriptions, droit de vote en AG et visibilité pour tes projets.
 
-💳 Pour régler : écris-nous à info@levelupingermany.de — on te transmet les coordonnées bancaires et le reçu officiel.
+💳 Pour régler : écris-nous à info@levelupingermany.com — on te transmet les coordonnées bancaires et le reçu officiel.
 
 Toute question ? info@levelupingermany.com
 
