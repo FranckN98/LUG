@@ -135,7 +135,7 @@ export function PartnersEditor() {
   const showForm = isEditing || form.name !== '' || editingId === null && partners.length === 0;
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="max-w-5xl px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
       <div className="mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/70 mb-1">Admin</p>
         <h1 className="text-2xl font-bold text-white">Partenaires & Sponsors</h1>

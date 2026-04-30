@@ -257,7 +257,7 @@ export default function MembersAdmin() {
       detail.applicationStatus === 'accepted' && (!detail.membershipFeePaid || expired);
 
     return (
-      <div className="min-h-screen p-6 md:p-8">
+      <div className="min-h-screen px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -447,7 +447,7 @@ export default function MembersAdmin() {
 
   // ── Render: List view ──────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen p-6 md:p-8">
+    <div className="min-h-screen px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
       {/* Page header */}
       <div className="mb-8">
         <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.3em] text-accent/70">

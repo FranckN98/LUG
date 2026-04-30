@@ -27,7 +27,7 @@ export default async function AdminEventsPage() {
   const published = events.filter((event) => event.status === 'published').length;
 
   return (
-    <div className="p-8">
+    <div className="px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
           <p className="mb-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent/70">Événements</p>

@@ -45,15 +45,15 @@ export default async function AdminDashboard() {
   ];
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
+    <div className="px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
+      <div className="mb-6 sm:mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/70 mb-1">Tableau de bord</p>
         <h1 className="text-2xl font-bold text-white">Bienvenue</h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
         {stats.map((s) => (
-          <Link key={s.label} href={s.href} className={`rounded-2xl border p-6 ${s.bg} hover:opacity-90 transition-opacity`}>
+          <Link key={s.label} href={s.href} className={`rounded-2xl border p-5 sm:p-6 ${s.bg} hover:opacity-90 transition-opacity`}>
             <div className={`mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border ${s.bg} ${s.color}`}>
               {s.icon}
             </div>

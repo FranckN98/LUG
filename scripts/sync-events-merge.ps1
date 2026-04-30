@@ -10,8 +10,21 @@
 
 $ErrorActionPreference = "Stop"
 
+# Auto-load NEON_DATABASE_URL from .env if not already set in the shell.
 if (-not $env:NEON_DATABASE_URL) {
-    Write-Error "Set `$env:NEON_DATABASE_URL first (the Postgres URL of the Neon production branch)."
+    $envPath = Join-Path $PSScriptRoot "..\.env"
+    if (Test-Path $envPath) {
+        Get-Content $envPath | ForEach-Object {
+            if ($_ -match '^\s*NEON_DATABASE_URL\s*=\s*"?([^"]+)"?\s*$') {
+                $env:NEON_DATABASE_URL = $matches[1]
+                Write-Host "Loaded NEON_DATABASE_URL from .env" -ForegroundColor DarkGray
+            }
+        }
+    }
+}
+
+if (-not $env:NEON_DATABASE_URL) {
+    Write-Error "NEON_DATABASE_URL is not set. Add it to .env or run: `$env:NEON_DATABASE_URL = '...'"
     exit 1
 }
 

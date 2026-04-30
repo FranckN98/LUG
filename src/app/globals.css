@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Admin drawer animations ───────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
 @font-face {
   font-family: 'Nathalyn';
   src: url('/fonts/NathalynDemo.otf') format('opentype');

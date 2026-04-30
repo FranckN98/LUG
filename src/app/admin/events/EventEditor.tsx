@@ -476,7 +476,7 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
   }
 
   return (
-    <div className="p-8">
+    <div className="px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-center gap-4">
           <Link href="/admin/events" className="text-white/35 hover:text-white transition focus:outline-none">
