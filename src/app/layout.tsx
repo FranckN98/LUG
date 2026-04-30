@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { headers } from 'next/headers';
 import { DM_Sans, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { getSiteUrl } from '@/config/site';
@@ -42,13 +43,24 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Read the locale surfaced by middleware so <html lang> is correct on the
+  // very first byte of HTML — required to prevent Chrome's auto-translate
+  // from kicking in when the URL locale differs from the user's browser language.
+  const h = await headers();
+  const headerLocale = h.get('x-locale');
+  const lang = headerLocale === 'de' || headerLocale === 'fr' ? headerLocale : 'en';
+
   return (
-    <html lang="en" className={`${dmSans.variable} ${cormorant.variable}`}>
+    <html lang={lang} className={`${dmSans.variable} ${cormorant.variable}`}>
+      <head>
+        {/* Disable automatic browser translation (Chrome / Edge / Safari). */}
+        <meta name="google" content="notranslate" />
+      </head>
       <body className="paper-texture antialiased min-h-screen font-sans">
         <InitialBrandLoader />
         <div className="paper-texture-shell min-h-screen">{children}</div>

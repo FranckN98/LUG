@@ -52,7 +52,14 @@ export function middleware(request: NextRequest) {
   const preferredLocale =
     cookieLocale && locales.includes(cookieLocale as Locale) ? cookieLocale : defaultLocale;
   const hasLocale = locales.some((loc) => pathname === `/${loc}` || pathname.startsWith(`/${loc}/`));
-  if (hasLocale) return NextResponse.next();
+  if (hasLocale) {
+    // Surface the URL locale to the root layout so <html lang> is correct server-side.
+    const m = pathname.match(/^\/(de|en|fr)(?:\/|$)/);
+    const urlLocale = (m?.[1] as Locale) ?? defaultLocale;
+    const res = NextResponse.next();
+    res.headers.set('x-locale', urlLocale);
+    return res;
+  }
   if (pathname === '/' || pathname === '') {
     return NextResponse.redirect(new URL(`/${preferredLocale}`, request.url));
   }
