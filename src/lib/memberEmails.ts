@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { emailLinksFooterHtml, emailLinksFooterText } from './emailFooter';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM =
@@ -52,10 +53,11 @@ export async function sendMemberWelcomeEmail(email: string, firstName: string) {
       <p>Bienvenue dans notre communauté.</p>
       <p>Ton engagement et ton envie de contribuer à l'association sont précieux pour nous. Nous reviendrons vers toi prochainement avec les prochaines étapes, les informations importantes et les opportunités de participation.</p>
       <p>À très bientôt,<br/><strong>L'équipe Level Up in Germany</strong></p>
+      ${emailLinksFooterHtml()}
     </div>
   `);
 
-  const text = `Bonjour ${firstName},\n\nNous sommes heureux de t'annoncer que ta demande d'adhésion à Level Up in Germany a été acceptée.\n\nBienvenue dans notre communauté.\n\nTon engagement et ton envie de contribuer à l'association sont précieux pour nous. Nous reviendrons vers toi prochainement avec les prochaines étapes, les informations importantes et les opportunités de participation.\n\nÀ très bientôt,\nL'équipe Level Up in Germany`;
+  const text = `Bonjour ${firstName},\n\nNous sommes heureux de t'annoncer que ta demande d'adhésion à Level Up in Germany a été acceptée.\n\nBienvenue dans notre communauté.\n\nTon engagement et ton envie de contribuer à l'association sont précieux pour nous. Nous reviendrons vers toi prochainement avec les prochaines étapes, les informations importantes et les opportunités de participation.\n\nÀ très bientôt,\nL'équipe Level Up in Germany${emailLinksFooterText()}`;
 
   return resend.emails.send({
     from: FROM,
@@ -84,10 +86,11 @@ export async function sendMemberRejectionEmail(
       ${reason ? `<div class="highlight"><strong>Raison :</strong> ${reason}</div>` : ''}
       <p>Nous te remercions pour ta compréhension et te souhaitons beaucoup de succès dans tes projets.</p>
       <p>Bien cordialement,<br/><strong>L'équipe Level Up in Germany</strong></p>
+      ${emailLinksFooterHtml()}
     </div>
   `);
 
-  const text = `Bonjour ${firstName},\n\nMerci beaucoup pour l'intérêt que tu portes à Level Up in Germany.\n\nAprès analyse de ta demande, nous ne pouvons malheureusement pas l'accepter pour le moment.\n${reason ? `\nRaison : ${reason}\n` : ''}\nNous te remercions pour ta compréhension et te souhaitons beaucoup de succès dans tes projets.\n\nBien cordialement,\nL'équipe Level Up in Germany`;
+  const text = `Bonjour ${firstName},\n\nMerci beaucoup pour l'intérêt que tu portes à Level Up in Germany.\n\nAprès analyse de ta demande, nous ne pouvons malheureusement pas l'accepter pour le moment.\n${reason ? `\nRaison : ${reason}\n` : ''}\nNous te remercions pour ta compréhension et te souhaitons beaucoup de succès dans tes projets.\n\nBien cordialement,\nL'équipe Level Up in Germany${emailLinksFooterText()}`;
 
   return resend.emails.send({
     from: FROM,
@@ -112,10 +115,11 @@ export async function sendMemberPaymentReminderEmail(email: string, firstName: s
       <p>Merci de régulariser ta situation dès que possible afin de conserver ton statut de membre actif.</p>
       <p>Pour toute question, n'hésite pas à nous contacter directement à <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;">info@levelupingermany.com</a>.</p>
       <p>Bien cordialement,<br/><strong>L'équipe Level Up in Germany</strong></p>
+      ${emailLinksFooterHtml()}
     </div>
   `);
 
-  const text = `Bonjour ${firstName},\n\nNous te contactons concernant tes frais annuels de membre pour Level Up in Germany.\n\nD'après nos informations, le paiement de tes frais de membre n'a pas encore été enregistré ou doit être renouvelé.\n\nMerci de régulariser ta situation dès que possible afin de conserver ton statut de membre actif.\n\nBien cordialement,\nL'équipe Level Up in Germany`;
+  const text = `Bonjour ${firstName},\n\nNous te contactons concernant tes frais annuels de membre pour Level Up in Germany.\n\nD'après nos informations, le paiement de tes frais de membre n'a pas encore été enregistré ou doit être renouvelé.\n\nMerci de régulariser ta situation dès que possible afin de conserver ton statut de membre actif.\n\nBien cordialement,\nL'équipe Level Up in Germany${emailLinksFooterText()}`;
 
   return resend.emails.send({
     from: FROM,

@@ -6,6 +6,8 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+import { emailLinksFooterHtml, emailLinksFooterText } from './emailFooter';
+
 const SUBJECT = 'Merci pour votre intérêt – Level Up Germany';
 
 const BODY_TEXT = (pdfUrl: string) =>
@@ -21,7 +23,7 @@ Nous espérons que cette lecture vous apportera de la valeur et vous inspirera.
 Nous serions ravis de vous compter parmi nous lors de la prochaine édition.
 
 À très bientôt,
-L'équipe Level Up`;
+L'équipe Level Up${emailLinksFooterText()}`;
 
 const BODY_HTML = (pdfUrl: string) => `
 <!DOCTYPE html><html><body style="font-family:system-ui,Segoe UI,sans-serif;line-height:1.6;color:#1a1a1a">
@@ -32,6 +34,7 @@ const BODY_HTML = (pdfUrl: string) => `
 <p>Nous espérons que cette lecture vous apportera de la valeur et vous inspirera.</p>
 <p>Nous serions ravis de vous compter parmi nous lors de la prochaine édition.</p>
 <p>À très bientôt,<br/>L'équipe Level Up</p>
+${emailLinksFooterHtml()}
 <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
 <p style="font-size:12px;color:#666">Level Up in Germany · ${new Date().toISOString()}</p>
 </body></html>`;
