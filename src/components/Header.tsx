@@ -77,8 +77,19 @@ export function Header({
   const [scrolled, setScrolled] = useState(false);
 
   // Only use transparent/white-text mode on the home page (which has a dark hero behind)
+  // Force opaque mode whenever the mobile menu is open so links stay readable.
   const isHomePage = pathname === `/${locale}` || pathname === `/${locale}/`;
-  const useTransparent = isHomePage && !scrolled;
+  const useTransparent = isHomePage && !scrolled && !menuOpen;
+
+  // Lock body scroll when the mobile menu is open
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (menuOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [menuOpen]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -211,51 +222,70 @@ export function Header({
           </div>
         </div>
 
-        {/* Mobile nav */}
-        {menuOpen && (
-          <nav className="md:hidden py-4 border-t border-gray-100">
-            <ul className="flex flex-col gap-1">
+      </div>
+
+      {/* Mobile nav — full-width, opaque, properly readable */}
+      {menuOpen && (
+        <>
+          {/* Backdrop to close menu on outside tap */}
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setMenuOpen(false)}
+            className="md:hidden fixed inset-0 top-16 bg-black/30 backdrop-blur-[2px] z-40"
+          />
+          <nav
+            id="mobile-nav"
+            className="md:hidden absolute left-0 right-0 top-full bg-white border-t border-gray-200 shadow-[0_12px_24px_-8px_rgba(0,0,0,0.18)] z-50"
+          >
+            <ul className="flex flex-col gap-1 px-4 py-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
               {navItems.map((item) => {
                 const href =
                   item.href === '/who-we-are' ? whoWeAreHref(locale) : item.href ? `${base}${item.href}` : base;
+                const isActive =
+                  item.href === '/who-we-are'
+                    ? isWhoWeArePathname(pathname)
+                    : pathname === href || (item.href ? pathname.startsWith(href) : false);
                 return (
                   <li key={item.href || 'home'}>
                     <Link
                       href={href}
                       onClick={() => setMenuOpen(false)}
-                      className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-gray-100"
+                      className={`block py-3 px-3 rounded-lg text-base font-medium transition-colors ${
+                        isActive
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-gray-800 hover:bg-gray-100 active:bg-gray-200'
+                      }`}
                     >
                       {getLabel(item)}
                     </Link>
                   </li>
                 );
               })}
-              <li>
+              <li className="pt-2 mt-2 border-t border-gray-100 flex flex-col gap-2">
                 <Link
                   href={contactHref}
                   target={siteConfig?.headerJoinOpenInNewTab ? '_blank' : undefined}
                   rel={siteConfig?.headerJoinOpenInNewTab ? 'noopener noreferrer' : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className={`block py-2 px-3 rounded-lg font-medium ${joinBtnCls}`}
+                  className={`block text-center py-3 px-4 rounded-full text-sm font-semibold shadow-md ${joinBtnCls}`}
                 >
                   {joinLabel}
                 </Link>
-              </li>
-              <li>
                 <Link
                   href={sponsorHref}
                   target={siteConfig?.headerSponsorOpenInNewTab ? '_blank' : undefined}
                   rel={siteConfig?.headerSponsorOpenInNewTab ? 'noopener noreferrer' : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className={`block py-2 px-3 rounded-lg font-medium ${sponsorBtnCls}`}
+                  className={`block text-center py-3 px-4 rounded-full text-sm font-semibold shadow-md ${sponsorBtnCls}`}
                 >
                   {sponsorLabel}
                 </Link>
               </li>
             </ul>
           </nav>
-        )}
-      </div>
+        </>
+      )}
     </header>
   );
 }

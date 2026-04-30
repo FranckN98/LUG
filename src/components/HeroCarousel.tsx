@@ -25,7 +25,7 @@ function AnimatedHeroTitle({ title }: { title: string }) {
 }
 
 // ── Button color variants (hero dark background context) ──────────────────────
-const BASE_BTN = 'group inline-flex items-center justify-center h-12 sm:h-14 px-8 rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base';
+const BASE_BTN = 'group inline-flex items-center justify-center w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base';
 
 function heroBtnCls(variant: string): string {
   switch (variant) {
@@ -80,7 +80,7 @@ export default function HeroCarousel({
 
   return (
     <section
-      className="relative w-full min-h-[88vh] sm:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
+      className="relative w-full min-h-[78vh] sm:min-h-[88vh] md:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
       aria-label="Hero carousel"
     >
       {/* ── Images: zoom + fade + slide transition ── */}
@@ -149,9 +149,23 @@ export default function HeroCarousel({
           `,
         }}
       />
-      {/* Layer 3 — Text-zone readability: soft bottom veil with brand depth */}
+      {/* Layer 3 — Text-zone readability: stronger on mobile where text is closer to bottom */}
       <div
-        className="absolute inset-0 z-[3] pointer-events-none"
+        className="absolute inset-0 z-[3] pointer-events-none md:hidden"
+        aria-hidden
+        style={{
+          background: `
+            linear-gradient(to top,
+              rgba(15,6,6,0.85) 0%,
+              rgba(26,26,26,0.55) 25%,
+              rgba(140,26,26,0.18) 55%,
+              transparent 80%
+            )
+          `,
+        }}
+      />
+      <div
+        className="absolute inset-0 z-[3] pointer-events-none hidden md:block"
         aria-hidden
         style={{
           background: `
@@ -165,8 +179,8 @@ export default function HeroCarousel({
       />
 
       {/* ── Text content — bottom-left, cinematic anchoring ── */}
-      <div className="absolute inset-0 z-10 flex items-end pb-24 sm:pb-32 md:pb-36 px-6 sm:px-10 md:px-16 lg:px-20">
-        <div className="max-w-3xl">
+      <div className="absolute inset-0 z-10 flex items-end pb-16 sm:pb-32 md:pb-36 px-5 sm:px-10 md:px-16 lg:px-20">
+        <div className="max-w-3xl w-full">
           {tagline && (
             <div className="animate-hero-tagline flex items-center gap-3 mb-5">
               <span className="h-px w-10 bg-accent" />
@@ -189,7 +203,7 @@ export default function HeroCarousel({
           )}
 
           {(primaryButton || buttons.length > 0) && (
-            <div className="animate-hero-buttons flex flex-wrap items-center gap-4 sm:gap-5">
+            <div className="animate-hero-buttons flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-5">
               {primaryButton && (() => {
                 const isExternal = /^https?:\/\//i.test(primaryButton.href);
                 const cls = heroBtnCls(primaryButton.colorVariant ?? 'red');
