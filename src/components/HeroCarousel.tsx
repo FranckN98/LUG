@@ -207,12 +207,7 @@ export default function HeroCarousel({
               {primaryButton && (() => {
                 const isExternal = /^https?:\/\//i.test(primaryButton.href);
                 const cls = heroBtnCls(primaryButton.colorVariant ?? 'red');
-                const inner = (
-                  <>
-                    {primaryButton.label}
-                    <span aria-hidden className="inline-block group-hover:translate-x-0.5 transition-transform">→</span>
-                  </>
-                );
+                const inner = <>{primaryButton.label}</>;
                 return isExternal ? (
                   <a key="p" href={primaryButton.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
                 ) : (
