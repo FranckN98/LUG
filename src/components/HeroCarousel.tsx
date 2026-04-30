@@ -25,7 +25,7 @@ function AnimatedHeroTitle({ title }: { title: string }) {
 }
 
 // ── Button color variants (hero dark background context) ──────────────────────
-const BASE_BTN = 'group inline-flex items-center justify-center w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base';
+const BASE_BTN = 'group inline-flex items-center justify-center flex-1 sm:flex-none sm:w-auto h-11 sm:h-14 px-4 sm:px-8 rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-xs sm:text-base';
 
 function heroBtnCls(variant: string): string {
   switch (variant) {
@@ -80,7 +80,7 @@ export default function HeroCarousel({
 
   return (
     <section
-      className="relative w-full min-h-[78vh] sm:min-h-[88vh] md:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
+      className="relative w-full min-h-[100svh] sm:min-h-[88vh] md:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
       aria-label="Hero carousel"
     >
       {/* ── Images: zoom + fade + slide transition ── */}
@@ -149,17 +149,17 @@ export default function HeroCarousel({
           `,
         }}
       />
-      {/* Layer 3 — Text-zone readability: stronger on mobile where text is closer to bottom */}
+      {/* Layer 3 — Text-zone readability: lighter on mobile so the image stays visible */}
       <div
         className="absolute inset-0 z-[3] pointer-events-none md:hidden"
         aria-hidden
         style={{
           background: `
             linear-gradient(to top,
-              rgba(15,6,6,0.85) 0%,
-              rgba(26,26,26,0.55) 25%,
-              rgba(140,26,26,0.18) 55%,
-              transparent 80%
+              rgba(15,6,6,0.62) 0%,
+              rgba(26,26,26,0.32) 30%,
+              rgba(140,26,26,0.10) 55%,
+              transparent 78%
             )
           `,
         }}
@@ -179,31 +179,31 @@ export default function HeroCarousel({
       />
 
       {/* ── Text content — bottom-left, cinematic anchoring ── */}
-      <div className="absolute inset-0 z-10 flex items-end pb-16 sm:pb-32 md:pb-36 px-5 sm:px-10 md:px-16 lg:px-20">
+      <div className="absolute inset-0 z-10 flex items-end pb-10 sm:pb-32 md:pb-36 px-5 sm:px-10 md:px-16 lg:px-20">
         <div className="max-w-3xl w-full">
           {tagline && (
-            <div className="animate-hero-tagline flex items-center gap-3 mb-5">
-              <span className="h-px w-10 bg-accent" />
-              <p className="text-[0.7rem] sm:text-xs font-bold uppercase tracking-[0.3em] text-accent"
+            <div className="animate-hero-tagline flex items-center gap-3 mb-3 sm:mb-5">
+              <span className="h-px w-8 sm:w-10 bg-accent" />
+              <p className="text-[0.65rem] sm:text-xs font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-accent"
                  style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
                 {tagline}
               </p>
             </div>
           )}
           {title && (
-            <h1 className="animate-hero-title mb-5 leading-[1.15]">
+            <h1 className="animate-hero-title mb-3 sm:mb-5 leading-[1.15]">
               <AnimatedHeroTitle title={title} />
             </h1>
           )}
           {subtitle && (
-            <p className="animate-hero-subtitle text-base sm:text-lg md:text-xl text-white/85 mb-10 max-w-xl leading-relaxed"
+            <p className="animate-hero-subtitle text-sm sm:text-lg md:text-xl text-white/85 mb-6 sm:mb-10 max-w-xl leading-relaxed line-clamp-2 sm:line-clamp-none"
                style={{ textShadow: '0 1px 12px rgba(0,0,0,0.35)' }}>
               {subtitle}
             </p>
           )}
 
           {(primaryButton || buttons.length > 0) && (
-            <div className="animate-hero-buttons flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-5">
+            <div className="animate-hero-buttons flex flex-row flex-wrap sm:items-center gap-2 sm:gap-5">
               {primaryButton && (() => {
                 const isExternal = /^https?:\/\//i.test(primaryButton.href);
                 const cls = heroBtnCls(primaryButton.colorVariant ?? 'red');
