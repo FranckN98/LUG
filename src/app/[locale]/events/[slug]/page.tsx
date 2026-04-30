@@ -7,6 +7,7 @@ import { EditionContent } from '@/components/EventsTabs';
 import { getEventBySlug, getEventHeadline, mapEventToEventData } from '@/lib/events-db';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 function normalizeLocale(locale: string): Locale {
   return locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en';
