@@ -136,6 +136,12 @@ export default function MembersAdmin() {
   // Reminder loading
   const [reminderLoading, setReminderLoading] = useState<string | null>(null);
 
+  // Email actions
+  const [emailActionLoading, setEmailActionLoading] = useState<string | null>(null);
+  const [customEmailOpen, setCustomEmailOpen] = useState(false);
+  const [customSubject, setCustomSubject] = useState('');
+  const [customMessage, setCustomMessage] = useState('');
+
   const [toast, setToast] = useState<{ msg: string; kind: 'success' | 'error' } | null>(null);
   const showToast = useCallback((msg: string, kind: 'success' | 'error' = 'success') => {
     setToast({ msg, kind });
@@ -247,6 +253,54 @@ export default function MembersAdmin() {
       showToast(`Rappel de paiement envoyé à ${member.email}`);
     } else {
       showToast("Erreur lors de l'envoi du rappel", 'error');
+    }
+  }
+
+  async function handleSendWelcome(member: Member) {
+    setEmailActionLoading('welcome-' + member.id);
+    const res = await fetch(`/api/admin/members/${member.id}/welcome`, { method: 'POST' });
+    setEmailActionLoading(null);
+    if (res.ok) {
+      showToast(`Email de bienvenue envoyé à ${member.email}`);
+    } else {
+      showToast("Erreur lors de l'envoi de l'email", 'error');
+    }
+  }
+
+  async function handleSendPreset(member: Member, preset: 'welcome-full' | 'info-pack') {
+    setEmailActionLoading(`${preset}-${member.id}`);
+    const res = await fetch(`/api/admin/members/${member.id}/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ preset }),
+    });
+    setEmailActionLoading(null);
+    if (res.ok) {
+      showToast(`Email envoyé à ${member.email}`);
+    } else {
+      showToast("Erreur lors de l'envoi de l'email", 'error');
+    }
+  }
+
+  async function handleSendCustomEmail(member: Member) {
+    if (!customSubject.trim() || !customMessage.trim()) {
+      showToast('Sujet et message requis', 'error');
+      return;
+    }
+    setEmailActionLoading('custom-' + member.id);
+    const res = await fetch(`/api/admin/members/${member.id}/email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject: customSubject, message: customMessage }),
+    });
+    setEmailActionLoading(null);
+    if (res.ok) {
+      showToast(`Email envoyé à ${member.email}`);
+      setCustomEmailOpen(false);
+      setCustomSubject('');
+      setCustomMessage('');
+    } else {
+      showToast("Erreur lors de l'envoi de l'email", 'error');
     }
   }
 
@@ -435,8 +489,140 @@ export default function MembersAdmin() {
                 </div>
               </div>
             )}
+
+            {/* Email actions card */}
+            <div className="rounded-2xl border border-white/8 bg-white/3 p-5 space-y-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60">
+                Emails
+              </p>
+              <p className="text-xs text-white/50 leading-relaxed">
+                Envoie un email manuellement à <strong className="text-white/80">{detail.email}</strong>.
+              </p>
+
+              <div className="space-y-2 pt-1">
+                <button
+                  onClick={() => handleSendPreset(detail, 'welcome-full')}
+                  disabled={emailActionLoading === `welcome-full-${detail.id}`}
+                  className="w-full rounded-xl bg-emerald-600/90 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-500 disabled:opacity-50 transition-colors"
+                >
+                  {emailActionLoading === `welcome-full-${detail.id}`
+                    ? 'Envoi…'
+                    : '🎉 Envoyer un email de bienvenue complet'}
+                </button>
+                <p className="text-[11px] text-white/40 leading-snug">
+                  Mail rédigé : présentation, missions, prochains pas, contacts &amp; communauté.
+                </p>
+
+                <button
+                  onClick={() => handleSendPreset(detail, 'info-pack')}
+                  disabled={emailActionLoading === `info-pack-${detail.id}`}
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white/85 hover:bg-white/10 disabled:opacity-50 transition-colors"
+                >
+                  {emailActionLoading === `info-pack-${detail.id}`
+                    ? 'Envoi…'
+                    : '📋 Envoyer le kit d\u2019informations'}
+                </button>
+                <p className="text-[11px] text-white/40 leading-snug">
+                  Tous les contacts, événements et liens pour bien démarrer.
+                </p>
+
+                <button
+                  onClick={() => handleSendWelcome(detail)}
+                  disabled={emailActionLoading === `welcome-${detail.id}`}
+                  className="w-full rounded-xl border border-white/10 px-4 py-2 text-xs font-medium text-white/60 hover:bg-white/5 disabled:opacity-50 transition-colors"
+                >
+                  {emailActionLoading === `welcome-${detail.id}`
+                    ? 'Envoi…'
+                    : '↺ Renvoyer l\u2019email de bienvenue court'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCustomSubject('');
+                    setCustomMessage('');
+                    setCustomEmailOpen(true);
+                  }}
+                  className="w-full rounded-xl bg-primary/80 px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary transition-colors"
+                >
+                  ✍️ Écrire un email personnalisé
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Custom email modal */}
+        {customEmailOpen && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4">
+            <div className="w-full sm:max-w-lg bg-[#1a0c0c] border border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+              <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent/70">
+                    Email personnalisé
+                  </p>
+                  <p className="text-sm font-semibold text-white mt-0.5 truncate">
+                    À : {detail.email}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCustomEmailOpen(false)}
+                  className="h-9 w-9 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                  aria-label="Fermer"
+                >
+                  <svg className="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="px-5 py-4 space-y-4 overflow-y-auto">
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-1.5 block">
+                    Sujet
+                  </label>
+                  <input
+                    type="text"
+                    value={customSubject}
+                    onChange={(e) => setCustomSubject(e.target.value)}
+                    placeholder="Ex : Invitation au prochain workshop"
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/30 focus:border-accent/40 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-1.5 block">
+                    Message
+                  </label>
+                  <textarea
+                    value={customMessage}
+                    onChange={(e) => setCustomMessage(e.target.value)}
+                    rows={8}
+                    placeholder="Écris ton message ici. Une ligne vide entre 2 paragraphes pour les séparer."
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 focus:border-accent/40 focus:outline-none leading-relaxed resize-y"
+                  />
+                  <p className="mt-1.5 text-[11px] text-white/40">
+                    Le message sera automatiquement entouré du logo, d'une salutation à <strong className="text-white/60">{detail.firstName}</strong> et du pied de page (liens site, réseaux, WhatsApp).
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-5 py-4 border-t border-white/8 flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+                <button
+                  onClick={() => setCustomEmailOpen(false)}
+                  className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-white/60 hover:text-white transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => handleSendCustomEmail(detail)}
+                  disabled={emailActionLoading === `custom-${detail.id}` || !customSubject.trim() || !customMessage.trim()}
+                  className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 transition-colors"
+                >
+                  {emailActionLoading === `custom-${detail.id}` ? 'Envoi…' : '📨 Envoyer'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {toast && (
           <Toast msg={toast.msg} kind={toast.kind} onClose={() => setToast(null)} />

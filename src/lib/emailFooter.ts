@@ -12,8 +12,14 @@
 
 import { SOCIAL_LINKS } from '@/data/social';
 
+/**
+ * Canonical production URL used for ALL email content (logos, links, footer).
+ * Hardcoded to .com because that is the active public domain — using
+ * NEXT_PUBLIC_SITE_URL is unreliable for email clients (env may be missing
+ * or contain typos like .de). Override only via EMAIL_SITE_URL if needed.
+ */
 const SITE_URL =
-  (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://www.levelupingermany.com').replace(/\/$/, '');
+  (process.env.EMAIL_SITE_URL?.trim() || 'https://www.levelupingermany.com').replace(/\/$/, '');
 
 const AMBASSADOR_WHATSAPP_URL = 'https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst';
 

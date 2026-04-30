@@ -130,3 +130,238 @@ export async function sendMemberPaymentReminderEmail(email: string, firstName: s
     text,
   });
 }
+
+// ── Custom / preset email (manual send from admin) ────────────────────────────
+type CustomEmailParams = {
+  email: string;
+  firstName: string;
+  subject: string;
+  message: string;
+  preset?: 'welcome-full' | 'info-pack';
+};
+
+const FULL_WELCOME_HTML = (firstName: string) => `
+  <div class="header">
+    <h1>Bienvenue dans la famille Level Up in Germany</h1>
+    <p>Ton parcours commence ici</p>
+  </div>
+  <div class="body">
+    <p>Bonjour ${firstName},</p>
+    <p>Nous sommes vraiment heureux de t'accueillir officiellement parmi les membres de
+      <strong>Level Up in Germany e.V.</strong> 🎉</p>
+
+    <p>Notre association est née d'une conviction simple : la diaspora francophone
+      en Allemagne possède un potentiel énorme — d'idées, de talents et d'envie d'avancer.
+      Notre mission est de te donner les outils, les contacts et la communauté pour
+      <strong>passer à la vitesse supérieure</strong>, que ce soit dans ton projet pro,
+      ton intégration, ton entrepreneuriat ou tes études.</p>
+
+    <div class="highlight">
+      <strong>Concrètement, en tant que membre tu profites de :</strong>
+      <ul style="margin:8px 0 0 0;padding-left:20px;line-height:1.8">
+        <li>Accès prioritaire à la <strong>Mega Conference</strong> annuelle</li>
+        <li>Workshops, mentorat et programmes thématiques (carrière, entrepreneuriat, intégration)</li>
+        <li>Communauté WhatsApp privée des Ambassadeurs &amp; échanges directs avec l'équipe</li>
+        <li>Newsletter mensuelle avec opportunités, témoignages et événements partenaires</li>
+        <li>Réductions chez nos partenaires (à venir)</li>
+      </ul>
+    </div>
+
+    <p><strong>Tes 3 prochains pas recommandés :</strong></p>
+    <ol style="line-height:1.8;padding-left:20px">
+      <li>Rejoins notre <a href="https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst" style="color:#8C1A1A;font-weight:600">communauté WhatsApp des Ambassadeurs</a> pour rencontrer les autres membres.</li>
+      <li>Suis-nous sur <a href="https://www.linkedin.com/company/level-up-in-germany" style="color:#8C1A1A">LinkedIn</a> et <a href="https://www.instagram.com/levelupingermany" style="color:#8C1A1A">Instagram</a> pour ne rien rater.</li>
+      <li>Réserve la date de notre prochaine <a href="https://www.levelupingermany.com/events" style="color:#8C1A1A;font-weight:600">Mega Conference</a>.</li>
+    </ol>
+
+    <p><strong>Une question, une idée, une envie de contribuer ?</strong><br/>
+      Réponds simplement à ce mail ou contacte-nous à
+      <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a>.
+      L'équipe te répond personnellement.</p>
+
+    <p>Encore une fois : bienvenue. On a hâte de bâtir avec toi.</p>
+
+    <p>À très vite,<br/>
+      <strong>L'équipe Level Up in Germany</strong><br/>
+      <span style="color:#8C1A1A;font-style:italic">— Ensemble, on monte d'un cran.</span></p>
+
+    ${emailLinksFooterHtml()}
+  </div>
+`;
+
+const FULL_WELCOME_TEXT = (firstName: string) => `Bonjour ${firstName},
+
+Nous sommes vraiment heureux de t'accueillir officiellement parmi les membres de Level Up in Germany e.V. 🎉
+
+Notre association est née d'une conviction simple : la diaspora francophone en Allemagne possède un potentiel énorme — d'idées, de talents et d'envie d'avancer. Notre mission est de te donner les outils, les contacts et la communauté pour passer à la vitesse supérieure, que ce soit dans ton projet pro, ton intégration, ton entrepreneuriat ou tes études.
+
+En tant que membre, tu profites de :
+  • Accès prioritaire à la Mega Conference annuelle
+  • Workshops, mentorat et programmes thématiques
+  • Communauté WhatsApp privée des Ambassadeurs
+  • Newsletter mensuelle avec opportunités et événements
+  • Réductions chez nos partenaires (à venir)
+
+Tes 3 prochains pas :
+  1. Rejoins notre communauté WhatsApp : https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst
+  2. Suis-nous sur LinkedIn et Instagram (@levelupingermany)
+  3. Réserve la date de notre prochaine Mega Conference : https://www.levelupingermany.com/events
+
+Une question ? Réponds simplement à ce mail ou écris-nous à info@levelupingermany.com.
+
+Bienvenue. On a hâte de bâtir avec toi.
+
+À très vite,
+L'équipe Level Up in Germany
+— Ensemble, on monte d'un cran.${emailLinksFooterText()}`;
+
+const INFO_PACK_HTML = (firstName: string) => `
+  <div class="header">
+    <h1>Toutes les infos pour bien démarrer</h1>
+    <p>Ton kit Level Up in Germany</p>
+  </div>
+  <div class="body">
+    <p>Bonjour ${firstName},</p>
+    <p>Voici un résumé pratique de tout ce qu'il faut savoir sur l'association et de la
+      façon dont tu peux profiter au maximum de ton statut de membre.</p>
+
+    <div class="highlight">
+      <strong>📍 Qui sommes-nous ?</strong><br/>
+      <strong>Level Up in Germany e.V.</strong> est une association francophone basée en Allemagne
+      qui accompagne la diaspora dans sa montée en compétences, son intégration et son
+      entrepreneuriat. Site officiel :
+      <a href="https://www.levelupingermany.com" style="color:#8C1A1A;font-weight:600">levelupingermany.com</a>
+    </div>
+
+    <p><strong>📅 Nos événements phares</strong></p>
+    <ul style="line-height:1.8;padding-left:20px">
+      <li><strong>Mega Conference annuelle</strong> — la grande rencontre de la communauté</li>
+      <li><strong>Workshops thématiques</strong> — carrière, leadership, entrepreneuriat</li>
+      <li><strong>Sessions de mentorat</strong> — accompagnement individualisé</li>
+      <li><strong>Programmes spécifiques</strong> — étudiants, jeunes pros, entrepreneurs</li>
+    </ul>
+    <p>👉 Calendrier complet :
+      <a href="https://www.levelupingermany.com/events" style="color:#8C1A1A;font-weight:600">levelupingermany.com/events</a>
+    </p>
+
+    <p><strong>📬 Comment nous contacter</strong></p>
+    <ul style="line-height:1.8;padding-left:20px">
+      <li>Email général :
+        <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A">info@levelupingermany.com</a></li>
+      <li>WhatsApp Ambassadeurs :
+        <a href="https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst" style="color:#25D366;font-weight:600">rejoindre la communauté</a></li>
+      <li>LinkedIn :
+        <a href="https://www.linkedin.com/company/level-up-in-germany" style="color:#8C1A1A">@level-up-in-germany</a></li>
+      <li>Instagram :
+        <a href="https://www.instagram.com/levelupingermany" style="color:#8C1A1A">@levelupingermany</a></li>
+      <li>TikTok :
+        <a href="https://www.tiktok.com/@levelupingermany" style="color:#8C1A1A">@levelupingermany</a></li>
+    </ul>
+
+    <p><strong>🤝 Comment t'impliquer ?</strong></p>
+    <ul style="line-height:1.8;padding-left:20px">
+      <li>Participer aux événements et workshops</li>
+      <li>Devenir <strong>Ambassadeur·rice</strong> dans ta ville (écris-nous !)</li>
+      <li>Proposer un sujet, animer un atelier, partager ton expertise</li>
+      <li>Parrainer un nouveau membre</li>
+    </ul>
+
+    <p>Tu peux toujours nous écrire pour toute question :
+      <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a></p>
+
+    <p>À très vite,<br/>
+      <strong>L'équipe Level Up in Germany</strong></p>
+
+    ${emailLinksFooterHtml()}
+  </div>
+`;
+
+const INFO_PACK_TEXT = (firstName: string) => `Bonjour ${firstName},
+
+Voici un résumé pratique de tout ce qu'il faut savoir sur Level Up in Germany.
+
+📍 QUI SOMMES-NOUS
+Level Up in Germany e.V. est une association francophone basée en Allemagne qui accompagne la diaspora dans sa montée en compétences, son intégration et son entrepreneuriat.
+Site : https://www.levelupingermany.com
+
+📅 NOS ÉVÉNEMENTS
+  • Mega Conference annuelle
+  • Workshops thématiques (carrière, leadership, entrepreneuriat)
+  • Sessions de mentorat
+  • Programmes spécifiques (étudiants, jeunes pros, entrepreneurs)
+Calendrier : https://www.levelupingermany.com/events
+
+📬 NOUS CONTACTER
+  • Email : info@levelupingermany.com
+  • WhatsApp Ambassadeurs : https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst
+  • LinkedIn : https://www.linkedin.com/company/level-up-in-germany
+  • Instagram : @levelupingermany
+  • TikTok : @levelupingermany
+
+🤝 COMMENT T'IMPLIQUER
+  • Participer aux événements et workshops
+  • Devenir Ambassadeur·rice dans ta ville
+  • Proposer un sujet, animer un atelier
+  • Parrainer un nouveau membre
+
+Toute question ? info@levelupingermany.com
+
+À très vite,
+L'équipe Level Up in Germany${emailLinksFooterText()}`;
+
+/**
+ * Send a custom OR preset email to a member.
+ * - preset='welcome-full'  → full warm welcome with all info & next steps
+ * - preset='info-pack'     → contacts & resources kit
+ * - otherwise              → use provided subject + message (plain message becomes paragraphs)
+ */
+export async function sendMemberCustomEmail(params: CustomEmailParams) {
+  const { email, firstName, subject, message, preset } = params;
+
+  let html: string;
+  let text: string;
+  let finalSubject: string;
+
+  if (preset === 'welcome-full') {
+    html = wrapHtml(FULL_WELCOME_HTML(firstName));
+    text = FULL_WELCOME_TEXT(firstName);
+    finalSubject = `Bienvenue dans Level Up in Germany, ${firstName} 🎉`;
+  } else if (preset === 'info-pack') {
+    html = wrapHtml(INFO_PACK_HTML(firstName));
+    text = INFO_PACK_TEXT(firstName);
+    finalSubject = 'Toutes les infos Level Up in Germany';
+  } else {
+    // Custom message: turn line breaks into paragraphs, escape HTML.
+    const escaped = message
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    const paragraphs = escaped
+      .split(/\n{2,}/)
+      .map((p) => `<p>${p.replace(/\n/g, '<br/>')}</p>`)
+      .join('');
+
+    html = wrapHtml(`
+      <div class="header">
+        <h1>Level Up in Germany</h1>
+        <p>${subject}</p>
+      </div>
+      <div class="body">
+        <p>Bonjour ${firstName},</p>
+        ${paragraphs}
+        <p>À très vite,<br/><strong>L'équipe Level Up in Germany</strong></p>
+        ${emailLinksFooterHtml()}
+      </div>
+    `);
+    text = `Bonjour ${firstName},\n\n${message}\n\nÀ très vite,\nL'équipe Level Up in Germany${emailLinksFooterText()}`;
+    finalSubject = subject;
+  }
+
+  return resend.emails.send({
+    from: FROM,
+    to: email,
+    subject: finalSubject,
+    html,
+    text,
+  });
+}
