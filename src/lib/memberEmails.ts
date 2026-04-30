@@ -167,6 +167,25 @@ const FULL_WELCOME_HTML = (firstName: string) => `
       </ul>
     </div>
 
+    <p><strong>💛 Une petite contribution, une grande communauté</strong></p>
+    <p>Pour faire vivre l'association, organiser nos événements et continuer à offrir un
+      accompagnement de qualité, nous comptons sur une cotisation symbolique de
+      <strong>30&nbsp;€ par an</strong>. C'est ce qui nous permet de louer les salles, produire
+      le contenu, soutenir les ambassadeurs dans leurs villes et garder l'association
+      indépendante &amp; au service de ses membres.</p>
+    <p>En tant que membre cotisant, tu bénéficies en plus :</p>
+    <ul style="line-height:1.8;padding-left:20px">
+      <li>D'un <strong>tarif préférentiel</strong> sur la Mega Conference et les workshops payants</li>
+      <li>D'un <strong>accès en avant-première</strong> aux inscriptions (places limitées)</li>
+      <li>Du <strong>droit de vote</strong> en assemblée générale et de participation aux décisions</li>
+      <li>D'une <strong>visibilité dédiée</strong> pour tes projets dans la communauté</li>
+    </ul>
+    <p style="font-size:14px;color:#5a3030">
+      💳 Pour régler ta cotisation, écris simplement à
+      <a href="mailto:info@levelupingermany.de" style="color:#8C1A1A;font-weight:600">info@levelupingermany.de</a>
+      — on te transmet les coordonnées bancaires et le reçu officiel.
+    </p>
+
     <p><strong>Tes 3 prochains pas recommandés :</strong></p>
     <ol style="line-height:1.8;padding-left:20px">
       <li>Rejoins notre <a href="https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst" style="color:#8C1A1A;font-weight:600">communauté WhatsApp des Ambassadeurs</a> pour rencontrer les autres membres.</li>
@@ -201,6 +220,17 @@ En tant que membre, tu profites de :
   • Communauté WhatsApp privée des Ambassadeurs
   • Newsletter mensuelle avec opportunités et événements
   • Réductions chez nos partenaires (à venir)
+
+💛 UNE PETITE CONTRIBUTION, UNE GRANDE COMMUNAUTÉ
+Pour faire vivre l'association et continuer à organiser nos événements, nous comptons sur une cotisation symbolique de 30 € par an. C'est ce qui nous permet de louer les salles, produire le contenu et soutenir les ambassadeurs dans leurs villes.
+
+En tant que membre cotisant, tu profites en plus :
+  • D'un tarif préférentiel sur la Mega Conference et les workshops payants
+  • D'un accès en avant-première aux inscriptions (places limitées)
+  • Du droit de vote en assemblée générale
+  • D'une visibilité dédiée pour tes projets dans la communauté
+
+💳 Pour régler ta cotisation, écris-nous à info@levelupingermany.de — on te transmet les coordonnées bancaires et le reçu officiel.
 
 Tes 3 prochains pas :
   1. Rejoins notre communauté WhatsApp : https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst
@@ -266,6 +296,20 @@ const INFO_PACK_HTML = (firstName: string) => `
       <li>Parrainer un nouveau membre</li>
     </ul>
 
+    <div class="highlight">
+      <strong>💛 Cotisation membre — 30&nbsp;€ / an</strong><br/>
+      Une petite contribution qui fait une grande différence : elle nous permet de louer
+      les salles, produire les contenus, soutenir les ambassadeurs dans leurs villes et
+      garder l'association libre &amp; indépendante.
+      <br/><br/>
+      <strong>Ce que ça t'apporte en plus :</strong> tarif préférentiel sur la Mega Conference,
+      accès anticipé aux inscriptions, droit de vote en AG et visibilité pour tes projets.
+      <br/><br/>
+      💳 Pour régler ta cotisation, écris-nous à
+      <a href="mailto:info@levelupingermany.de" style="color:#8C1A1A;font-weight:600">info@levelupingermany.de</a>
+      — on te transmet les coordonnées bancaires et le reçu officiel.
+    </div>
+
     <p>Tu peux toujours nous écrire pour toute question :
       <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a></p>
 
@@ -303,6 +347,13 @@ Calendrier : https://www.levelupingermany.com/events
   • Devenir Ambassadeur·rice dans ta ville
   • Proposer un sujet, animer un atelier
   • Parrainer un nouveau membre
+
+💛 COTISATION MEMBRE — 30 € / AN
+Une petite contribution qui fait une grande différence : elle nous permet de louer les salles, produire les contenus, soutenir les ambassadeurs et garder l'association libre & indépendante.
+
+En tant que cotisant, tu profites en plus : tarif préférentiel sur la Mega Conference, accès anticipé aux inscriptions, droit de vote en AG et visibilité pour tes projets.
+
+💳 Pour régler : écris-nous à info@levelupingermany.de — on te transmet les coordonnées bancaires et le reçu officiel.
 
 Toute question ? info@levelupingermany.com
 
