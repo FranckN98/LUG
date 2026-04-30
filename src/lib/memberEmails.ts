@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { emailLinksFooterHtml, emailLinksFooterText } from './emailFooter';
+import { emailLinksFooterHtml, emailLinksFooterText, emailHeaderLogoHtml } from './emailFooter';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM =
@@ -29,6 +29,7 @@ function wrapHtml(bodyHtml: string): string {
 <body>
 <div style="padding:24px 16px;">
   <div class="wrap">
+    ${emailHeaderLogoHtml()}
     ${bodyHtml}
     <div class="footer">
       <p>Level Up in Germany · levelupingermany.com<br/>

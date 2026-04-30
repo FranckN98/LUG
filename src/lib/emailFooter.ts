@@ -17,6 +17,28 @@ const SITE_URL =
 
 const AMBASSADOR_WHATSAPP_URL = 'https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst';
 
+/** Public absolute URL of the Level Up in Germany logo (served from /public). */
+export const EMAIL_LOGO_URL = `${SITE_URL}/logo.png`;
+
+/**
+ * Centered logo block to render at the top of transactional emails.
+ * Uses absolute URLs so all email clients (Gmail, Outlook, Apple Mail) load it.
+ */
+export function emailHeaderLogoHtml(opts: { background?: string; width?: number } = {}): string {
+  const bg = opts.background ?? '#ffffff';
+  const w = opts.width ?? 140;
+  return `
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${bg}">
+  <tr>
+    <td align="center" style="padding:24px 24px 8px">
+      <a href="${SITE_URL}" style="text-decoration:none;border:0;outline:none">
+        <img src="${EMAIL_LOGO_URL}" alt="Level Up in Germany" width="${w}" style="display:block;border:0;outline:none;max-width:${w}px;height:auto" />
+      </a>
+    </td>
+  </tr>
+</table>`;
+}
+
 const TEXT = {
   fr: {
     stayConnected: 'Restez connecté à Level Up in Germany',

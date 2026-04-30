@@ -1,4 +1,5 @@
 import type { FormPayload } from '@/types/form-payload';
+import { emailHeaderLogoHtml } from './emailFooter';
 
 function esc(s: string): string {
   return s
@@ -29,10 +30,15 @@ export async function sendFormSubmissionEmail(payload: FormPayload): Promise<voi
     .join('');
 
   const html = `
-    <!DOCTYPE html><html><body style="font-family:system-ui,sans-serif;line-height:1.5">
-    <h2 style="color:#8C1A1A">${esc(TYPE_LABEL[payload.type])}</h2>
-    <table style="border-collapse:collapse;max-width:560px">${rows}</table>
-    <p style="margin-top:16px;font-size:12px;color:#666">Envoyé depuis le site levelupingermany.de · ${new Date().toISOString()}</p>
+    <!DOCTYPE html><html><body style="margin:0;padding:0;background:#f6f4f4;font-family:system-ui,sans-serif;line-height:1.5;color:#1a1a1a">
+    <div style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden">
+    ${emailHeaderLogoHtml()}
+    <div style="padding:8px 32px 32px">
+    <h2 style="color:#8C1A1A;margin:0 0 16px">${esc(TYPE_LABEL[payload.type])}</h2>
+    <table style="border-collapse:collapse;max-width:560px;width:100%">${rows}</table>
+    <p style="margin-top:16px;font-size:12px;color:#666">Envoyé depuis le site levelupingermany.com · ${new Date().toISOString()}</p>
+    </div>
+    </div>
     </body></html>`;
 
   if (!apiKey) {

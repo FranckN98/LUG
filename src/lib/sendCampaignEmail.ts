@@ -71,7 +71,7 @@ export function buildCampaignHtml(
   // Header image: displayed prominently above the name bar if provided
   const headerImageBlock = normalizedHeaderImageUrl
     ? `<img src="${esc(normalizedHeaderImageUrl)}" alt="Logo" width="160" style="display:block;margin:0 auto 16px;max-width:160px;height:auto;border:0" />`
-    : `<img src="${siteBaseUrl}/favicon.ico" alt="" width="40" height="40" style="display:inline-block;margin-bottom:12px;opacity:0.9;border-radius:8px" onerror="this.style.display='none'"/>`;
+    : `<img src="${siteBaseUrl}/logo.png" alt="Level Up in Germany" width="140" style="display:block;margin:0 auto 12px;max-width:140px;height:auto;border:0" />`;
 
 
   return `<!DOCTYPE html>
