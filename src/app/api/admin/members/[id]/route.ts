@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (body.action === 'accept') {
     const updated = await prisma.member.update({
       where: { id },
-      data: { applicationStatus: 'accepted' },
+      data: { applicationStatus: 'accepted', welcomeShortSentAt: new Date() },
     });
     // Fire-and-forget welcome email
     sendMemberWelcomeEmail(member.email, member.firstName).catch(console.error);

@@ -36,6 +36,10 @@ export async function GET(req: NextRequest) {
       rejectionReason: true,
       membershipFeePaid: true,
       lastPaymentDate: true,
+      welcomeShortSentAt: true,
+      welcomeFullSentAt: true,
+      infoPackSentAt: true,
+      lastCustomEmailAt: true,
       createdAt: true,
     },
   });

@@ -35,6 +35,14 @@ export async function POST(req: NextRequest, { params }: Params) {
       message: message ?? '',
       preset,
     });
+
+    const now = new Date();
+    const data: Record<string, Date> = {};
+    if (preset === 'welcome-full') data.welcomeFullSentAt = now;
+    else if (preset === 'info-pack') data.infoPackSentAt = now;
+    else data.lastCustomEmailAt = now;
+    await prisma.member.update({ where: { id }, data });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[members/email] failed:', err);

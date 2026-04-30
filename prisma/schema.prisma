@@ -109,6 +109,10 @@ model Member {
   membershipFeePaid Boolean   @default(false) @map("membership_fee_paid")
   lastPaymentDate   DateTime? @map("last_payment_date")
   consentGiven      Boolean   @default(true) @map("consent_given")
+  welcomeShortSentAt DateTime? @map("welcome_short_sent_at")
+  welcomeFullSentAt  DateTime? @map("welcome_full_sent_at")
+  infoPackSentAt     DateTime? @map("info_pack_sent_at")
+  lastCustomEmailAt  DateTime? @map("last_custom_email_at")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 

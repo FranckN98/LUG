@@ -11,6 +11,10 @@ export async function POST(_req: NextRequest, { params }: Params) {
 
   try {
     await sendMemberWelcomeEmail(member.email, member.firstName);
+    await prisma.member.update({
+      where: { id },
+      data: { welcomeShortSentAt: new Date() },
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[members/welcome] failed:', err);

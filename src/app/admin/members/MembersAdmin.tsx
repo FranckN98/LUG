@@ -18,6 +18,10 @@ interface Member {
   rejectionReason: string | null;
   membershipFeePaid: boolean;
   lastPaymentDate: string | null;
+  welcomeShortSentAt: string | null;
+  welcomeFullSentAt: string | null;
+  infoPackSentAt: string | null;
+  lastCustomEmailAt: string | null;
   createdAt: string;
 }
 
@@ -34,6 +38,27 @@ function fmtDate(iso: string | null) {
     year: 'numeric',
   });
 }
+
+function fmtDateTime(iso: string | null) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+// Pre-filled brief about Level Up in Germany — admin can insert it into a custom email
+// then edit/expand around it.
+const LUG_BRIEF_TEMPLATE = `Petit rappel sur Level Up in Germany e.V. : nous sommes une association francophone basée en Allemagne qui accompagne la diaspora dans sa montée en compétences, son intégration et son entrepreneuriat.
+
+Concrètement, en tant que membre tu profites de la Mega Conference annuelle, des workshops et programmes de mentorat, de la communauté WhatsApp privée des Ambassadeurs, de la newsletter mensuelle et de réductions chez nos partenaires (à venir).
+
+La cotisation annuelle est de 30 € et nous permet de faire vivre l'association : louer les salles, produire les contenus et soutenir nos ambassadeurs dans leurs villes. Pour régler, il suffit d'écrire à info@levelupingermany.com — on te transmet les coordonnées bancaires et le reçu officiel.
+
+Plus d'infos : https://www.levelupingermany.com — communauté WhatsApp : https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst`;
 
 function isPaymentExpired(m: Member): boolean {
   if (!m.membershipFeePaid || !m.lastPaymentDate) return false;
@@ -262,6 +287,7 @@ export default function MembersAdmin() {
     setEmailActionLoading(null);
     if (res.ok) {
       showToast(`Email de bienvenue envoyé à ${member.email}`);
+      await fetchAll();
     } else {
       showToast("Erreur lors de l'envoi de l'email", 'error');
     }
@@ -277,6 +303,7 @@ export default function MembersAdmin() {
     setEmailActionLoading(null);
     if (res.ok) {
       showToast(`Email envoyé à ${member.email}`);
+      await fetchAll();
     } else {
       showToast("Erreur lors de l'envoi de l'email", 'error');
     }
@@ -299,6 +326,7 @@ export default function MembersAdmin() {
       setCustomEmailOpen(false);
       setCustomSubject('');
       setCustomMessage('');
+      await fetchAll();
     } else {
       showToast("Erreur lors de l'envoi de l'email", 'error');
     }
@@ -507,11 +535,19 @@ export default function MembersAdmin() {
                 >
                   {emailActionLoading === `welcome-full-${detail.id}`
                     ? 'Envoi…'
+                    : detail.welcomeFullSentAt
+                    ? '🎉 Renvoyer l\u2019email de bienvenue complet'
                     : '🎉 Envoyer un email de bienvenue complet'}
                 </button>
-                <p className="text-[11px] text-white/40 leading-snug">
-                  Mail rédigé : présentation, missions, prochains pas, contacts &amp; communauté.
-                </p>
+                {detail.welcomeFullSentAt ? (
+                  <p className="text-[11px] text-emerald-400/80 leading-snug">
+                    ✓ Déjà envoyé le {fmtDateTime(detail.welcomeFullSentAt)}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-white/40 leading-snug">
+                    Mail rédigé : présentation, missions, prochains pas, contacts &amp; communauté.
+                  </p>
+                )}
 
                 <button
                   onClick={() => handleSendPreset(detail, 'info-pack')}
@@ -520,11 +556,19 @@ export default function MembersAdmin() {
                 >
                   {emailActionLoading === `info-pack-${detail.id}`
                     ? 'Envoi…'
+                    : detail.infoPackSentAt
+                    ? '📋 Renvoyer le kit d\u2019informations'
                     : '📋 Envoyer le kit d\u2019informations'}
                 </button>
-                <p className="text-[11px] text-white/40 leading-snug">
-                  Tous les contacts, événements et liens pour bien démarrer.
-                </p>
+                {detail.infoPackSentAt ? (
+                  <p className="text-[11px] text-emerald-400/80 leading-snug">
+                    ✓ Déjà envoyé le {fmtDateTime(detail.infoPackSentAt)}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-white/40 leading-snug">
+                    Tous les contacts, événements et liens pour bien démarrer.
+                  </p>
+                )}
 
                 <button
                   onClick={() => handleSendWelcome(detail)}
@@ -535,6 +579,11 @@ export default function MembersAdmin() {
                     ? 'Envoi…'
                     : '↺ Renvoyer l\u2019email de bienvenue court'}
                 </button>
+                {detail.welcomeShortSentAt && (
+                  <p className="text-[11px] text-white/40 leading-snug">
+                    Dernier envoi : {fmtDateTime(detail.welcomeShortSentAt)}
+                  </p>
+                )}
 
                 <button
                   onClick={() => {
@@ -546,6 +595,11 @@ export default function MembersAdmin() {
                 >
                   ✍️ Écrire un email personnalisé
                 </button>
+                {detail.lastCustomEmailAt && (
+                  <p className="text-[11px] text-white/40 leading-snug">
+                    Dernier email perso : {fmtDateTime(detail.lastCustomEmailAt)}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -576,6 +630,17 @@ export default function MembersAdmin() {
               </div>
 
               <div className="px-5 py-4 space-y-4 overflow-y-auto">
+                {/* Email history hint */}
+                {(detail.welcomeFullSentAt || detail.infoPackSentAt || detail.welcomeShortSentAt || detail.lastCustomEmailAt) && (
+                  <div className="rounded-xl border border-white/8 bg-white/3 px-3 py-2.5 text-[11px] text-white/55 leading-relaxed">
+                    <p className="font-bold uppercase tracking-wider text-white/40 mb-1">Historique emails</p>
+                    {detail.welcomeFullSentAt && <p>• Bienvenue complet · {fmtDateTime(detail.welcomeFullSentAt)}</p>}
+                    {detail.infoPackSentAt && <p>• Kit d'infos · {fmtDateTime(detail.infoPackSentAt)}</p>}
+                    {detail.welcomeShortSentAt && <p>• Bienvenue court · {fmtDateTime(detail.welcomeShortSentAt)}</p>}
+                    {detail.lastCustomEmailAt && <p>• Dernier email perso · {fmtDateTime(detail.lastCustomEmailAt)}</p>}
+                  </div>
+                )}
+
                 <div>
                   <label className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-1.5 block">
                     Sujet
@@ -589,14 +654,30 @@ export default function MembersAdmin() {
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-white/50 mb-1.5 block">
-                    Message
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-white/50">
+                      Message
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomMessage((prev) => {
+                          const trimmed = prev.trim();
+                          return trimmed
+                            ? `${trimmed}\n\n${LUG_BRIEF_TEMPLATE}`
+                            : LUG_BRIEF_TEMPLATE;
+                        });
+                      }}
+                      className="text-[11px] font-semibold text-accent/80 hover:text-accent rounded-lg px-2 py-1 hover:bg-white/5 transition-colors"
+                    >
+                      📎 Insérer un brief sur LUG
+                    </button>
+                  </div>
                   <textarea
                     value={customMessage}
                     onChange={(e) => setCustomMessage(e.target.value)}
-                    rows={8}
-                    placeholder="Écris ton message ici. Une ligne vide entre 2 paragraphes pour les séparer."
+                    rows={10}
+                    placeholder="Écris ton message ici. Une ligne vide entre 2 paragraphes pour les séparer.&#10;&#10;Astuce : clique sur « Insérer un brief sur LUG » pour ajouter automatiquement un rappel sur l'association, la cotisation et les bénéfices membres — tu peux ensuite l'éditer."
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 focus:border-accent/40 focus:outline-none leading-relaxed resize-y"
                   />
                   <p className="mt-1.5 text-[11px] text-white/40">
