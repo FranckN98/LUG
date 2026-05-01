@@ -8,9 +8,16 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { title, body, coverImage, author, category, published } = await req.json();
+  const { title, body, coverImage, author, category, published, publishedAt } = await req.json();
   if (!title || !body) {
     return NextResponse.json({ error: 'Titre et contenu requis.' }, { status: 400 });
+  }
+  let publishedAtDate: Date | null = null;
+  if (publishedAt) {
+    const d = new Date(publishedAt);
+    if (!Number.isNaN(d.getTime())) publishedAtDate = d;
+  } else if (published) {
+    publishedAtDate = new Date();
   }
   const post = await prisma.blogPost.create({
     data: {
@@ -20,6 +27,7 @@ export async function POST(req: NextRequest) {
       author,
       category,
       published: published ?? false,
+      publishedAt: publishedAtDate,
     },
   });
   return NextResponse.json(post, { status: 201 });

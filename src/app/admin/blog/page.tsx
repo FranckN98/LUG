@@ -30,7 +30,11 @@ export default async function AdminBlogPage() {
         </Link>
       </div>
 
-      <BlogPostList posts={posts.map((p) => ({ ...p, createdAt: p.createdAt.toISOString() }))} />
+      <BlogPostList posts={posts.map((p) => ({
+        ...p,
+        createdAt: p.createdAt.toISOString(),
+        publishedAt: p.publishedAt ? p.publishedAt.toISOString() : null,
+      }))} />
     </div>
   );
 }

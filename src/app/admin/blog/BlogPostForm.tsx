@@ -15,6 +15,7 @@ export type BlogPostFormValues = {
   category: string;
   coverImage: string;
   published: boolean;
+  publishedAt: string; // local datetime string for <input type="datetime-local"> (or '')
 };
 
 type Mode = 'new' | 'edit';
@@ -32,9 +33,17 @@ const DEFAULT_VALUES: BlogPostFormValues = {
   category: '',
   coverImage: '',
   published: false,
+  publishedAt: '',
 };
 
 const DRAFT_KEY = 'admin-blog-draft-new';
+
+// Convert a Date to the value format expected by <input type="datetime-local">
+// (YYYY-MM-DDTHH:mm in the user's local timezone).
+function toLocalDatetimeInput(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export default function BlogPostForm({ mode, postId, initial }: Props) {
   const router = useRouter();
@@ -76,7 +85,8 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
     const a = form;
     const b = initialRef.current;
     return a.title !== b.title || a.body !== b.body || a.author !== b.author
-      || a.category !== b.category || a.coverImage !== b.coverImage || a.published !== b.published;
+      || a.category !== b.category || a.coverImage !== b.coverImage || a.published !== b.published
+      || a.publishedAt !== b.publishedAt;
   }, [form]);
 
   useEffect(() => {
@@ -183,10 +193,15 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
 
     const url = mode === 'new' ? '/api/admin/blog' : `/api/admin/blog/${postId}`;
     const method = mode === 'new' ? 'POST' : 'PATCH';
+    const payload = {
+      ...form,
+      // Convert local datetime → ISO; empty string means "no override"
+      publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : null,
+    };
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
     setSaving(false);
     if (res.ok) {
@@ -401,7 +416,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
         </div>
 
         {/* ── Publish toggle ── */}
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 sm:px-5">
+        <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 sm:px-5 space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-white">
@@ -421,6 +436,55 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
             >
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${form.published ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
+          </div>
+
+          {/* Publish date */}
+          <div className="border-t border-white/8 pt-4">
+            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+              Date de publication
+            </label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input
+                type="datetime-local"
+                value={form.publishedAt}
+                onChange={(e) => update('publishedAt', e.target.value)}
+                className="flex-1 rounded-xl bg-white/[0.06] border border-white/10 text-white px-4 py-3 text-sm focus:outline-none focus:border-accent/40 focus:bg-white/[0.09] transition [color-scheme:dark]"
+              />
+              <button
+                type="button"
+                onClick={() => update('publishedAt', toLocalDatetimeInput(new Date()))}
+                className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-semibold text-white/70 hover:bg-white/[0.08] hover:text-white transition"
+              >
+                Maintenant
+              </button>
+              {form.publishedAt && (
+                <button
+                  type="button"
+                  onClick={() => update('publishedAt', '')}
+                  className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-semibold text-white/50 hover:text-white transition"
+                >
+                  Effacer
+                </button>
+              )}
+            </div>
+            {(() => {
+              if (!form.publishedAt) {
+                return (
+                  <p className="mt-2 text-[0.7rem] text-white/40">
+                    Si vide, la date sera automatiquement renseignée à la première publication.
+                  </p>
+                );
+              }
+              const d = new Date(form.publishedAt);
+              const future = d.getTime() > Date.now();
+              return (
+                <p className={`mt-2 text-[0.7rem] ${future ? 'text-amber-300/90' : 'text-white/45'}`}>
+                  {future
+                    ? `⏱ Programmé : sera publié le ${d.toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}.`
+                    : `Date affichée : ${d.toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' })}.`}
+                </p>
+              );
+            })()}
           </div>
         </div>
 

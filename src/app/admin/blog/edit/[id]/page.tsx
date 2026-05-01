@@ -14,11 +14,19 @@ export default function EditBlogPostPage() {
   useEffect(() => {
     fetch('/api/admin/blog')
       .then((r) => r.json())
-      .then((posts: Array<Partial<BlogPostFormValues> & { id: string }>) => {
+      .then((posts: Array<Partial<BlogPostFormValues> & { id: string; publishedAt?: string | null }>) => {
         const post = posts.find((p) => p.id === id);
         if (!post) {
           setNotFound(true);
           return;
+        }
+        let publishedAtLocal = '';
+        if (post.publishedAt) {
+          const d = new Date(post.publishedAt);
+          if (!Number.isNaN(d.getTime())) {
+            const pad = (n: number) => String(n).padStart(2, '0');
+            publishedAtLocal = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          }
         }
         setInitial({
           title: post.title ?? '',
@@ -27,6 +35,7 @@ export default function EditBlogPostPage() {
           category: post.category ?? '',
           coverImage: post.coverImage ?? '',
           published: post.published ?? false,
+          publishedAt: publishedAtLocal,
         });
       })
       .catch(() => setNotFound(true));

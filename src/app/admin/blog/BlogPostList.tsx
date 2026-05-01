@@ -11,6 +11,7 @@ type Post = {
   category: string | null;
   published: boolean;
   createdAt: string;
+  publishedAt: string | null;
 };
 
 export default function BlogPostList({ posts }: { posts: Post[] }) {
@@ -69,9 +70,19 @@ export default function BlogPostList({ posts }: { posts: Post[] }) {
                   {post.category}
                 </span>
               )}
+              {post.published && post.publishedAt && new Date(post.publishedAt).getTime() > Date.now() && (
+                <span className="text-[0.6rem] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-amber-500/10 border-amber-500/25 text-amber-300">
+                  Programmé
+                </span>
+              )}
             </div>
             <p className="font-semibold text-white text-sm leading-snug mb-1 truncate">{post.title}</p>
-            <p className="text-xs text-white/35">{post.author} · {new Date(post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+            <p className="text-xs text-white/35">
+              {post.author} · {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {post.publishedAt && new Date(post.publishedAt).getTime() > Date.now() && (
+                <> · {new Date(post.publishedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</>
+              )}
+            </p>
           </div>
           </div>
 

@@ -83,9 +83,16 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
 
   let posts: Awaited<ReturnType<typeof prisma.blogPost.findMany>> = [];
   try {
+    const now = new Date();
     posts = await prisma.blogPost.findMany({
-      where: { published: true },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        published: true,
+        OR: [
+          { publishedAt: null },
+          { publishedAt: { lte: now } },
+        ],
+      },
+      orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
     });
   } catch {
     // blogPost model not yet available — show coming soon
@@ -185,7 +192,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                         <p className="text-sm text-gray-500 leading-relaxed flex-1 line-clamp-3">{excerpt}</p>
                         <div className="mt-4 flex items-center justify-between">
                           <p className="text-xs text-gray-400">
-                            {post.author} · {new Date(post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {post.author} · {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
                           <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                             {t.readMore} →

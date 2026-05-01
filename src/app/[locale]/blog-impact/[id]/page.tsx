@@ -20,6 +20,8 @@ export default async function ArticlePage({
 
   const post = await prisma.blogPost.findUnique({ where: { id } });
   if (!post || !post.published) notFound();
+  // Hide scheduled future posts from the public
+  if (post.publishedAt && post.publishedAt.getTime() > Date.now()) notFound();
 
   const paragraphs = post.body.split('\n').filter(Boolean);
   const coverImageSrc = getBlogCoverImageSrc(post.coverImage);
@@ -50,7 +52,7 @@ export default async function ArticlePage({
             {post.title}
           </h1>
           <p className="mt-4 text-sm text-white/50">
-            {post.author} · {new Date(post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+            {post.author} · {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
       </section>
