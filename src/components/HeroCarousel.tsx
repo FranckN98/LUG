@@ -284,7 +284,7 @@ export default function HeroCarousel({
       />
 
       {/* ── Text content — bottom-left, cinematic anchoring ── */}
-      <div className="absolute inset-0 z-10 flex items-end pb-40 sm:pb-32 md:pb-36 px-5 sm:px-10 md:px-16 lg:px-20">
+      <div className="absolute inset-0 z-10 flex items-end pb-32 sm:pb-32 md:pb-36 px-5 sm:px-10 md:px-16 lg:px-20">
         <div className="max-w-3xl w-full">
           {tagline && (
             <div className="animate-hero-tagline flex items-center gap-3 mb-3 sm:mb-5">
