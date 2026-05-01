@@ -68,6 +68,19 @@ export default async function ArticlePage({
 
           <div className="prose prose-gray max-w-none">
             {paragraphs.map((p, i) => {
+              const img = p.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+              if (img) {
+                // eslint-disable-next-line @next/next/no-img-element
+                return (
+                  <img
+                    key={i}
+                    src={img[2]}
+                    alt={img[1]}
+                    className="my-6 w-full rounded-xl border border-gray-200"
+                    loading="lazy"
+                  />
+                );
+              }
               if (p.startsWith('**') && p.endsWith('**')) {
                 return <h3 key={i} className="text-lg font-bold text-brand-dark mt-8 mb-3">{p.replace(/\*\*/g, '')}</h3>;
               }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MediaPicker } from '@/app/admin/components/MediaPicker';
+import { InlineImageInserter, type InlineImageInserterHandle } from './InlineImageInserter';
 
 const CATEGORIES = ['Événements', 'Carrière', 'Études', 'Entrepreneuriat', 'Intégration', 'Impact'];
 
@@ -45,6 +46,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
   const [draftRestored, setDraftRestored] = useState(false);
   const initialRef = useRef<BlogPostFormValues>(initial ?? DEFAULT_VALUES);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const imageInserterRef = useRef<InlineImageInserterHandle | null>(null);
 
   // ── Draft auto-save (new only) ──
   useEffect(() => {
@@ -143,6 +145,29 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
       ta2.setSelectionRange(pos, pos);
     });
   }, []);
+
+  // Insert a markdown-style image at the cursor (or replace selection)
+  const insertImageMarkdown = useCallback((url: string, alt: string) => {
+    const ta = textareaRef.current;
+    const safeAlt = (alt || 'image').replace(/[\[\]]/g, '');
+    const snippet = `\n![${safeAlt}](${url})\n`;
+    if (!ta) {
+      update('body', form.body + snippet);
+      return;
+    }
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const value = ta.value;
+    const next = value.slice(0, start) + snippet + value.slice(end);
+    update('body', next);
+    requestAnimationFrame(() => {
+      const ta2 = textareaRef.current;
+      if (!ta2) return;
+      ta2.focus();
+      const pos = start + snippet.length;
+      ta2.setSelectionRange(pos, pos);
+    });
+  }, [form.body]);
 
   // ── Submit ──
   const handleSubmit = useCallback(async (e?: React.FormEvent) => {
@@ -348,6 +373,11 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
                 <ToolbarBtn label="I" title="Italique (*texte*)" italic onClick={() => applyFormat('italic')} />
                 <ToolbarBtn label="• Liste" title="Liste à puces (- élément)" onClick={() => applyFormat('list')} />
                 <ToolbarBtn label="¶" title="Nouveau paragraphe" onClick={() => applyFormat('paragraph')} />
+                <ToolbarBtn
+                  label="🖼 Image"
+                  title="Insérer une image (upload ou médiathèque)"
+                  onClick={() => imageInserterRef.current?.open()}
+                />
                 <span className="ml-auto text-[0.65rem] text-white/30 px-1">
                   {stats.words} mots · ~{stats.minutes} min
                 </span>
@@ -362,7 +392,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
                 className="w-full rounded-b-xl bg-white/[0.06] border border-white/10 text-white placeholder-white/25 px-4 py-3 text-sm leading-relaxed font-mono focus:outline-none focus:border-accent/40 focus:bg-white/[0.09] transition resize-y"
               />
               <p className="mt-1.5 text-[0.65rem] text-white/30">
-                Mise en forme : <code className="text-white/50">**Titre**</code> = sous-titre · <code className="text-white/50">- élément</code> = liste · ligne vide = nouveau paragraphe
+                Mise en forme : <code className="text-white/50">**Titre**</code> = sous-titre · <code className="text-white/50">- élément</code> = liste · <code className="text-white/50">![alt](url)</code> = image · ligne vide = nouveau paragraphe
               </p>
             </>
           ) : (
@@ -407,6 +437,9 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
         {/* spacer for sticky bar */}
         <div className="h-2" />
       </form>
+
+      {/* Inline image inserter (modal: upload from computer or pick from library) */}
+      <InlineImageInserter ref={imageInserterRef} onInsert={insertImageMarkdown} />
 
       {/* ── Sticky save bar ── */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-[#0a0606]/95 backdrop-blur supports-[backdrop-filter]:bg-[#0a0606]/80">
@@ -471,6 +504,11 @@ function BlogPreview({ body, title }: { body: string; title: string }) {
       )}
       <div className="prose prose-sm max-w-none">
         {paragraphs.map((p, i) => {
+          const img = p.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+          if (img) {
+            // eslint-disable-next-line @next/next/no-img-element
+            return <img key={i} src={img[2]} alt={img[1]} className="my-4 w-full rounded-lg border border-gray-200" />;
+          }
           if (p.startsWith('**') && p.endsWith('**')) {
             return <h3 key={i} className="text-base font-bold text-[#1a0a0a] mt-6 mb-2">{p.replace(/\*\*/g, '')}</h3>;
           }
