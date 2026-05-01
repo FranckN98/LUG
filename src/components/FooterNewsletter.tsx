@@ -15,7 +15,9 @@ const COPY = {
     invalid: 'Adresse e-mail invalide.',
     error: "Une erreur est survenue. Réessayez plus tard.",
     rate: 'Trop de tentatives. Réessayez plus tard.',
-    consent: "J'accepte de recevoir la newsletter.",
+    consentPrefix: "J'ai lu et j'accepte la ",
+    consentLink: 'politique de confidentialité',
+    consentSuffix: ' concernant le traitement de mes données personnelles.',
   },
   en: {
     title: 'Newsletter',
@@ -26,7 +28,9 @@ const COPY = {
     invalid: 'Invalid email address.',
     error: 'Something went wrong. Please try again later.',
     rate: 'Too many attempts. Try again later.',
-    consent: 'I agree to receive the newsletter.',
+    consentPrefix: 'I have read and accept the ',
+    consentLink: 'privacy policy',
+    consentSuffix: ' regarding the processing of my personal data.',
   },
   de: {
     title: 'Newsletter',
@@ -37,7 +41,9 @@ const COPY = {
     invalid: 'Ungültige E-Mail-Adresse.',
     error: 'Ein Fehler ist aufgetreten. Bitte später erneut versuchen.',
     rate: 'Zu viele Versuche. Bitte später erneut versuchen.',
-    consent: 'Ich stimme dem Erhalt des Newsletters zu.',
+    consentPrefix: 'Ich habe die ',
+    consentLink: 'Datenschutzerklärung',
+    consentSuffix: ' gelesen und stimme der Verarbeitung meiner personenbezogenen Daten zu.',
   },
 } as const;
 
@@ -45,12 +51,14 @@ export function FooterNewsletter({ locale }: { locale: Locale }) {
   const t = COPY[locale];
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState(''); // honeypot
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>('idle');
   const [message, setMessage] = useState('');
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (status === 'loading') return;
+    if (!consent) return;
     setStatus('loading');
     setMessage('');
 
@@ -58,7 +66,7 @@ export function FooterNewsletter({ locale }: { locale: Locale }) {
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, consent: true, website, locale }),
+        body: JSON.stringify({ email, consent, website, locale }),
       });
       const data = await res.json().catch(() => ({}));
 
@@ -109,13 +117,34 @@ export function FooterNewsletter({ locale }: { locale: Locale }) {
           />
           <button
             type="submit"
-            disabled={status === 'loading'}
+            disabled={status === 'loading' || !consent}
             className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-accent px-4 py-2 text-xs font-semibold text-brand-dark transition hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-60"
           >
             {status === 'loading' ? '…' : t.button}
           </button>
         </div>
-        <p className="text-[0.65rem] text-white/35 leading-snug">{t.consent}</p>
+        <label className="flex items-start gap-2 text-[0.65rem] leading-snug text-white/55">
+          <input
+            type="checkbox"
+            required
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-white/30 bg-white/5 text-accent focus:ring-accent focus:ring-offset-0"
+            aria-required="true"
+          />
+          <span>
+            {t.consentPrefix}
+            <a
+              href={`/${locale}/privacy`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent underline underline-offset-2 hover:text-accent-light"
+            >
+              {t.consentLink}
+            </a>
+            {t.consentSuffix}
+          </span>
+        </label>
         {message && (
           <p
             role="status"

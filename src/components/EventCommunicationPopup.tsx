@@ -35,6 +35,9 @@ const copy = {
     requiredEmail: 'Veuillez entrer une adresse email valide.',
     genericError: 'Impossible de vous inscrire pour le moment.',
     previewNote: 'Aperçu admin',
+    consentPrefix: "J'ai lu et j'accepte la ",
+    consentLink: 'politique de confidentialité',
+    consentSuffix: ' concernant le traitement de mes données personnelles.',
   },
   en: {
     eyebrow: 'Upcoming events',
@@ -45,6 +48,9 @@ const copy = {
     requiredEmail: 'Please enter a valid email address.',
     genericError: 'Unable to subscribe right now.',
     previewNote: 'Admin preview',
+    consentPrefix: 'I have read and accept the ',
+    consentLink: 'privacy policy',
+    consentSuffix: ' regarding the processing of my personal data.',
   },
   de: {
     eyebrow: 'Kommende Events',
@@ -55,6 +61,9 @@ const copy = {
     requiredEmail: 'Bitte eine gültige E-Mail-Adresse eingeben.',
     genericError: 'Anmeldung aktuell nicht möglich.',
     previewNote: 'Admin-Vorschau',
+    consentPrefix: 'Ich habe die ',
+    consentLink: 'Datenschutzerklärung',
+    consentSuffix: ' gelesen und stimme der Verarbeitung meiner personenbezogenen Daten zu.',
   },
 } as const;
 
@@ -65,6 +74,7 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +96,7 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
     if (!open) {
       setFirstName('');
       setEmail('');
+      setConsent(false);
       setSubmitting(false);
       setSuccess(false);
       setError(null);
@@ -99,6 +110,9 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
 
     if (!EMAIL_RE.test(email.trim())) {
       setError(t.requiredEmail);
+      return;
+    }
+    if (!consent) {
       return;
     }
 
@@ -229,9 +243,37 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
                   required
                 />
                 {error ? <p className="text-sm text-red-600">{error}</p> : null}
+                <label className={isHeroDisplay
+                  ? 'flex items-start gap-3 text-sm leading-snug text-white/75'
+                  : 'flex items-start gap-3 text-sm leading-snug text-[#0a5b57]/80'}>
+                  <input
+                    type="checkbox"
+                    required
+                    checked={consent}
+                    onChange={(event) => setConsent(event.target.checked)}
+                    aria-required="true"
+                    className={isHeroDisplay
+                      ? 'mt-1 h-4 w-4 shrink-0 rounded border-white/30 bg-white/10 text-accent focus:ring-accent focus:ring-offset-0'
+                      : 'mt-1 h-4 w-4 shrink-0 rounded border-[#d9cec2] bg-white text-[#0a5b57] focus:ring-[#0a5b57] focus:ring-offset-0'}
+                  />
+                  <span>
+                    {t.consentPrefix}
+                    <a
+                      href={`/${locale}/privacy`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={isHeroDisplay
+                        ? 'text-accent underline underline-offset-2 hover:text-accent-light'
+                        : 'text-[#0a5b57] underline underline-offset-2 hover:text-[#084844]'}
+                    >
+                      {t.consentLink}
+                    </a>
+                    {t.consentSuffix}
+                  </span>
+                </label>
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || !consent}
                   className={isHeroDisplay
                     ? 'inline-flex w-full items-center justify-center rounded-2xl bg-accent px-6 py-4 text-lg font-semibold text-brand-dark transition hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-60'
                     : 'inline-flex w-full items-center justify-center rounded-2xl bg-[#0a5b57] px-6 py-4 text-lg font-semibold text-white transition hover:bg-[#084844] disabled:cursor-not-allowed disabled:opacity-60'}

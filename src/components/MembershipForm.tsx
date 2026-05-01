@@ -37,6 +37,8 @@ const LABELS: Record<Locale, {
   motivationPlaceholder: string;
   helpDomains: string;
   consent: string;
+  consentLink: string;
+  consentSuffix: string;
   submit: string;
   submitting: string;
   successTitle: string;
@@ -58,7 +60,9 @@ const LABELS: Record<Locale, {
     motivation: 'Motivation / courte présentation',
     motivationPlaceholder: 'Parlez-nous de vous et de vos motivations à rejoindre l\'association…',
     helpDomains: 'Comment souhaitez-vous aider l\'association ? *',
-    consent: 'J\'ai lu et accepté les conditions de traitement et de sauvegarde de mes données personnelles.',
+    consent: "J'ai lu et j'accepte la ",
+    consentLink: 'politique de confidentialité',
+    consentSuffix: ' concernant le traitement de mes données personnelles.',
     submit: 'Envoyer ma demande',
     submitting: 'Envoi en cours…',
     successTitle: 'Demande envoyée !',
@@ -80,7 +84,9 @@ const LABELS: Record<Locale, {
     motivation: 'Motivation / short presentation',
     motivationPlaceholder: 'Tell us about yourself and your motivation to join the association…',
     helpDomains: 'How would you like to help the association? *',
-    consent: 'I have read and accepted the terms for processing and storing my personal data.',
+    consent: 'I have read and accept the ',
+    consentLink: 'privacy policy',
+    consentSuffix: ' regarding the processing of my personal data.',
     submit: 'Submit my application',
     submitting: 'Submitting…',
     successTitle: 'Application submitted!',
@@ -102,7 +108,9 @@ const LABELS: Record<Locale, {
     motivation: 'Motivation / Kurzvorstellung',
     motivationPlaceholder: 'Erzählen Sie uns von sich und Ihrer Motivation, dem Verein beizutreten…',
     helpDomains: 'Wie möchten Sie den Verein unterstützen? *',
-    consent: 'Ich habe die Bedingungen zur Verarbeitung und Speicherung meiner persönlichen Daten gelesen und akzeptiert.',
+    consent: 'Ich habe die ',
+    consentLink: 'Datenschutzerklärung',
+    consentSuffix: ' gelesen und stimme der Verarbeitung meiner personenbezogenen Daten zu.',
     submit: 'Bewerbung absenden',
     submitting: 'Wird gesendet…',
     successTitle: 'Bewerbung eingereicht!',
@@ -333,6 +341,16 @@ export default function MembershipForm({ locale }: Props) {
         </div>
         <span className="text-sm text-gray-700 leading-relaxed">
           {t.consent}
+          <a
+            href={`/${locale}/privacy`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-[#8c1a1a] underline underline-offset-2 hover:text-[#a52020]"
+          >
+            {t.consentLink}
+          </a>
+          {t.consentSuffix}
         </span>
       </label>
 
