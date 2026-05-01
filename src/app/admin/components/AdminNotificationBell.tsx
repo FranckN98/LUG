@@ -102,7 +102,7 @@ export function AdminNotificationBell() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 active:scale-95"
+        className="admin-icon-btn relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 active:scale-95"
         aria-label="Notifications"
       >
         <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">

@@ -513,3 +513,94 @@ body.paper-texture::after {
   }
 }
 
+
+
+/* -- Admin light theme --------------------------------------------------- */
+/* Toggled via AdminThemeToggle which sets data-admin-theme on <html>.    */
+/* Scope strictly to .admin-shell so only /admin pages are restyled.       */
+
+html[data-admin-theme='light'] .admin-shell {
+  background-color: #f6f5f2 !important;
+  color: #1a1a1a;
+}
+
+/* Sidebar + top bars */
+html[data-admin-theme='light'] .admin-shell .admin-sidebar,
+html[data-admin-theme='light'] .admin-shell .admin-topbar {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Generic dark bgs used across admin pages */
+html[data-admin-theme='light'] .admin-shell [class*='bg-[#0f0606]'],
+html[data-admin-theme='light'] .admin-shell [class*='bg-[#130707]'],
+html[data-admin-theme='light'] .admin-shell [class*='bg-[#1b0c0c]'] {
+  background-color: #ffffff !important;
+}
+
+/* Card surfaces (white/X overlays on dark) become subtle light surfaces */
+html[data-admin-theme='light'] .admin-shell [class*='bg-white/5'],
+html[data-admin-theme='light'] .admin-shell [class*='bg-white/8'],
+html[data-admin-theme='light'] .admin-shell [class*='bg-white/10'] {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+html[data-admin-theme='light'] .admin-shell [class*='hover:bg-white/5']:hover,
+html[data-admin-theme='light'] .admin-shell [class*='hover:bg-white/10']:hover {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+}
+
+/* Borders */
+html[data-admin-theme='light'] .admin-shell [class*='border-white/'] {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Text colors: white/whitish ? near-black, muted variants ? grays */
+html[data-admin-theme='light'] .admin-shell .text-white,
+html[data-admin-theme='light'] .admin-shell [class*='text-white\\/9'] {
+  color: #111827 !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*='text-white\\/8'],
+html[data-admin-theme='light'] .admin-shell [class*='text-white\\/7'] {
+  color: #1f2937 !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*='text-white\\/6'],
+html[data-admin-theme='light'] .admin-shell [class*='text-white\\/5'] {
+  color: #4b5563 !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*='text-white\\/4'],
+html[data-admin-theme='light'] .admin-shell [class*='text-white\\/3'] {
+  color: #6b7280 !important;
+}
+
+/* Icon buttons in toolbar/header keep readable contrast */
+html[data-admin-theme='light'] .admin-shell .admin-icon-btn {
+  color: #374151 !important;
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+html[data-admin-theme='light'] .admin-shell .admin-icon-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Notification dropdown panel */
+html[data-admin-theme='light'] .admin-shell .relative > div[class*='bg-[#1b0c0c]'] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+/* Active nav link */
+html[data-admin-theme='light'] .admin-shell [class*='bg-primary/20'] {
+  background-color: rgba(140, 26, 26, 0.08) !important;
+  color: #8c1a1a !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*='border-primary/30'] {
+  border-color: rgba(140, 26, 26, 0.25) !important;
+}
+
+/* Inputs & textareas */
+html[data-admin-theme='light'] .admin-shell input,
+html[data-admin-theme='light'] .admin-shell textarea,
+html[data-admin-theme='light'] .admin-shell select {
+  color: #111827;
+}

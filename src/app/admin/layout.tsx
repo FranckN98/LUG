@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AdminNotificationBell } from './components/AdminNotificationBell';
+import { AdminThemeToggle } from './components/AdminThemeToggle';
 
 const navItems = [
   {
@@ -122,14 +123,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="min-h-screen bg-[#0f0606] md:flex">
+    <div className="admin-shell min-h-screen bg-[#0f0606] md:flex">
 
       {/* ── Mobile top bar ────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-40 border-b border-white/8 bg-[#130707]/95 backdrop-blur md:hidden">
+      <div className="admin-topbar sticky top-0 z-40 border-b border-white/8 bg-[#130707]/95 backdrop-blur md:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 active:scale-95 transition-all"
+            className="admin-icon-btn inline-flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 active:scale-95 transition-all"
             aria-label="Ouvrir le menu"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,10 +141,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <p className="truncate text-[0.55rem] font-bold uppercase tracking-[0.28em] text-accent/70">Admin</p>
             <p className="truncate text-sm font-bold text-white">{currentItem?.label ?? 'Level Up in Germany'}</p>
           </div>
+          <AdminThemeToggle />
           <AdminNotificationBell />
           <button
             onClick={handleLogout}
-            className="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
+            className="admin-icon-btn inline-flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
             aria-label="Déconnexion"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,17 +223,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* ── Sidebar (desktop) ─────────────────────────────────────────────── */}
-      <aside className="hidden w-60 shrink-0 border-r border-white/8 bg-[#130707] md:flex md:flex-col">
+      <aside className="admin-sidebar hidden w-60 shrink-0 border-r border-white/8 bg-[#130707] md:flex md:flex-col">
 
         {/* Brand */}
         <div className="px-6 py-6 border-b border-white/8">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-accent/70 mb-1">Level Up in Germany</p>
-              <p className="text-base font-bold text-white">Admin</p>
-            </div>
-            <AdminNotificationBell />
-          </div>
+          <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-accent/70 mb-1">Level Up in Germany</p>
+          <p className="text-base font-bold text-white">Admin</p>
         </div>
 
         {/* Nav */}
@@ -273,6 +270,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main */}
       <main className="min-w-0 flex-1 overflow-auto">
+        {/* Desktop top toolbar (theme toggle + notifications, right-aligned) */}
+        <div className="admin-topbar hidden md:flex sticky top-0 z-30 items-center justify-end gap-2 border-b border-white/8 bg-[#130707]/85 px-6 py-3 backdrop-blur">
+          <AdminThemeToggle />
+          <AdminNotificationBell />
+        </div>
         {children}
       </main>
 
