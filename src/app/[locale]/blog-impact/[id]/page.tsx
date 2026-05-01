@@ -28,6 +28,26 @@ export default async function ArticlePage({
   const paragraphs = post.body.split('\n').filter(Boolean);
   const coverImageSrc = getBlogCoverImageSrc(post.coverImage);
 
+  // Render **bold** segments inline. Splits on `**...**` while keeping the matched
+  // groups so we can wrap them in <strong>. Unmatched `**` are left as-is.
+  function renderInline(text: string) {
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+        return <strong key={i} className="font-semibold text-brand-dark">{part.slice(2, -2)}</strong>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  }
+
+  // A line is a heading only if the WHOLE line is wrapped in a single pair of `**`
+  // (no other bold markers inside).
+  function isHeadingLine(p: string) {
+    if (!p.startsWith('**') || !p.endsWith('**') || p.length <= 4) return false;
+    const inner = p.slice(2, -2);
+    return !inner.includes('**');
+  }
+
   return (
     <div className="overflow-hidden">
 
@@ -94,13 +114,13 @@ export default async function ArticlePage({
                   />
                 );
               }
-              if (p.startsWith('**') && p.endsWith('**')) {
-                return <h3 key={i} className="text-lg font-bold text-brand-dark mt-8 mb-3">{p.replace(/\*\*/g, '')}</h3>;
+              if (isHeadingLine(p)) {
+                return <h3 key={i} className="text-lg font-bold text-brand-dark mt-8 mb-3">{p.slice(2, -2)}</h3>;
               }
               if (p.startsWith('- ')) {
-                return <li key={i} className="text-gray-600 leading-relaxed ml-4">{p.slice(2)}</li>;
+                return <li key={i} className="text-gray-600 leading-relaxed ml-4">{renderInline(p.slice(2))}</li>;
               }
-              return <p key={i} className="text-gray-600 leading-relaxed mb-4">{p}</p>;
+              return <p key={i} className="text-gray-600 leading-relaxed mb-4">{renderInline(p)}</p>;
             })}
           </div>
 
