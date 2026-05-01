@@ -25,7 +25,7 @@ function AnimatedHeroTitle({ title }: { title: string }) {
 }
 
 // ── Button color variants (hero dark background context) ──────────────────────
-const BASE_BTN = 'group inline-flex items-center justify-center flex-1 sm:flex-none sm:w-auto h-11 sm:h-14 px-2 sm:px-8 rounded-xl sm:rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-[11px] sm:text-base whitespace-nowrap min-w-0';
+const BASE_BTN = 'group inline-flex items-center justify-center flex-1 sm:flex-none sm:w-auto min-h-11 sm:h-14 py-1.5 sm:py-0 px-2 sm:px-8 rounded-xl sm:rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-[11px] sm:text-base text-center leading-tight min-w-0';
 
 function heroBtnCls(variant: string): string {
   switch (variant) {
@@ -316,7 +316,7 @@ export default function HeroCarousel({
                 const inner = (
                   <span className="inline-flex items-center gap-1.5 sm:gap-2">
                     {emoji && <span className="shrink-0">{emoji}</span>}
-                    <span className="truncate">{primaryButton.label}</span>
+                    <span className="break-words sm:whitespace-nowrap">{primaryButton.label}</span>
                   </span>
                 );
                 return isExternal ? (
@@ -332,7 +332,7 @@ export default function HeroCarousel({
                 const inner = (
                   <span className="inline-flex items-center gap-1.5 sm:gap-2">
                     {emoji && <span className="shrink-0">{emoji}</span>}
-                    <span className="truncate">{btn.label}</span>
+                    <span className="break-words sm:whitespace-nowrap">{btn.label}</span>
                   </span>
                 );
                 return isExternal ? (
