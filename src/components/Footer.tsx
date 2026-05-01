@@ -5,6 +5,7 @@ import { homeContent } from '@/content/home';
 import { SITE_CONTACT, siteContactTelHref } from '@/config/siteContact';
 import { SocialIcons } from '@/components/SocialIcons';
 import { FooterLogo } from '@/components/FooterLogo';
+import { FooterNewsletter } from '@/components/FooterNewsletter';
 import { whoWeAreHref } from '@/lib/whoWeAreRoutes';
 
 const footerLinks: { href: string; de: string; en: string; fr: string }[] = [
@@ -94,20 +95,25 @@ export function Footer({ locale, joinWhatsAppUrl }: { locale: Locale; joinWhatsA
           className="rounded-xl border border-white/[0.07] bg-white/[0.02] px-4 py-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] sm:px-6 sm:py-6"
           aria-label={locale === 'de' ? 'Marke' : locale === 'fr' ? 'Marque' : 'Brand'}
         >
-          <div className="flex max-w-xl flex-col items-start text-left">
-            <FooterLogo homeHref={base} />
-            <span className="sr-only">Level Up in Germany</span>
-            <p className="mt-3 max-w-sm text-xs leading-snug text-white/65">{tagline}</p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-white/40">{followLabel}</p>
-              <SocialIcons compact labels={socialLabels} whatsappHref={joinWhatsAppUrl} className="justify-start" />
+          <div className="grid gap-6 sm:grid-cols-2 sm:items-start">
+            <div className="flex max-w-xl flex-col items-start text-left">
+              <FooterLogo homeHref={base} />
+              <span className="sr-only">Level Up in Germany</span>
+              <p className="mt-3 max-w-sm text-xs leading-snug text-white/65">{tagline}</p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-white/40">{followLabel}</p>
+                <SocialIcons compact labels={socialLabels} whatsappHref={joinWhatsAppUrl} className="justify-start" />
+              </div>
+              <Link
+                href={contactPageHref}
+                className="mt-4 inline-flex w-fit items-center justify-center rounded-full border border-accent/45 bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition hover:border-accent hover:bg-accent hover:text-brand-dark"
+              >
+                {contactCtaLabel}
+              </Link>
             </div>
-            <Link
-              href={contactPageHref}
-              className="mt-4 inline-flex w-fit items-center justify-center rounded-full border border-accent/45 bg-accent/10 px-4 py-2 text-xs font-semibold text-accent transition hover:border-accent hover:bg-accent hover:text-brand-dark"
-            >
-              {contactCtaLabel}
-            </Link>
+            <div className="sm:pl-6 sm:border-l sm:border-white/10">
+              <FooterNewsletter locale={locale} />
+            </div>
           </div>
         </section>
 
