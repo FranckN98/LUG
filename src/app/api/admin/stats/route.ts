@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ensureDefaultStats } from '@/lib/siteStats';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const page = url.searchParams.get('page');
+  await ensureDefaultStats();
   const stats = await prisma.siteStat.findMany({
     where: page ? { page } : undefined,
     orderBy: [{ page: 'asc' }, { displayOrder: 'asc' }, { createdAt: 'asc' }],

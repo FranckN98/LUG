@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import { ensureDefaultStats } from '@/lib/siteStats';
+import StatsAdmin from './components/StatsAdmin';
 
 export default async function AdminDashboard() {
   let totalSubscribers = 0;
@@ -14,6 +16,8 @@ export default async function AdminDashboard() {
   } catch {
     // DB not yet available
   }
+  // Ensure default KPI rows exist so the editor below is never empty.
+  await ensureDefaultStats();
 
   const stats = [
     {
@@ -103,6 +107,11 @@ export default async function AdminDashboard() {
             Page d'accueil (Hero & Boutons)
           </Link>
         </div>
+      </div>
+
+      {/* KPIs editor */}
+      <div className="mt-10">
+        <StatsAdmin />
       </div>
     </div>
   );

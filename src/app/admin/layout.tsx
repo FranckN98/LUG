@@ -42,15 +42,6 @@ const navItems = [
     ),
   },
   {
-    href: '/admin/stats',
-    label: 'KPIs',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 3v18h18M7 14l4-4 4 4 5-5" />
-      </svg>
-    ),
-  },
-  {
     href: '/admin/newsletter',
     label: 'Newsletter',
     icon: (
