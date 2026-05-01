@@ -6,6 +6,7 @@ import { getBlogCoverImageSrc } from '@/lib/blogCoverImage';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { getBlogStats } from '@/lib/siteStats';
+import { formatReadingTime } from '@/lib/readingTime';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/blog-impact');
@@ -194,12 +195,15 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                           {post.title}
                         </h2>
                         <p className="text-sm text-gray-500 leading-relaxed flex-1 line-clamp-3">{excerpt}</p>
-                        <div className="mt-4 flex items-center justify-between">
-                          <p className="text-xs text-gray-400">
+                        <div className="mt-4 flex items-center justify-between gap-3">
+                          <p className="text-xs text-gray-400 truncate">
                             {post.author} · {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
-                          <span className="text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                            {t.readMore} →
+                          <span className="shrink-0 inline-flex items-center gap-1 text-[0.65rem] font-semibold text-gray-500">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {formatReadingTime(post.body, loc)}
                           </span>
                         </div>
                       </div>

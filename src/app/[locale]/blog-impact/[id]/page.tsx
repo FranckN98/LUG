@@ -4,6 +4,7 @@ import type { Locale } from '@/i18n/config';
 import { getBlogCoverImageSrc } from '@/lib/blogCoverImage';
 import { prisma } from '@/lib/prisma';
 import { BlogPostActions } from '@/components/BlogPostActions';
+import { formatReadingTime } from '@/lib/readingTime';
 
 const backLabel: Record<Locale, string> = {
   fr: '← Retour au Blog',
@@ -52,8 +53,17 @@ export default async function ArticlePage({
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white font-display leading-tight max-w-3xl">
             {post.title}
           </h1>
-          <p className="mt-4 text-sm text-white/50">
-            {post.author} · {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+          <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/50">
+            <span>{post.author}</span>
+            <span aria-hidden>·</span>
+            <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <span aria-hidden>·</span>
+            <span className="inline-flex items-center gap-1">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {formatReadingTime(post.body, loc)}
+            </span>
           </p>
         </div>
       </section>
