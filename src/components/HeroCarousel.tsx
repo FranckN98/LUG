@@ -45,20 +45,97 @@ function heroBtnCls(variant: string): string {
   }
 }
 
-// Pick an emoji that matches the button intent based on label/href keywords
-function pickBtnEmoji(label: string, href: string): string | null {
+// Pick a Lucide-style stroked SVG icon that matches the button intent
+function pickBtnIcon(label: string, href: string): React.ReactNode | null {
   const t = `${label} ${href}`.toLowerCase();
-  if (/\b(join|rejoin|adh[ée]r|membre|become|werden|mitglied)\b/.test(t)) return '🤝';
-  if (/whatsapp|chat\.whatsapp/.test(t)) return '💬';
-  if (/(event|attend|participer|teilnehmen|conference|conférence|workshop|atelier)/.test(t)) return '🎟️';
-  if (/(partner|partenaire|sponsor|collaborate|kooperation)/.test(t)) return '🤝';
-  if (/(contact|kontakt|nous écrire|get in touch|reach)/.test(t)) return '✉️';
-  if (/(donate|don|spenden|support|soutien)/.test(t)) return '❤️';
-  if (/(blog|article|read|lire|lesen|news|actualit)/.test(t)) return '📝';
-  if (/(team|équipe|equipe|about|qui sommes|über uns|über)/.test(t)) return '👥';
-  if (/(download|télécharg|telecharg|herunterladen|brochure|pdf|kit)/.test(t)) return '📄';
-  if (/(newsletter|subscribe|abonn)/.test(t)) return '📩';
-  if (/(learn|découvr|decouvr|entdecken|explore|explorer)/.test(t)) return '✨';
+  const baseProps = {
+    width: 18,
+    height: 18,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+  };
+
+  // Group / membership / partners / team
+  if (/\b(join|rejoin|adh[ée]r|membre|become|werden|mitglied|partner|partenaire|sponsor|team|équipe|equipe)\b/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    );
+  }
+  // Calendar / events
+  if (/(event|attend|participer|teilnehmen|conference|conférence|workshop|atelier|agenda|calendar)/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    );
+  }
+  // Chat bubble / WhatsApp
+  if (/whatsapp|chat|message/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+      </svg>
+    );
+  }
+  // Mail / contact / newsletter
+  if (/(contact|kontakt|nous écrire|get in touch|reach|newsletter|subscribe|abonn)/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <polyline points="22,6 12,13 2,6" />
+      </svg>
+    );
+  }
+  // Heart / donate
+  if (/(donate|don|spenden|support|soutien)/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    );
+  }
+  // News / blog / article
+  if (/(blog|article|read|lire|lesen|news|actualit)/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <path d="M4 22h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+        <line x1="18" y1="14" x2="10" y2="14" />
+        <line x1="15" y1="18" x2="10" y2="18" />
+        <rect x="10" y="6" width="8" height="4" />
+      </svg>
+    );
+  }
+  // Download / pdf / brochure
+  if (/(download|téléch|telech|herunterladen|brochure|pdf|kit)/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7,10 12,15 17,10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+    );
+  }
+  // Sparkle / discover
+  if (/(learn|découvr|decouvr|entdecken|explore|explorer|discover)/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <polygon points="12,2 15,9 22,12 15,15 12,22 9,15 2,12 9,9" />
+      </svg>
+    );
+  }
   return null;
 }
 
@@ -224,10 +301,10 @@ export default function HeroCarousel({
               {primaryButton && (() => {
                 const isExternal = /^https?:\/\//i.test(primaryButton.href);
                 const cls = heroBtnCls(primaryButton.colorVariant ?? 'red');
-                const emoji = pickBtnEmoji(primaryButton.label, primaryButton.href);
+                const emoji = pickBtnIcon(primaryButton.label, primaryButton.href);
                 const inner = (
                   <span className="inline-flex items-center gap-2">
-                    {emoji && <span aria-hidden>{emoji}</span>}
+                    {emoji && <span className="shrink-0">{emoji}</span>}
                     <span>{primaryButton.label}</span>
                   </span>
                 );
@@ -240,10 +317,10 @@ export default function HeroCarousel({
               {buttons.map((btn, i) => {
                 const isExternal = /^https?:\/\//i.test(btn.href);
                 const cls = heroBtnCls(btn.colorVariant ?? (i === 0 ? 'white' : 'yellow'));
-                const emoji = pickBtnEmoji(btn.label, btn.href);
+                const emoji = pickBtnIcon(btn.label, btn.href);
                 const inner = (
                   <span className="inline-flex items-center gap-2">
-                    {emoji && <span aria-hidden>{emoji}</span>}
+                    {emoji && <span className="shrink-0">{emoji}</span>}
                     <span>{btn.label}</span>
                   </span>
                 );
