@@ -66,17 +66,19 @@ const content: Record<Locale, {
   },
 };
 
+// Solid, high-contrast pills so they remain readable on top of any cover image.
 const CATEGORY_COLORS: Record<string, string> = {
-  'Événements': 'bg-primary/10 text-primary border-primary/20',
-  'Events':     'bg-primary/10 text-primary border-primary/20',
-  'Carrière':   'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  'Career':     'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  'Impact':     'bg-accent/10 text-accent border-accent/20',
-  'Intégration':'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  'Integration':'bg-purple-500/10 text-purple-400 border-purple-500/20',
-  'Études':     'bg-green-500/10 text-green-400 border-green-500/20',
-  'Entrepreneuriat': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  'Événements':      'bg-primary text-white',
+  'Events':          'bg-primary text-white',
+  'Carrière':        'bg-blue-600 text-white',
+  'Career':          'bg-blue-600 text-white',
+  'Impact':          'bg-accent text-brand-dark',
+  'Intégration':     'bg-purple-600 text-white',
+  'Integration':     'bg-purple-600 text-white',
+  'Études':          'bg-emerald-600 text-white',
+  'Entrepreneuriat': 'bg-orange-500 text-white',
 };
+const CATEGORY_FALLBACK = 'bg-gray-900 text-white';
 
 export default async function BlogImpactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -163,7 +165,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {posts.map((post, i) => {
                 const excerpt = post.body.replace(/\*\*/g, '').slice(0, 160) + '…';
-                const catColor = post.category ? (CATEGORY_COLORS[post.category] ?? 'bg-gray-100 text-gray-500 border-gray-200') : '';
+                const catColor = post.category ? (CATEGORY_COLORS[post.category] ?? CATEGORY_FALLBACK) : '';
                 const coverImageSrc = getBlogCoverImageSrc(post.coverImage);
                 return (
                   <RevealOnScroll key={post.id} delayMs={i * 80}>
@@ -183,7 +185,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                           </div>
                         )}
                         {post.category && (
-                          <span className={`absolute top-3 left-3 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${catColor}`}>
+                          <span className={`absolute top-3 left-3 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md ring-1 ring-black/10 ${catColor}`}>
                             {post.category}
                           </span>
                         )}

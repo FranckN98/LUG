@@ -113,7 +113,7 @@ export default async function ArticlePage({
         </span>
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16 pt-24 sm:pt-28 w-full">
           {post.category && (
-            <span className="inline-block mb-4 text-[0.6rem] font-bold uppercase tracking-[0.3em] px-3 py-1 rounded-full border border-accent/40 text-accent bg-accent/10">
+            <span className="inline-block mb-4 text-[0.6rem] font-bold uppercase tracking-[0.3em] px-3 py-1 rounded-full bg-accent text-brand-dark shadow-md">
               {post.category}
             </span>
           )}
