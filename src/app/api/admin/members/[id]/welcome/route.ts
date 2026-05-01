@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendMemberWelcomeEmail } from '@/lib/memberEmails';
+import { subscribeMemberToNewsletter } from '@/lib/memberNewsletter';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -15,6 +16,12 @@ export async function POST(_req: NextRequest, { params }: Params) {
       where: { id },
       data: { welcomeShortSentAt: new Date() },
     });
+    // Auto-subscribe to newsletter (idempotent)
+    subscribeMemberToNewsletter({
+      email: member.email,
+      firstName: member.firstName,
+      lastName: member.lastName,
+    }).catch(console.error);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[members/welcome] failed:', err);

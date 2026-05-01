@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { ensureDefaultStats } from '@/lib/siteStats';
+import { backfillAcceptedMembersToNewsletter } from '@/lib/memberNewsletter';
 import StatsAdmin from './components/StatsAdmin';
 
 export default async function AdminDashboard() {
@@ -18,6 +19,8 @@ export default async function AdminDashboard() {
   }
   // Ensure default KPI rows exist so the editor below is never empty.
   await ensureDefaultStats();
+  // Idempotently backfill accepted members into the newsletter list.
+  await backfillAcceptedMembersToNewsletter();
 
   const stats = [
     {

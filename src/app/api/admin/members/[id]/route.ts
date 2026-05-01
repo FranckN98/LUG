@@ -4,6 +4,7 @@ import {
   sendMemberWelcomeEmail,
   sendMemberRejectionEmail,
 } from '@/lib/memberEmails';
+import { subscribeMemberToNewsletter } from '@/lib/memberNewsletter';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -29,6 +30,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     });
     // Fire-and-forget welcome email
     sendMemberWelcomeEmail(member.email, member.firstName).catch(console.error);
+    // Auto-subscribe to newsletter
+    subscribeMemberToNewsletter({
+      email: member.email,
+      firstName: member.firstName,
+      lastName: member.lastName,
+    }).catch(console.error);
     return NextResponse.json(updated);
   }
 
