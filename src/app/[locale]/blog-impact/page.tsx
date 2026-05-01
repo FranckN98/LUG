@@ -66,19 +66,19 @@ const content: Record<Locale, {
   },
 };
 
-// Solid, high-contrast pills so they remain readable on top of any cover image.
+// Translucent, high-contrast pills so they remain readable on top of any cover image.
 const CATEGORY_COLORS: Record<string, string> = {
-  'Événements':      'bg-primary text-white',
-  'Events':          'bg-primary text-white',
-  'Carrière':        'bg-blue-600 text-white',
-  'Career':          'bg-blue-600 text-white',
-  'Impact':          'bg-accent text-brand-dark',
-  'Intégration':     'bg-purple-600 text-white',
-  'Integration':     'bg-purple-600 text-white',
-  'Études':          'bg-emerald-600 text-white',
-  'Entrepreneuriat': 'bg-orange-500 text-white',
+  'Événements':      'bg-primary/80 text-white',
+  'Events':          'bg-primary/80 text-white',
+  'Carrière':        'bg-blue-600/80 text-white',
+  'Career':          'bg-blue-600/80 text-white',
+  'Impact':          'bg-accent/85 text-brand-dark',
+  'Intégration':     'bg-purple-600/80 text-white',
+  'Integration':     'bg-purple-600/80 text-white',
+  'Études':          'bg-emerald-600/80 text-white',
+  'Entrepreneuriat': 'bg-orange-500/85 text-white',
 };
-const CATEGORY_FALLBACK = 'bg-gray-900 text-white';
+const CATEGORY_FALLBACK = 'bg-gray-900/75 text-white';
 
 export default async function BlogImpactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -185,7 +185,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                           </div>
                         )}
                         {post.category && (
-                          <span className={`absolute top-3 left-3 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md ring-1 ring-black/10 ${catColor}`}>
+                          <span className={`absolute top-3 left-3 text-[0.6rem] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full backdrop-blur-md shadow-md ring-1 ring-white/15 ${catColor}`}>
                             {post.category}
                           </span>
                         )}
