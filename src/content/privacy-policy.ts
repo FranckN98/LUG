@@ -99,6 +99,11 @@ export const privacyPolicy: Record<Locale, PrivacyDocument> = {
             text:
               'Rechtsgrundlage für nicht unbedingt erforderliche Cookies bzw. Speicherungen ist Ihre Einwilligung gemäß § 25 Abs. 1 TTDSG i. V. m. Art. 6 Abs. 1 lit. a DSGVO, soweit personenbezogene Daten betroffen sind. Sie können Ihre Einwilligung mit Wirkung für die Zukunft widerrufen, indem Sie gespeicherte Website-Daten in Ihrem Browser löschen; technisch notwendige Funktionen können davon ausgenommen sein.',
           },
+          {
+            type: 'p',
+            text:
+              'Reichweitenmessung: Mit Ihrer Einwilligung erfassen wir anonymisierte Nutzungsstatistiken (Seitenaufrufe, Herkunftsquelle, UTM-Parameter, ausgelöste Ereignisse wie Newsletter-Anmeldungen oder Formularabsendungen). Eingesetzte datenschutzfreundliche Werkzeuge können sein: Plausible, Umami oder Matomo (cookielos) sowie optional Google Analytics 4 mit IP-Anonymisierung. Die Skripte werden erst nach Ihrer Einwilligung geladen. Wir speichern keine Inhalte aus Formularen oder Nachrichten.',
+          },
         ],
       },
       {
@@ -241,6 +246,11 @@ export const privacyPolicy: Record<Locale, PrivacyDocument> = {
             text:
               'The legal basis for non-essential cookies or storage is your consent under the ePrivacy rules (in Germany: Section 25(1) TTDSG) in conjunction with Art. 6(1)(a) GDPR where personal data is affected. You may withdraw consent with effect for the future by clearing site data in your browser; strictly necessary functions may be exempt.',
           },
+          {
+            type: 'p',
+            text:
+              'Audience measurement: with your consent we collect anonymised usage statistics (page views, traffic source, UTM parameters, triggered events such as newsletter sign-ups or form submissions). Tools we may use are privacy-friendly: Plausible, Umami or Matomo (cookieless) and optionally Google Analytics 4 with IP anonymisation. Scripts are only loaded after your consent. We never store the content of forms or messages.',
+          },
         ],
       },
       {
@@ -382,6 +392,11 @@ export const privacyPolicy: Record<Locale, PrivacyDocument> = {
             type: 'p',
             text:
               'La base juridique pour les cookies non strictement nécessaires est votre consentement, conformément à la directive ePrivacy et au droit national applicable, conjointement avec l’article 6(1)(a) RGPD lorsque des données personnelles sont concernées. Vous pouvez retirer votre consentement en effaçant les données du site dans votre navigateur.',
+          },
+          {
+            type: 'p',
+            text:
+              'Mesure d’audience : avec votre consentement, nous collectons des statistiques d’usage anonymisées (pages vues, source de trafic, paramètres UTM, événements déclenchés tels que inscriptions newsletter ou envois de formulaires). Les outils utilisés peuvent être privacy-friendly : Plausible, Umami ou Matomo (sans cookies) et optionnellement Google Analytics 4 avec anonymisation IP. Les scripts ne sont chargés qu’après votre consentement. Nous ne stockons jamais le contenu des formulaires ou des messages.',
           },
         ],
       },

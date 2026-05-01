@@ -3,6 +3,7 @@
 import React, { useId, useState } from 'react';
 import type { Locale } from '@/i18n/config';
 import { TurnstileField } from '@/components/TurnstileField';
+import { trackEvent, type AnalyticsEventName } from '@/lib/analytics';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? '';
 
@@ -157,6 +158,18 @@ export function Form({
       setStatus('success');
       setCaptchaToken(null);
       setTurnstileKey((k) => k + 1);
+      // Track successful submission (no PII / message bodies)
+      const eventByType: Record<string, AnalyticsEventName> = {
+        contact: 'contact_form_submit',
+        join: 'member_registration',
+        'workshop-registration': 'contact_form_submit',
+        'mentor-request': 'contact_form_submit',
+        'sponsor-inquiry': 'sponsor_form_submit',
+      };
+      trackEvent(eventByType[formType] ?? 'contact_form_submit', {
+        form_type: formType,
+        language: locale,
+      });
     } catch {
       setDisplayError(errorMessage);
       setStatus('error');

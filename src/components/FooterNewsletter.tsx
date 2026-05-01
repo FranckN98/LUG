@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Locale } from '@/i18n/config';
+import { trackEvent } from '@/lib/analytics';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
@@ -81,6 +82,7 @@ export function FooterNewsletter({ locale }: { locale: Locale }) {
       setStatus('success');
       setMessage(t.success);
       setEmail('');
+      trackEvent('newsletter_signup', { source: 'footer', language: locale });
     } catch {
       setStatus('error');
       setMessage(t.error);

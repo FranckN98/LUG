@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { trackEvent } from '@/lib/analytics';
 
 type Locale = 'de' | 'en' | 'fr';
 
@@ -143,6 +144,7 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
       }
 
       setSuccess(true);
+      trackEvent('event_popup_email_submit', { source: 'event_popup', language: locale });
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : t.genericError);
     } finally {

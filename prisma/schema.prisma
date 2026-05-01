@@ -227,6 +227,32 @@ model BlogInteraction {
   @@map("blog_interactions")
 }
 
+model AnalyticsEvent {
+  id           String   @id @default(uuid())
+  name         String // 'page_view' | 'newsletter_signup' | 'contact_form_submit' | etc.
+  page         String? // pathname, e.g. '/fr/event-2026'
+  locale       String?
+  referrer     String?
+  utmSource    String?  @map("utm_source")
+  utmMedium    String?  @map("utm_medium")
+  utmCampaign  String?  @map("utm_campaign")
+  utmTerm      String?  @map("utm_term")
+  utmContent   String?  @map("utm_content")
+  source       String? // 'tiktok' | 'instagram' | 'whatsapp' | 'linkedin' | 'google' | 'direct' | 'newsletter' | …
+  visitorHash  String?  @map("visitor_hash")
+  sessionId    String?  @map("session_id")
+  country      String?
+  device       String? // 'mobile' | 'tablet' | 'desktop'
+  properties   String? // JSON string with event-specific extras
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([name, createdAt])
+  @@index([page, createdAt])
+  @@index([utmSource, utmCampaign])
+  @@index([source, createdAt])
+  @@map("analytics_events")
+}
+
 model SiteStat {
   id           String   @id @default(uuid())
   page         String // 'home' | 'blog'

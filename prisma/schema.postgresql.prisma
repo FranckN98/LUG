@@ -65,6 +65,32 @@ model BlogInteraction {
   @@map("blog_interactions")
 }
 
+model AnalyticsEvent {
+  id           String   @id @default(uuid())
+  name         String
+  page         String?
+  locale       String?
+  referrer     String?
+  utmSource    String?  @map("utm_source")
+  utmMedium    String?  @map("utm_medium")
+  utmCampaign  String?  @map("utm_campaign")
+  utmTerm      String?  @map("utm_term")
+  utmContent   String?  @map("utm_content")
+  source       String?
+  visitorHash  String?  @map("visitor_hash")
+  sessionId    String?  @map("session_id")
+  country      String?
+  device       String?
+  properties   String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([name, createdAt])
+  @@index([page, createdAt])
+  @@index([utmSource, utmCampaign])
+  @@index([source, createdAt])
+  @@map("analytics_events")
+}
+
 model SiteStat {
   id           String   @id @default(uuid())
   page         String

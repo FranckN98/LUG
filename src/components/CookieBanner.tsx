@@ -49,11 +49,13 @@ export function CookieBanner({ locale }: Props) {
 
   const accept = () => {
     localStorage.setItem('lug_cookie_consent', 'accepted');
+    window.dispatchEvent(new Event('lug:consent-changed'));
     setVisible(false);
   };
 
   const decline = () => {
     localStorage.setItem('lug_cookie_consent', 'declined');
+    window.dispatchEvent(new Event('lug:consent-changed'));
     setVisible(false);
   };
 
