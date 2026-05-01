@@ -45,6 +45,23 @@ function heroBtnCls(variant: string): string {
   }
 }
 
+// Pick an emoji that matches the button intent based on label/href keywords
+function pickBtnEmoji(label: string, href: string): string | null {
+  const t = `${label} ${href}`.toLowerCase();
+  if (/\b(join|rejoin|adh[ée]r|membre|become|werden|mitglied)\b/.test(t)) return '🤝';
+  if (/whatsapp|chat\.whatsapp/.test(t)) return '💬';
+  if (/(event|attend|participer|teilnehmen|conference|conférence|workshop|atelier)/.test(t)) return '🎟️';
+  if (/(partner|partenaire|sponsor|collaborate|kooperation)/.test(t)) return '🤝';
+  if (/(contact|kontakt|nous écrire|get in touch|reach)/.test(t)) return '✉️';
+  if (/(donate|don|spenden|support|soutien)/.test(t)) return '❤️';
+  if (/(blog|article|read|lire|lesen|news|actualit)/.test(t)) return '📝';
+  if (/(team|équipe|equipe|about|qui sommes|über uns|über)/.test(t)) return '👥';
+  if (/(download|télécharg|telecharg|herunterladen|brochure|pdf|kit)/.test(t)) return '📄';
+  if (/(newsletter|subscribe|abonn)/.test(t)) return '📩';
+  if (/(learn|découvr|decouvr|entdecken|explore|explorer)/.test(t)) return '✨';
+  return null;
+}
+
 export default function HeroCarousel({
   title,
   tagline,
@@ -207,7 +224,13 @@ export default function HeroCarousel({
               {primaryButton && (() => {
                 const isExternal = /^https?:\/\//i.test(primaryButton.href);
                 const cls = heroBtnCls(primaryButton.colorVariant ?? 'red');
-                const inner = <>{primaryButton.label}</>;
+                const emoji = pickBtnEmoji(primaryButton.label, primaryButton.href);
+                const inner = (
+                  <span className="inline-flex items-center gap-2">
+                    {emoji && <span aria-hidden>{emoji}</span>}
+                    <span>{primaryButton.label}</span>
+                  </span>
+                );
                 return isExternal ? (
                   <a key="p" href={primaryButton.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
                 ) : (
@@ -217,13 +240,20 @@ export default function HeroCarousel({
               {buttons.map((btn, i) => {
                 const isExternal = /^https?:\/\//i.test(btn.href);
                 const cls = heroBtnCls(btn.colorVariant ?? (i === 0 ? 'white' : 'yellow'));
+                const emoji = pickBtnEmoji(btn.label, btn.href);
+                const inner = (
+                  <span className="inline-flex items-center gap-2">
+                    {emoji && <span aria-hidden>{emoji}</span>}
+                    <span>{btn.label}</span>
+                  </span>
+                );
                 return isExternal ? (
                   <a key={i} href={btn.href} target={btn.openInNewTab ? '_blank' : undefined} rel="noopener noreferrer" className={cls}>
-                    {btn.label}
+                    {inner}
                   </a>
                 ) : (
                   <Link key={i} href={btn.href} className={cls}>
-                    {btn.label}
+                    {inner}
                   </Link>
                 );
               })}
