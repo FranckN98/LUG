@@ -637,3 +637,91 @@ html[data-admin-theme='light'] .admin-shell [class*="bg-[#130707]/"] {
   background-color: rgba(255, 255, 255, 0.92) !important;
 }
 
+/* Buttons & status pills: deepen tinted text/bg for readability on white */
+
+/* Solid primary / accent CTAs keep white text */
+html[data-admin-theme='light'] .admin-shell button[class*="bg-primary"]:not([class*="bg-primary/"]),
+html[data-admin-theme='light'] .admin-shell a[class*="bg-primary"]:not([class*="bg-primary/"]),
+html[data-admin-theme='light'] .admin-shell button[class*="bg-accent"]:not([class*="bg-accent/"]),
+html[data-admin-theme='light'] .admin-shell a[class*="bg-accent"]:not([class*="bg-accent/"]) {
+  color: #ffffff !important;
+}
+
+/* Tinted bg-{color}-500/10..30 surfaces — deepen so they're visible on white */
+html[data-admin-theme='light'] .admin-shell [class*="bg-emerald-500/"] {
+  background-color: rgba(16, 185, 129, 0.14) !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="bg-green-500/"] {
+  background-color: rgba(34, 197, 94, 0.14) !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="bg-red-500/"] {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="bg-rose-500/"] {
+  background-color: rgba(244, 63, 94, 0.14) !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="bg-amber-500/"],
+html[data-admin-theme='light'] .admin-shell [class*="bg-yellow-500/"] {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="bg-blue-500/"] {
+  background-color: rgba(59, 130, 246, 0.14) !important;
+}
+
+/* Tinted text variants — use 600/700 shades for proper contrast on white */
+html[data-admin-theme='light'] .admin-shell [class*="text-emerald-4"],
+html[data-admin-theme='light'] .admin-shell [class*="text-emerald-3"] {
+  color: #047857 !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="text-green-4"],
+html[data-admin-theme='light'] .admin-shell [class*="text-green-3"] {
+  color: #15803d !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="text-red-4"],
+html[data-admin-theme='light'] .admin-shell [class*="text-red-3"] {
+  color: #b91c1c !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="text-rose-4"],
+html[data-admin-theme='light'] .admin-shell [class*="text-rose-3"] {
+  color: #be123c !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="text-amber-4"],
+html[data-admin-theme='light'] .admin-shell [class*="text-amber-3"],
+html[data-admin-theme='light'] .admin-shell [class*="text-yellow-4"],
+html[data-admin-theme='light'] .admin-shell [class*="text-yellow-3"] {
+  color: #b45309 !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="text-blue-4"],
+html[data-admin-theme='light'] .admin-shell [class*="text-blue-3"] {
+  color: #1d4ed8 !important;
+}
+
+/* Tinted borders */
+html[data-admin-theme='light'] .admin-shell [class*="border-emerald-500/"] { border-color: rgba(16, 185, 129, 0.4) !important; }
+html[data-admin-theme='light'] .admin-shell [class*="border-green-500/"]   { border-color: rgba(34, 197, 94, 0.4) !important; }
+html[data-admin-theme='light'] .admin-shell [class*="border-red-500/"]     { border-color: rgba(239, 68, 68, 0.4) !important; }
+html[data-admin-theme='light'] .admin-shell [class*="border-rose-500/"]    { border-color: rgba(244, 63, 94, 0.4) !important; }
+html[data-admin-theme='light'] .admin-shell [class*="border-amber-500/"],
+html[data-admin-theme='light'] .admin-shell [class*="border-yellow-500/"]  { border-color: rgba(245, 158, 11, 0.4) !important; }
+html[data-admin-theme='light'] .admin-shell [class*="border-blue-500/"]    { border-color: rgba(59, 130, 246, 0.4) !important; }
+
+/* Generic action buttons (non-icon, non-tinted) — ensure dark text & visible bg */
+html[data-admin-theme='light'] .admin-shell button:not(.admin-icon-btn):not([class*="bg-primary"]):not([class*="bg-accent"]):not([class*="bg-rose-5"]):not([class*="bg-emerald-5"]):not([class*="bg-red-5"]):not([class*="bg-amber-5"]):not([class*="bg-yellow-5"]):not([class*="bg-green-5"]):not([class*="bg-blue-5"]) {
+  color: inherit;
+}
+
+/* Specifically the "Tout marquer lu" / "Marquer lu" small buttons in dropdown */
+html[data-admin-theme='light'] .admin-shell [class*="bg-[#1b0c0c]"] button {
+  color: #1f2937 !important;
+}
+html[data-admin-theme='light'] .admin-shell [class*="bg-[#1b0c0c]"] button:hover {
+  color: #0f172a !important;
+}
+
+/* Logout / sidebar nav text override (active link white-on-primary becomes dark-on-tint) */
+html[data-admin-theme='light'] .admin-shell .admin-sidebar nav a[class*="bg-primary/"],
+html[data-admin-theme='light'] .admin-shell .admin-sidebar nav a[class*="bg-primary/"] * {
+  color: #8c1a1a !important;
+}
+
+
