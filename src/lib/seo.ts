@@ -4,6 +4,9 @@ import { locales } from '@/i18n/config';
 import { getGoogleSiteVerification, getSiteUrl, SITE_NAME } from '@/config/site';
 import { getSeoForPath } from '@/content/seo-metadata';
 
+/** Default Open Graph image used when a page does not provide one. 1200x630 PNG. */
+export const DEFAULT_OG_IMAGE_PATH = '/hero/hero-1.png';
+
 export async function generateMetadataForPath(
   params: Promise<{ locale: string }>,
   pathSuffix: string,
@@ -26,17 +29,33 @@ function absoluteUrl(path: string): string {
   return `${base}${p}`;
 }
 
+/** Resolve a path or URL into an absolute URL suitable for OG/Twitter image tags. */
+export function resolveOgImageUrl(image: string | null | undefined): string {
+  if (!image) return absoluteUrl(DEFAULT_OG_IMAGE_PATH);
+  if (/^https?:\/\//i.test(image)) return image;
+  return absoluteUrl(image);
+}
+
 /**
  * M\u00e9tadonn\u00e9es par page : titre, description, URL canonique, hreflang, Open Graph, Twitter.
  */
 export function buildPageMetadata(
   locale: Locale,
   pathSuffix: string,
-  seo: { title: string; description: string; keywords?: string[]; noindex?: boolean },
+  seo: {
+    title: string;
+    description: string;
+    keywords?: string[];
+    noindex?: boolean;
+    image?: string | null;
+    imageAlt?: string;
+  },
 ): Metadata {
   const suffix = pathSuffix === '' ? '' : pathSuffix.startsWith('/') ? pathSuffix : `/${pathSuffix}`;
   const canonicalPath = `/${locale}${suffix}`;
   const url = absoluteUrl(canonicalPath);
+  const imageUrl = resolveOgImageUrl(seo.image);
+  const imageAlt = seo.imageAlt ?? seo.title;
 
   const languageAlternates: Record<string, string> = {
     'x-default': absoluteUrl(`/en${suffix}`),
@@ -61,11 +80,20 @@ export function buildPageMetadata(
       description: seo.description,
       locale: OG_LOCALE[locale],
       alternateLocale: locales.filter((l) => l !== locale).map((l) => OG_LOCALE[l]),
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: imageAlt,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: seo.title,
       description: seo.description,
+      images: [imageUrl],
     },
     robots: seo.noindex
       ? { index: false, follow: true, googleBot: { index: false, follow: true } }
@@ -79,6 +107,7 @@ export function buildPageMetadata(
 export function buildLocaleLayoutMetadata(locale: Locale): Metadata {
   const verification = getGoogleSiteVerification();
   const defaults = SEO_DEFAULT_LAYOUT[locale];
+  const defaultImage = absoluteUrl(DEFAULT_OG_IMAGE_PATH);
   const base: Metadata = {
     metadataBase: new URL(getSiteUrl()),
     title: {
@@ -99,10 +128,19 @@ export function buildLocaleLayoutMetadata(locale: Locale): Metadata {
       type: 'website',
       siteName: SITE_NAME,
       locale: OG_LOCALE[locale],
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: SITE_NAME,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: SITE_NAME,
+      images: [defaultImage],
     },
     robots: {
       index: true,

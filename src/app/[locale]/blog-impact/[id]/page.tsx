@@ -1,16 +1,55 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import type { Locale } from '@/i18n/config';
 import { getBlogCoverImageSrc } from '@/lib/blogCoverImage';
 import { prisma } from '@/lib/prisma';
 import { BlogPostActions } from '@/components/BlogPostActions';
 import { formatReadingTime } from '@/lib/readingTime';
+import { buildPageMetadata } from '@/lib/seo';
 
 const backLabel: Record<Locale, string> = {
   fr: '← Retour au Blog',
   en: '← Back to Blog',
   de: '← Zurück zum Blog',
 };
+
+function buildExcerpt(body: string, max = 180): string {
+  const stripped = body
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[*_`#>~-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (stripped.length <= max) return stripped;
+  return stripped.slice(0, max).replace(/\s+\S*$/, '') + '…';
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale, id } = await params;
+  const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
+
+  const post = await prisma.blogPost.findUnique({ where: { id } }).catch(() => null);
+  if (!post || !post.published) {
+    return buildPageMetadata(loc, `/blog-impact/${id}`, {
+      title: 'Article',
+      description: '',
+      noindex: true,
+    });
+  }
+
+  const cover = getBlogCoverImageSrc(post.coverImage);
+  return buildPageMetadata(loc, `/blog-impact/${id}`, {
+    title: post.title,
+    description: buildExcerpt(post.body),
+    image: cover ?? undefined,
+    imageAlt: post.title,
+  });
+}
 
 export default async function ArticlePage({
   params,
