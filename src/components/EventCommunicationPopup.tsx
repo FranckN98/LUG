@@ -155,8 +155,8 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
   return (
     <div
       className={isHeroDisplay
-        ? 'fixed inset-x-0 top-[5.8rem] z-[90] flex justify-center px-4'
-        : 'fixed inset-0 z-[120] flex items-center justify-center bg-[#100706]/55 px-4 py-6 backdrop-blur-sm'}
+        ? 'fixed inset-x-0 top-[4.5rem] bottom-0 z-[90] flex justify-center overflow-y-auto px-3 pb-4 pt-2 sm:top-[5.8rem] sm:px-4'
+        : 'fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto bg-[#100706]/55 px-3 py-4 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6'}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
@@ -166,71 +166,71 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
       <div
         ref={dialogRef}
         className={isHeroDisplay
-          ? 'relative w-full max-w-5xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#120909] via-[#22110f] to-[#2a1412] shadow-[0_26px_70px_rgba(0,0,0,0.45)] ring-1 ring-accent/20 animate-[fadeIn_.28s_ease]'
-          : 'relative w-full max-w-5xl overflow-hidden rounded-[2rem] bg-[#f6f1ea] shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 ring-black/5 animate-[fadeIn_.28s_ease]'}
+          ? 'relative my-auto w-full max-w-5xl overflow-hidden rounded-2xl bg-gradient-to-br from-[#120909] via-[#22110f] to-[#2a1412] shadow-[0_26px_70px_rgba(0,0,0,0.45)] ring-1 ring-accent/20 animate-[fadeIn_.28s_ease] sm:rounded-[2rem]'
+          : 'relative w-full max-w-5xl overflow-hidden rounded-2xl bg-[#f6f1ea] shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 ring-black/5 animate-[fadeIn_.28s_ease] sm:rounded-[2rem]'}
       >
         <button
           type="button"
           onClick={onClose}
           className={isHeroDisplay
-            ? 'absolute right-5 top-5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-md backdrop-blur transition hover:bg-white/20'
-            : 'absolute right-5 top-5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white/90 text-[#0a5b57] shadow-md transition hover:bg-white'}
+            ? 'absolute right-3 top-3 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white shadow-md backdrop-blur transition hover:bg-white/20 sm:right-5 sm:top-5 sm:h-11 sm:w-11 sm:bg-white/10'
+            : 'absolute right-3 top-3 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/95 text-[#0a5b57] shadow-md transition hover:bg-white sm:right-5 sm:top-5 sm:h-11 sm:w-11'}
           aria-label="Close"
         >
           <span className="text-2xl leading-none">×</span>
         </button>
 
         <div className="grid md:grid-cols-[0.95fr_1.05fr]">
-          <div className="relative min-h-[250px] bg-[#083a35]">
+          <div className="relative h-32 bg-[#083a35] sm:h-48 md:h-auto md:min-h-[250px]">
             {data.imageUrl ? (
               <img src={data.imageUrl} alt={data.eventTitle ?? ''} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full min-h-[260px] items-end bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.24),transparent_40%),linear-gradient(135deg,#06352f,#0d5c55_55%,#ab1a10)] p-8">
+              <div className="flex h-full items-end bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.24),transparent_40%),linear-gradient(135deg,#06352f,#0d5c55_55%,#ab1a10)] p-5 sm:p-8">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.34em] text-white/60">Level Up</p>
-                  <p className="mt-3 max-w-xs text-3xl font-semibold leading-tight text-white">{data.eventTitle ?? 'Upcoming event'}</p>
-                  {data.eventYear ? <p className="mt-2 text-white/70">{data.eventYear}</p> : null}
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/60 sm:text-xs sm:tracking-[0.34em]">Level Up</p>
+                  <p className="mt-2 max-w-xs text-xl font-semibold leading-tight text-white sm:mt-3 sm:text-3xl">{data.eventTitle ?? 'Upcoming event'}</p>
+                  {data.eventYear ? <p className="mt-1 text-sm text-white/70 sm:mt-2 sm:text-base">{data.eventYear}</p> : null}
                 </div>
               </div>
             )}
             {previewMode ? (
-              <span className="absolute left-5 top-5 rounded-full bg-black/35 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/85">
+              <span className="absolute left-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/85 sm:left-5 sm:top-5 sm:px-3 sm:text-[11px] sm:tracking-[0.24em]">
                 {t.previewNote}
               </span>
             ) : null}
           </div>
 
-          <div className={isHeroDisplay ? 'flex flex-col justify-center px-6 py-8 text-white sm:px-10 sm:py-10' : 'flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-10'}>
+          <div className={isHeroDisplay ? 'flex flex-col justify-center px-5 py-6 text-white sm:px-10 sm:py-10' : 'flex flex-col justify-center px-5 py-6 sm:px-10 sm:py-10'}>
             <span className={isHeroDisplay
-              ? 'inline-flex w-fit rounded-full bg-accent/90 px-5 py-2 text-xs font-bold uppercase tracking-[0.24em] text-brand-dark'
-              : 'inline-flex w-fit rounded-full bg-[#0a5b57] px-5 py-2 text-xs font-bold uppercase tracking-[0.24em] text-white/85'}>
+              ? 'inline-flex w-fit rounded-full bg-accent/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-dark sm:px-5 sm:py-2 sm:text-xs sm:tracking-[0.24em]'
+              : 'inline-flex w-fit rounded-full bg-[#0a5b57] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white/85 sm:px-5 sm:py-2 sm:text-xs sm:tracking-[0.24em]'}>
               {t.eyebrow}
             </span>
             <h3 className={isHeroDisplay
-              ? 'mt-6 max-w-xl text-4xl font-semibold leading-[1.08] text-white sm:text-5xl'
-              : 'mt-6 max-w-xl text-4xl font-semibold leading-[1.08] text-[#2f231c] sm:text-5xl'}>
+              ? 'mt-4 max-w-xl text-2xl font-semibold leading-[1.12] text-white sm:mt-6 sm:text-4xl sm:leading-[1.08] md:text-5xl'
+              : 'mt-4 max-w-xl text-2xl font-semibold leading-[1.12] text-[#2f231c] sm:mt-6 sm:text-4xl sm:leading-[1.08] md:text-5xl'}>
               {data.title}
             </h3>
             <p className={isHeroDisplay
-              ? 'mt-5 max-w-lg text-lg leading-relaxed text-white/75'
-              : 'mt-5 max-w-lg text-lg leading-relaxed text-[#0a5b57]/78'}>
+              ? 'mt-3 max-w-lg text-sm leading-relaxed text-white/75 sm:mt-5 sm:text-lg'
+              : 'mt-3 max-w-lg text-sm leading-relaxed text-[#0a5b57]/78 sm:mt-5 sm:text-lg'}>
               {data.description}
             </p>
 
             {success ? (
-              <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-relaxed text-emerald-800">
+              <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-relaxed text-emerald-800 sm:mt-8 sm:px-5 sm:py-4">
                 {t.success}
               </div>
             ) : (
-              <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+              <form className="mt-5 space-y-3 sm:mt-8 sm:space-y-4" onSubmit={handleSubmit}>
                 <input
                   type="text"
                   value={firstName}
                   onChange={(event) => setFirstName(event.target.value)}
                   placeholder={t.firstName}
                   className={isHeroDisplay
-                    ? 'w-full rounded-2xl border border-white/20 bg-white/10 px-5 py-4 text-base text-white placeholder-white/55 outline-none transition focus:border-accent/70 focus:ring-4 focus:ring-accent/15'
-                    : 'w-full rounded-2xl border border-[#d9cec2] bg-white px-5 py-4 text-base text-[#2f231c] outline-none transition focus:border-[#0a5b57] focus:ring-4 focus:ring-[#0a5b57]/10'}
+                    ? 'w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/55 outline-none transition focus:border-accent/70 focus:ring-4 focus:ring-accent/15 sm:rounded-2xl sm:px-5 sm:py-4'
+                    : 'w-full rounded-xl border border-[#d9cec2] bg-white px-4 py-3 text-base text-[#2f231c] outline-none transition focus:border-[#0a5b57] focus:ring-4 focus:ring-[#0a5b57]/10 sm:rounded-2xl sm:px-5 sm:py-4'}
                 />
                 <input
                   type="email"
@@ -238,14 +238,14 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder={t.email}
                   className={isHeroDisplay
-                    ? 'w-full rounded-2xl border border-white/20 bg-white/10 px-5 py-4 text-base text-white placeholder-white/55 outline-none transition focus:border-accent/70 focus:ring-4 focus:ring-accent/15'
-                    : 'w-full rounded-2xl border border-[#d9cec2] bg-white px-5 py-4 text-base text-[#2f231c] outline-none transition focus:border-[#0a5b57] focus:ring-4 focus:ring-[#0a5b57]/10'}
+                    ? 'w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/55 outline-none transition focus:border-accent/70 focus:ring-4 focus:ring-accent/15 sm:rounded-2xl sm:px-5 sm:py-4'
+                    : 'w-full rounded-xl border border-[#d9cec2] bg-white px-4 py-3 text-base text-[#2f231c] outline-none transition focus:border-[#0a5b57] focus:ring-4 focus:ring-[#0a5b57]/10 sm:rounded-2xl sm:px-5 sm:py-4'}
                   required
                 />
                 {error ? <p className="text-sm text-red-600">{error}</p> : null}
                 <label className={isHeroDisplay
-                  ? 'flex items-start gap-3 text-sm leading-snug text-white/75'
-                  : 'flex items-start gap-3 text-sm leading-snug text-[#0a5b57]/80'}>
+                  ? 'flex items-start gap-2 text-xs leading-snug text-white/75 sm:gap-3 sm:text-sm'
+                  : 'flex items-start gap-2 text-xs leading-snug text-[#0a5b57]/80 sm:gap-3 sm:text-sm'}>
                   <input
                     type="checkbox"
                     required
@@ -275,8 +275,8 @@ export function EventCommunicationPopup({ locale, data, open, previewMode = fals
                   type="submit"
                   disabled={submitting || !consent}
                   className={isHeroDisplay
-                    ? 'inline-flex w-full items-center justify-center rounded-2xl bg-accent px-6 py-4 text-lg font-semibold text-brand-dark transition hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-60'
-                    : 'inline-flex w-full items-center justify-center rounded-2xl bg-[#0a5b57] px-6 py-4 text-lg font-semibold text-white transition hover:bg-[#084844] disabled:cursor-not-allowed disabled:opacity-60'}
+                    ? 'inline-flex w-full items-center justify-center rounded-xl bg-accent px-5 py-3 text-base font-semibold text-brand-dark transition hover:bg-accent-light disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-2xl sm:px-6 sm:py-4 sm:text-lg'
+                    : 'inline-flex w-full items-center justify-center rounded-xl bg-[#0a5b57] px-5 py-3 text-base font-semibold text-white transition hover:bg-[#084844] disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-2xl sm:px-6 sm:py-4 sm:text-lg'}
                 >
                   {submitting ? t.submitting : data.buttonText}
                 </button>
