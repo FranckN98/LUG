@@ -60,8 +60,19 @@ function pickBtnIcon(label: string, href: string): React.ReactNode | null {
     'aria-hidden': true,
   };
 
-  // Group / membership / partners / team
-  if (/\b(join|rejoin|adh[ée]r|membre|become|werden|mitglied|partner|partenaire|sponsor|team|équipe|equipe)\b/.test(t)) {
+  // Partners / sponsors — handshake
+  if (/(partner|partenaire|sponsor|collaborate|kooperation)/.test(t)) {
+    return (
+      <svg {...baseProps}>
+        <path d="M11 17l2 2a1 1 0 0 0 1.41 0L20 13.41a2 2 0 0 0 0-2.83L17.42 8" />
+        <path d="M22 12l-2 2-3.5-3.5L14 13l-3.5-3.5L7 13l-2-2L9 7c1.66-1.66 4.34-1.66 6 0l2 2c1.66 1.66 1.66 4.34 0 6z" />
+        <path d="M3 11l4 4" />
+        <path d="M2 14l3 3" />
+      </svg>
+    );
+  }
+  // Group / membership / team — silhouettes
+  if (/\b(join|rejoin|adh[ée]r|membre|become|werden|mitglied|team|équipe|equipe|community|communaut)\b/.test(t)) {
     return (
       <svg {...baseProps}>
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
