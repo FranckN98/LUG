@@ -187,6 +187,12 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                             {post.category}
                           </span>
                         )}
+                        <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/55 backdrop-blur-md border border-white/15 px-2.5 py-1 text-[0.6rem] font-semibold text-white">
+                          <svg className="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {formatReadingTime(post.body, loc)}
+                        </span>
                       </div>
 
                       {/* Body */}
@@ -199,11 +205,8 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                           <p className="text-xs text-gray-400 truncate">
                             {post.author} · {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
-                          <span className="shrink-0 inline-flex items-center gap-1 text-[0.65rem] font-semibold text-gray-500">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {formatReadingTime(post.body, loc)}
+                          <span className="shrink-0 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                            {t.readMore} →
                           </span>
                         </div>
                       </div>

@@ -64,6 +64,14 @@ export default async function ArticlePage({
             <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_20%_30%,rgba(233,140,11,0.22),transparent_50%)]" />
           </>
         )}
+
+        {/* Reading time badge over cover */}
+        <span className="absolute top-24 sm:top-28 right-4 sm:right-6 z-20 inline-flex items-center gap-1.5 rounded-full bg-black/55 backdrop-blur-md border border-white/15 px-3 py-1.5 text-xs font-semibold text-white shadow-lg">
+          <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {formatReadingTime(post.body, loc)}
+        </span>
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16 pt-24 sm:pt-28 w-full">
           {post.category && (
             <span className="inline-block mb-4 text-[0.6rem] font-bold uppercase tracking-[0.3em] px-3 py-1 rounded-full border border-accent/40 text-accent bg-accent/10">
@@ -77,13 +85,6 @@ export default async function ArticlePage({
             <span>{post.author}</span>
             <span aria-hidden>·</span>
             <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-            <span aria-hidden>·</span>
-            <span className="inline-flex items-center gap-1">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {formatReadingTime(post.body, loc)}
-            </span>
           </p>
         </div>
       </section>
