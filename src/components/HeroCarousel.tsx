@@ -80,7 +80,7 @@ export default function HeroCarousel({
 
   return (
     <section
-      className="relative w-full min-h-[90svh] sm:min-h-[88vh] md:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
+      className="relative w-full min-h-[95svh] sm:min-h-[88vh] md:min-h-screen overflow-hidden -mt-16 sm:-mt-20 md:-mt-[5.5rem]"
       aria-label="Hero carousel"
     >
       {/* ── Images: zoom + fade + slide transition ── */}
