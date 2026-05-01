@@ -278,7 +278,6 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
                 <PremiumSurfaceCard
                   title={prog.title}
                   description={prog.desc}
-                  href={programHref(base, prog.hrefKey)}
                 />
               </RevealOnScroll>
             ))}
