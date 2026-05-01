@@ -264,8 +264,19 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
 
       {/* Programs */}
       <section className="relative py-20 sm:py-28 bg-white overflow-hidden">
+        {/* subtle grid pattern */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(to_right,rgba(15,23,42,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.045)_1px,transparent_1px)] [background-size:42px_42px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
+        />
         {/* soft ambient backdrop */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(140,26,26,0.05),transparent_55%),radial-gradient(circle_at_85%_80%,rgba(245,184,46,0.06),transparent_55%)]" />
+        {/* floating orbs */}
+        <div aria-hidden className="pointer-events-none absolute top-1/4 -left-24 h-72 w-72 rounded-full bg-primary/[0.04] blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-1/4 -right-24 h-80 w-80 rounded-full bg-accent/[0.05] blur-3xl" />
+        {/* top & bottom hairline gradients */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-accent/25 to-transparent" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
             <SectionHeading
