@@ -301,7 +301,7 @@ export default function HeroCarousel({
             </h1>
           )}
           {subtitle && (
-            <p className="animate-hero-subtitle text-sm sm:text-lg md:text-xl text-white/85 mb-6 sm:mb-10 max-w-xl leading-relaxed line-clamp-2 sm:line-clamp-none"
+            <p className="animate-hero-subtitle text-sm sm:text-lg md:text-xl text-white/85 mb-6 sm:mb-10 max-w-xl leading-relaxed"
                style={{ textShadow: '0 1px 12px rgba(0,0,0,0.35)' }}>
               {subtitle}
             </p>
