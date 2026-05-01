@@ -516,91 +516,124 @@ body.paper-texture::after {
 
 
 /* -- Admin light theme --------------------------------------------------- */
-/* Toggled via AdminThemeToggle which sets data-admin-theme on <html>.    */
-/* Scope strictly to .admin-shell so only /admin pages are restyled.       */
+/* Toggled via AdminThemeToggle which sets data-admin-theme on <html>.     */
+/* Scope strictly to .admin-shell so only /admin pages are restyled.        */
 
 html[data-admin-theme='light'] .admin-shell {
-  background-color: #f6f5f2 !important;
-  color: #1a1a1a;
+  background-color: #f4f5f7 !important;
+  color: #0f172a;
 }
 
-/* Sidebar + top bars */
+/* Sidebar + top bars + dark surfaces */
 html[data-admin-theme='light'] .admin-shell .admin-sidebar,
-html[data-admin-theme='light'] .admin-shell .admin-topbar {
+html[data-admin-theme='light'] .admin-shell .admin-topbar,
+html[data-admin-theme='light'] .admin-shell [class*="bg-[#0f0606]"],
+html[data-admin-theme='light'] .admin-shell [class*="bg-[#130707]"],
+html[data-admin-theme='light'] .admin-shell [class*="bg-[#1b0c0c]"],
+html[data-admin-theme='light'] .admin-shell [class*="bg-black"] {
   background-color: #ffffff !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
 }
 
-/* Generic dark bgs used across admin pages */
-html[data-admin-theme='light'] .admin-shell [class*='bg-[#0f0606]'],
-html[data-admin-theme='light'] .admin-shell [class*='bg-[#130707]'],
-html[data-admin-theme='light'] .admin-shell [class*='bg-[#1b0c0c]'] {
-  background-color: #ffffff !important;
+/* Card surfaces: white-on-dark overlays become subtle light surfaces */
+html[data-admin-theme='light'] .admin-shell [class*="bg-white/"] {
+  background-color: rgba(15, 23, 42, 0.04) !important;
 }
-
-/* Card surfaces (white/X overlays on dark) become subtle light surfaces */
-html[data-admin-theme='light'] .admin-shell [class*='bg-white/5'],
-html[data-admin-theme='light'] .admin-shell [class*='bg-white/8'],
-html[data-admin-theme='light'] .admin-shell [class*='bg-white/10'] {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-}
-
-html[data-admin-theme='light'] .admin-shell [class*='hover:bg-white/5']:hover,
-html[data-admin-theme='light'] .admin-shell [class*='hover:bg-white/10']:hover {
-  background-color: rgba(0, 0, 0, 0.07) !important;
+html[data-admin-theme='light'] .admin-shell [class*="hover:bg-white/"]:hover {
+  background-color: rgba(15, 23, 42, 0.08) !important;
 }
 
 /* Borders */
-html[data-admin-theme='light'] .admin-shell [class*='border-white/'] {
-  border-color: rgba(0, 0, 0, 0.1) !important;
+html[data-admin-theme='light'] .admin-shell [class*="border-white/"],
+html[data-admin-theme='light'] .admin-shell [class*="ring-white/"],
+html[data-admin-theme='light'] .admin-shell [class*="divide-white/"] > * {
+  border-color: rgba(15, 23, 42, 0.12) !important;
 }
 
-/* Text colors: white/whitish ? near-black, muted variants ? grays */
+/* Text — pure white & high-opacity white become near-black; muted whites become grays */
 html[data-admin-theme='light'] .admin-shell .text-white,
-html[data-admin-theme='light'] .admin-shell [class*='text-white\\/9'] {
-  color: #111827 !important;
+html[data-admin-theme='light'] .admin-shell [class*="text-white/9"],
+html[data-admin-theme='light'] .admin-shell [class*="text-white/8"] {
+  color: #0f172a !important;
 }
-html[data-admin-theme='light'] .admin-shell [class*='text-white\\/8'],
-html[data-admin-theme='light'] .admin-shell [class*='text-white\\/7'] {
-  color: #1f2937 !important;
+html[data-admin-theme='light'] .admin-shell [class*="text-white/7"],
+html[data-admin-theme='light'] .admin-shell [class*="text-white/6"] {
+  color: #334155 !important;
 }
-html[data-admin-theme='light'] .admin-shell [class*='text-white\\/6'],
-html[data-admin-theme='light'] .admin-shell [class*='text-white\\/5'] {
-  color: #4b5563 !important;
+html[data-admin-theme='light'] .admin-shell [class*="text-white/5"],
+html[data-admin-theme='light'] .admin-shell [class*="text-white/4"] {
+  color: #475569 !important;
 }
-html[data-admin-theme='light'] .admin-shell [class*='text-white\\/4'],
-html[data-admin-theme='light'] .admin-shell [class*='text-white\\/3'] {
-  color: #6b7280 !important;
+html[data-admin-theme='light'] .admin-shell [class*="text-white/3"],
+html[data-admin-theme='light'] .admin-shell [class*="text-white/2"] {
+  color: #64748b !important;
 }
 
-/* Icon buttons in toolbar/header keep readable contrast */
+/* Hover text variants */
+html[data-admin-theme='light'] .admin-shell [class*="hover:text-white"]:hover {
+  color: #0f172a !important;
+}
+
+/* Accent colour stays warm on light bg */
+html[data-admin-theme='light'] .admin-shell [class*="text-accent"] {
+  color: #b96808 !important;
+}
+
+/* Icon buttons (bell, theme, hamburger, logout) */
 html[data-admin-theme='light'] .admin-shell .admin-icon-btn {
-  color: #374151 !important;
-  background-color: rgba(0, 0, 0, 0.04) !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: #1f2937 !important;
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 html[data-admin-theme='light'] .admin-shell .admin-icon-btn:hover {
-  background-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
 /* Notification dropdown panel */
-html[data-admin-theme='light'] .admin-shell .relative > div[class*='bg-[#1b0c0c]'] {
+html[data-admin-theme='light'] .admin-shell [class*="bg-[#1b0c0c]"] {
   background-color: #ffffff !important;
-  color: #111827 !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.06) !important;
 }
 
-/* Active nav link */
-html[data-admin-theme='light'] .admin-shell [class*='bg-primary/20'] {
-  background-color: rgba(140, 26, 26, 0.08) !important;
+/* Active nav link (primary tinted) */
+html[data-admin-theme='light'] .admin-shell [class*="bg-primary/2"],
+html[data-admin-theme='light'] .admin-shell [class*="bg-primary/1"] {
+  background-color: rgba(140, 26, 26, 0.1) !important;
   color: #8c1a1a !important;
 }
-html[data-admin-theme='light'] .admin-shell [class*='border-primary/30'] {
-  border-color: rgba(140, 26, 26, 0.25) !important;
+html[data-admin-theme='light'] .admin-shell [class*="border-primary/"] {
+  border-color: rgba(140, 26, 26, 0.3) !important;
 }
 
-/* Inputs & textareas */
+/* Active nav link text override (the layout uses text-white when active) */
+html[data-admin-theme='light'] .admin-shell a[class*="bg-primary/2"],
+html[data-admin-theme='light'] .admin-shell a[class*="bg-primary/2"] .text-white {
+  color: #8c1a1a !important;
+}
+
+/* Inputs / textareas / selects */
 html[data-admin-theme='light'] .admin-shell input,
 html[data-admin-theme='light'] .admin-shell textarea,
 html[data-admin-theme='light'] .admin-shell select {
-  color: #111827;
+  color: #0f172a;
+  background-color: #ffffff;
+  border-color: rgba(15, 23, 42, 0.15);
 }
+html[data-admin-theme='light'] .admin-shell input::placeholder,
+html[data-admin-theme='light'] .admin-shell textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Mobile drawer panel */
+html[data-admin-theme='light'] .admin-shell aside[class*="bg-[#130707]"] {
+  background-color: #ffffff !important;
+}
+
+/* Backdrop blur surfaces with /85 /95 opacity */
+html[data-admin-theme='light'] .admin-shell [class*="bg-[#130707]/"] {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
