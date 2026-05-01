@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { AdminNotificationBell } from './components/AdminNotificationBell';
 
 const navItems = [
   {
@@ -139,6 +140,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <p className="truncate text-[0.55rem] font-bold uppercase tracking-[0.28em] text-accent/70">Admin</p>
             <p className="truncate text-sm font-bold text-white">{currentItem?.label ?? 'Level Up in Germany'}</p>
           </div>
+          <AdminNotificationBell />
           <button
             onClick={handleLogout}
             className="inline-flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 active:scale-95 transition-all"
@@ -223,8 +225,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Brand */}
         <div className="px-6 py-6 border-b border-white/8">
-          <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-accent/70 mb-1">Level Up in Germany</p>
-          <p className="text-base font-bold text-white">Admin</p>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-accent/70 mb-1">Level Up in Germany</p>
+              <p className="text-base font-bold text-white">Admin</p>
+            </div>
+            <AdminNotificationBell />
+          </div>
         </div>
 
         {/* Nav */}

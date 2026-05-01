@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { getBlogCoverImageSrc } from '@/lib/blogCoverImage';
 import { prisma } from '@/lib/prisma';
+import { BlogPostActions } from '@/components/BlogPostActions';
 
 const backLabel: Record<Locale, string> = {
   fr: '← Retour au Blog',
@@ -92,6 +93,14 @@ export default async function ArticlePage({
               return <p key={i} className="text-gray-600 leading-relaxed mb-4">{p}</p>;
             })}
           </div>
+
+          <BlogPostActions
+            postId={post.id}
+            postTitle={post.title}
+            initialLikes={post.likes}
+            initialShares={post.shares}
+            locale={loc}
+          />
 
           <div className="mt-12 pt-8 border-t border-gray-100">
             <Link

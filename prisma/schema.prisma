@@ -203,10 +203,28 @@ model BlogPost {
   category    String?
   published   Boolean   @default(false)
   publishedAt DateTime? @map("published_at")
+  likes       Int       @default(0)
+  shares      Int       @default(0)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
+  interactions BlogInteraction[]
 
   @@map("blog_posts")
+}
+
+model BlogInteraction {
+  id           String   @id @default(uuid())
+  blogPostId   String   @map("blog_post_id")
+  type         String // 'like' | 'share'
+  createdAt    DateTime @default(now()) @map("created_at")
+  seenByAdmin  Boolean  @default(false) @map("seen_by_admin")
+  visitorHash  String?  @map("visitor_hash")
+  shareChannel String?  @map("share_channel") // 'native' | 'copy' | 'twitter' | 'facebook' | 'linkedin' | 'whatsapp' | 'email'
+  blogPost     BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+
+  @@index([blogPostId, type])
+  @@index([seenByAdmin, createdAt])
+  @@map("blog_interactions")
 }
 
 model SiteStat {
