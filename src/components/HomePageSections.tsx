@@ -263,8 +263,10 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
       </section>
 
       {/* Programs */}
-      <section className="py-20 sm:py-28 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <section className="relative py-20 sm:py-28 bg-white overflow-hidden">
+        {/* soft ambient backdrop */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(140,26,26,0.05),transparent_55%),radial-gradient(circle_at_85%_80%,rgba(245,184,46,0.06),transparent_55%)]" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
             <SectionHeading
               eyebrow={t.programsEyebrow}
@@ -275,10 +277,22 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {t.programs.map((prog, i) => (
               <RevealOnScroll key={prog.title} delayMs={(i % 3) * 70} className="h-full">
-                <PremiumSurfaceCard
-                  title={prog.title}
-                  description={prog.desc}
-                />
+                <div className="group relative flex flex-col h-full rounded-2xl border border-gray-100/70 bg-white p-7 sm:p-8 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_48px_-12px_rgba(140,26,26,0.18)] hover:-translate-y-1.5 hover:border-primary/20 transition-all duration-500 overflow-hidden">
+                  {/* gradient accent bar (top) */}
+                  <span className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  {/* corner glow */}
+                  <span className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-gradient-to-br from-accent/20 to-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  {/* watermark index */}
+                  <span className="pointer-events-none absolute top-4 right-5 font-display text-5xl font-bold leading-none text-gray-100 group-hover:text-primary/10 transition-colors duration-500 select-none">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  {/* accent line */}
+                  <span className="block h-[2px] w-8 rounded-full bg-gradient-to-r from-primary to-accent group-hover:w-14 transition-all duration-500" />
+                  <h3 className="mt-4 text-lg font-semibold text-brand-dark group-hover:text-primary transition-colors duration-300">
+                    {prog.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600 leading-relaxed flex-1">{prog.desc}</p>
+                </div>
               </RevealOnScroll>
             ))}
           </div>
