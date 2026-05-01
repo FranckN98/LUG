@@ -30,7 +30,7 @@ export default async function ArticlePage({
 
   // Render **bold** segments inline. Splits on `**...**` while keeping the matched
   // groups so we can wrap them in <strong>. Unmatched `**` are left as-is.
-  function renderInline(text: string) {
+  const renderInline = (text: string) => {
     const parts = text.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((part, i) => {
       if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
@@ -38,15 +38,15 @@ export default async function ArticlePage({
       }
       return <span key={i}>{part}</span>;
     });
-  }
+  };
 
   // A line is a heading only if the WHOLE line is wrapped in a single pair of `**`
   // (no other bold markers inside).
-  function isHeadingLine(p: string) {
+  const isHeadingLine = (p: string) => {
     if (!p.startsWith('**') || !p.endsWith('**') || p.length <= 4) return false;
     const inner = p.slice(2, -2);
     return !inner.includes('**');
-  }
+  };
 
   return (
     <div className="overflow-hidden">

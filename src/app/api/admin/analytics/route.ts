@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
       rows.map((r) => r.visitorHash).filter((v): v is string => Boolean(v)),
     ).size;
 
-    function tally(items: Array<string | null | undefined>) {
+    const tally = (items: Array<string | null | undefined>) => {
       const map = new Map<string, number>();
       for (const it of items) {
         if (!it) continue;
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
       return Array.from(map.entries())
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10);
-    }
+    };
 
     const topPages = tally(rows.filter((r) => r.name === 'page_view').map((r) => r.page)).map(
       ([page, views]) => ({ page, views }),
