@@ -5,6 +5,7 @@ import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { getBlogCoverImageSrc } from '@/lib/blogCoverImage';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
+import { getBlogStats } from '@/lib/siteStats';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/blog-impact');
@@ -98,6 +99,9 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
     // blogPost model not yet available — show coming soon
   }
 
+  const dbStats = await getBlogStats(loc);
+  const stats = dbStats ?? t.stats;
+
   return (
     <div className="overflow-hidden">
 
@@ -124,7 +128,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
             <p className="text-center text-xs font-semibold uppercase tracking-[0.3em] text-accent/80 mb-10">{t.statsLabel}</p>
           </RevealOnScroll>
           <div className="grid grid-cols-3 gap-6">
-            {t.stats.map((s, i) => (
+            {stats.map((s, i) => (
               <RevealOnScroll key={i} delayMs={i * 80}>
                 <div className="text-center">
                   <p className="text-4xl sm:text-5xl font-display font-bold text-white">{s.value}</p>

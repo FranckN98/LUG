@@ -8,6 +8,7 @@ import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { getPublicCommunityGallery } from '@/lib/communityGallery';
 import { DEFAULT_HERO_IMAGES } from '@/lib/heroDefaults';
+import { getHomeStats } from '@/lib/siteStats';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '');
@@ -116,6 +117,10 @@ export default async function LocaleHomePage({
         { label: t.heroBtnPartner, href: `${base}/contact` },
       ];
 
+  const dbHomeStats = await getHomeStats(loc);
+  const stats = dbHomeStats ?? t.stats;
+  const tWithStats = { ...t, stats };
+
   return (
     <>
       <HeroCarousel
@@ -123,13 +128,13 @@ export default async function LocaleHomePage({
         tagline={t.heroTagline}
         title={heroTitle}
         subtitle={heroSubtitle}
-        stats={t.stats}
+        stats={stats}
         primaryButton={primaryButton}
         buttons={buttons}
         autoplayInterval={6000}
       />
       <HomePageSections
-        t={t}
+        t={tWithStats}
         base={base}
         joinWhatsAppUrl={joinWhatsAppUrl}
         locale={loc}

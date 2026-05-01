@@ -47,6 +47,24 @@ model BlogPost {
   @@map("blog_posts")
 }
 
+model SiteStat {
+  id           String   @id @default(uuid())
+  page         String
+  labelDe      String
+  labelEn      String
+  labelFr      String
+  valueNumber  Int?
+  suffix       String?  @default("")
+  valueText    String?
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([page, displayOrder])
+  @@map("site_stats")
+}
+
 model TeamMember {
   id       String  @id @default(uuid())
   name     String  @unique
