@@ -17,67 +17,103 @@ export async function GET(req: NextRequest) {
     const days = RANGES[rangeKey] ?? 7;
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const [
-      totalEvents,
-      pageViews,
-      uniqueVisitorsRows,
-      topPagesRows,
-      topSourcesRows,
-      topCampaignsRows,
-      eventBreakdownRows,
-      dailyRows,
-    ] = await Promise.all([
-      prisma.analyticsEvent.count({ where: { createdAt: { gte: since } } }),
-      prisma.analyticsEvent.count({ where: { createdAt: { gte: since }, name: 'page_view' } }),
-      prisma.$queryRawUnsafe<Array<{ visitors: bigint }>>(
-        `SELECT COUNT(DISTINCT visitor_hash) AS visitors FROM analytics_events WHERE created_at >= ?`,
-        since.toISOString(),
-      ),
-      prisma.$queryRawUnsafe<Array<{ page: string; views: bigint }>>(
-        `SELECT page, COUNT(*) AS views FROM analytics_events WHERE created_at >= ? AND name = 'page_view' AND page IS NOT NULL GROUP BY page ORDER BY views DESC LIMIT 10`,
-        since.toISOString(),
-      ),
-      prisma.$queryRawUnsafe<Array<{ source: string; count: bigint }>>(
-        `SELECT COALESCE(source, 'direct') AS source, COUNT(*) AS count FROM analytics_events WHERE created_at >= ? AND name = 'page_view' GROUP BY source ORDER BY count DESC LIMIT 10`,
-        since.toISOString(),
-      ),
-      prisma.$queryRawUnsafe<Array<{ utm_source: string | null; utm_campaign: string | null; count: bigint }>>(
-        `SELECT utm_source, utm_campaign, COUNT(*) AS count FROM analytics_events WHERE created_at >= ? AND utm_campaign IS NOT NULL GROUP BY utm_source, utm_campaign ORDER BY count DESC LIMIT 10`,
-        since.toISOString(),
-      ),
-      prisma.$queryRawUnsafe<Array<{ name: string; count: bigint }>>(
-        `SELECT name, COUNT(*) AS count FROM analytics_events WHERE created_at >= ? AND name <> 'page_view' GROUP BY name ORDER BY count DESC`,
-        since.toISOString(),
-      ),
-      prisma.$queryRawUnsafe<Array<{ day: string; views: bigint; visitors: bigint }>>(
-        `SELECT substr(created_at, 1, 10) AS day, COUNT(*) AS views, COUNT(DISTINCT visitor_hash) AS visitors FROM analytics_events WHERE created_at >= ? AND name = 'page_view' GROUP BY day ORDER BY day ASC`,
-        since.toISOString(),
-      ),
-    ]);
+    // Pull all rows in window — for analytics scale this is fine. We aggregate in JS to
+    // avoid SQLite/Postgres dialect differences and Date binding issues.
+    const rows = await prisma.analyticsEvent.findMany({
+      where: { createdAt: { gte: since } },
+      select: {
+        name: true,
+        page: true,
+        source: true,
+        utmSource: true,
+        utmCampaign: true,
+        visitorHash: true,
+        createdAt: true,
+      },
+    });
 
-    const num = (v: bigint | number) => (typeof v === 'bigint' ? Number(v) : v);
+    const totalEvents = rows.length;
+    const pageViews = rows.filter((r) => r.name === 'page_view').length;
+    const uniqueVisitors = new Set(
+      rows.map((r) => r.visitorHash).filter((v): v is string => Boolean(v)),
+    ).size;
+
+    function tally(items: Array<string | null | undefined>) {
+      const map = new Map<string, number>();
+      for (const it of items) {
+        if (!it) continue;
+        map.set(it, (map.get(it) ?? 0) + 1);
+      }
+      return Array.from(map.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+    }
+
+    const topPages = tally(rows.filter((r) => r.name === 'page_view').map((r) => r.page)).map(
+      ([page, views]) => ({ page, views }),
+    );
+
+    const topSources = tally(
+      rows.filter((r) => r.name === 'page_view').map((r) => r.source ?? 'direct'),
+    ).map(([source, count]) => ({ source, count }));
+
+    const campaignMap = new Map<
+      string,
+      { utm_source: string | null; utm_campaign: string | null; count: number }
+    >();
+    for (const r of rows) {
+      if (!r.utmCampaign) continue;
+      const key = `${r.utmSource ?? ''}::${r.utmCampaign}`;
+      const cur = campaignMap.get(key);
+      if (cur) cur.count += 1;
+      else
+        campaignMap.set(key, {
+          utm_source: r.utmSource ?? null,
+          utm_campaign: r.utmCampaign,
+          count: 1,
+        });
+    }
+    const topCampaigns = Array.from(campaignMap.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    const eventBreakdown = tally(
+      rows.filter((r) => r.name !== 'page_view').map((r) => r.name),
+    ).map(([name, count]) => ({ name, count }));
+
+    // Daily series — fill every day in window so the chart isn't sparse.
+    const dayMap = new Map<string, { views: number; visitors: Set<string> }>();
+    for (const r of rows) {
+      if (r.name !== 'page_view') continue;
+      const day = r.createdAt.toISOString().slice(0, 10);
+      let entry = dayMap.get(day);
+      if (!entry) {
+        entry = { views: 0, visitors: new Set() };
+        dayMap.set(day, entry);
+      }
+      entry.views += 1;
+      if (r.visitorHash) entry.visitors.add(r.visitorHash);
+    }
+    const daily: Array<{ day: string; views: number; visitors: number }> = [];
+    const startDay = new Date(since);
+    startDay.setUTCHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    for (let d = new Date(startDay); d <= today; d.setUTCDate(d.getUTCDate() + 1)) {
+      const key = d.toISOString().slice(0, 10);
+      const entry = dayMap.get(key);
+      daily.push({ day: key, views: entry?.views ?? 0, visitors: entry?.visitors.size ?? 0 });
+    }
 
     return NextResponse.json({
       ok: true,
       range: rangeKey,
-      totals: {
-        events: totalEvents,
-        pageViews,
-        uniqueVisitors: num(uniqueVisitorsRows[0]?.visitors ?? 0),
-      },
-      topPages: topPagesRows.map((r) => ({ page: r.page, views: num(r.views) })),
-      topSources: topSourcesRows.map((r) => ({ source: r.source, count: num(r.count) })),
-      topCampaigns: topCampaignsRows.map((r) => ({
-        utm_source: r.utm_source,
-        utm_campaign: r.utm_campaign,
-        count: num(r.count),
-      })),
-      eventBreakdown: eventBreakdownRows.map((r) => ({ name: r.name, count: num(r.count) })),
-      daily: dailyRows.map((r) => ({
-        day: r.day,
-        views: num(r.views),
-        visitors: num(r.visitors),
-      })),
+      totals: { events: totalEvents, pageViews, uniqueVisitors },
+      topPages,
+      topSources,
+      topCampaigns,
+      eventBreakdown,
+      daily,
     });
   } catch (e) {
     // eslint-disable-next-line no-console
