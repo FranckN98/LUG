@@ -1,7 +1,7 @@
 // Newsletter leads (event PDF downloads). Local: DATABASE_URL="file:./dev.db"
 // Production: use PostgreSQL (Neon, etc.) — change provider to "postgresql" + update DATABASE_URL.
 // LOCAL DEV: provider = "sqlite"  →  run: npx prisma db push
-// PRODUCTION: provider = "postgresql"  →  run: npx prisma migrate deploy
+// PRODUCTION: provider = "sqlite"  →  run: npx prisma migrate deploy
 generator client {
   provider = "prisma-client-js"
 }

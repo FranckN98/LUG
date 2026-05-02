@@ -242,6 +242,70 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
     }));
   };
 
+  // ── Auto-translate from another locale ──
+  const [translating, setTranslating] = useState<Locale | null>(null);
+  const [translateError, setTranslateError] = useState('');
+  const [translateProvider, setTranslateProvider] = useState<string | null>(null);
+
+  const translateFromLocale = async (source: Locale) => {
+    if (source === activeLocale) return;
+    const src = form.translations[source];
+    if (!src.title.trim() && !src.body.trim()) {
+      setTranslateError(`La langue source (${LOCALE_LABELS[source]}) est vide.`);
+      return;
+    }
+    setTranslateError('');
+    setTranslateProvider(null);
+    setTranslating(source);
+    try {
+      const res = await fetch('/api/admin/blog/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source,
+          target: activeLocale,
+          fields: {
+            title: src.title,
+            excerpt: src.excerpt,
+            body: src.body,
+            metaTitle: src.metaTitle,
+            metaDescription: src.metaDescription,
+          },
+        }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error || `HTTP ${res.status}`);
+      }
+      const j = await res.json() as {
+        provider?: string;
+        title?: string;
+        excerpt?: string;
+        body?: string;
+        metaTitle?: string;
+        metaDescription?: string;
+      };
+      setForm((f) => ({
+        ...f,
+        translations: {
+          ...f.translations,
+          [activeLocale]: {
+            title: j.title ?? f.translations[activeLocale].title,
+            excerpt: j.excerpt ?? f.translations[activeLocale].excerpt,
+            body: j.body ?? f.translations[activeLocale].body,
+            metaTitle: j.metaTitle ?? f.translations[activeLocale].metaTitle,
+            metaDescription: j.metaDescription ?? f.translations[activeLocale].metaDescription,
+          },
+        },
+      }));
+      setTranslateProvider(j.provider ?? null);
+    } catch (err) {
+      setTranslateError(err instanceof Error ? err.message : 'Échec de la traduction');
+    } finally {
+      setTranslating(null);
+    }
+  };
+
   // ── Submit ──
   const handleSubmit = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -465,6 +529,48 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
               </div>
             )}
           </div>
+
+          {/* ── Auto-translate row ── */}
+          {LOCALES.filter((l) => l !== activeLocale && localeStatus[l] !== 'empty').length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-accent/20 bg-accent/[0.05] px-3 py-2.5">
+              <svg className="w-4 h-4 text-accent shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-white/70">
+                Traduire automatiquement vers {LOCALE_LABELS[activeLocale]} depuis :
+              </span>
+              {LOCALES.filter((l) => l !== activeLocale && localeStatus[l] !== 'empty').map((l) => {
+                const isLoading = translating === l;
+                return (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => translateFromLocale(l)}
+                    disabled={!!translating}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/15 px-2.5 py-1 text-[0.7rem] font-semibold text-accent hover:bg-accent/25 transition disabled:opacity-50 disabled:cursor-wait"
+                    title={`Traduire automatiquement le contenu ${LOCALE_LABELS[l]} vers ${LOCALE_LABELS[activeLocale]} (écrase le contenu actuel)`}
+                  >
+                    {isLoading ? (
+                      <span className="w-3 h-3 rounded-full border-2 border-accent/40 border-t-accent animate-spin" />
+                    ) : (
+                      <span aria-hidden>{LOCALE_FLAGS[l]}</span>
+                    )}
+                    {LOCALE_LABELS[l]}
+                  </button>
+                );
+              })}
+              {translateProvider && (
+                <span className="ml-auto text-[0.65rem] text-white/40">
+                  ✓ via {translateProvider}
+                </span>
+              )}
+              {translateError && (
+                <span className="ml-auto text-[0.65rem] text-red-300">
+                  ⚠ {translateError}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* ── Title (per-locale) ── */}
           <div>
