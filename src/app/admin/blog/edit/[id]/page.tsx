@@ -3,7 +3,41 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import BlogPostForm, { type BlogPostFormValues } from '../../BlogPostForm';
+import type { Locale } from '@/i18n/config';
+import BlogPostForm, {
+  type BlogPostFormValues,
+  type BlogTranslationFormValues,
+} from '../../BlogPostForm';
+
+const LOCALES: Locale[] = ['fr', 'en', 'de'];
+const EMPTY_TR: BlogTranslationFormValues = {
+  title: '',
+  excerpt: '',
+  body: '',
+  metaTitle: '',
+  metaDescription: '',
+};
+
+type TranslationRow = {
+  locale: string;
+  title: string;
+  excerpt: string | null;
+  body: string;
+  metaTitle: string | null;
+  metaDescription: string | null;
+};
+
+type ApiPost = {
+  id: string;
+  title?: string;
+  body?: string;
+  author?: string;
+  category?: string | null;
+  coverImage?: string | null;
+  published?: boolean;
+  publishedAt?: string | null;
+  translations?: TranslationRow[];
+};
 
 export default function EditBlogPostPage() {
   const params = useParams();
@@ -12,14 +46,12 @@ export default function EditBlogPostPage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    fetch('/api/admin/blog')
-      .then((r) => r.json())
-      .then((posts: Array<Partial<BlogPostFormValues> & { id: string; publishedAt?: string | null }>) => {
-        const post = posts.find((p) => p.id === id);
-        if (!post) {
-          setNotFound(true);
-          return;
-        }
+    fetch(`/api/admin/blog/${id}`)
+      .then((r) => {
+        if (!r.ok) throw new Error('not found');
+        return r.json();
+      })
+      .then((post: ApiPost) => {
         let publishedAtLocal = '';
         if (post.publishedAt) {
           const d = new Date(post.publishedAt);
@@ -28,14 +60,39 @@ export default function EditBlogPostPage() {
             publishedAtLocal = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
           }
         }
+        const translations: Record<Locale, BlogTranslationFormValues> = {
+          fr: { ...EMPTY_TR },
+          en: { ...EMPTY_TR },
+          de: { ...EMPTY_TR },
+        };
+        for (const l of LOCALES) {
+          const t = post.translations?.find((x) => x.locale === l);
+          if (t) {
+            translations[l] = {
+              title: t.title ?? '',
+              excerpt: t.excerpt ?? '',
+              body: t.body ?? '',
+              metaTitle: t.metaTitle ?? '',
+              metaDescription: t.metaDescription ?? '',
+            };
+          }
+        }
+        // Legacy fallback: if no translations exist at all, seed FR from legacy fields.
+        const anyFilled = LOCALES.some((l) => translations[l].title || translations[l].body);
+        if (!anyFilled && (post.title || post.body)) {
+          translations.fr = {
+            ...EMPTY_TR,
+            title: post.title ?? '',
+            body: post.body ?? '',
+          };
+        }
         setInitial({
-          title: post.title ?? '',
-          body: post.body ?? '',
           author: post.author ?? '',
           category: post.category ?? '',
           coverImage: post.coverImage ?? '',
           published: post.published ?? false,
           publishedAt: publishedAtLocal,
+          translations,
         });
       })
       .catch(() => setNotFound(true));

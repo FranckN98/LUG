@@ -3,19 +3,41 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import type { Locale } from '@/i18n/config';
 import { MediaPicker } from '@/app/admin/components/MediaPicker';
 import { InlineImageInserter, type InlineImageInserterHandle } from './InlineImageInserter';
 
 const CATEGORIES = ['Événements', 'Carrière', 'Études', 'Entrepreneuriat', 'Intégration', 'Impact'];
 
-export type BlogPostFormValues = {
+const LOCALES: Locale[] = ['fr', 'en', 'de'];
+
+const LOCALE_LABELS: Record<Locale, string> = {
+  fr: 'Français',
+  en: 'English',
+  de: 'Deutsch',
+};
+
+const LOCALE_FLAGS: Record<Locale, string> = {
+  fr: '🇫🇷',
+  en: '🇬🇧',
+  de: '🇩🇪',
+};
+
+export type BlogTranslationFormValues = {
   title: string;
+  excerpt: string;
   body: string;
+  metaTitle: string;
+  metaDescription: string;
+};
+
+export type BlogPostFormValues = {
   author: string;
   category: string;
   coverImage: string;
   published: boolean;
   publishedAt: string; // local datetime string for <input type="datetime-local"> (or '')
+  translations: Record<Locale, BlogTranslationFormValues>;
 };
 
 type Mode = 'new' | 'edit';
@@ -26,24 +48,33 @@ type Props = {
   initial?: BlogPostFormValues;
 };
 
-const DEFAULT_VALUES: BlogPostFormValues = {
+const EMPTY_TRANSLATION: BlogTranslationFormValues = {
   title: '',
+  excerpt: '',
   body: '',
+  metaTitle: '',
+  metaDescription: '',
+};
+
+const DEFAULT_VALUES: BlogPostFormValues = {
   author: 'Équipe Level Up in Germany',
   category: '',
   coverImage: '',
   published: false,
   publishedAt: '',
+  translations: {
+    fr: { ...EMPTY_TRANSLATION },
+    en: { ...EMPTY_TRANSLATION },
+    de: { ...EMPTY_TRANSLATION },
+  },
 };
 
-const DRAFT_KEY = 'admin-blog-draft-new';
+const DRAFT_KEY = 'admin-blog-draft-new-i18n';
 
-// Convert a Date to the value format expected by <input type="datetime-local">
-// (YYYY-MM-DDTHH:mm in the user's local timezone).
-function toLocalDatetimeInput(d: Date): string {
+const toLocalDatetimeInput = (d: Date): string => {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+};
 
 export default function BlogPostForm({ mode, postId, initial }: Props) {
   const router = useRouter();
@@ -53,6 +84,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
   const [success, setSuccess] = useState(false);
   const [view, setView] = useState<'edit' | 'preview'>('edit');
   const [draftRestored, setDraftRestored] = useState(false);
+  const [activeLocale, setActiveLocale] = useState<Locale>('fr');
   const initialRef = useRef<BlogPostFormValues>(initial ?? DEFAULT_VALUES);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const imageInserterRef = useRef<InlineImageInserterHandle | null>(null);
@@ -64,7 +96,8 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (raw) {
         const draft = JSON.parse(raw) as BlogPostFormValues;
-        if (draft && (draft.title || draft.body)) {
+        const hasContent = LOCALES.some((l) => draft?.translations?.[l]?.title || draft?.translations?.[l]?.body);
+        if (hasContent) {
           setForm(draft);
           setDraftRestored(true);
         }
@@ -82,37 +115,56 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
 
   // ── Dirty tracking ──
   const isDirty = useMemo(() => {
-    const a = form;
-    const b = initialRef.current;
-    return a.title !== b.title || a.body !== b.body || a.author !== b.author
-      || a.category !== b.category || a.coverImage !== b.coverImage || a.published !== b.published
-      || a.publishedAt !== b.publishedAt;
+    return JSON.stringify(form) !== JSON.stringify(initialRef.current);
   }, [form]);
 
   useEffect(() => {
-    function onBeforeUnload(e: BeforeUnloadEvent) {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
       if (!isDirty || saving) return;
       e.preventDefault();
       e.returnValue = '';
-    }
+    };
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [isDirty, saving]);
 
-  // ── Stats ──
+  // ── Stats (current locale) ──
+  const currentTr = form.translations[activeLocale];
   const stats = useMemo(() => {
-    const text = form.body.trim();
+    const text = currentTr.body.trim();
     const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
-    const chars = form.body.length;
+    const chars = currentTr.body.length;
     const minutes = Math.max(1, Math.round(words / 200));
     return { words, chars, minutes };
-  }, [form.body]);
+  }, [currentTr.body]);
 
-  function update<K extends keyof BlogPostFormValues>(field: K, value: BlogPostFormValues[K]) {
+  // Filled-status per locale (for tab badges).
+  const localeStatus = useMemo(() => {
+    const out: Record<Locale, 'complete' | 'partial' | 'empty'> = { fr: 'empty', en: 'empty', de: 'empty' };
+    for (const l of LOCALES) {
+      const t = form.translations[l];
+      const hasTitle = !!t.title.trim();
+      const hasBody = !!t.body.trim();
+      out[l] = hasTitle && hasBody ? 'complete' : (hasTitle || hasBody) ? 'partial' : 'empty';
+    }
+    return out;
+  }, [form.translations]);
+
+  const updateShared = <K extends Exclude<keyof BlogPostFormValues, 'translations'>>(field: K, value: BlogPostFormValues[K]) => {
     setForm((f) => ({ ...f, [field]: value }));
-  }
+  };
 
-  // ── Formatting helpers (operate on textarea selection) ──
+  const updateTr = <K extends keyof BlogTranslationFormValues>(locale: Locale, field: K, value: BlogTranslationFormValues[K]) => {
+    setForm((f) => ({
+      ...f,
+      translations: {
+        ...f.translations,
+        [locale]: { ...f.translations[locale], [field]: value },
+      },
+    }));
+  };
+
+  // ── Formatting helpers (operate on textarea selection in active locale) ──
   const applyFormat = useCallback((kind: 'h3' | 'bold' | 'italic' | 'list' | 'paragraph') => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -146,7 +198,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
     }
 
     const next = value.slice(0, start) + replacement + value.slice(end);
-    update('body', next);
+    updateTr(activeLocale, 'body', next);
     requestAnimationFrame(() => {
       const ta2 = textareaRef.current;
       if (!ta2) return;
@@ -154,22 +206,21 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
       const pos = start + cursorOffset;
       ta2.setSelectionRange(pos, pos);
     });
-  }, []);
+  }, [activeLocale]);
 
-  // Insert a markdown-style image at the cursor (or replace selection)
   const insertImageMarkdown = useCallback((url: string, alt: string) => {
     const ta = textareaRef.current;
     const safeAlt = (alt || 'image').replace(/[\[\]]/g, '');
     const snippet = `\n![${safeAlt}](${url})\n`;
     if (!ta) {
-      update('body', form.body + snippet);
+      updateTr(activeLocale, 'body', currentTr.body + snippet);
       return;
     }
     const start = ta.selectionStart;
     const end = ta.selectionEnd;
     const value = ta.value;
     const next = value.slice(0, start) + snippet + value.slice(end);
-    update('body', next);
+    updateTr(activeLocale, 'body', next);
     requestAnimationFrame(() => {
       const ta2 = textareaRef.current;
       if (!ta2) return;
@@ -177,27 +228,62 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
       const pos = start + snippet.length;
       ta2.setSelectionRange(pos, pos);
     });
-  }, [form.body]);
+  }, [activeLocale, currentTr.body]);
+
+  // ── Copy from another locale ──
+  const copyFromLocale = (source: Locale) => {
+    if (source === activeLocale) return;
+    setForm((f) => ({
+      ...f,
+      translations: {
+        ...f.translations,
+        [activeLocale]: { ...f.translations[source] },
+      },
+    }));
+  };
 
   // ── Submit ──
   const handleSubmit = useCallback(async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (saving) return;
-    if (!form.title.trim() || !form.body.trim()) {
-      setError('Le titre et le contenu sont obligatoires.');
+
+    // At least one fully-filled locale required.
+    const filled = LOCALES.filter((l) => form.translations[l].title.trim() && form.translations[l].body.trim());
+    if (!filled.length) {
+      setError('Au moins une langue (titre + contenu) est obligatoire.');
       return;
     }
+
     setError('');
     setSuccess(false);
     setSaving(true);
 
     const url = mode === 'new' ? '/api/admin/blog' : `/api/admin/blog/${postId}`;
     const method = mode === 'new' ? 'POST' : 'PATCH';
+
+    // Build translations payload — drop empty optional fields, omit empty locales entirely.
+    const translationsPayload: Partial<Record<Locale, Partial<BlogTranslationFormValues>>> = {};
+    for (const l of LOCALES) {
+      const t = form.translations[l];
+      if (!t.title.trim() || !t.body.trim()) continue;
+      translationsPayload[l] = {
+        title: t.title.trim(),
+        body: t.body.trim(),
+        excerpt: t.excerpt.trim() || undefined,
+        metaTitle: t.metaTitle.trim() || undefined,
+        metaDescription: t.metaDescription.trim() || undefined,
+      };
+    }
+
     const payload = {
-      ...form,
-      // Convert local datetime → ISO; empty string means "no override"
+      author: form.author,
+      category: form.category,
+      coverImage: form.coverImage,
+      published: form.published,
       publishedAt: form.publishedAt ? new Date(form.publishedAt).toISOString() : null,
+      translations: translationsPayload,
     };
+
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
@@ -221,23 +307,22 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
     }
   }, [form, mode, postId, router, saving]);
 
-  // ── Ctrl/Cmd+S ──
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault();
         handleSubmit();
       }
-    }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [handleSubmit]);
 
-  function discardDraft() {
+  const discardDraft = () => {
     try { localStorage.removeItem(DRAFT_KEY); } catch {/* ignore */}
     setForm(DEFAULT_VALUES);
     setDraftRestored(false);
-  }
+  };
 
   const inputCls =
     'w-full rounded-xl bg-white/[0.06] border border-white/10 text-white placeholder-white/25 px-4 py-3 text-sm focus:outline-none focus:border-accent/40 focus:bg-white/[0.09] transition';
@@ -258,7 +343,6 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/70">{headerLabel}</p>
           <h1 className="text-xl font-bold text-white sm:text-2xl truncate">{headerTitle}</h1>
         </div>
-        {/* Status pill */}
         <div className="hidden sm:flex items-center gap-2">
           {isDirty && !saving && !success && (
             <span className="text-[0.65rem] font-bold uppercase tracking-wider px-2 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300">
@@ -294,40 +378,22 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
 
       <form onSubmit={handleSubmit} className="space-y-5">
 
-        {/* ── Title ── */}
-        <div>
-          <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Titre *</label>
-          <input
-            type="text"
-            required
-            value={form.title}
-            onChange={(e) => update('title', e.target.value)}
-            placeholder="Un titre clair et accrocheur…"
-            className={inputCls + ' text-base sm:text-lg font-semibold'}
-            maxLength={140}
-          />
-          <div className="mt-1.5 flex justify-between text-[0.65rem] text-white/30">
-            <span>Idéal : 40–70 caractères pour le SEO</span>
-            <span className={form.title.length > 70 ? 'text-amber-400/80' : ''}>{form.title.length}/140</span>
-          </div>
-        </div>
-
-        {/* ── Author + Category ── */}
+        {/* ── Shared: Author + Category ── */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Auteur</label>
+            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Auteur (commun)</label>
             <input
               type="text"
               value={form.author}
-              onChange={(e) => update('author', e.target.value)}
+              onChange={(e) => updateShared('author', e.target.value)}
               className={inputCls}
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Catégorie</label>
+            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Catégorie (commun)</label>
             <select
               value={form.category}
-              onChange={(e) => update('category', e.target.value)}
+              onChange={(e) => updateShared('category', e.target.value)}
               className={inputCls + ' cursor-pointer'}
             >
               <option value="">— Choisir —</option>
@@ -336,11 +402,11 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
           </div>
         </div>
 
-        {/* ── Cover ── */}
+        {/* ── Shared: Cover ── */}
         <MediaPicker
-          label="Image de couverture"
+          label="Image de couverture (commune)"
           value={form.coverImage}
-          onChange={(url) => update('coverImage', url)}
+          onChange={(url) => updateShared('coverImage', url)}
           defaultCategory="blog"
           placeholder="https://bucket.s3.amazonaws.com/image.jpg ou https://cdn.example.com/image.jpg"
           helperText="Lien AWS/S3/CloudFront ou choisissez une image dans la médiathèque."
@@ -357,65 +423,177 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
           </div>
         )}
 
-        {/* ── Body editor with toolbar + preview ── */}
-        <div>
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">Contenu *</label>
-            <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.04] p-0.5">
-              <button
-                type="button"
-                onClick={() => setView('edit')}
-                className={`px-3 py-1 text-[0.7rem] font-semibold rounded-md transition ${view === 'edit' ? 'bg-white/10 text-white' : 'text-white/45 hover:text-white/70'}`}
-              >
-                Édition
-              </button>
-              <button
-                type="button"
-                onClick={() => setView('preview')}
-                className={`px-3 py-1 text-[0.7rem] font-semibold rounded-md transition ${view === 'preview' ? 'bg-white/10 text-white' : 'text-white/45 hover:text-white/70'}`}
-              >
-                Aperçu
-              </button>
+        {/* ── Language tabs ── */}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 sm:p-5 space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-white/50 mr-2">Langue :</span>
+            {LOCALES.map((l) => {
+              const status = localeStatus[l];
+              const isActive = activeLocale === l;
+              const dot = status === 'complete' ? 'bg-green-400' : status === 'partial' ? 'bg-amber-400' : 'bg-white/20';
+              return (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setActiveLocale(l)}
+                  className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    isActive
+                      ? 'border-accent/50 bg-accent/15 text-white'
+                      : 'border-white/10 bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08]'
+                  }`}
+                >
+                  <span aria-hidden>{LOCALE_FLAGS[l]}</span>
+                  {LOCALE_LABELS[l]}
+                  <span className={`w-1.5 h-1.5 rounded-full ${dot}`} aria-hidden />
+                </button>
+              );
+            })}
+            {LOCALES.filter((l) => l !== activeLocale && localeStatus[l] !== 'empty').length > 0 && (
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-[0.65rem] uppercase tracking-wider text-white/35">Copier depuis :</span>
+                {LOCALES.filter((l) => l !== activeLocale && localeStatus[l] !== 'empty').map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => copyFromLocale(l)}
+                    className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[0.65rem] font-semibold text-white/60 hover:text-white hover:bg-white/[0.08] transition"
+                    title={`Copier le contenu ${LOCALE_LABELS[l]} vers ${LOCALE_LABELS[activeLocale]}`}
+                  >
+                    {LOCALE_FLAGS[l]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Title (per-locale) ── */}
+          <div>
+            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+              Titre — {LOCALE_LABELS[activeLocale]} *
+            </label>
+            <input
+              type="text"
+              value={currentTr.title}
+              onChange={(e) => updateTr(activeLocale, 'title', e.target.value)}
+              placeholder="Un titre clair et accrocheur…"
+              className={inputCls + ' text-base sm:text-lg font-semibold'}
+              maxLength={140}
+            />
+            <div className="mt-1.5 flex justify-between text-[0.65rem] text-white/30">
+              <span>Idéal : 40–70 caractères pour le SEO</span>
+              <span className={currentTr.title.length > 70 ? 'text-amber-400/80' : ''}>{currentTr.title.length}/140</span>
             </div>
           </div>
 
-          {view === 'edit' ? (
-            <>
-              {/* Toolbar */}
-              <div className="flex flex-wrap items-center gap-1 rounded-t-xl border border-b-0 border-white/10 bg-white/[0.04] px-2 py-1.5">
-                <ToolbarBtn label="H" title="Titre de section (**texte**)" onClick={() => applyFormat('h3')} />
-                <ToolbarBtn label="B" title="Gras (**texte**)" bold onClick={() => applyFormat('bold')} />
-                <ToolbarBtn label="I" title="Italique (*texte*)" italic onClick={() => applyFormat('italic')} />
-                <ToolbarBtn label="• Liste" title="Liste à puces (- élément)" onClick={() => applyFormat('list')} />
-                <ToolbarBtn label="¶" title="Nouveau paragraphe" onClick={() => applyFormat('paragraph')} />
-                <ToolbarBtn
-                  label="🖼 Image"
-                  title="Insérer une image (upload ou médiathèque)"
-                  onClick={() => imageInserterRef.current?.open()}
-                />
-                <span className="ml-auto text-[0.65rem] text-white/30 px-1">
-                  {stats.words} mots · ~{stats.minutes} min
-                </span>
+          {/* ── Excerpt (per-locale) ── */}
+          <div>
+            <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+              Extrait — {LOCALE_LABELS[activeLocale]}
+            </label>
+            <textarea
+              value={currentTr.excerpt}
+              onChange={(e) => updateTr(activeLocale, 'excerpt', e.target.value)}
+              rows={2}
+              placeholder="Court résumé affiché sur la liste et dans les partages (laisser vide = auto)."
+              className={inputCls + ' resize-y'}
+              maxLength={300}
+            />
+            <p className="mt-1 text-[0.65rem] text-white/30">{currentTr.excerpt.length}/300 — facultatif. Si vide, un extrait du contenu est utilisé.</p>
+          </div>
+
+          {/* ── Body editor (per-locale) ── */}
+          <div>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <label className="text-xs font-semibold text-white/50 uppercase tracking-wider">
+                Contenu — {LOCALE_LABELS[activeLocale]} *
+              </label>
+              <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.04] p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setView('edit')}
+                  className={`px-3 py-1 text-[0.7rem] font-semibold rounded-md transition ${view === 'edit' ? 'bg-white/10 text-white' : 'text-white/45 hover:text-white/70'}`}
+                >
+                  Édition
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView('preview')}
+                  className={`px-3 py-1 text-[0.7rem] font-semibold rounded-md transition ${view === 'preview' ? 'bg-white/10 text-white' : 'text-white/45 hover:text-white/70'}`}
+                >
+                  Aperçu
+                </button>
               </div>
-              <textarea
-                ref={textareaRef}
-                required
-                value={form.body}
-                onChange={(e) => update('body', e.target.value)}
-                rows={18}
-                placeholder={`Écrivez votre article ici…\n\n**Titre de section**\nUn paragraphe de texte.\n\n- Premier point\n- Deuxième point`}
-                className="w-full rounded-b-xl bg-white/[0.06] border border-white/10 text-white placeholder-white/25 px-4 py-3 text-sm leading-relaxed font-mono focus:outline-none focus:border-accent/40 focus:bg-white/[0.09] transition resize-y"
-              />
-              <p className="mt-1.5 text-[0.65rem] text-white/30">
-                Mise en forme : <code className="text-white/50">**Titre**</code> = sous-titre · <code className="text-white/50">- élément</code> = liste · <code className="text-white/50">![alt](url)</code> = image · ligne vide = nouveau paragraphe
-              </p>
-            </>
-          ) : (
-            <BlogPreview body={form.body} title={form.title} />
-          )}
+            </div>
+
+            {view === 'edit' ? (
+              <>
+                <div className="flex flex-wrap items-center gap-1 rounded-t-xl border border-b-0 border-white/10 bg-white/[0.04] px-2 py-1.5">
+                  <ToolbarBtn label="H" title="Titre de section (**texte**)" onClick={() => applyFormat('h3')} />
+                  <ToolbarBtn label="B" title="Gras (**texte**)" bold onClick={() => applyFormat('bold')} />
+                  <ToolbarBtn label="I" title="Italique (*texte*)" italic onClick={() => applyFormat('italic')} />
+                  <ToolbarBtn label="• Liste" title="Liste à puces (- élément)" onClick={() => applyFormat('list')} />
+                  <ToolbarBtn label="¶" title="Nouveau paragraphe" onClick={() => applyFormat('paragraph')} />
+                  <ToolbarBtn
+                    label="🖼 Image"
+                    title="Insérer une image (upload ou médiathèque)"
+                    onClick={() => imageInserterRef.current?.open()}
+                  />
+                  <span className="ml-auto text-[0.65rem] text-white/30 px-1">
+                    {stats.words} mots · ~{stats.minutes} min
+                  </span>
+                </div>
+                <textarea
+                  ref={textareaRef}
+                  value={currentTr.body}
+                  onChange={(e) => updateTr(activeLocale, 'body', e.target.value)}
+                  rows={18}
+                  placeholder={`Écrivez votre article ici…\n\n**Titre de section**\nUn paragraphe de texte.\n\n- Premier point\n- Deuxième point`}
+                  className="w-full rounded-b-xl bg-white/[0.06] border border-white/10 text-white placeholder-white/25 px-4 py-3 text-sm leading-relaxed font-mono focus:outline-none focus:border-accent/40 focus:bg-white/[0.09] transition resize-y"
+                />
+                <p className="mt-1.5 text-[0.65rem] text-white/30">
+                  Mise en forme : <code className="text-white/50">**Titre**</code> = sous-titre · <code className="text-white/50">- élément</code> = liste · <code className="text-white/50">![alt](url)</code> = image · ligne vide = nouveau paragraphe
+                </p>
+              </>
+            ) : (
+              <BlogPreview body={currentTr.body} title={currentTr.title} />
+            )}
+          </div>
+
+          {/* ── SEO meta (per-locale) ── */}
+          <details className="rounded-xl border border-white/10 bg-white/[0.02]">
+            <summary className="cursor-pointer select-none px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/55 hover:text-white">
+              SEO — {LOCALE_LABELS[activeLocale]} (facultatif)
+            </summary>
+            <div className="space-y-3 px-4 pb-4">
+              <div>
+                <label className="block text-[0.7rem] font-semibold text-white/45 uppercase tracking-wider mb-1.5">Meta title</label>
+                <input
+                  type="text"
+                  value={currentTr.metaTitle}
+                  onChange={(e) => updateTr(activeLocale, 'metaTitle', e.target.value)}
+                  placeholder="Si vide, le titre sera utilisé."
+                  className={inputCls}
+                  maxLength={70}
+                />
+                <p className="mt-1 text-[0.65rem] text-white/30">{currentTr.metaTitle.length}/70</p>
+              </div>
+              <div>
+                <label className="block text-[0.7rem] font-semibold text-white/45 uppercase tracking-wider mb-1.5">Meta description</label>
+                <textarea
+                  value={currentTr.metaDescription}
+                  onChange={(e) => updateTr(activeLocale, 'metaDescription', e.target.value)}
+                  rows={2}
+                  placeholder="Si vide, l'extrait (ou un extrait auto) sera utilisé."
+                  className={inputCls + ' resize-y'}
+                  maxLength={170}
+                />
+                <p className="mt-1 text-[0.65rem] text-white/30">{currentTr.metaDescription.length}/170</p>
+              </div>
+            </div>
+          </details>
         </div>
 
-        {/* ── Publish toggle ── */}
+        {/* ── Publish toggle (shared) ── */}
         <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-4 sm:px-5 space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -430,7 +608,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
             </div>
             <button
               type="button"
-              onClick={() => update('published', !form.published)}
+              onClick={() => updateShared('published', !form.published)}
               aria-label="Basculer l'état de publication"
               className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none ${form.published ? 'bg-green-500' : 'bg-white/15'}`}
             >
@@ -438,21 +616,20 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
             </button>
           </div>
 
-          {/* Publish date */}
           <div className="border-t border-white/8 pt-4">
             <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-              Date de publication
+              Date de publication (commune)
             </label>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <input
                 type="datetime-local"
                 value={form.publishedAt}
-                onChange={(e) => update('publishedAt', e.target.value)}
+                onChange={(e) => updateShared('publishedAt', e.target.value)}
                 className="flex-1 rounded-xl bg-white/[0.06] border border-white/10 text-white px-4 py-3 text-sm focus:outline-none focus:border-accent/40 focus:bg-white/[0.09] transition [color-scheme:dark]"
               />
               <button
                 type="button"
-                onClick={() => update('publishedAt', toLocalDatetimeInput(new Date()))}
+                onClick={() => updateShared('publishedAt', toLocalDatetimeInput(new Date()))}
                 className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-semibold text-white/70 hover:bg-white/[0.08] hover:text-white transition"
               >
                 Maintenant
@@ -460,7 +637,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
               {form.publishedAt && (
                 <button
                   type="button"
-                  onClick={() => update('publishedAt', '')}
+                  onClick={() => updateShared('publishedAt', '')}
                   className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-semibold text-white/50 hover:text-white transition"
                 >
                   Effacer
@@ -498,11 +675,9 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
           </p>
         )}
 
-        {/* spacer for sticky bar */}
         <div className="h-2" />
       </form>
 
-      {/* Inline image inserter (modal: upload from computer or pick from library) */}
       <InlineImageInserter ref={imageInserterRef} onInsert={insertImageMarkdown} />
 
       {/* ── Sticky save bar ── */}
@@ -510,7 +685,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
         <div className="max-w-4xl px-4 py-3 sm:px-6 lg:px-8 mx-0 lg:ml-[var(--admin-sidebar-width,0)] flex items-center gap-3">
           <div className="hidden sm:flex flex-1 min-w-0 items-center gap-3 text-xs text-white/40">
             <span className="truncate">
-              {stats.words} mots · {stats.chars} car. · ~{stats.minutes} min de lecture
+              {LOCALE_FLAGS[activeLocale]} {stats.words} mots · {stats.chars} car. · ~{stats.minutes} min
             </span>
             {isDirty && <span className="text-amber-300/80 shrink-0">• modifications non sauvegardées</span>}
           </div>
@@ -587,7 +762,6 @@ function BlogPreview({ body, title }: { body: string; title: string }) {
 }
 
 function renderInline(text: string): React.ReactNode {
-  // Render **bold** and *italic* spans inline
   const parts: Array<{ type: 'b' | 'i' | 't'; v: string }> = [];
   let rest = text;
   const re = /(\*\*[^*]+\*\*|\*[^*]+\*)/;

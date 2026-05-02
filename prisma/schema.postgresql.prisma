@@ -46,8 +46,27 @@ model BlogPost {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   interactions BlogInteraction[]
+  translations BlogPostTranslation[]
 
   @@map("blog_posts")
+}
+
+model BlogPostTranslation {
+  id              String   @id @default(uuid())
+  blogPostId      String   @map("blog_post_id")
+  locale          String
+  title           String
+  excerpt         String?
+  body            String
+  metaTitle       String?  @map("meta_title")
+  metaDescription String?  @map("meta_description")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  blogPost        BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+
+  @@unique([blogPostId, locale])
+  @@index([locale])
+  @@map("blog_post_translations")
 }
 
 model BlogInteraction {

@@ -7,6 +7,7 @@ import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { getBlogStats } from '@/lib/siteStats';
 import { formatReadingTime } from '@/lib/readingTime';
+import { pickBlogTranslation } from '@/lib/blogTranslation';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/blog-impact');
@@ -85,7 +86,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
   const t = content[loc];
 
-  let posts: Awaited<ReturnType<typeof prisma.blogPost.findMany>> = [];
+  let posts: Array<Awaited<ReturnType<typeof prisma.blogPost.findMany>>[number] & { translations: Awaited<ReturnType<typeof prisma.blogPostTranslation.findMany>> }> = [];
   try {
     const now = new Date();
     posts = await prisma.blogPost.findMany({
@@ -97,6 +98,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
         ],
       },
       orderBy: [{ publishedAt: 'desc' }, { createdAt: 'desc' }],
+      include: { translations: true },
     });
   } catch {
     // blogPost model not yet available — show coming soon
@@ -164,7 +166,8 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {posts.map((post, i) => {
-                const excerpt = post.body.replace(/\*\*/g, '').slice(0, 160) + '…';
+                const tr = pickBlogTranslation(post, loc);
+                const excerpt = tr.excerpt ?? (tr.body.replace(/\*\*/g, '').slice(0, 160) + '…');
                 const catColor = post.category ? (CATEGORY_COLORS[post.category] ?? CATEGORY_FALLBACK) : '';
                 const coverImageSrc = getBlogCoverImageSrc(post.coverImage);
                 return (
@@ -176,7 +179,7 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                       {/* Cover */}
                       <div className="relative h-44 bg-gradient-to-br from-[#1a0808] to-[#2c1010] overflow-hidden">
                         {coverImageSrc ? (
-                          <img src={coverImageSrc} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <img src={coverImageSrc} alt={tr.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center opacity-10">
                             <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,19 +196,19 @@ export default async function BlogImpactPage({ params }: { params: Promise<{ loc
                           <svg className="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          {formatReadingTime(post.body, loc)}
+                          {formatReadingTime(tr.body, loc)}
                         </span>
                       </div>
 
                       {/* Body */}
                       <div className="flex flex-col flex-1 p-6">
                         <h2 className="font-display font-bold text-brand-dark text-base leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                          {post.title}
+                          {tr.title}
                         </h2>
                         <p className="text-sm text-gray-500 leading-relaxed flex-1 line-clamp-3">{excerpt}</p>
                         <div className="mt-4 flex items-center justify-between gap-3">
                           <p className="text-xs text-gray-400 truncate">
-                            {post.author} · {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            {post.author} · {new Date(post.publishedAt ?? post.createdAt).toLocaleDateString(loc === 'de' ? 'de-DE' : loc === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </p>
                           <span className="shrink-0 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                             {t.readMore} →

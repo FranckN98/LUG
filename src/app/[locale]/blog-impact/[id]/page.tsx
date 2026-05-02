@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { BlogPostActions } from '@/components/BlogPostActions';
 import { formatReadingTime } from '@/lib/readingTime';
 import { buildPageMetadata } from '@/lib/seo';
+import { pickBlogTranslation } from '@/lib/blogTranslation';
 
 const backLabel: Record<Locale, string> = {
   fr: '← Retour au Blog',
@@ -33,7 +34,10 @@ export async function generateMetadata({
   const { locale, id } = await params;
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
 
-  const post = await prisma.blogPost.findUnique({ where: { id } }).catch(() => null);
+  const post = await prisma.blogPost.findUnique({
+    where: { id },
+    include: { translations: true },
+  }).catch(() => null);
   if (!post || !post.published) {
     return buildPageMetadata(loc, `/blog-impact/${id}`, {
       title: 'Article',
@@ -42,12 +46,13 @@ export async function generateMetadata({
     });
   }
 
+  const tr = pickBlogTranslation(post, loc);
   const cover = getBlogCoverImageSrc(post.coverImage);
   return buildPageMetadata(loc, `/blog-impact/${id}`, {
-    title: post.title,
-    description: buildExcerpt(post.body),
+    title: tr.metaTitle ?? tr.title,
+    description: tr.metaDescription ?? tr.excerpt ?? buildExcerpt(tr.body),
     image: cover ?? undefined,
-    imageAlt: post.title,
+    imageAlt: tr.title,
   });
 }
 
@@ -59,12 +64,16 @@ export default async function ArticlePage({
   const { locale, id } = await params;
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
 
-  const post = await prisma.blogPost.findUnique({ where: { id } });
+  const post = await prisma.blogPost.findUnique({
+    where: { id },
+    include: { translations: true },
+  });
   if (!post || !post.published) notFound();
   // Hide scheduled future posts from the public
   if (post.publishedAt && post.publishedAt.getTime() > Date.now()) notFound();
 
-  const paragraphs = post.body.split('\n').filter(Boolean);
+  const tr = pickBlogTranslation(post, loc);
+  const paragraphs = tr.body.split('\n').filter(Boolean);
   const coverImageSrc = getBlogCoverImageSrc(post.coverImage);
 
   // Render **bold** segments inline. Splits on `**...**` while keeping the matched
@@ -94,7 +103,7 @@ export default async function ArticlePage({
       <section className="relative min-h-[42vh] flex items-end overflow-hidden">
         {coverImageSrc ? (
           <>
-            <img src={coverImageSrc} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
+            <img src={coverImageSrc} alt={tr.title} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0d0505] via-[#0d050580] to-transparent" />
           </>
         ) : (
@@ -109,7 +118,7 @@ export default async function ArticlePage({
           <svg className="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          {formatReadingTime(post.body, loc)}
+          {formatReadingTime(tr.body, loc)}
         </span>
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16 pt-24 sm:pt-28 w-full">
           {post.category && (
@@ -118,12 +127,12 @@ export default async function ArticlePage({
             </span>
           )}
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white font-display leading-tight max-w-3xl">
-            {post.title}
+            {tr.title}
           </h1>
           <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-white/50">
             <span>{post.author}</span>
             <span aria-hidden>·</span>
-            <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <span>{new Date(post.publishedAt ?? post.createdAt).toLocaleDateString(loc === 'de' ? 'de-DE' : loc === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
           </p>
         </div>
       </section>
@@ -166,7 +175,7 @@ export default async function ArticlePage({
 
           <BlogPostActions
             postId={post.id}
-            postTitle={post.title}
+            postTitle={tr.title}
             initialLikes={post.likes}
             initialShares={post.shares}
             locale={loc}
