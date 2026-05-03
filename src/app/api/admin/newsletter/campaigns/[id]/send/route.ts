@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendCampaignEmail } from '@/lib/sendCampaignEmail';
+import { parseNameFromEmail } from '@/lib/emailName';
+
+/**
+ * Best-effort first name resolution for a newsletter subscriber.
+ * Order: stored `firstName` → first token of stored `name` → derived from email local-part.
+ * Returns null if nothing usable is found (recipient will get a neutral greeting).
+ */
+function resolveFirstName(sub: { email: string; firstName: string | null; name: string | null }): string | null {
+  if (sub.firstName && sub.firstName.trim()) return sub.firstName.trim();
+  if (sub.name && sub.name.trim()) {
+    const first = sub.name.trim().split(/\s+/)[0];
+    if (first) return first;
+  }
+  return parseNameFromEmail(sub.email).firstName;
+}
 
 export async function POST(
   req: NextRequest,
@@ -43,6 +58,7 @@ export async function POST(
       unsubscribeToken: 'preview-only',
       siteBaseUrl,
       content: { ...content, subject: `[TEST] ${content.subject}` },
+      recipientFirstName: resolveFirstName({ email: testEmail, firstName: null, name: null }),
     });
 
     return NextResponse.json({ ok: true, testOnly: true });
@@ -51,7 +67,7 @@ export async function POST(
   // ── Real send ──
   const subscribers = await prisma.newsletterSubscriber.findMany({
     where: { status: 'active' },
-    select: { id: true, email: true, unsubscribeToken: true },
+    select: { id: true, email: true, unsubscribeToken: true, firstName: true, name: true },
   });
 
   let sentCount = 0;
@@ -64,6 +80,7 @@ export async function POST(
         unsubscribeToken: sub.unsubscribeToken ?? sub.id,
         siteBaseUrl,
         content,
+        recipientFirstName: resolveFirstName(sub),
       });
       sentCount++;
     } catch (err) {

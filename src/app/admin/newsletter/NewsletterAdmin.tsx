@@ -996,6 +996,16 @@ export default function NewsletterAdmin() {
                       placeholder="Écrivez votre message ici…&#10;&#10;Chaque double-saut de ligne crée un nouveau paragraphe dans l'email."
                       className="input-field resize-none font-mono text-[13px] leading-relaxed"
                     />
+                    <div className="mt-2 rounded-lg border border-accent/20 bg-accent/[0.04] px-3 py-2 text-[11px] leading-relaxed text-white/70">
+                      <p className="font-semibold text-accent/90 mb-1">💡 Personnalisation par prénom (optionnelle)</p>
+                      <p>Insère un de ces marqueurs dans le sujet, le titre ou le corps — ils seront remplacés automatiquement pour chaque abonné :</p>
+                      <ul className="mt-1 ml-3 space-y-0.5">
+                        <li><code className="text-accent">{'{{greeting}}'}</code> → <em>« Bonjour Marie, »</em> ou <em>« Bonjour, »</em> si le prénom est inconnu</li>
+                        <li><code className="text-accent">{'{{firstName}}'}</code> → <em>« Marie »</em> ou <em>vide</em> si inconnu</li>
+                        <li><code className="text-accent">{'{{firstName|cher ami}}'}</code> → <em>« Marie »</em> ou <em>« cher ami »</em> en repli</li>
+                      </ul>
+                      <p className="mt-1 text-white/50">Exemple : <code className="text-white/80">{'{{greeting}}'} Voici les nouveautés de la semaine…</code></p>
+                    </div>
                   </div>
 
                   {/* Section: CTA */}

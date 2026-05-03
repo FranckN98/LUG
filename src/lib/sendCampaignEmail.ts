@@ -190,7 +190,71 @@ export interface SendCampaignParams {
   unsubscribeToken: string;
   siteBaseUrl: string;
   content: CampaignContent;
+  /**
+   * Optional first name of the recipient. When provided, placeholders such as
+   * `{{firstName}}` and `{{greeting}}` in subject / title / preview / body are
+   * replaced with personalized values. When null/undefined/empty, placeholders
+   * gracefully fall back to a neutral greeting.
+   */
+  recipientFirstName?: string | null;
 }
+
+/**
+ * Personalize campaign text using placeholders.
+ *
+ * Supported tokens:
+ *   - `{{firstName}}`           → first name, or empty if unknown
+ *   - `{{firstName|fallback}}`  → first name, or the literal fallback if unknown
+ *   - `{{greeting}}`            → "Bonjour Marie," / "Hallo Marie," / "Hi Marie,"
+ *                                 or "Bonjour," / "Hallo," / "Hi," when unknown.
+ *                                 Language is inferred from existing words in the
+ *                                 source text (defaults to FR).
+ *
+ * Also cleans up the artefacts of empty replacements (double spaces, "Bonjour ,",
+ * leading whitespace lines, etc.).
+ */
+export function personalizeCampaignText(text: string, firstName: string | null | undefined): string {
+  if (!text) return text;
+  const name = (firstName ?? '').trim();
+
+  // Detect language for {{greeting}}
+  const lower = text.toLowerCase();
+  const lang: 'fr' | 'de' | 'en' =
+    /\b(hallo|liebe|sehr geehrte|guten tag|moin)\b/.test(lower) ? 'de' :
+    /\b(hi|hello|hey|dear|good morning|good afternoon)\b/.test(lower) ? 'en' :
+    'fr';
+  const greetingWord = lang === 'de' ? 'Hallo' : lang === 'en' ? 'Hi' : 'Bonjour';
+  const greeting = name ? `${greetingWord} ${name},` : `${greetingWord},`;
+
+  let out = text
+    .replace(/\{\{\s*greeting\s*\}\}/gi, greeting)
+    .replace(/\{\{\s*firstName\s*\|\s*([^}]*?)\s*\}\}/gi, (_m, fb) => name || fb)
+    .replace(/\{\{\s*firstName\s*\}\}/gi, name);
+
+  if (!name) {
+    // Clean residue when first name was empty:
+    //   "Bonjour ," → "Bonjour,"   "Bonjour  ," → "Bonjour,"
+    out = out.replace(/([A-Za-zÀ-ÿ])\s+,/g, '$1,');
+    //   "  ," at start of line → ","
+    out = out.replace(/[ \t]+,/g, ',');
+    // Collapse runs of spaces/tabs (preserve newlines)
+    out = out.replace(/[ \t]{2,}/g, ' ');
+    // Trim leading spaces inside paragraphs
+    out = out.split('\n').map((l) => l.replace(/^[ \t]+/, (s) => s)).join('\n');
+  }
+
+  return out;
+}
+
+const personalizeContent = (content: CampaignContent, firstName: string | null | undefined): CampaignContent => ({
+  ...content,
+  subject: personalizeCampaignText(content.subject, firstName),
+  previewText: content.previewText ? personalizeCampaignText(content.previewText, firstName) : content.previewText,
+  titleText: content.titleText ? personalizeCampaignText(content.titleText, firstName) : content.titleText,
+  bodyContent: personalizeCampaignText(content.bodyContent, firstName),
+  ctaLabel: content.ctaLabel ? personalizeCampaignText(content.ctaLabel, firstName) : content.ctaLabel,
+  footerNote: content.footerNote ? personalizeCampaignText(content.footerNote, firstName) : content.footerNote,
+});
 
 export async function sendCampaignEmail(params: SendCampaignParams): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
@@ -198,9 +262,10 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
     process.env.NEWSLETTER_FROM_EMAIL?.trim() ||
     'Level Up in Germany <info@levelupingermany.com>';
 
+  const personalized = personalizeContent(params.content, params.recipientFirstName);
   const unsubscribeUrl = `${params.siteBaseUrl}/api/unsubscribe?token=${encodeURIComponent(params.unsubscribeToken)}`;
-  const html = buildCampaignHtml(params.content, unsubscribeUrl, params.siteBaseUrl);
-  const text = buildCampaignText(params.content, unsubscribeUrl);
+  const html = buildCampaignHtml(personalized, unsubscribeUrl, params.siteBaseUrl);
+  const text = buildCampaignText(personalized, unsubscribeUrl);
 
   if (!apiKey) {
     console.warn('[newsletter] RESEND_API_KEY manquant — email non envoyé à', params.toEmail);
@@ -216,7 +281,7 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
     body: JSON.stringify({
       from,
       to: [params.toEmail],
-      subject: params.content.subject,
+      subject: personalized.subject,
       html,
       text,
     }),
