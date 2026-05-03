@@ -27,6 +27,14 @@ interface CampaignTranslation {
   footerNote: string | null;
 }
 
+interface CampaignAttachment {
+  id?: string;
+  filename: string;
+  url: string;
+  contentType: string | null;
+  size: number | null;
+}
+
 interface Campaign {
   id: string;
   subject: string;
@@ -43,6 +51,7 @@ interface Campaign {
   sentCount: number;
   createdAt: string;
   translations?: CampaignTranslation[];
+  attachments?: CampaignAttachment[];
 }
 
 // ── i18n ──────────────────────────────────────────────────────────────────
@@ -74,6 +83,7 @@ type CampaignFormShape = {
   campaignImageUrl: string;
   ctaUrl: string;
   translations: Record<CampaignLocale, CampaignTrFields>;
+  attachments: CampaignAttachment[];
 };
 
 const EMPTY_CAMPAIGN_FORM: CampaignFormShape = {
@@ -85,6 +95,7 @@ const EMPTY_CAMPAIGN_FORM: CampaignFormShape = {
     en: { ...EMPTY_TR },
     de: { ...EMPTY_TR },
   },
+  attachments: [],
 };
 
 const EMPTY_ADD_FORM = {
@@ -405,6 +416,13 @@ export default function NewsletterAdmin() {
       campaignImageUrl: c.campaignImageUrl ?? '',
       ctaUrl: c.ctaUrl ?? '',
       translations: trMap,
+      attachments: (c.attachments ?? []).map((a) => ({
+        id: a.id,
+        filename: a.filename,
+        url: a.url,
+        contentType: a.contentType ?? null,
+        size: a.size ?? null,
+      })),
     });
     setActiveLocale('fr');
     setTranslateError('');
@@ -533,6 +551,12 @@ export default function NewsletterAdmin() {
       campaignImageUrl: campaignForm.campaignImageUrl,
       ctaUrl: campaignForm.ctaUrl,
       translations: translationsPayload,
+      attachments: campaignForm.attachments.map((a) => ({
+        filename: a.filename,
+        url: a.url,
+        contentType: a.contentType,
+        size: a.size,
+      })),
     };
 
     setSavingCampaign(true);
@@ -698,6 +722,55 @@ export default function NewsletterAdmin() {
       setTranslating(null);
     }
   };
+
+  // ── Attachments uploader ───────────────────────────────────────────────────
+  const attachmentInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadingAttachment, setUploadingAttachment] = useState(false);
+  const [attachmentError, setAttachmentError] = useState<string | null>(null);
+
+  const formatFileSize = (bytes: number | null | undefined): string => {
+    if (!bytes && bytes !== 0) return '';
+    if (bytes < 1024) return `${bytes} o`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+    return `${(bytes / 1024 / 1024).toFixed(2)} Mo`;
+  };
+
+  const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = ''; // allow re-uploading the same file
+    if (files.length === 0) return;
+    setAttachmentError(null);
+    setUploadingAttachment(true);
+    try {
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/admin/newsletter/attachments', { method: 'POST', body: fd });
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          throw new Error(j?.error || `Échec de l'upload de ${file.name}`);
+        }
+        const j = (await res.json()) as CampaignAttachment;
+        setCampaignForm((f) => ({ ...f, attachments: [...f.attachments, j] }));
+      }
+    } catch (err) {
+      setAttachmentError(err instanceof Error ? err.message : 'Échec de l\'upload');
+    } finally {
+      setUploadingAttachment(false);
+    }
+  };
+
+  const removeAttachment = (index: number) => {
+    setCampaignForm((f) => ({
+      ...f,
+      attachments: f.attachments.filter((_, i) => i !== index),
+    }));
+  };
+
+  const totalAttachmentsBytes = campaignForm.attachments.reduce(
+    (sum, a) => sum + (a.size ?? 0),
+    0,
+  );
 
   // ══════════════════════════════════════════════════════════════════════════
   // RENDER
@@ -1291,6 +1364,103 @@ export default function NewsletterAdmin() {
                         className="input-field"
                       />
                     </div>
+                  </div>
+
+                  {/* Section: Attachments (shared across locales) */}
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60 pt-2">
+                    Pièces jointes <span className="text-white/30 normal-case font-normal">(PDF, Word, Excel, images… — communes à toutes les langues)</span>
+                  </p>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => attachmentInputRef.current?.click()}
+                        disabled={uploadingAttachment}
+                        className="inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/15 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/25 transition disabled:opacity-50 disabled:cursor-wait"
+                      >
+                        {uploadingAttachment ? (
+                          <>
+                            <span className="w-3.5 h-3.5 rounded-full border-2 border-accent/40 border-t-accent animate-spin" />
+                            Upload en cours…
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                            Ajouter des fichiers
+                          </>
+                        )}
+                      </button>
+                      <input
+                        ref={attachmentInputRef}
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.csv,.txt,.json,image/*"
+                        className="hidden"
+                        onChange={handleAttachmentUpload}
+                      />
+                      <span className="text-[11px] text-white/45">
+                        Max. 15 Mo / fichier · 30 Mo au total
+                      </span>
+                      {campaignForm.attachments.length > 0 && (
+                        <span className="ml-auto text-[11px] text-white/60">
+                          {campaignForm.attachments.length} fichier{campaignForm.attachments.length > 1 ? 's' : ''} · {formatFileSize(totalAttachmentsBytes)}
+                        </span>
+                      )}
+                    </div>
+
+                    {attachmentError && (
+                      <div className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-[12px] text-red-200">
+                        ⚠ {attachmentError}
+                      </div>
+                    )}
+
+                    {campaignForm.attachments.length === 0 ? (
+                      <p className="text-[12px] text-white/40 italic">
+                        Aucune pièce jointe — chaque destinataire recevra simplement le corps du mail.
+                      </p>
+                    ) : (
+                      <ul className="space-y-1.5">
+                        {campaignForm.attachments.map((a, idx) => (
+                          <li
+                            key={`${a.url}-${idx}`}
+                            className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2"
+                          >
+                            <span className="text-base" aria-hidden>
+                              {a.contentType?.startsWith('image/') ? '🖼️' :
+                                a.contentType === 'application/pdf' ? '📄' :
+                                a.contentType?.includes('word') ? '📝' :
+                                a.contentType?.includes('sheet') || a.contentType?.includes('excel') ? '📊' :
+                                a.contentType?.includes('zip') ? '🗜️' : '📎'}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <a
+                                href={a.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block truncate text-[13px] font-medium text-white hover:text-accent transition"
+                                title={a.filename}
+                              >
+                                {a.filename}
+                              </a>
+                              <p className="text-[10px] text-white/40">
+                                {a.contentType ?? 'fichier'}
+                                {a.size ? ` · ${formatFileSize(a.size)}` : ''}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeAttachment(idx)}
+                              className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] text-white/50 hover:text-red-300 hover:border-red-400/30 hover:bg-red-500/10 transition"
+                              title="Retirer cette pièce jointe"
+                            >
+                              ✕
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
 
                   {/* Section: Footer */}

@@ -197,6 +197,12 @@ export interface SendCampaignParams {
    * gracefully fall back to a neutral greeting.
    */
   recipientFirstName?: string | null;
+  /**
+   * Optional list of files to attach to the email. Each entry must contain a
+   * `filename` and a base64-encoded `content` (no data URL prefix). Forwarded
+   * as-is to the Resend API.
+   */
+  attachments?: ReadonlyArray<{ filename: string; content: string }>;
 }
 
 /**
@@ -284,6 +290,9 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
       subject: personalized.subject,
       html,
       text,
+      ...(params.attachments && params.attachments.length > 0
+        ? { attachments: params.attachments.map((a) => ({ filename: a.filename, content: a.content })) }
+        : {}),
     }),
   });
 

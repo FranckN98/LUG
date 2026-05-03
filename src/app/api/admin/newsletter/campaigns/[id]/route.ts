@@ -6,6 +6,7 @@ import {
   normalizeCampaignTranslations,
   pickLegacyMirror,
 } from '@/lib/newsletterCampaignI18n';
+import { normalizeAttachmentsInput } from '@/lib/newsletterAttachments';
 
 export async function GET(
   _req: NextRequest,
@@ -13,7 +14,10 @@ export async function GET(
 ) {
   const campaign = await prisma.newsletterCampaign.findUnique({
     where: { id: params.id },
-    include: { translations: true },
+    include: {
+      translations: true,
+      attachments: { orderBy: { position: 'asc' } },
+    },
   });
   if (!campaign) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
   return NextResponse.json(campaign);
@@ -29,6 +33,7 @@ export async function PATCH(
     campaignImageUrl,
     ctaUrl,
     translations: translationsInput,
+    attachments: attachmentsInput,
     // legacy single-locale fields
     subject,
     previewText,
@@ -45,6 +50,12 @@ export async function PATCH(
       : null;
 
   const translations = translationsObject ? normalizeCampaignTranslations(translationsObject) : null;
+
+  // Attachments are managed as a full replacement when the key is present.
+  const hasAttachmentsKey = Object.prototype.hasOwnProperty.call(body ?? {}, 'attachments');
+  const normalizedAttachments = hasAttachmentsKey
+    ? normalizeAttachmentsInput(attachmentsInput)
+    : null;
 
   // Transactional update
   const updated = await prisma.$transaction(async (tx) => {
@@ -111,9 +122,40 @@ export async function PATCH(
     return tx.newsletterCampaign.update({
       where: { id: params.id },
       data: scalarData,
-      include: { translations: true },
+      include: {
+        translations: true,
+        attachments: { orderBy: { position: 'asc' } },
+      },
     });
   });
+
+  // Replace attachments outside the inner branch but still in the same transaction
+  if (normalizedAttachments) {
+    await prisma.$transaction(async (tx) => {
+      await tx.newsletterCampaignAttachment.deleteMany({ where: { campaignId: params.id } });
+      if (normalizedAttachments.length > 0) {
+        await tx.newsletterCampaignAttachment.createMany({
+          data: normalizedAttachments.map((a, i) => ({
+            campaignId: params.id,
+            filename: a.filename,
+            url: a.url,
+            contentType: a.contentType ?? null,
+            size: a.size ?? null,
+            position: i,
+          })),
+        });
+      }
+    });
+    // Re-read with the fresh attachments
+    const refreshed = await prisma.newsletterCampaign.findUnique({
+      where: { id: params.id },
+      include: {
+        translations: true,
+        attachments: { orderBy: { position: 'asc' } },
+      },
+    });
+    return NextResponse.json(refreshed);
+  }
 
   return NextResponse.json(updated);
 }

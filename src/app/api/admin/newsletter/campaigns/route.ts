@@ -5,11 +5,15 @@ import {
   normalizeCampaignTranslations,
   pickLegacyMirror,
 } from '@/lib/newsletterCampaignI18n';
+import { normalizeAttachmentsInput } from '@/lib/newsletterAttachments';
 
 export async function GET() {
   const campaigns = await prisma.newsletterCampaign.findMany({
     orderBy: { createdAt: 'desc' },
-    include: { translations: true },
+    include: {
+      translations: true,
+      attachments: { orderBy: { position: 'asc' } },
+    },
   });
   return NextResponse.json(campaigns);
 }
@@ -21,6 +25,7 @@ export async function POST(req: NextRequest) {
     campaignImageUrl,
     ctaUrl,
     translations: translationsInput,
+    attachments: attachmentsInput,
     // legacy single-locale payload (kept for backwards compatibility)
     subject,
     previewText,
@@ -51,6 +56,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Données invalides' }, { status: 400 });
   }
 
+  const normalizedAttachments = normalizeAttachmentsInput(attachmentsInput);
+
   const campaign = await prisma.newsletterCampaign.create({
     data: {
       subject: mirror.subject,
@@ -74,8 +81,22 @@ export async function POST(req: NextRequest) {
           footerNote: t.footerNote ?? null,
         })),
       },
+      attachments: normalizedAttachments.length
+        ? {
+            create: normalizedAttachments.map((a, i) => ({
+              filename: a.filename,
+              url: a.url,
+              contentType: a.contentType ?? null,
+              size: a.size ?? null,
+              position: i,
+            })),
+          }
+        : undefined,
     },
-    include: { translations: true },
+    include: {
+      translations: true,
+      attachments: { orderBy: { position: 'asc' } },
+    },
   });
 
   return NextResponse.json(campaign, { status: 201 });

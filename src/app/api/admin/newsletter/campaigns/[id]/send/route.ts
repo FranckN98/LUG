@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { sendCampaignEmail } from '@/lib/sendCampaignEmail';
 import { parseNameFromEmail } from '@/lib/emailName';
 import { pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
+import { resolveAttachmentsForResend } from '@/lib/newsletterAttachments';
 
 /**
  * Best-effort first name resolution for a newsletter subscriber.
@@ -28,7 +29,10 @@ export async function POST(
 
   const campaign = await prisma.newsletterCampaign.findUnique({
     where: { id: params.id },
-    include: { translations: true },
+    include: {
+      translations: true,
+      attachments: { orderBy: { position: 'asc' } },
+    },
   });
   if (!campaign) return NextResponse.json({ error: 'Campagne introuvable' }, { status: 404 });
 
@@ -38,6 +42,12 @@ export async function POST(
 
   const siteBaseUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://www.levelupingermany.com';
+
+  // Resolve attachments once (read URLs → base64) and reuse for every recipient
+  const resolvedAttachments = await resolveAttachmentsForResend(
+    campaign.attachments.map((a) => ({ filename: a.filename, url: a.url, size: a.size })),
+    siteBaseUrl,
+  );
 
   // Build per-locale content (subject/body/title/etc. come from translation; images & CTA URL are shared scalars)
   const buildContentFor = (locale: string) => {
@@ -79,6 +89,7 @@ export async function POST(
       siteBaseUrl,
       content: { ...testContent, subject: `[TEST ${testLocale.toUpperCase()}] ${testContent.subject}` },
       recipientFirstName: resolveFirstName({ email: testEmail, firstName: null, name: null }),
+      attachments: resolvedAttachments,
     });
 
     return NextResponse.json({ ok: true, testOnly: true, locale: testLocale });
@@ -102,6 +113,7 @@ export async function POST(
         siteBaseUrl,
         content: buildContentFor(subLocale),
         recipientFirstName: resolveFirstName(sub),
+        attachments: resolvedAttachments,
       });
       sentCount++;
     } catch (err) {

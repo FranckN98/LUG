@@ -80,8 +80,24 @@ model NewsletterCampaign {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   translations NewsletterCampaignTranslation[]
+  attachments  NewsletterCampaignAttachment[]
 
   @@map("newsletter_campaigns")
+}
+
+model NewsletterCampaignAttachment {
+  id          String   @id @default(uuid())
+  campaignId  String   @map("campaign_id")
+  filename    String
+  url         String
+  contentType String?  @map("content_type")
+  size        Int?
+  position    Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  campaign    NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("newsletter_campaign_attachments")
 }
 
 model NewsletterCampaignTranslation {
