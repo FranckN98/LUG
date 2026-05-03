@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { buildCampaignHtml } from '@/lib/sendCampaignEmail';
+import { buildCampaignHtml, buildMultilingualCampaignHtml, type MultilingualSection } from '@/lib/sendCampaignEmail';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Subscriber {
@@ -134,6 +134,43 @@ function buildPreview(form: CampaignFormShape, locale: CampaignLocale): string {
     '#',
     'https://www.levelupingermany.com',
   );
+}
+
+/**
+ * Build the multilingual preview — exactly what subscribers will receive.
+ * Sections are ordered by the active locale (preferred first), then the rest.
+ */
+function buildMultilingualPreview(form: CampaignFormShape, primaryLocale: CampaignLocale): string {
+  const ordered: CampaignLocale[] = [
+    primaryLocale,
+    ...CAMPAIGN_LOCALES.filter((l) => l !== primaryLocale),
+  ];
+  const sections: MultilingualSection[] = ordered
+    .map((locale): MultilingualSection | null => {
+      const tr = form.translations[locale];
+      if (!tr.subject.trim() || !tr.bodyContent.trim()) return null;
+      return {
+        locale,
+        content: {
+          subject: tr.subject,
+          previewText: tr.previewText || undefined,
+          titleText: tr.titleText || undefined,
+          bodyContent: tr.bodyContent,
+          headerImageUrl: form.headerImageUrl || undefined,
+          campaignImageUrl: form.campaignImageUrl || undefined,
+          ctaLabel: tr.ctaLabel || undefined,
+          ctaUrl: form.ctaUrl || '#',
+          footerNote: tr.footerNote || undefined,
+        },
+      };
+    })
+    .filter((x): x is MultilingualSection => x !== null);
+
+  if (sections.length === 0) {
+    // No language fully filled yet — fall back to a placeholder single-section preview
+    return buildPreview(form, primaryLocale);
+  }
+  return buildMultilingualCampaignHtml(sections, '#', 'https://www.levelupingermany.com', sections[0].content.subject);
 }
 
 // ── Stat card ──────────────────────────────────────────────────────────────────
@@ -638,7 +675,11 @@ export default function NewsletterAdmin() {
   }
 
   // ── Preview HTML ───────────────────────────────────────────────────────────
-  const previewHtml = buildPreview(campaignForm, activeLocale);
+  const [previewMode, setPreviewMode] = useState<'single' | 'multi'>('multi');
+  const previewHtml =
+    previewMode === 'multi'
+      ? buildMultilingualPreview(campaignForm, activeLocale)
+      : buildPreview(campaignForm, activeLocale);
 
   // ── Per-locale helpers ─────────────────────────────────────────────────────
   const currentTr = campaignForm.translations[activeLocale];
@@ -1562,11 +1603,36 @@ export default function NewsletterAdmin() {
 
                 {/* ── Right: Preview ─────────────────────────────────── */}
                 <div className={`space-y-3 ${showPreview ? 'block' : 'hidden xl:block'}`}>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60">
                       Aperçu email
                     </p>
-                    <span className="text-[11px] text-white/25">Mis à jour en temps réel</span>
+                    <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewMode('multi')}
+                        className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition ${
+                          previewMode === 'multi'
+                            ? 'bg-accent/20 text-white'
+                            : 'text-white/45 hover:text-white'
+                        }`}
+                        title="Aperçu de l'email tel qu'il sera envoyé (toutes les langues stackées)"
+                      >
+                        🌍 Multilingue (envoi)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewMode('single')}
+                        className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition ${
+                          previewMode === 'single'
+                            ? 'bg-accent/20 text-white'
+                            : 'text-white/45 hover:text-white'
+                        }`}
+                        title="Aperçu langue par langue (édition)"
+                      >
+                        {LOCALE_FLAGS[activeLocale]} Langue active
+                      </button>
+                    </div>
                   </div>
                   <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#f0eded]" style={{ height: '640px' }}>
                     <iframe

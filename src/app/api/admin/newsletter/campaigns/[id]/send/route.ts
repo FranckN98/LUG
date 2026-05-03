@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendCampaignEmail } from '@/lib/sendCampaignEmail';
+import { sendMultilingualCampaignEmail, type MultilingualSection } from '@/lib/sendCampaignEmail';
 import { parseNameFromEmail } from '@/lib/emailName';
-import { pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
+import { CAMPAIGN_LOCALES, type CampaignLocale, pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
 import { resolveAttachmentsForResend } from '@/lib/newsletterAttachments';
 
 /**
@@ -76,23 +76,64 @@ export async function POST(
     };
   };
 
+  // Determine which locales actually have a usable translation row
+  const availableLocales: CampaignLocale[] = CAMPAIGN_LOCALES.filter((l) =>
+    campaign.translations.some(
+      (t) => t.locale === l && !!t.subject?.trim() && !!t.bodyContent?.trim(),
+    ),
+  );
+  // If the campaign has no translation rows at all, fall back to FR using the legacy scalar fields
+  const effectiveLocales: CampaignLocale[] = availableLocales.length > 0 ? availableLocales : ['fr'];
+
+  /**
+   * Build the ordered section list for one recipient: their preferred locale
+   * comes first, then the rest (in canonical FR/EN/DE order).
+   */
+  const buildSectionsFor = (preferred: string): MultilingualSection[] => {
+    const pref: CampaignLocale = (CAMPAIGN_LOCALES as readonly string[]).includes(preferred)
+      ? (preferred as CampaignLocale)
+      : 'fr';
+    const ordered: CampaignLocale[] = [
+      ...(effectiveLocales.includes(pref) ? [pref] : []),
+      ...effectiveLocales.filter((l) => l !== pref),
+    ];
+    return ordered.map((locale) => ({ locale, content: buildContentFor(locale) }));
+  };
+
   // ── Test send ──
   if (testEmail) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(testEmail)) {
       return NextResponse.json({ error: 'Email de test invalide' }, { status: 400 });
     }
-    const testContent = buildContentFor(testLocale);
-    await sendCampaignEmail({
+    const sections = buildSectionsFor(testLocale);
+    // Prefix the (primary) subject with [TEST]
+    const primary = sections[0];
+    const testedSections: MultilingualSection[] = [
+      {
+        locale: primary.locale,
+        content: {
+          ...primary.content,
+          subject: `[TEST ${primary.locale.toUpperCase()}] ${primary.content.subject}`,
+        },
+      },
+      ...sections.slice(1),
+    ];
+    await sendMultilingualCampaignEmail({
       toEmail: testEmail,
       unsubscribeToken: 'preview-only',
       siteBaseUrl,
-      content: { ...testContent, subject: `[TEST ${testLocale.toUpperCase()}] ${testContent.subject}` },
+      sections: testedSections,
       recipientFirstName: resolveFirstName({ email: testEmail, firstName: null, name: null }),
       attachments: resolvedAttachments,
     });
 
-    return NextResponse.json({ ok: true, testOnly: true, locale: testLocale });
+    return NextResponse.json({
+      ok: true,
+      testOnly: true,
+      primaryLocale: primary.locale,
+      includedLocales: sections.map((s) => s.locale),
+    });
   }
 
   // ── Real send ──
@@ -107,11 +148,11 @@ export async function POST(
   for (const sub of subscribers) {
     try {
       const subLocale = sub.locale ?? 'fr';
-      await sendCampaignEmail({
+      await sendMultilingualCampaignEmail({
         toEmail: sub.email,
         unsubscribeToken: sub.unsubscribeToken ?? sub.id,
         siteBaseUrl,
-        content: buildContentFor(subLocale),
+        sections: buildSectionsFor(subLocale),
         recipientFirstName: resolveFirstName(sub),
         attachments: resolvedAttachments,
       });
