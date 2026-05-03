@@ -144,7 +144,7 @@ export function buildCampaignHtml(
                 </td>
                 <td style="vertical-align:top">
                   <p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#1a1a1a">L'équipe Level Up in Germany</p>
-                  <p style="margin:0;font-size:12px;color:#999;line-height:1.5">Communauté africaine en Allemagne · Berlin</p>
+                  <p style="margin:0;font-size:12px;color:#999;line-height:1.5">Communauté africaine en Allemagne</p>
                 </td>
               </tr>
             </table>
@@ -155,7 +155,7 @@ export function buildCampaignHtml(
         <tr>
           <td class="email-footer" style="background-color:#f9f7f7;padding:24px 40px;border-top:1px solid #eeeeee;border-radius:0 0 16px 16px">
             ${footerNoteBlock}
-            <p style="margin:0 0 8px;font-size:11px;color:#bbb;line-height:1.6">Level Up in Germany · Berlin, Deutschland · <a href="${siteBaseUrl}" style="color:#bbb;text-decoration:underline">${siteBaseUrl.replace(/^https?:\/\//, '')}</a></p>
+            <p style="margin:0 0 8px;font-size:11px;color:#bbb;line-height:1.6">Level Up in Germany · Deutschland · <a href="${siteBaseUrl}" style="color:#bbb;text-decoration:underline">${siteBaseUrl.replace(/^https?:\/\//, '')}</a></p>
             <p style="margin:0;font-size:11px;color:#ccc;line-height:1.6">
               Vous recevez cet e-mail car vous êtes inscrit(e) à notre newsletter.&nbsp;
               <a href="${esc(unsubscribeUrl)}" style="color:#8C1A1A;text-decoration:underline;font-weight:600">Se désabonner</a>
@@ -180,7 +180,7 @@ export function buildCampaignText(content: CampaignContent, unsubscribeUrl: stri
     lines.push(`→ ${content.ctaLabel}: ${content.ctaUrl}`, '');
   }
   lines.push(emailLinksFooterText());
-  lines.push('--', "L'équipe Level Up in Germany", 'Berlin, Deutschland', '');
+  lines.push('--', "L'équipe Level Up in Germany", 'Deutschland', '');
   lines.push(`Se désabonner : ${unsubscribeUrl}`);
   return lines.join('\n');
 }
