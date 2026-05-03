@@ -17,6 +17,16 @@ interface Subscriber {
   createdAt: string;
 }
 
+interface CampaignTranslation {
+  locale: string;
+  subject: string;
+  previewText: string | null;
+  titleText: string | null;
+  bodyContent: string;
+  ctaLabel: string | null;
+  footerNote: string | null;
+}
+
 interface Campaign {
   id: string;
   subject: string;
@@ -32,18 +42,49 @@ interface Campaign {
   sentAt: string | null;
   sentCount: number;
   createdAt: string;
+  translations?: CampaignTranslation[];
 }
 
-const EMPTY_CAMPAIGN_FORM = {
+// ── i18n ──────────────────────────────────────────────────────────────────
+type CampaignLocale = 'fr' | 'en' | 'de';
+const CAMPAIGN_LOCALES: CampaignLocale[] = ['fr', 'en', 'de'];
+const LOCALE_FLAGS: Record<CampaignLocale, string> = { fr: '🇫🇷', en: '🇬🇧', de: '🇩🇪' };
+const LOCALE_LABELS: Record<CampaignLocale, string> = { fr: 'Français', en: 'English', de: 'Deutsch' };
+
+type CampaignTrFields = {
+  subject: string;
+  previewText: string;
+  titleText: string;
+  bodyContent: string;
+  ctaLabel: string;
+  footerNote: string;
+};
+
+const EMPTY_TR: CampaignTrFields = {
   subject: '',
   previewText: '',
   titleText: '',
   bodyContent: '',
+  ctaLabel: '',
+  footerNote: '',
+};
+
+type CampaignFormShape = {
+  headerImageUrl: string;
+  campaignImageUrl: string;
+  ctaUrl: string;
+  translations: Record<CampaignLocale, CampaignTrFields>;
+};
+
+const EMPTY_CAMPAIGN_FORM: CampaignFormShape = {
   headerImageUrl: '',
   campaignImageUrl: '',
-  ctaLabel: '',
   ctaUrl: '',
-  footerNote: '',
+  translations: {
+    fr: { ...EMPTY_TR },
+    en: { ...EMPTY_TR },
+    de: { ...EMPTY_TR },
+  },
 };
 
 const EMPTY_ADD_FORM = {
@@ -65,21 +106,22 @@ function fmtDate(iso: string) {
 }
 
 // ── Preview builder (pure, client-safe) ────────────────────────────────────────
-function buildPreview(form: typeof EMPTY_CAMPAIGN_FORM): string {
+function buildPreview(form: CampaignFormShape, locale: CampaignLocale): string {
+  const tr = form.translations[locale];
   return buildCampaignHtml(
     {
-      subject: form.subject || '(sans objet)',
-      previewText: form.previewText || undefined,
-      titleText: form.titleText || undefined,
-      bodyContent: form.bodyContent || '(contenu vide)',
+      subject: tr.subject || '(sans objet)',
+      previewText: tr.previewText || undefined,
+      titleText: tr.titleText || undefined,
+      bodyContent: tr.bodyContent || '(contenu vide)',
       headerImageUrl: form.headerImageUrl || undefined,
       campaignImageUrl: form.campaignImageUrl || undefined,
-      ctaLabel: form.ctaLabel || undefined,
+      ctaLabel: tr.ctaLabel || undefined,
       ctaUrl: form.ctaUrl || '#',
-      footerNote: form.footerNote || undefined,
+      footerNote: tr.footerNote || undefined,
     },
     '#',
-    'https://levelupingermany.de',
+    'https://www.levelupingermany.com',
   );
 }
 
@@ -185,7 +227,11 @@ export default function NewsletterAdmin() {
   // Campaign UI
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
   const [isNew, setIsNew] = useState(false);
-  const [campaignForm, setCampaignForm] = useState(EMPTY_CAMPAIGN_FORM);
+  const [campaignForm, setCampaignForm] = useState<CampaignFormShape>(EMPTY_CAMPAIGN_FORM);
+  const [activeLocale, setActiveLocale] = useState<CampaignLocale>('fr');
+  const [translating, setTranslating] = useState<CampaignLocale | null>(null);
+  const [translateError, setTranslateError] = useState('');
+  const [translateProvider, setTranslateProvider] = useState<string | null>(null);
   const [savingCampaign, setSavingCampaign] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
@@ -314,6 +360,9 @@ export default function NewsletterAdmin() {
   function openNewCampaign() {
     setEditingCampaign(null);
     setCampaignForm(EMPTY_CAMPAIGN_FORM);
+    setActiveLocale('fr');
+    setTranslateError('');
+    setTranslateProvider(null);
     setIsNew(true);
     setShowPreview(false);
     setSendResult(null);
@@ -321,17 +370,45 @@ export default function NewsletterAdmin() {
 
   function openEditCampaign(c: Campaign) {
     setEditingCampaign(c);
+    // Seed translations from the campaign's translations array; fallback to
+    // legacy scalar fields on the FR locale when no translations exist yet.
+    const trMap: Record<CampaignLocale, CampaignTrFields> = {
+      fr: { ...EMPTY_TR },
+      en: { ...EMPTY_TR },
+      de: { ...EMPTY_TR },
+    };
+    if (c.translations && c.translations.length > 0) {
+      for (const t of c.translations) {
+        if ((CAMPAIGN_LOCALES as string[]).includes(t.locale)) {
+          trMap[t.locale as CampaignLocale] = {
+            subject: t.subject ?? '',
+            previewText: t.previewText ?? '',
+            titleText: t.titleText ?? '',
+            bodyContent: t.bodyContent ?? '',
+            ctaLabel: t.ctaLabel ?? '',
+            footerNote: t.footerNote ?? '',
+          };
+        }
+      }
+    } else {
+      trMap.fr = {
+        subject: c.subject ?? '',
+        previewText: c.previewText ?? '',
+        titleText: c.titleText ?? '',
+        bodyContent: c.bodyContent ?? '',
+        ctaLabel: c.ctaLabel ?? '',
+        footerNote: c.footerNote ?? '',
+      };
+    }
     setCampaignForm({
-      subject: c.subject,
-      previewText: c.previewText ?? '',
-      titleText: c.titleText ?? '',
-      bodyContent: c.bodyContent,
       headerImageUrl: c.headerImageUrl ?? '',
       campaignImageUrl: c.campaignImageUrl ?? '',
-      ctaLabel: c.ctaLabel ?? '',
       ctaUrl: c.ctaUrl ?? '',
-      footerNote: c.footerNote ?? '',
+      translations: trMap,
     });
+    setActiveLocale('fr');
+    setTranslateError('');
+    setTranslateProvider(null);
     setIsNew(false);
     setShowPreview(false);
     setSendResult(null);
@@ -436,10 +513,28 @@ export default function NewsletterAdmin() {
   }
 
   async function handleSaveCampaign() {
-    if (!campaignForm.subject.trim() || !campaignForm.bodyContent.trim()) {
-      showToast('L\'objet et le contenu sont requis', 'error');
+    // Determine locales with at least subject + body
+    const filledLocales = CAMPAIGN_LOCALES.filter((l) => {
+      const t = campaignForm.translations[l];
+      return t.subject.trim() && t.bodyContent.trim();
+    });
+    if (filledLocales.length === 0) {
+      showToast("Au moins une langue doit avoir un objet et un corps", 'error');
       return;
     }
+
+    const translationsPayload: Partial<Record<CampaignLocale, CampaignTrFields>> = {};
+    for (const l of filledLocales) {
+      translationsPayload[l] = campaignForm.translations[l];
+    }
+
+    const payload = {
+      headerImageUrl: campaignForm.headerImageUrl,
+      campaignImageUrl: campaignForm.campaignImageUrl,
+      ctaUrl: campaignForm.ctaUrl,
+      translations: translationsPayload,
+    };
+
     setSavingCampaign(true);
     try {
       let res: Response;
@@ -447,13 +542,13 @@ export default function NewsletterAdmin() {
         res = await fetch('/api/admin/newsletter/campaigns', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(campaignForm),
+          body: JSON.stringify(payload),
         });
       } else {
         res = await fetch(`/api/admin/newsletter/campaigns/${editingCampaign!.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(campaignForm),
+          body: JSON.stringify(payload),
         });
       }
       const data = await res.json();
@@ -481,11 +576,11 @@ export default function NewsletterAdmin() {
     setSendingTest(true);
     try {
       const res = await fetch(
-        `/api/admin/newsletter/campaigns/${id}/send?testEmail=${encodeURIComponent(testEmail)}`,
+        `/api/admin/newsletter/campaigns/${id}/send?testEmail=${encodeURIComponent(testEmail)}&testLocale=${activeLocale}`,
         { method: 'POST' },
       );
       const data = await res.json();
-      if (res.ok) showToast(`Email de test envoyé à ${testEmail}`);
+      if (res.ok) showToast(`Email de test (${LOCALE_LABELS[activeLocale]}) envoyé à ${testEmail}`);
       else showToast(data.error || 'Erreur envoi test', 'error');
     } finally {
       setSendingTest(false);
@@ -519,7 +614,90 @@ export default function NewsletterAdmin() {
   }
 
   // ── Preview HTML ───────────────────────────────────────────────────────────
-  const previewHtml = buildPreview(campaignForm);
+  const previewHtml = buildPreview(campaignForm, activeLocale);
+
+  // ── Per-locale helpers ─────────────────────────────────────────────────────
+  const currentTr = campaignForm.translations[activeLocale];
+  const updateTr = useCallback((locale: CampaignLocale, key: keyof CampaignTrFields, value: string) => {
+    setCampaignForm((f) => ({
+      ...f,
+      translations: {
+        ...f.translations,
+        [locale]: { ...f.translations[locale], [key]: value },
+      },
+    }));
+  }, []);
+
+  const localeStatus = (l: CampaignLocale): 'empty' | 'partial' | 'complete' => {
+    const t = campaignForm.translations[l];
+    const filled = [t.subject, t.bodyContent].filter((s) => s.trim()).length;
+    if (filled === 0) return 'empty';
+    if (filled === 2) return 'complete';
+    return 'partial';
+  };
+
+  const copyTrFromLocale = (source: CampaignLocale) => {
+    if (source === activeLocale) return;
+    setCampaignForm((f) => ({
+      ...f,
+      translations: { ...f.translations, [activeLocale]: { ...f.translations[source] } },
+    }));
+  };
+
+  const translateTrFromLocale = async (source: CampaignLocale) => {
+    if (source === activeLocale) return;
+    const src = campaignForm.translations[source];
+    if (!src.subject.trim() && !src.bodyContent.trim()) {
+      setTranslateError(`La langue source (${LOCALE_LABELS[source]}) est vide.`);
+      return;
+    }
+    setTranslateError('');
+    setTranslateProvider(null);
+    setTranslating(source);
+    try {
+      const res = await fetch('/api/admin/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source,
+          target: activeLocale,
+          fields: {
+            subject: src.subject,
+            previewText: src.previewText,
+            titleText: src.titleText,
+            bodyContent: src.bodyContent,
+            ctaLabel: src.ctaLabel,
+            footerNote: src.footerNote,
+          },
+        }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error || `HTTP ${res.status}`);
+      }
+      const j = await res.json() as { provider?: string; values?: Record<string, string> };
+      const v = j.values ?? {};
+      setCampaignForm((f) => ({
+        ...f,
+        translations: {
+          ...f.translations,
+          [activeLocale]: {
+            subject: v.subject ?? f.translations[activeLocale].subject,
+            previewText: v.previewText ?? f.translations[activeLocale].previewText,
+            titleText: v.titleText ?? f.translations[activeLocale].titleText,
+            bodyContent: v.bodyContent ?? f.translations[activeLocale].bodyContent,
+            ctaLabel: v.ctaLabel ?? f.translations[activeLocale].ctaLabel,
+            footerNote: v.footerNote ?? f.translations[activeLocale].footerNote,
+          },
+        },
+      }));
+      setTranslateProvider(j.provider ?? null);
+    } catch (err) {
+      setTranslateError(err instanceof Error ? err.message : 'Échec de la traduction');
+    } finally {
+      setTranslating(null);
+    }
+  };
 
   // ══════════════════════════════════════════════════════════════════════════
   // RENDER
@@ -825,7 +1003,7 @@ export default function NewsletterAdmin() {
                     {isNew ? 'Nouvelle campagne' : 'Modifier la campagne'}
                   </p>
                   <h2 className="text-lg font-bold text-white mt-0.5">
-                    {campaignForm.subject || '(sans objet)'}
+                    {currentTr.subject || campaignForm.translations.fr.subject || '(sans objet)'}
                   </h2>
                 </div>
                 <button
@@ -839,14 +1017,96 @@ export default function NewsletterAdmin() {
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {/* ── Left: Form ─────────────────────────────────────── */}
                 <div className="space-y-4 rounded-2xl border border-white/8 bg-white/3 p-5">
+                  {/* ── Language tabs ── */}
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-white/50 mr-1">Langue&nbsp;:</span>
+                      {CAMPAIGN_LOCALES.map((l) => {
+                        const status = localeStatus(l);
+                        const isActive = activeLocale === l;
+                        const dot = status === 'complete' ? 'bg-green-400' : status === 'partial' ? 'bg-amber-400' : 'bg-white/20';
+                        return (
+                          <button
+                            key={l}
+                            type="button"
+                            onClick={() => setActiveLocale(l)}
+                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                              isActive
+                                ? 'border-accent/50 bg-accent/15 text-white'
+                                : 'border-white/10 bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08]'
+                            }`}
+                          >
+                            <span aria-hidden>{LOCALE_FLAGS[l]}</span>
+                            {LOCALE_LABELS[l]}
+                            <span className={`w-1.5 h-1.5 rounded-full ${dot}`} aria-hidden />
+                          </button>
+                        );
+                      })}
+                      {CAMPAIGN_LOCALES.filter((l) => l !== activeLocale && localeStatus(l) !== 'empty').length > 0 && (
+                        <div className="ml-auto flex items-center gap-1.5">
+                          <span className="text-[10px] uppercase tracking-wider text-white/35">Copier&nbsp;:</span>
+                          {CAMPAIGN_LOCALES.filter((l) => l !== activeLocale && localeStatus(l) !== 'empty').map((l) => (
+                            <button
+                              key={l}
+                              type="button"
+                              onClick={() => copyTrFromLocale(l)}
+                              className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold text-white/60 hover:text-white hover:bg-white/[0.08] transition"
+                              title={`Copier ${LOCALE_LABELS[l]} → ${LOCALE_LABELS[activeLocale]}`}
+                            >
+                              {LOCALE_FLAGS[l]}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Auto-translate row */}
+                    {CAMPAIGN_LOCALES.filter((l) => l !== activeLocale && localeStatus(l) !== 'empty').length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-accent/20 bg-accent/[0.05] px-3 py-2">
+                        <svg className="w-4 h-4 text-accent shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                        </svg>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-white/70">
+                          Traduire vers {LOCALE_LABELS[activeLocale]} depuis&nbsp;:
+                        </span>
+                        {CAMPAIGN_LOCALES.filter((l) => l !== activeLocale && localeStatus(l) !== 'empty').map((l) => {
+                          const isLoading = translating === l;
+                          return (
+                            <button
+                              key={l}
+                              type="button"
+                              onClick={() => translateTrFromLocale(l)}
+                              disabled={!!translating}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/15 px-2.5 py-1 text-[10px] font-semibold text-accent hover:bg-accent/25 transition disabled:opacity-50 disabled:cursor-wait"
+                              title={`Traduire automatiquement ${LOCALE_LABELS[l]} → ${LOCALE_LABELS[activeLocale]} (écrase l'onglet courant)`}
+                            >
+                              {isLoading ? (
+                                <span className="w-3 h-3 rounded-full border-2 border-accent/40 border-t-accent animate-spin" />
+                              ) : (
+                                <span aria-hidden>{LOCALE_FLAGS[l]}</span>
+                              )}
+                              {LOCALE_LABELS[l]}
+                            </button>
+                          );
+                        })}
+                        {translateProvider && (
+                          <span className="ml-auto text-[10px] text-white/40">✓ via {translateProvider}</span>
+                        )}
+                        {translateError && (
+                          <span className="ml-auto text-[10px] text-red-300">⚠ {translateError}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Section: Enveloppe */}
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60">Enveloppe</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60">Enveloppe — {LOCALE_LABELS[activeLocale]}</p>
                   <div>
                     <label className="field-label">Objet de l&apos;email *</label>
                     <input
                       type="text"
-                      value={campaignForm.subject}
-                      onChange={(e) => setCampaignForm((f) => ({ ...f, subject: e.target.value }))}
+                      value={currentTr.subject}
+                      onChange={(e) => updateTr(activeLocale, 'subject', e.target.value)}
                       placeholder="ex : Notre événement 2026 approche…"
                       className="input-field"
                     />
@@ -855,8 +1115,8 @@ export default function NewsletterAdmin() {
                     <label className="field-label">Texte de prévisualisation <span className="text-white/25">(affiché avant ouverture)</span></label>
                     <input
                       type="text"
-                      value={campaignForm.previewText}
-                      onChange={(e) => setCampaignForm((f) => ({ ...f, previewText: e.target.value }))}
+                      value={currentTr.previewText}
+                      onChange={(e) => updateTr(activeLocale, 'previewText', e.target.value)}
                       placeholder="Résumé court affiché dans la boîte mail…"
                       className="input-field"
                     />
@@ -978,21 +1238,21 @@ export default function NewsletterAdmin() {
                     )}
                   </div>
                   <div>
-                    <label className="field-label">Titre principal</label>
+                    <label className="field-label">Titre principal — {LOCALE_LABELS[activeLocale]}</label>
                     <input
                       type="text"
-                      value={campaignForm.titleText}
-                      onChange={(e) => setCampaignForm((f) => ({ ...f, titleText: e.target.value }))}
+                      value={currentTr.titleText}
+                      onChange={(e) => updateTr(activeLocale, 'titleText', e.target.value)}
                       placeholder="ex : Rejoignez-nous pour Level Up 2026"
                       className="input-field"
                     />
                   </div>
                   <div>
-                    <label className="field-label">Corps du message * <span className="text-white/25">(double saut de ligne = nouveau paragraphe)</span></label>
+                    <label className="field-label">Corps du message * — {LOCALE_LABELS[activeLocale]} <span className="text-white/25">(double saut de ligne = nouveau paragraphe)</span></label>
                     <textarea
                       rows={8}
-                      value={campaignForm.bodyContent}
-                      onChange={(e) => setCampaignForm((f) => ({ ...f, bodyContent: e.target.value }))}
+                      value={currentTr.bodyContent}
+                      onChange={(e) => updateTr(activeLocale, 'bodyContent', e.target.value)}
                       placeholder="Écrivez votre message ici…&#10;&#10;Chaque double-saut de ligne crée un nouveau paragraphe dans l'email."
                       className="input-field resize-none font-mono text-[13px] leading-relaxed"
                     />
@@ -1012,17 +1272,17 @@ export default function NewsletterAdmin() {
                   <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60 pt-2">Bouton d&apos;action (optionnel)</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="field-label">Texte du bouton</label>
+                      <label className="field-label">Texte du bouton — {LOCALE_LABELS[activeLocale]}</label>
                       <input
                         type="text"
-                        value={campaignForm.ctaLabel}
-                        onChange={(e) => setCampaignForm((f) => ({ ...f, ctaLabel: e.target.value }))}
+                        value={currentTr.ctaLabel}
+                        onChange={(e) => updateTr(activeLocale, 'ctaLabel', e.target.value)}
                         placeholder="ex : Je m'inscris"
                         className="input-field"
                       />
                     </div>
                     <div>
-                      <label className="field-label">URL du bouton</label>
+                      <label className="field-label">URL du bouton <span className="text-white/25">(commune)</span></label>
                       <input
                         type="url"
                         value={campaignForm.ctaUrl}
@@ -1034,13 +1294,13 @@ export default function NewsletterAdmin() {
                   </div>
 
                   {/* Section: Footer */}
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60 pt-2">Footer (optionnel)</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60 pt-2">Footer (optionnel) — {LOCALE_LABELS[activeLocale]}</p>
                   <div>
                     <label className="field-label">Note de bas de page</label>
                     <input
                       type="text"
-                      value={campaignForm.footerNote}
-                      onChange={(e) => setCampaignForm((f) => ({ ...f, footerNote: e.target.value }))}
+                      value={currentTr.footerNote}
+                      onChange={(e) => updateTr(activeLocale, 'footerNote', e.target.value)}
                       placeholder="ex : Vous recevez cet email car vous vous êtes inscrit lors de…"
                       className="input-field"
                     />

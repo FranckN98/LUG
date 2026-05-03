@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       website?: string;
       startedAt?: number;
       submittedAt?: number;
+      locale?: string;
     };
 
     if (body.website) {
@@ -83,6 +84,16 @@ export async function POST(req: Request) {
 
     const consent = Boolean(body.consent);
 
+    const acceptLang = (h.get('accept-language') ?? '').toLowerCase();
+    const detectedLocale: 'fr' | 'en' | 'de' =
+      body.locale === 'de' || body.locale === 'fr' || body.locale === 'en'
+        ? body.locale
+        : acceptLang.startsWith('de')
+          ? 'de'
+          : acceptLang.startsWith('en')
+            ? 'en'
+            : 'fr';
+
     const existing = await prisma.newsletterSubscriber.findUnique({ where: { email } });
     if (!existing) {
       await prisma.newsletterSubscriber.create({
@@ -93,13 +104,17 @@ export async function POST(req: Request) {
           lastName: parsedName.lastName,
           source,
           consent,
+          locale: detectedLocale,
           tags: 'levelup_event',
         },
       });
     } else if (consent && !existing.consent) {
       await prisma.newsletterSubscriber.update({
         where: { email },
-        data: { consent: true },
+        data: {
+          consent: true,
+          ...(existing.locale ? {} : { locale: detectedLocale }),
+        },
       });
     } else if (!existing.firstName && !existing.lastName && parsedName.firstName) {
       await prisma.newsletterSubscriber.update({
@@ -108,7 +123,13 @@ export async function POST(req: Request) {
           name: existing.name ?? parsedName.fullName,
           firstName: parsedName.firstName,
           lastName: parsedName.lastName,
+          ...(existing.locale ? {} : { locale: detectedLocale }),
         },
+      });
+    } else if (!existing.locale) {
+      await prisma.newsletterSubscriber.update({
+        where: { email },
+        data: { locale: detectedLocale },
       });
     }
 

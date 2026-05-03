@@ -160,6 +160,7 @@ export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle,
           website: honeypot,
           startedAt,
           submittedAt: Date.now(),
+          locale,
           ...(captchaEnabled && captchaToken ? { captchaToken } : {}),
         }),
       });

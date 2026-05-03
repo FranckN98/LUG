@@ -24,6 +24,7 @@ model NewsletterSubscriber {
   address          String?
   city             String?
   status           String   @default("active")
+  locale           String?  @default("fr")
   unsubscribeToken String?  @unique @map("unsubscribe_token")
   eventCommunicationLeads EventCommunicationLead[]
 
@@ -78,8 +79,28 @@ model NewsletterCampaign {
   sentCount   Int       @default(0) @map("sent_count")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
+  translations NewsletterCampaignTranslation[]
 
   @@map("newsletter_campaigns")
+}
+
+model NewsletterCampaignTranslation {
+  id          String   @id @default(uuid())
+  campaignId  String   @map("campaign_id")
+  locale      String
+  subject     String
+  previewText String?  @map("preview_text")
+  titleText   String?  @map("title_text")
+  bodyContent String   @map("body_content")
+  ctaLabel    String?  @map("cta_label")
+  footerNote  String?  @map("footer_note")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  campaign    NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, locale])
+  @@index([locale])
+  @@map("newsletter_campaign_translations")
 }
 
 model ContactMessage {

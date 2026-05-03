@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendCampaignEmail } from '@/lib/sendCampaignEmail';
 import { parseNameFromEmail } from '@/lib/emailName';
+import { pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
 
 /**
  * Best-effort first name resolution for a newsletter subscriber.
@@ -23,8 +24,12 @@ export async function POST(
 ) {
   const { searchParams } = new URL(req.url);
   const testEmail = searchParams.get('testEmail')?.trim();
+  const testLocale = searchParams.get('testLocale')?.trim() || 'fr';
 
-  const campaign = await prisma.newsletterCampaign.findUnique({ where: { id: params.id } });
+  const campaign = await prisma.newsletterCampaign.findUnique({
+    where: { id: params.id },
+    include: { translations: true },
+  });
   if (!campaign) return NextResponse.json({ error: 'Campagne introuvable' }, { status: 404 });
 
   if (campaign.status === 'sent' && !testEmail) {
@@ -32,18 +37,33 @@ export async function POST(
   }
 
   const siteBaseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://levelupingermany.de';
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://www.levelupingermany.com';
 
-  const content = {
-    subject: campaign.subject,
-    previewText: campaign.previewText ?? undefined,
-    titleText: campaign.titleText ?? undefined,
-    bodyContent: campaign.bodyContent,
-    headerImageUrl: campaign.headerImageUrl ?? undefined,
-    campaignImageUrl: campaign.campaignImageUrl ?? undefined,
-    ctaLabel: campaign.ctaLabel ?? undefined,
-    ctaUrl: campaign.ctaUrl ?? undefined,
-    footerNote: campaign.footerNote ?? undefined,
+  // Build per-locale content (subject/body/title/etc. come from translation; images & CTA URL are shared scalars)
+  const buildContentFor = (locale: string) => {
+    const tr = pickCampaignTranslation(
+      {
+        subject: campaign.subject,
+        previewText: campaign.previewText,
+        titleText: campaign.titleText,
+        bodyContent: campaign.bodyContent,
+        ctaLabel: campaign.ctaLabel,
+        footerNote: campaign.footerNote,
+        translations: campaign.translations,
+      },
+      locale,
+    );
+    return {
+      subject: tr.subject,
+      previewText: tr.previewText ?? undefined,
+      titleText: tr.titleText ?? undefined,
+      bodyContent: tr.bodyContent,
+      headerImageUrl: campaign.headerImageUrl ?? undefined,
+      campaignImageUrl: campaign.campaignImageUrl ?? undefined,
+      ctaLabel: tr.ctaLabel ?? undefined,
+      ctaUrl: campaign.ctaUrl ?? undefined,
+      footerNote: tr.footerNote ?? undefined,
+    };
   };
 
   // ── Test send ──
@@ -52,22 +72,22 @@ export async function POST(
     if (!emailRegex.test(testEmail)) {
       return NextResponse.json({ error: 'Email de test invalide' }, { status: 400 });
     }
-
+    const testContent = buildContentFor(testLocale);
     await sendCampaignEmail({
       toEmail: testEmail,
       unsubscribeToken: 'preview-only',
       siteBaseUrl,
-      content: { ...content, subject: `[TEST] ${content.subject}` },
+      content: { ...testContent, subject: `[TEST ${testLocale.toUpperCase()}] ${testContent.subject}` },
       recipientFirstName: resolveFirstName({ email: testEmail, firstName: null, name: null }),
     });
 
-    return NextResponse.json({ ok: true, testOnly: true });
+    return NextResponse.json({ ok: true, testOnly: true, locale: testLocale });
   }
 
   // ── Real send ──
   const subscribers = await prisma.newsletterSubscriber.findMany({
     where: { status: 'active' },
-    select: { id: true, email: true, unsubscribeToken: true, firstName: true, name: true },
+    select: { id: true, email: true, unsubscribeToken: true, firstName: true, name: true, locale: true },
   });
 
   let sentCount = 0;
@@ -75,11 +95,12 @@ export async function POST(
 
   for (const sub of subscribers) {
     try {
+      const subLocale = sub.locale ?? 'fr';
       await sendCampaignEmail({
         toEmail: sub.email,
         unsubscribeToken: sub.unsubscribeToken ?? sub.id,
         siteBaseUrl,
-        content,
+        content: buildContentFor(subLocale),
         recipientFirstName: resolveFirstName(sub),
       });
       sentCount++;

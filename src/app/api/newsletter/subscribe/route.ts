@@ -38,7 +38,15 @@ export async function POST(req: Request) {
     const consent = Boolean(body.consent);
     const parsedName = parseNameFromEmail(email);
     const source = 'footer_newsletter';
-    const locale = body.locale === 'de' || body.locale === 'fr' || body.locale === 'en' ? body.locale : null;
+    const acceptLang = (h.get('accept-language') ?? '').toLowerCase();
+    const detectedLocale: 'fr' | 'en' | 'de' =
+      body.locale === 'de' || body.locale === 'fr' || body.locale === 'en'
+        ? body.locale
+        : acceptLang.startsWith('de')
+          ? 'de'
+          : acceptLang.startsWith('en')
+            ? 'en'
+            : 'fr';
 
     const existing = await prisma.newsletterSubscriber.findUnique({ where: { email } });
     if (!existing) {
@@ -50,7 +58,8 @@ export async function POST(req: Request) {
           lastName: parsedName.lastName,
           source,
           consent,
-          tags: locale ? `newsletter,locale:${locale}` : 'newsletter',
+          locale: detectedLocale,
+          tags: `newsletter,locale:${detectedLocale}`,
         },
       });
     } else {
@@ -58,6 +67,7 @@ export async function POST(req: Request) {
         where: { email },
         data: {
           consent: consent || existing.consent,
+          ...(existing.locale ? {} : { locale: detectedLocale }),
           ...(existing.firstName || existing.lastName
             ? {}
             : {

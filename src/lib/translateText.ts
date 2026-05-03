@@ -306,3 +306,22 @@ export async function translateBlogFields(
     metaDescription: metaDescription || undefined,
   };
 }
+
+/**
+ * Generic translator for arbitrary string fields. Returns the same keys with
+ * translated values (empty / null / undefined inputs become empty strings).
+ */
+export async function translateRecord(
+  fields: Record<string, string | null | undefined>,
+  options: TranslateOptions,
+): Promise<{ provider: ProviderName; values: Record<string, string> }> {
+  const provider = pickProvider();
+  const { source, target } = options;
+  const keys = Object.keys(fields);
+  const translated = await Promise.all(
+    keys.map((k) => translateOne(fields[k] ?? '', source, target, provider)),
+  );
+  const values: Record<string, string> = {};
+  keys.forEach((k, i) => { values[k] = translated[i]; });
+  return { provider: provider.name, values };
+}
