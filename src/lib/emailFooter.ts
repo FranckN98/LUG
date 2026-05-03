@@ -23,6 +23,17 @@ const SITE_URL =
 
 const AMBASSADOR_WHATSAPP_URL = 'https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst';
 
+/** Direct WhatsApp/phone contact (kept in sync with /contact and /imprint pages). */
+const CONTACT_PHONE_DISPLAY = '+49 152 04256840';
+const CONTACT_PHONE_E164 = '+4915204256840'; // tel: scheme
+const CONTACT_PHONE_WA = '4915204256840'; // wa.me requires no '+'
+const CONTACT_WHATSAPP_URL = `https://wa.me/${CONTACT_PHONE_WA}`;
+const CONTACT_TEL_URL = `tel:${CONTACT_PHONE_E164}`;
+
+/** Public contact email (kept in sync with FORMS_TO_EMAIL / NEWSLETTER_FROM_EMAIL). */
+const CONTACT_EMAIL = 'info@levelupingermany.com';
+const CONTACT_EMAIL_URL = `mailto:${CONTACT_EMAIL}`;
+
 /** Public absolute URL of the Level Up in Germany logo (served from /public). */
 export const EMAIL_LOGO_URL = `${SITE_URL}/logo.png`;
 
@@ -51,26 +62,32 @@ const TEXT = {
     visitSite: 'Notre site',
     followUs: 'Suivez-nous',
     joinAmbassadors: 'Rejoignez notre communauté WhatsApp des Ambassadeurs',
+    contactUs: 'Nous contacter',
+    writeUs: 'Écrivez-nous',
+    callOrWhatsApp: 'Appel ou WhatsApp',
   },
   de: {
     stayConnected: 'Bleiben Sie mit Level Up in Germany in Verbindung',
     visitSite: 'Unsere Website',
     followUs: 'Folgen Sie uns',
     joinAmbassadors: 'Treten Sie unserer Botschafter-WhatsApp-Community bei',
+    contactUs: 'Kontakt',
+    writeUs: 'Schreiben Sie uns',
+    callOrWhatsApp: 'Anruf oder WhatsApp',
   },
   en: {
     stayConnected: 'Stay connected with Level Up in Germany',
     visitSite: 'Our website',
     followUs: 'Follow us',
     joinAmbassadors: 'Join our Ambassadors WhatsApp community',
+    contactUs: 'Get in touch',
+    writeUs: 'Write to us',
+    callOrWhatsApp: 'Call or WhatsApp',
   },
 } as const;
 
 /** HTML block to append inside the email body (before any <hr/>/footer). */
 export function emailLinksFooterHtml(): string {
-  const lang = (k: keyof typeof TEXT.fr) =>
-    `<strong>FR</strong> ${TEXT.fr[k]}<br/><strong>DE</strong> ${TEXT.de[k]}<br/><strong>EN</strong> ${TEXT.en[k]}`;
-
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:32px 0 0;border-top:1px solid #eee;padding-top:20px">
   <tr><td style="font-family:system-ui,'Segoe UI',Arial,sans-serif;color:#1a0a0a;font-size:14px;line-height:1.6">
@@ -82,6 +99,20 @@ export function emailLinksFooterHtml(): string {
       🌐 <a href="${SITE_URL}" style="color:#8C1A1A;text-decoration:none"><strong>${SITE_URL.replace(/^https?:\/\//, '')}</strong></a>
       &nbsp;—&nbsp;
       <span style="color:#666;font-size:13px">${TEXT.fr.visitSite} / ${TEXT.de.visitSite} / ${TEXT.en.visitSite}</span>
+    </p>
+
+    <p style="margin:0 0 8px">
+      ✉️ <a href="${CONTACT_EMAIL_URL}" style="color:#8C1A1A;text-decoration:none"><strong>${CONTACT_EMAIL}</strong></a>
+      &nbsp;—&nbsp;
+      <span style="color:#666;font-size:13px">${TEXT.fr.writeUs} / ${TEXT.de.writeUs} / ${TEXT.en.writeUs}</span>
+    </p>
+
+    <p style="margin:0 0 8px">
+      📞 <a href="${CONTACT_TEL_URL}" style="color:#8C1A1A;text-decoration:none"><strong>${CONTACT_PHONE_DISPLAY}</strong></a>
+      &nbsp;·&nbsp;
+      <a href="${CONTACT_WHATSAPP_URL}" style="color:#25D366;text-decoration:none;font-weight:600">WhatsApp</a>
+      &nbsp;—&nbsp;
+      <span style="color:#666;font-size:13px">${TEXT.fr.callOrWhatsApp} / ${TEXT.de.callOrWhatsApp} / ${TEXT.en.callOrWhatsApp}</span>
     </p>
 
     <p style="margin:0 0 8px">
@@ -116,6 +147,12 @@ export function emailLinksFooterText(): string {
     '',
     `🌐 ${SITE_URL}`,
     `   ${TEXT.fr.visitSite} / ${TEXT.de.visitSite} / ${TEXT.en.visitSite}`,
+    '',
+    `✉️  ${CONTACT_EMAIL}`,
+    `   ${TEXT.fr.writeUs} / ${TEXT.de.writeUs} / ${TEXT.en.writeUs}`,
+    '',
+    `📞 ${CONTACT_PHONE_DISPLAY}  ·  WhatsApp: ${CONTACT_WHATSAPP_URL}`,
+    `   ${TEXT.fr.callOrWhatsApp} / ${TEXT.de.callOrWhatsApp} / ${TEXT.en.callOrWhatsApp}`,
     '',
     `📱 LinkedIn:  ${SOCIAL_LINKS.linkedin}`,
     `   Instagram: ${SOCIAL_LINKS.instagram}`,

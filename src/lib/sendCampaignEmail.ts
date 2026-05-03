@@ -6,6 +6,8 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+import { emailLinksFooterHtml, emailLinksFooterText } from '@/lib/emailFooter';
+
 export interface CampaignContent {
   subject: string;
   previewText?: string;
@@ -124,6 +126,13 @@ export function buildCampaignHtml(
           </td>
         </tr>
 
+        <!-- ══ CONTACT & SOCIAL FOOTER ══ -->
+        <tr>
+          <td style="background-color:#ffffff;padding:0 40px 8px">
+            ${emailLinksFooterHtml()}
+          </td>
+        </tr>
+
         <!-- ══ SIGNATURE ══ -->
         <tr>
           <td style="background-color:#ffffff;padding:0 40px 28px">
@@ -170,6 +179,7 @@ export function buildCampaignText(content: CampaignContent, unsubscribeUrl: stri
   if (content.ctaLabel && content.ctaUrl) {
     lines.push(`→ ${content.ctaLabel}: ${content.ctaUrl}`, '');
   }
+  lines.push(emailLinksFooterText());
   lines.push('--', "L'équipe Level Up in Germany", 'Berlin, Deutschland', '');
   lines.push(`Se désabonner : ${unsubscribeUrl}`);
   return lines.join('\n');
