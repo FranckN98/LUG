@@ -119,14 +119,23 @@ export async function POST(
       },
       ...sections.slice(1),
     ];
-    await sendMultilingualCampaignEmail({
-      toEmail: testEmail,
-      unsubscribeToken: 'preview-only',
-      siteBaseUrl,
-      sections: testedSections,
-      recipientFirstName: resolveFirstName({ email: testEmail, firstName: null, name: null }),
-      attachments: resolvedAttachments,
-    });
+    try {
+      await sendMultilingualCampaignEmail({
+        toEmail: testEmail,
+        unsubscribeToken: 'preview-only',
+        siteBaseUrl,
+        sections: testedSections,
+        recipientFirstName: resolveFirstName({ email: testEmail, firstName: null, name: null }),
+        attachments: resolvedAttachments,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[newsletter] Test send failed:', message);
+      return NextResponse.json(
+        { error: `Échec de l’envoi du test : ${message}` },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({
       ok: true,

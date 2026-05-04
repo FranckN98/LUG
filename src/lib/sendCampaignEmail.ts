@@ -603,7 +603,15 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
   if (!res.ok) {
     const errText = await res.text();
     console.error('[newsletter] Resend error:', res.status, errText);
-    throw new Error(`resend_failed: ${res.status}`);
+    // Try to extract a clean message from Resend's JSON error body
+    let detail = errText;
+    try {
+      const parsed = JSON.parse(errText);
+      detail = parsed.message || parsed.error || errText;
+    } catch {
+      // keep raw text
+    }
+    throw new Error(`Resend ${res.status}: ${detail}`);
   }
 }
 
@@ -677,6 +685,13 @@ export async function sendMultilingualCampaignEmail(
   if (!res.ok) {
     const errText = await res.text();
     console.error('[newsletter] Resend error:', res.status, errText);
-    throw new Error(`resend_failed: ${res.status}`);
+    let detail = errText;
+    try {
+      const parsed = JSON.parse(errText);
+      detail = parsed.message || parsed.error || errText;
+    } catch {
+      // keep raw text
+    }
+    throw new Error(`Resend ${res.status}: ${detail}`);
   }
 }
