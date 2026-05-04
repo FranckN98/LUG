@@ -4,6 +4,7 @@ import { sendMultilingualCampaignEmail, type MultilingualSection } from '@/lib/s
 import { parseNameFromEmail } from '@/lib/emailName';
 import { CAMPAIGN_LOCALES, type CampaignLocale, pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
 import { resolveAttachmentsForResend } from '@/lib/newsletterAttachments';
+import { getInlineLogoAttachment } from '@/lib/emailLogoAttachment';
 
 /**
  * Best-effort first name resolution for a newsletter subscriber.
@@ -48,6 +49,10 @@ export async function POST(
     campaign.attachments.map((a) => ({ filename: a.filename, url: a.url, size: a.size })),
     siteBaseUrl,
   );
+
+  // Inline brand logo (cid:lug-logo) so it renders in clients that block
+  // remote images. Loaded once per request and reused for every recipient.
+  const inlineLogo = (await getInlineLogoAttachment(siteBaseUrl)) ?? undefined;
 
   // Build per-locale content (subject/body/title/etc. come from translation; images & CTA URL are shared scalars)
   const buildContentFor = (locale: string) => {
@@ -127,6 +132,7 @@ export async function POST(
         sections: testedSections,
         recipientFirstName: resolveFirstName({ email: testEmail, firstName: null, name: null }),
         attachments: resolvedAttachments,
+        inlineLogo,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -164,6 +170,7 @@ export async function POST(
         sections: buildSectionsFor(subLocale),
         recipientFirstName: resolveFirstName(sub),
         attachments: resolvedAttachments,
+        inlineLogo,
       });
       sentCount++;
     } catch (err) {

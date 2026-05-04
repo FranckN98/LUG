@@ -8,7 +8,9 @@ function esc(s: string): string {
 
 import { emailLinksFooterEnglishHtml, emailLinksFooterEnglishText } from '@/lib/emailFooter';
 import { looksLikeHtml, renderRichBodyHtml, htmlToPlainText } from '@/lib/emailHtmlSanitizer';
-import { getInlineLogoAttachment, INLINE_LOGO_CID } from '@/lib/emailLogoAttachment';
+
+/** CID used to reference the inline logo in email HTML (`<img src="cid:lug-logo" />`). */
+const INLINE_LOGO_CID = 'lug-logo';
 
 export interface CampaignContent {
   subject: string;
@@ -478,6 +480,12 @@ export interface SendCampaignParams {
    * as-is to the Resend API.
    */
   attachments?: ReadonlyArray<{ filename: string; content: string }>;
+  /**
+   * Optional inline logo (CID `lug-logo`) loaded server-side. When omitted
+   * and the campaign uses the default header image, the email will still
+   * render but with a remote-loaded logo (which some clients block).
+   */
+  inlineLogo?: { filename: string; content: string; content_id: string; content_type: string };
 }
 
 /**
@@ -545,20 +553,16 @@ const personalizeContent = (content: CampaignContent, firstName: string | null |
  */
 async function buildResendAttachments(
   userAttachments: ReadonlyArray<{ filename: string; content: string }> | undefined,
-  embedLogo: boolean,
-  siteBaseUrl?: string,
+  inlineLogo: { filename: string; content: string; content_id: string; content_type: string } | undefined,
 ): Promise<Array<Record<string, string>>> {
   const out: Array<Record<string, string>> = [];
-  if (embedLogo) {
-    const logo = await getInlineLogoAttachment(siteBaseUrl);
-    if (logo) {
-      out.push({
-        filename: logo.filename,
-        content: logo.content,
-        content_id: logo.content_id,
-        content_type: logo.content_type,
-      });
-    }
+  if (inlineLogo) {
+    out.push({
+      filename: inlineLogo.filename,
+      content: inlineLogo.content,
+      content_id: inlineLogo.content_id,
+      content_type: inlineLogo.content_type,
+    });
   }
   if (userAttachments) {
     for (const a of userAttachments) {
@@ -596,7 +600,7 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
       subject: personalized.subject,
       html,
       text,
-      attachments: await buildResendAttachments(params.attachments, !params.content.headerImageUrl, params.siteBaseUrl),
+      attachments: await buildResendAttachments(params.attachments, params.content.headerImageUrl ? undefined : params.inlineLogo),
     }),
   });
 
@@ -628,6 +632,7 @@ export interface SendMultilingualCampaignParams {
   sections: ReadonlyArray<MultilingualSection>;
   recipientFirstName?: string | null;
   attachments?: ReadonlyArray<{ filename: string; content: string }>;
+  inlineLogo?: { filename: string; content: string; content_id: string; content_type: string };
 }
 
 /**
@@ -678,7 +683,7 @@ export async function sendMultilingualCampaignEmail(
       subject,
       html,
       text,
-      attachments: await buildResendAttachments(params.attachments, !params.sections[0].content.headerImageUrl, params.siteBaseUrl),
+      attachments: await buildResendAttachments(params.attachments, params.sections[0].content.headerImageUrl ? undefined : params.inlineLogo),
     }),
   });
 
