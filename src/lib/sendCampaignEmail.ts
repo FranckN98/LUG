@@ -7,6 +7,7 @@ function esc(s: string): string {
 }
 
 import { emailLinksFooterEnglishHtml, emailLinksFooterEnglishText } from '@/lib/emailFooter';
+import { looksLikeHtml, renderRichBodyHtml, htmlToPlainText } from '@/lib/emailHtmlSanitizer';
 
 export interface CampaignContent {
   subject: string;
@@ -38,14 +39,16 @@ export function buildCampaignHtml(
   const normalizedHeaderImageUrl = absoluteUrl(headerImageUrl, siteBaseUrl);
   const normalizedCampaignImageUrl = absoluteUrl(campaignImageUrl, siteBaseUrl);
 
-  const paragraphs = bodyContent
-    .split(/\n\n+/)
-    .filter(Boolean)
-    .map(
-      (p) =>
-        `<p style="margin:0 0 18px;font-size:16px;line-height:1.75;color:#2d2d2d">${esc(p.trim()).replace(/\n/g, '<br/>')}</p>`,
-    )
-    .join('');
+  const paragraphs = looksLikeHtml(bodyContent)
+    ? renderRichBodyHtml(bodyContent)
+    : bodyContent
+        .split(/\n\n+/)
+        .filter(Boolean)
+        .map(
+          (p) =>
+            `<p style="margin:0 0 18px;font-size:16px;line-height:1.75;color:#2d2d2d">${esc(p.trim()).replace(/\n/g, '<br/>')}</p>`,
+        )
+        .join('');
 
   const titleBlock = titleText
     ? `<h1 style="margin:0 0 28px;font-size:28px;font-weight:800;color:#1a1a1a;line-height:1.2;letter-spacing:-0.02em">${esc(titleText)}</h1>`
@@ -175,7 +178,11 @@ export function buildCampaignText(content: CampaignContent, unsubscribeUrl: stri
   if (content.titleText) {
     lines.push(content.titleText, '='.repeat(content.titleText.length), '');
   }
-  lines.push(content.bodyContent, '');
+  lines.push(content.titleText ? '' : '');
+  const bodyText = looksLikeHtml(content.bodyContent)
+    ? htmlToPlainText(content.bodyContent)
+    : content.bodyContent;
+  lines.push(bodyText, '');
   if (content.ctaLabel && content.ctaUrl) {
     lines.push(`→ ${content.ctaLabel}: ${content.ctaUrl}`, '');
   }
@@ -270,14 +277,16 @@ export function buildMultilingualCampaignHtml(
   const sectionBlock = (s: MultilingualSection, index: number, total: number): string => {
     const { content, locale } = s;
 
-    const paragraphs = content.bodyContent
-      .split(/\n\n+/)
-      .filter(Boolean)
-      .map(
-        (p) =>
-          `<p style="margin:0 0 18px;font-size:16px;line-height:1.75;color:#2d2d2d">${esc(p.trim()).replace(/\n/g, '<br/>')}</p>`,
-      )
-      .join('');
+    const paragraphs = looksLikeHtml(content.bodyContent)
+      ? renderRichBodyHtml(content.bodyContent)
+      : content.bodyContent
+          .split(/\n\n+/)
+          .filter(Boolean)
+          .map(
+            (p) =>
+              `<p style="margin:0 0 18px;font-size:16px;line-height:1.75;color:#2d2d2d">${esc(p.trim()).replace(/\n/g, '<br/>')}</p>`,
+          )
+          .join('');
 
     const titleBlock = content.titleText
       ? `<h2 style="margin:0 0 24px;font-size:24px;font-weight:800;color:#1a1a1a;line-height:1.2;letter-spacing:-0.02em">${esc(content.titleText)}</h2>`
@@ -430,7 +439,10 @@ export function buildMultilingualCampaignText(
     if (s.content.titleText) {
       lines.push(s.content.titleText, '─'.repeat(Math.min(s.content.titleText.length, 60)), '');
     }
-    lines.push(s.content.bodyContent, '');
+    const bodyText = looksLikeHtml(s.content.bodyContent)
+      ? htmlToPlainText(s.content.bodyContent)
+      : s.content.bodyContent;
+    lines.push(bodyText, '');
     if (s.content.ctaLabel && s.content.ctaUrl) {
       lines.push(`→ ${s.content.ctaLabel}: ${s.content.ctaUrl}`, '');
     }

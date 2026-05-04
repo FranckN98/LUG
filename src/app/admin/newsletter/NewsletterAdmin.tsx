@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { buildCampaignHtml, buildMultilingualCampaignHtml, type MultilingualSection } from '@/lib/sendCampaignEmail';
+import { NewsletterRichEditor } from '@/components/admin/NewsletterRichEditor';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Subscriber {
@@ -1362,13 +1363,12 @@ export default function NewsletterAdmin() {
                     />
                   </div>
                   <div>
-                    <label className="field-label">Corps du message * — {LOCALE_LABELS[activeLocale]} <span className="text-white/25">(double saut de ligne = nouveau paragraphe)</span></label>
-                    <textarea
-                      rows={8}
+                    <label className="field-label">Corps du message * — {LOCALE_LABELS[activeLocale]} <span className="text-white/25">(éditeur riche : gras, liens, images, boutons…)</span></label>
+                    <NewsletterRichEditor
                       value={currentTr.bodyContent}
-                      onChange={(e) => updateTr(activeLocale, 'bodyContent', e.target.value)}
-                      placeholder="Écrivez votre message ici…&#10;&#10;Chaque double-saut de ligne crée un nouveau paragraphe dans l'email."
-                      className="input-field resize-none font-mono text-[13px] leading-relaxed"
+                      onChange={(html) => updateTr(activeLocale, 'bodyContent', html)}
+                      placeholder="Rédigez votre message… utilisez la barre d'outils pour ajouter des titres, listes, liens, images et boutons."
+                      minHeight={260}
                     />
                     <div className="mt-2 rounded-lg border border-accent/20 bg-accent/[0.04] px-3 py-2 text-[11px] leading-relaxed text-white/70">
                       <p className="font-semibold text-accent/90 mb-1">💡 Personnalisation par prénom (optionnelle)</p>
