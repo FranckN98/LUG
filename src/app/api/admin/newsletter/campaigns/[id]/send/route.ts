@@ -4,7 +4,7 @@ import { sendMultilingualCampaignEmail, type MultilingualSection } from '@/lib/s
 import { parseNameFromEmail } from '@/lib/emailName';
 import { CAMPAIGN_LOCALES, type CampaignLocale, pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
 import { resolveAttachmentsForResend } from '@/lib/newsletterAttachments';
-import { getInlineLogoAttachment } from '@/lib/emailLogoAttachment';
+import { getInlineLogoAttachment, loadHeaderImageAsInline } from '@/lib/emailLogoAttachment';
 
 /**
  * Best-effort first name resolution for a newsletter subscriber.
@@ -51,8 +51,18 @@ export async function POST(
   );
 
   // Inline brand logo (cid:lug-logo) so it renders in clients that block
-  // remote images. Loaded once per request and reused for every recipient.
-  const inlineLogo = (await getInlineLogoAttachment(siteBaseUrl)) ?? undefined;
+  // remote images. If the campaign has a custom header image (uploaded by
+  // the admin), use that; otherwise fall back to the default brand logo.
+  let inlineLogo = undefined;
+  if (campaign.headerImageUrl) {
+    inlineLogo = (await loadHeaderImageAsInline(campaign.headerImageUrl, siteBaseUrl)) ?? undefined;
+    if (!inlineLogo) {
+      console.warn('[newsletter] Custom header image could not be loaded, falling back to default logo:', campaign.headerImageUrl);
+    }
+  }
+  if (!inlineLogo) {
+    inlineLogo = (await getInlineLogoAttachment(siteBaseUrl)) ?? undefined;
+  }
 
   // Build per-locale content (subject/body/title/etc. come from translation; images & CTA URL are shared scalars)
   const buildContentFor = (locale: string) => {

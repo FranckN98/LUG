@@ -11,7 +11,21 @@ interface InlineLogoAttachment {
   content_type: string;
 }
 
-let cached: InlineLogoAttachment | null = null;
+let cachedDefault: InlineLogoAttachment | null = null;
+
+const EXT_TO_MIME: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  svg: 'image/svg+xml',
+};
+
+function mimeFromExt(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase() || '';
+  return EXT_TO_MIME[ext] || 'image/png';
+}
 
 /**
  * Read the brand logo as base64 and return it as an inline (CID) attachment
@@ -27,19 +41,19 @@ let cached: InlineLogoAttachment | null = null;
 export async function getInlineLogoAttachment(
   siteBaseUrl?: string,
 ): Promise<InlineLogoAttachment | null> {
-  if (cached) return cached;
+  if (cachedDefault) return cachedDefault;
 
   // 1) Try local filesystem (dev + bundled deployments)
   try {
     const filePath = path.join(process.cwd(), 'public', 'logo.png');
     const buf = await fs.readFile(filePath);
-    cached = {
+    cachedDefault = {
       filename: 'logo.png',
       content: buf.toString('base64'),
       content_id: INLINE_LOGO_CID,
       content_type: 'image/png',
     };
-    return cached;
+    return cachedDefault;
   } catch {
     // Continue to URL fallback
   }
@@ -50,15 +64,76 @@ export async function getInlineLogoAttachment(
     const res = await fetch(`${base}/logo.png`, { cache: 'force-cache' });
     if (!res.ok) throw new Error(`status ${res.status}`);
     const arr = await res.arrayBuffer();
-    cached = {
+    cachedDefault = {
       filename: 'logo.png',
       content: Buffer.from(arr).toString('base64'),
       content_id: INLINE_LOGO_CID,
       content_type: 'image/png',
     };
-    return cached;
+    return cachedDefault;
   } catch (err) {
-    console.warn('[newsletter] Could not load logo for inline embed:', err);
+    console.warn('[newsletter] Could not load default logo for inline embed:', err);
+    return null;
+  }
+}
+
+/**
+ * Load an arbitrary image (URL or relative path) and return it as an inline
+ * (CID) attachment. Used to embed user-uploaded campaign header logos so
+ * they render in email clients that block remote images.
+ *
+ * - Absolute https/http URLs are fetched as-is.
+ * - Relative paths starting with `/` are resolved against `siteBaseUrl`.
+ * - Other strings are treated as relative to `siteBaseUrl`.
+ *
+ * Returns `null` if the image cannot be loaded.
+ */
+export async function loadHeaderImageAsInline(
+  url: string,
+  siteBaseUrl: string,
+): Promise<InlineLogoAttachment | null> {
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+
+  let absoluteUrl: string;
+  if (/^https?:\/\//i.test(trimmed)) {
+    absoluteUrl = trimmed;
+  } else if (trimmed.startsWith('/')) {
+    absoluteUrl = `${siteBaseUrl}${trimmed}`;
+  } else {
+    absoluteUrl = `${siteBaseUrl}/${trimmed}`;
+  }
+
+  // For relative paths under public/, try the filesystem first
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+    try {
+      const filePath = path.join(process.cwd(), 'public', trimmed.replace(/^\/+/, ''));
+      const buf = await fs.readFile(filePath);
+      const filename = path.basename(filePath);
+      return {
+        filename,
+        content: buf.toString('base64'),
+        content_id: INLINE_LOGO_CID,
+        content_type: mimeFromExt(filename),
+      };
+    } catch {
+      // Fall through to fetch
+    }
+  }
+
+  try {
+    const res = await fetch(absoluteUrl, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`status ${res.status}`);
+    const arr = await res.arrayBuffer();
+    const filename = decodeURIComponent(absoluteUrl.split('/').pop() || 'logo.png').split('?')[0];
+    return {
+      filename: filename || 'logo.png',
+      content: Buffer.from(arr).toString('base64'),
+      content_id: INLINE_LOGO_CID,
+      content_type: mimeFromExt(filename),
+    };
+  } catch (err) {
+    console.warn('[newsletter] Could not load header image for inline embed:', absoluteUrl, err);
     return null;
   }
 }

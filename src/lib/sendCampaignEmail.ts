@@ -76,12 +76,11 @@ export function buildCampaignHtml(
     ? `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;visibility:hidden;opacity:0;color:transparent">${esc(previewText)}</div>`
     : '';
 
-  // Header image: displayed prominently above the name bar if provided.
-  // Falls back to the inline-embedded logo (cid:) so it renders even when the
-  // email client blocks external images.
-  const headerImageBlock = normalizedHeaderImageUrl
-    ? `<img src="${esc(normalizedHeaderImageUrl)}" alt="Logo" width="160" style="display:block;margin:0 auto 16px;max-width:160px;height:auto;border:0" />`
-    : `<img src="cid:${INLINE_LOGO_CID}" alt="Level Up in Germany" width="140" style="display:block;margin:0 auto 12px;max-width:140px;height:auto;border:0" />`;
+  // Header image: use the inline-embedded logo (cid:) so it renders even when
+  // the email client blocks external images. The CID resolves to either the
+  // default brand logo or the user-uploaded campaign header (loaded server-
+  // side and passed via `inlineLogo`).
+  const headerImageBlock = `<img src="cid:${INLINE_LOGO_CID}" alt="${normalizedHeaderImageUrl ? 'Logo' : 'Level Up in Germany'}" width="${normalizedHeaderImageUrl ? 160 : 140}" style="display:block;margin:0 auto ${normalizedHeaderImageUrl ? 16 : 12}px;max-width:${normalizedHeaderImageUrl ? 160 : 140}px;height:auto;border:0" />`;
 
 
   return `<!DOCTYPE html>
@@ -250,9 +249,7 @@ export function buildMultilingualCampaignHtml(
     ? `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;visibility:hidden;opacity:0;color:transparent">${esc(previewText)}</div>`
     : '';
 
-  const headerImageBlock = normalizedHeaderImageUrl
-    ? `<img src="${esc(normalizedHeaderImageUrl)}" alt="Logo" width="160" style="display:block;margin:0 auto 16px;max-width:160px;height:auto;border:0" />`
-    : `<img src="cid:${INLINE_LOGO_CID}" alt="Level Up in Germany" width="140" style="display:block;margin:0 auto 12px;max-width:140px;height:auto;border:0" />`;
+  const headerImageBlock = `<img src="cid:${INLINE_LOGO_CID}" alt="${normalizedHeaderImageUrl ? 'Logo' : 'Level Up in Germany'}" width="${normalizedHeaderImageUrl ? 160 : 140}" style="display:block;margin:0 auto ${normalizedHeaderImageUrl ? 16 : 12}px;max-width:${normalizedHeaderImageUrl ? 160 : 140}px;height:auto;border:0" />`;
 
   // Campaign image: shared, displayed once at the top of the body
   const campaignImageBlock = normalizedCampaignImageUrl
@@ -600,7 +597,7 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
       subject: personalized.subject,
       html,
       text,
-      attachments: await buildResendAttachments(params.attachments, params.content.headerImageUrl ? undefined : params.inlineLogo),
+      attachments: await buildResendAttachments(params.attachments, params.inlineLogo),
     }),
   });
 
@@ -683,7 +680,7 @@ export async function sendMultilingualCampaignEmail(
       subject,
       html,
       text,
-      attachments: await buildResendAttachments(params.attachments, params.sections[0].content.headerImageUrl ? undefined : params.inlineLogo),
+      attachments: await buildResendAttachments(params.attachments, params.inlineLogo),
     }),
   });
 
