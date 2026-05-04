@@ -12,6 +12,7 @@ import type { HomeCopy } from '@/content/home';
 import { programHref } from '@/content/home';
 import type { Locale } from '@/i18n/config';
 import { whoWeAreHref } from '@/lib/whoWeAreRoutes';
+import { BusinessTourVideoPlayer } from '@/components/BusinessTourVideoPlayer';
 
 function IconUsers() {
   return (
@@ -194,44 +195,11 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
                   ))}
                 </ul>
               </RevealOnScroll>
-              <RevealOnScroll delayMs={140}>
-                <Link
-                  href={`${base}/contact`}
-                  className="inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-black shadow-lg shadow-accent/30 hover:bg-amber-400 hover:scale-[1.03] active:scale-[0.97] transition-all duration-200"
-                >
-                  {t.businessTourCta}
-                  <span aria-hidden>→</span>
-                </Link>
-              </RevealOnScroll>
             </div>
 
-            {/* Right: visual quote card */}
+            {/* Right: inline video player with premium animated play button */}
             <RevealOnScroll delayMs={60}>
-              <div className="relative rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-sm p-8 sm:p-10 shadow-[0_0_80px_rgba(233,140,11,0.10)]">
-                {/* Film clapperboard icon */}
-                <div className="mb-6 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent text-xl">🎬</span>
-                  <span className="text-xs font-bold uppercase tracking-[0.25em] text-white/40">Business Tour</span>
-                </div>
-                <blockquote className="font-display text-2xl sm:text-3xl font-semibold text-white leading-snug mb-6">
-                  Behind every successful brand,<br />
-                  <span className="text-accent">there&apos;s a story people never see.</span><br />
-                  That&apos;s the story we film.
-                </blockquote>
-                <div className="h-px w-full bg-white/10 mb-6" />
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  {[
-                    { icon: '🏭', label: locale === 'fr' ? 'Entreprises' : locale === 'de' ? 'Betriebe' : 'Businesses' },
-                    { icon: '🎥', label: locale === 'fr' ? 'Mini-docs' : 'Mini-docs' },
-                    { icon: '🌍', label: locale === 'fr' ? 'Diaspora' : 'Diaspora' },
-                  ].map((item) => (
-                    <div key={item.label} className="rounded-2xl bg-white/[0.05] py-4 px-2">
-                      <div className="text-2xl mb-1">{item.icon}</div>
-                      <div className="text-xs text-white/50 font-medium">{item.label}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <BusinessTourVideoPlayer videoId="VZ6tcyH1RDY" locale={locale} title={t.businessTourTitle} />
             </RevealOnScroll>
           </div>
         </div>
