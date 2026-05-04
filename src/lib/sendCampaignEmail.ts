@@ -8,6 +8,7 @@ function esc(s: string): string {
 
 import { emailLinksFooterEnglishHtml, emailLinksFooterEnglishText } from '@/lib/emailFooter';
 import { looksLikeHtml, renderRichBodyHtml, htmlToPlainText } from '@/lib/emailHtmlSanitizer';
+import { getInlineLogoAttachment, INLINE_LOGO_CID } from '@/lib/emailLogoAttachment';
 
 export interface CampaignContent {
   subject: string;
@@ -73,10 +74,12 @@ export function buildCampaignHtml(
     ? `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;visibility:hidden;opacity:0;color:transparent">${esc(previewText)}</div>`
     : '';
 
-  // Header image: displayed prominently above the name bar if provided
+  // Header image: displayed prominently above the name bar if provided.
+  // Falls back to the inline-embedded logo (cid:) so it renders even when the
+  // email client blocks external images.
   const headerImageBlock = normalizedHeaderImageUrl
     ? `<img src="${esc(normalizedHeaderImageUrl)}" alt="Logo" width="160" style="display:block;margin:0 auto 16px;max-width:160px;height:auto;border:0" />`
-    : `<img src="${siteBaseUrl}/logo.png" alt="Level Up in Germany" width="140" style="display:block;margin:0 auto 12px;max-width:140px;height:auto;border:0" />`;
+    : `<img src="cid:${INLINE_LOGO_CID}" alt="Level Up in Germany" width="140" style="display:block;margin:0 auto 12px;max-width:140px;height:auto;border:0" />`;
 
 
   return `<!DOCTYPE html>
@@ -247,7 +250,7 @@ export function buildMultilingualCampaignHtml(
 
   const headerImageBlock = normalizedHeaderImageUrl
     ? `<img src="${esc(normalizedHeaderImageUrl)}" alt="Logo" width="160" style="display:block;margin:0 auto 16px;max-width:160px;height:auto;border:0" />`
-    : `<img src="${siteBaseUrl}/logo.png" alt="Level Up in Germany" width="140" style="display:block;margin:0 auto 12px;max-width:140px;height:auto;border:0" />`;
+    : `<img src="cid:${INLINE_LOGO_CID}" alt="Level Up in Germany" width="140" style="display:block;margin:0 auto 12px;max-width:140px;height:auto;border:0" />`;
 
   // Campaign image: shared, displayed once at the top of the body
   const campaignImageBlock = normalizedCampaignImageUrl
@@ -534,6 +537,37 @@ const personalizeContent = (content: CampaignContent, firstName: string | null |
   footerNote: content.footerNote ? personalizeCampaignText(content.footerNote, firstName) : content.footerNote,
 });
 
+/**
+ * Build the `attachments` array for the Resend API call. Always prepends the
+ * inline logo (referenced via `cid:lug-logo` in the HTML) when no custom
+ * `headerImageUrl` was provided, so the brand logo renders even in clients
+ * that block remote images by default (Gmail, Outlook, …).
+ */
+async function buildResendAttachments(
+  userAttachments: ReadonlyArray<{ filename: string; content: string }> | undefined,
+  embedLogo: boolean,
+  siteBaseUrl?: string,
+): Promise<Array<Record<string, string>>> {
+  const out: Array<Record<string, string>> = [];
+  if (embedLogo) {
+    const logo = await getInlineLogoAttachment(siteBaseUrl);
+    if (logo) {
+      out.push({
+        filename: logo.filename,
+        content: logo.content,
+        content_id: logo.content_id,
+        content_type: logo.content_type,
+      });
+    }
+  }
+  if (userAttachments) {
+    for (const a of userAttachments) {
+      out.push({ filename: a.filename, content: a.content });
+    }
+  }
+  return out;
+}
+
 export async function sendCampaignEmail(params: SendCampaignParams): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from =
@@ -562,9 +596,7 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
       subject: personalized.subject,
       html,
       text,
-      ...(params.attachments && params.attachments.length > 0
-        ? { attachments: params.attachments.map((a) => ({ filename: a.filename, content: a.content })) }
-        : {}),
+      attachments: await buildResendAttachments(params.attachments, !params.content.headerImageUrl, params.siteBaseUrl),
     }),
   });
 
@@ -638,9 +670,7 @@ export async function sendMultilingualCampaignEmail(
       subject,
       html,
       text,
-      ...(params.attachments && params.attachments.length > 0
-        ? { attachments: params.attachments.map((a) => ({ filename: a.filename, content: a.content })) }
-        : {}),
+      attachments: await buildResendAttachments(params.attachments, !params.sections[0].content.headerImageUrl, params.siteBaseUrl),
     }),
   });
 
