@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify';
+import sanitizeHtml from 'sanitize-html';
 
 /**
  * Returns true if the given string looks like HTML (contains a tag).
@@ -11,27 +11,38 @@ export function looksLikeHtml(s: string): boolean {
 }
 
 /**
- * Sanitize HTML for safe inclusion in outgoing emails. Strips scripts, iframes,
- * event handlers, and other unsafe constructs while preserving the inline
- * styling required by email clients.
+ * Sanitize HTML for safe inclusion in outgoing emails. Strips scripts,
+ * iframes, event handlers, and other unsafe constructs while preserving the
+ * inline `style` attributes required by email clients.
  */
 export function sanitizeEmailHtml(dirty: string): string {
-  return DOMPurify.sanitize(dirty, {
-    ALLOWED_TAGS: [
+  return sanitizeHtml(dirty, {
+    allowedTags: [
       'a', 'b', 'strong', 'i', 'em', 'u', 's', 'br', 'p', 'div', 'span',
       'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
       'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
       'hr', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th',
       'figure', 'figcaption', 'small', 'sub', 'sup',
     ],
-    ALLOWED_ATTR: [
-      'href', 'src', 'alt', 'title', 'target', 'rel', 'style', 'width', 'height',
-      'align', 'valign', 'cellpadding', 'cellspacing', 'border', 'colspan', 'rowspan',
-      'class', 'id', 'name',
-    ],
-    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|#|\/)/i,
-    ADD_ATTR: ['target'],
-    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'style', 'link', 'meta'],
+    allowedAttributes: {
+      '*': ['style', 'class', 'id', 'align'],
+      a: ['href', 'target', 'rel', 'title', 'name'],
+      img: ['src', 'alt', 'title', 'width', 'height'],
+      table: ['width', 'height', 'cellpadding', 'cellspacing', 'border', 'align'],
+      td: ['width', 'height', 'colspan', 'rowspan', 'valign', 'align'],
+      th: ['width', 'height', 'colspan', 'rowspan', 'valign', 'align'],
+      tr: ['valign', 'align'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+    allowedSchemesAppliedToAttributes: ['href', 'src', 'cite'],
+    allowProtocolRelative: false,
+    allowedStyles: {
+      '*': {
+        '*': [/.*/],
+      },
+    },
+    disallowedTagsMode: 'discard',
+    nonTextTags: ['style', 'script', 'textarea', 'noscript', 'iframe', 'object', 'embed'],
   });
 }
 
