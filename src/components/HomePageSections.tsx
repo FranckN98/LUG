@@ -200,6 +200,38 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
             {/* Right: large inline video player (7 cols) */}
             <RevealOnScroll delayMs={60} className="lg:col-span-7 w-full">
               <BusinessTourVideoPlayer videoId="VZ6tcyH1RDY" locale={locale} title={t.businessTourTitle} />
+
+              {/* Description + emoji highlights below the video */}
+              <div className="mt-8 sm:mt-10">
+                <p className="text-white/75 text-base sm:text-lg leading-relaxed text-center max-w-2xl mx-auto mb-6">
+                  {locale === 'fr'
+                    ? '🎬 Une immersion authentique au cœur des entreprises, marques et fondateurs qui construisent en silence — avant que le monde ne les remarque.'
+                    : locale === 'de'
+                    ? '🎬 Ein authentischer Einblick in Unternehmen, Marken und Gründer:innen, die im Stillen aufbauen – bevor die Welt sie bemerkt.'
+                    : '🎬 An authentic look inside the businesses, brands and founders who build quietly — long before the world notices.'}
+                </p>
+                <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
+                  {[
+                    {
+                      icon: '🏭',
+                      label:
+                        locale === 'fr' ? 'Entreprises' : locale === 'de' ? 'Betriebe' : 'Businesses',
+                    },
+                    { icon: '🎥', label: 'Mini-docs' },
+                    { icon: '🌍', label: 'Diaspora' },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm py-4 px-2 text-center transition-all duration-300 hover:border-accent/40 hover:bg-white/[0.07] hover:-translate-y-0.5"
+                    >
+                      <div className="text-2xl sm:text-3xl mb-1">{item.icon}</div>
+                      <div className="text-xs sm:text-sm text-white/70 font-semibold tracking-wide">
+                        {item.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </RevealOnScroll>
           </div>
         </div>
