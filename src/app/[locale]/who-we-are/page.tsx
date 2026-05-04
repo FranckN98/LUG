@@ -244,12 +244,25 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
                 ? 'Entrez en contact avec nous'
                 : 'Reach out to us'}
             </h2>
-            <Link
-              href={`/${loc}/contact`}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-light hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
-            >
-              {t.ctaContact} →
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+              <Link
+                href={`/${loc}/contact`}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/25 hover:bg-primary-light hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+              >
+                {t.ctaContact} →
+              </Link>
+              <Link
+                href={`/${loc}/membership`}
+                className="group inline-flex items-center justify-center gap-2 rounded-full border-2 border-accent bg-white px-8 py-3.5 text-sm font-semibold text-accent-dark shadow-sm hover:bg-accent hover:text-black hover:scale-[1.02] hover:shadow-lg hover:shadow-accent/30 active:scale-[0.98] transition-all duration-300"
+              >
+                <span aria-hidden className="text-base leading-none">★</span>
+                {loc === 'de'
+                  ? 'Mitglied werden'
+                  : loc === 'fr'
+                  ? 'Devenir membre'
+                  : 'Become a member'}
+              </Link>
+            </div>
           </RevealOnScroll>
         </div>
       </section>
