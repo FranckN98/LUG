@@ -138,6 +138,71 @@ export function emailLinksFooterHtml(): string {
 </table>`;
 }
 
+/**
+ * English-only variant of the email links footer, used by newsletter campaign
+ * emails (which already include per-language sections in the body so the
+ * footer should not duplicate that).
+ */
+export function emailLinksFooterEnglishHtml(): string {
+  return `
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:32px 0 0;border-top:1px solid #eee;padding-top:20px">
+  <tr><td style="font-family:system-ui,'Segoe UI',Arial,sans-serif;color:#1a0a0a;font-size:14px;line-height:1.6">
+    <p style="margin:0 0 12px;font-weight:600;color:#8C1A1A">
+      ${TEXT.en.stayConnected}
+    </p>
+
+    <p style="margin:0 0 8px">
+      🌐 <a href="${SITE_URL}" style="color:#8C1A1A;text-decoration:none"><strong>${SITE_URL.replace(/^https?:\/\//, '')}</strong></a>
+      &nbsp;—&nbsp;<span style="color:#666;font-size:13px">${TEXT.en.visitSite}</span>
+    </p>
+
+    <p style="margin:0 0 8px">
+      ✉️ <a href="${CONTACT_EMAIL_URL}" style="color:#8C1A1A;text-decoration:none"><strong>${CONTACT_EMAIL}</strong></a>
+      &nbsp;—&nbsp;<span style="color:#666;font-size:13px">${TEXT.en.writeUs}</span>
+    </p>
+
+    <p style="margin:0 0 8px">
+      📞 <a href="${CONTACT_TEL_URL}" style="color:#8C1A1A;text-decoration:none"><strong>${CONTACT_PHONE_DISPLAY}</strong></a>
+      &nbsp;·&nbsp;
+      <a href="${CONTACT_WHATSAPP_URL}" style="color:#25D366;text-decoration:none;font-weight:600">WhatsApp</a>
+      &nbsp;—&nbsp;<span style="color:#666;font-size:13px">${TEXT.en.callOrWhatsApp}</span>
+    </p>
+
+    <p style="margin:0 0 8px">
+      📱 <a href="${SOCIAL_LINKS.linkedin}" style="color:#8C1A1A;text-decoration:none">LinkedIn</a>
+      &nbsp;·&nbsp;
+      <a href="${SOCIAL_LINKS.instagram}" style="color:#8C1A1A;text-decoration:none">Instagram</a>
+      &nbsp;·&nbsp;
+      <a href="${SOCIAL_LINKS.tiktok}" style="color:#8C1A1A;text-decoration:none">TikTok</a>
+      &nbsp;—&nbsp;<span style="color:#666;font-size:13px">${TEXT.en.followUs}</span>
+    </p>
+
+    <p style="margin:0">
+      💬 <a href="${AMBASSADOR_WHATSAPP_URL}" style="color:#25D366;text-decoration:none;font-weight:600">${TEXT.en.joinAmbassadors}</a>
+    </p>
+  </td></tr>
+</table>`;
+}
+
+/** Plain-text English-only equivalent for newsletter campaigns. */
+export function emailLinksFooterEnglishText(): string {
+  return [
+    '',
+    '— — —',
+    TEXT.en.stayConnected,
+    '',
+    `🌐 ${SITE_URL}  —  ${TEXT.en.visitSite}`,
+    `✉️  ${CONTACT_EMAIL}  —  ${TEXT.en.writeUs}`,
+    `📞 ${CONTACT_PHONE_DISPLAY}  ·  WhatsApp: ${CONTACT_WHATSAPP_URL}`,
+    `📱 LinkedIn:  ${SOCIAL_LINKS.linkedin}`,
+    `   Instagram: ${SOCIAL_LINKS.instagram}`,
+    `   TikTok:    ${SOCIAL_LINKS.tiktok}`,
+    '',
+    `💬 ${TEXT.en.joinAmbassadors}: ${AMBASSADOR_WHATSAPP_URL}`,
+    '',
+  ].join('\n');
+}
+
 /** Plain-text equivalent for the same footer, appended to text-only bodies. */
 export function emailLinksFooterText(): string {
   return [
