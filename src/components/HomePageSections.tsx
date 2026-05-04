@@ -167,10 +167,10 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_80%_50%,rgba(233,140,11,0.12),transparent)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_10%_30%,rgba(140,26,26,0.18),transparent)]" />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Left: text */}
-            <div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+            {/* Left: text (5 cols) */}
+            <div className="lg:col-span-5">
               <RevealOnScroll>
                 <span className="inline-block text-xs font-bold uppercase tracking-[0.3em] text-accent mb-5">
                   {t.businessTourEyebrow}
@@ -197,8 +197,8 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
               </RevealOnScroll>
             </div>
 
-            {/* Right: inline video player with premium animated play button */}
-            <RevealOnScroll delayMs={60}>
+            {/* Right: large inline video player (7 cols) */}
+            <RevealOnScroll delayMs={60} className="lg:col-span-7 w-full">
               <BusinessTourVideoPlayer videoId="VZ6tcyH1RDY" locale={locale} title={t.businessTourTitle} />
             </RevealOnScroll>
           </div>
