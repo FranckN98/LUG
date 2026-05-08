@@ -1,0 +1,15 @@
+import { Client } from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
+const url = process.env.NEON_DATABASE_URL;
+const parsed = new URL(url.replace('postgresql://', 'http://').replace('postgres://', 'http://'));
+console.log('Host:', parsed.host);
+console.log('DB  :', parsed.pathname);
+const c = new Client({ connectionString: url });
+await c.connect();
+const schemas = await c.query("SELECT schema_name FROM information_schema.schemata ORDER BY schema_name");
+console.log('Schemas:', schemas.rows.map(r => r.schema_name).join(', '));
+const all = await c.query("SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog','information_schema') ORDER BY table_schema, table_name");
+console.log('All non-system tables (' + all.rows.length + '):');
+for (const row of all.rows) console.log('  ' + row.table_schema + '.' + row.table_name);
+await c.end();

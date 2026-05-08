@@ -9,6 +9,11 @@ import { formatReadingTime } from '@/lib/readingTime';
 import { buildPageMetadata } from '@/lib/seo';
 import { pickBlogTranslation } from '@/lib/blogTranslation';
 
+// Always render fresh from the DB so admin edits / new translations appear
+// immediately without redeploy.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const backLabel: Record<Locale, string> = {
   fr: '← Retour au Blog',
   en: '← Back to Blog',

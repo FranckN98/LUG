@@ -9,6 +9,11 @@ import { getBlogStats } from '@/lib/siteStats';
 import { formatReadingTime } from '@/lib/readingTime';
 import { pickBlogTranslation } from '@/lib/blogTranslation';
 
+// Always render fresh from the DB so admin edits / new translations appear
+// immediately without redeploy.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/blog-impact');
 }
