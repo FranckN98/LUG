@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { sendMultilingualCampaignEmail, type MultilingualSection } from '@/lib/sendCampaignEmail';
 import { parseNameFromEmail } from '@/lib/emailName';
 import { CAMPAIGN_LOCALES, type CampaignLocale, pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
 import { resolveAttachmentsForResend } from '@/lib/newsletterAttachments';
 import { getInlineLogoAttachment, loadHeaderImageAsInline } from '@/lib/emailLogoAttachment';
+import { requireAdmin } from '@/lib/adminAuth';
 
 /**
  * Best-effort first name resolution for a newsletter subscriber.
@@ -24,6 +26,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { searchParams } = new URL(req.url);
   const testEmail = searchParams.get('testEmail')?.trim();
   const testLocale = searchParams.get('testLocale')?.trim() || 'fr';
@@ -173,9 +178,19 @@ export async function POST(
   for (const sub of subscribers) {
     try {
       const subLocale = sub.locale ?? 'fr';
+      // Backfill an unsubscribe token for legacy rows that don't have one
+      // so the secure (token-only) /api/unsubscribe flow still works.
+      let token = sub.unsubscribeToken;
+      if (!token) {
+        token = randomUUID();
+        await prisma.newsletterSubscriber.update({
+          where: { id: sub.id },
+          data: { unsubscribeToken: token },
+        });
+      }
       await sendMultilingualCampaignEmail({
         toEmail: sub.email,
-        unsubscribeToken: sub.unsubscribeToken ?? sub.id,
+        unsubscribeToken: token,
         siteBaseUrl,
         sections: buildSectionsFor(subLocale),
         recipientFirstName: resolveFirstName(sub),

@@ -4,6 +4,7 @@ import { join } from 'path';
 import fs from 'fs';
 import { prisma } from '@/lib/prisma';
 import { DEFAULT_HERO_IMAGES } from '@/lib/heroDefaults';
+import { requireAdmin } from '@/lib/adminAuth';
 
 const IMAGE_EXT = /\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i;
 
@@ -44,6 +45,9 @@ function listCommunityItems() {
 
 // GET /api/admin/media?category=blog
 export async function GET(request: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
 
@@ -81,6 +85,9 @@ export async function GET(request: Request) {
 
 // POST /api/admin/media — enregistre une URL externe (ex: AWS S3) sans upload fichier
 export async function POST(request: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   let body: unknown;
   try {
     body = await request.json();
@@ -133,6 +140,9 @@ export async function POST(request: Request) {
 
 // DELETE /api/admin/media?id=xxx
 export async function DELETE(request: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
 

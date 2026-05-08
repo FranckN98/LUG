@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,9 @@ const RANGES: Record<string, number> = {
 };
 
 export async function GET(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(req.url);
     const rangeKey = searchParams.get('range') || '7d';

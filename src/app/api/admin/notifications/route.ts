@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const [pendingMembers, unreadMessages, unseenInteractions, recentMembers, recentMessages, recentInteractions] = await Promise.all([
       prisma.member.count({ where: { applicationStatus: 'pending' } }),
@@ -59,6 +63,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const body = (await req.json().catch(() => ({}))) as { categories?: string[] };
     const cats = Array.isArray(body.categories) && body.categories.length > 0 ? body.categories : ['messages', 'blog'];

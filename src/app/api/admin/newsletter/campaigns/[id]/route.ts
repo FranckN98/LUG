@@ -7,11 +7,15 @@ import {
   pickLegacyMirror,
 } from '@/lib/newsletterCampaignI18n';
 import { normalizeAttachmentsInput } from '@/lib/newsletterAttachments';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const campaign = await prisma.newsletterCampaign.findUnique({
     where: { id: params.id },
     include: {
@@ -27,6 +31,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } },
 ) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const body = await req.json();
   const {
     headerImageUrl,
@@ -164,6 +171,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } },
 ) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const campaign = await prisma.newsletterCampaign.findUnique({ where: { id: params.id } });
   if (!campaign) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
   if (campaign.status === 'sent') {

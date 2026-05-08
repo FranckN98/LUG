@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ensureDefaultStats } from '@/lib/siteStats';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const url = new URL(req.url);
   const page = url.searchParams.get('page');
   await ensureDefaultStats();
@@ -14,6 +18,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const body = await req.json();
   const {
     page,

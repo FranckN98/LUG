@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { searchParams } = new URL(req.url);
   const status = searchParams.get('status') || '';
   const search = searchParams.get('search')?.trim() || '';

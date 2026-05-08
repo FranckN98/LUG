@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { checkSubscribeRateLimit } from '@/lib/subscribe-rate-limit';
 import { parseNameFromEmail } from '@/lib/emailName';
@@ -60,6 +61,9 @@ export async function POST(req: Request) {
           consent,
           locale: detectedLocale,
           tags: `newsletter,locale:${detectedLocale}`,
+          // Always issue a hard-to-guess unsubscribe token so the user can
+          // securely opt out without exposing their internal id.
+          unsubscribeToken: randomUUID(),
         },
       });
     } else {
@@ -68,6 +72,8 @@ export async function POST(req: Request) {
         data: {
           consent: consent || existing.consent,
           ...(existing.locale ? {} : { locale: detectedLocale }),
+          // Backfill an unsubscribe token if a legacy record is missing one.
+          ...(existing.unsubscribeToken ? {} : { unsubscribeToken: randomUUID() }),
           ...(existing.firstName || existing.lastName
             ? {}
             : {

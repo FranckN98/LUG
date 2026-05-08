@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
 import { parseNameFromEmail } from '@/lib/emailName';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { searchParams } = new URL(req.url);
   const search = searchParams.get('search')?.trim() || '';
   const statusFilter = searchParams.get('status') || '';
@@ -41,6 +45,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const body = await req.json();
   const { email, firstName, lastName, address, city, source = 'admin' } = body;
 

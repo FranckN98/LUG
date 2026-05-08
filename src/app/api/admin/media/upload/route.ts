@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -28,6 +29,9 @@ async function saveFile(buffer: Buffer, savedFilename: string, subfolder: 'media
 }
 
 export async function POST(request: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const formData = await request.formData();
   const file = formData.get('file') as File | null;
   const category = (formData.get('category') as string) || 'general';

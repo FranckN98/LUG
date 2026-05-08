@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
 import { getCommunicationAdminData, normalizeCommunicationSettingsInput, saveCommunicationSettings } from '@/lib/event-communication';
 import type { Locale } from '@/i18n/config';
+import { requireAdmin } from '@/lib/adminAuth';
 
 function normalizeLocale(locale: string | null): Locale {
   return locale === 'de' || locale === 'fr' || locale === 'en' ? locale : 'fr';
 }
 
 export async function GET(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const locale = normalizeLocale(req.nextUrl.searchParams.get('locale'));
   const data = await getCommunicationAdminData(locale);
 
@@ -19,6 +23,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const payload = normalizeCommunicationSettingsInput(await req.json());
     const saved = await saveCommunicationSettings(payload);

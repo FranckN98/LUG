@@ -15,6 +15,29 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.public.blob.vercel-storage.com', pathname: '/**' },
     ],
   },
+  async headers() {
+    // Baseline security headers applied to every route. CSP is intentionally
+    // omitted for now to avoid breaking embedded YouTube / Vercel Blob assets;
+    // it should be added in report-only mode first, then enforced.
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

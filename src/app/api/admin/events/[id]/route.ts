@@ -8,10 +8,14 @@ import {
   updateEventRecord,
   validateEventPayload,
 } from '@/lib/events-db';
+import { requireAdmin } from '@/lib/adminAuth';
 
 type Params = { params: { id: string } };
 
 export async function GET(_: NextRequest, { params }: Params) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const event = await prisma.event.findUnique({ where: { id: params.id }, include: eventInclude });
 
   if (!event) {
@@ -22,6 +26,9 @@ export async function GET(_: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const rawBody = (await req.json()) as Record<string, unknown>;
     const existing = await prisma.event.findUnique({ where: { id: params.id }, include: eventInclude });
@@ -67,6 +74,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(_: NextRequest, { params }: Params) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   await prisma.event.delete({ where: { id: params.id } });
   return NextResponse.json({ success: true });
 }

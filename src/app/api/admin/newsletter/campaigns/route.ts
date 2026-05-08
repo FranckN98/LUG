@@ -6,8 +6,12 @@ import {
   pickLegacyMirror,
 } from '@/lib/newsletterCampaignI18n';
 import { normalizeAttachmentsInput } from '@/lib/newsletterAttachments';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET() {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const campaigns = await prisma.newsletterCampaign.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
@@ -19,6 +23,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const body = await req.json();
   const {
     headerImageUrl,

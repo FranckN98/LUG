@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { partners2025 } from '@/content/partners';
+import { requireAdmin } from '@/lib/adminAuth';
 
 const ALLOWED_CATEGORIES = new Set([
   'partner',
@@ -16,6 +17,9 @@ const ALLOWED_CATEGORIES = new Set([
 
 // GET /api/admin/partners
 export async function GET() {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const count = await prisma.partner.count();
   if (count === 0 && partners2025.length > 0) {
     await prisma.partner.createMany({
@@ -38,6 +42,9 @@ export async function GET() {
 
 // POST /api/admin/partners — create
 export async function POST(request: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   let body: unknown;
   try {
     body = await request.json();

@@ -6,8 +6,12 @@ import {
   type BlogTranslationsPayload,
 } from '@/lib/blogTranslation';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const post = await prisma.blogPost.findUnique({
     where: { id: params.id },
     include: { translations: true },
@@ -17,6 +21,9 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const data = await req.json();
   const has = (k: string) => Object.prototype.hasOwnProperty.call(data, k);
 
@@ -103,6 +110,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   await prisma.blogPost.delete({ where: { id: params.id } });
   return NextResponse.json({ success: true });
 }

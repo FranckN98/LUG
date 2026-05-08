@@ -6,8 +6,12 @@ import {
   type BlogTranslationsPayload,
 } from '@/lib/blogTranslation';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET() {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const posts = await prisma.blogPost.findMany({
     orderBy: { createdAt: 'desc' },
     include: { translations: true },
@@ -16,6 +20,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const payload = await req.json();
   const {
     coverImage,

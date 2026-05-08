@@ -1,14 +1,21 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // GET /api/admin/team — returns all stored team member records
 export async function GET() {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const members = await prisma.teamMember.findMany();
   return NextResponse.json(members);
 }
 
 // POST /api/admin/team — upsert a team member by name
 export async function POST(req: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const body = await req.json();
   const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl } = body as {
     name: string;
@@ -56,6 +63,9 @@ export async function POST(req: Request) {
 
 // PATCH /api/admin/team?id=<id> — update a team member by id
 export async function PATCH(req: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (!id) {
@@ -95,6 +105,9 @@ export async function PATCH(req: Request) {
 
 // DELETE /api/admin/team?id=<id> — delete a team member by id
 export async function DELETE(req: Request) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (!id) {

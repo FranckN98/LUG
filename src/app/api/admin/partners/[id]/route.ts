@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
 
 const ALLOWED_CATEGORIES = new Set([
   'partner',
@@ -18,6 +19,9 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { id } = await params;
   let body: unknown;
   try {
@@ -51,6 +55,9 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const { id } = await params;
   try {
     await prisma.partner.delete({ where: { id } });

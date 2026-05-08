@@ -7,8 +7,12 @@ import {
   normalizeEventPayload,
   validateEventPayload,
 } from '@/lib/events-db';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export async function GET() {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   const events = await prisma.event.findMany({
     orderBy: [{ year: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
     include: eventInclude,
@@ -18,6 +22,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const payload = normalizeEventPayload(await req.json());
     const error = validateEventPayload(payload);

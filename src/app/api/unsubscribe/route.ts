@@ -12,10 +12,12 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Check by token first, then by id (fallback for subscribers without token)
-  const subscriber =
-    (await prisma.newsletterSubscriber.findFirst({ where: { unsubscribeToken: token } })) ??
-    (await prisma.newsletterSubscriber.findFirst({ where: { id: token } }));
+  // Look up by signed unsubscribe token only. We deliberately removed the
+  // legacy fallback to subscriber.id because IDs are guessable / enumerable
+  // and would let any visitor unsubscribe arbitrary users.
+  const subscriber = await prisma.newsletterSubscriber.findFirst({
+    where: { unsubscribeToken: token },
+  });
 
   if (!subscriber) {
     return htmlResponse('Introuvable', 'Aucun abonné trouvé pour ce lien de désabonnement.', false);
