@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Form } from '@/components/Form';
 import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { generateMetadataForPath } from '@/lib/seo';
+import { FsconPdfViewer } from '@/components/FsconPdfViewer';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/sponsor-donate');
@@ -158,7 +160,8 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
 
               <div className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
                 <p className="text-xs font-semibold uppercase tracking-widest text-accent/70">{t.ibanLabel}</p>
-                <p className="font-mono text-white/80 text-sm">{t.iban}</p>
+                {/* IBAN flouté */}
+                <p className="font-mono text-white/80 text-sm blur-sm select-none" title="IBAN masqué pour sécurité">{t.iban}</p>
                 <p className="font-mono text-white/80 text-sm">{t.bic}</p>
                 <div className="pt-2">
                   <a
@@ -170,6 +173,11 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
                     {t.paypal} →
                   </a>
                 </div>
+              </div>
+              {/* PDF FSCon intégré, lecture seule, pas de téléchargement */}
+              <div className="mt-8">
+                <FsconPdfViewer />
+                <p className="mt-2 text-xs text-white/40 text-center">Document FSCon – consultation uniquement, téléchargement désactivé</p>
               </div>
             </RevealOnScroll>
           </div>
