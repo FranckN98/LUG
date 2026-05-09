@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import SiteConfigAdmin from './SiteConfigAdmin';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -267,6 +268,7 @@ function HeroAdmin() {
   function flash(type: 'ok' | 'err', text: string) {
     setMsg({ type, text });
     setTimeout(() => setMsg(null), 3500);
+    if (type === 'ok') adminNotify.success(text); else adminNotify.error(text);
   }
 
   function openEdit(s: HeroSlide) {
@@ -309,7 +311,9 @@ function HeroAdmin() {
   }
 
   async function toggleActive(s: HeroSlide) {
-    await fetch(`/api/admin/hero/${s.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: !s.isActive }) });
+    const res = await fetch(`/api/admin/hero/${s.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: !s.isActive }) });
+    if (res.ok) flash('ok', s.isActive ? 'Image désactivée.' : 'Image activée.');
+    else flash('err', 'Mise à jour impossible.');
     load();
   }
 
@@ -485,6 +489,7 @@ function HeroButtonsAdmin() {
   function flash(type: 'ok' | 'err', text: string) {
     setMsg({ type, text });
     setTimeout(() => setMsg(null), 3500);
+    if (type === 'ok') adminNotify.success(text); else adminNotify.error(text);
   }
 
   function setField(slot: string, key: keyof HomeButton, value: string | boolean) {

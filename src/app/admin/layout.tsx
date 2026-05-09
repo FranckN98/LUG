@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { AdminNotificationBell } from './components/AdminNotificationBell';
 import { AdminThemeToggle } from './components/AdminThemeToggle';
+import { AdminToaster } from './components/AdminToaster';
 
 const navItems = [
   {
@@ -286,6 +287,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         {children}
       </main>
+
+      {/* Global toast notifications for save / delete operations. */}
+      <AdminToaster />
 
     </div>
   );

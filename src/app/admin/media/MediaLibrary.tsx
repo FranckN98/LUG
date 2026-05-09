@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { PartnersSection } from './PartnersSection';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type MediaItem = {
   id: string;
@@ -99,6 +100,7 @@ export function MediaLibrary() {
     setUploading(true);
     setUploadError('');
     try {
+      let count = 0;
       for (const file of Array.from(files)) {
         const fd = new FormData();
         fd.append('file', file);
@@ -106,13 +108,18 @@ export function MediaLibrary() {
         const res = await fetch('/api/admin/media/upload', { method: 'POST', body: fd });
         if (!res.ok) {
           const d = await res.json();
-          setUploadError(d.error ?? 'Erreur upload');
+          const msg = d.error ?? 'Erreur upload';
+          setUploadError(msg);
+          adminNotify.error(msg);
           return;
         }
+        count++;
       }
+      adminNotify.success(count === 1 ? 'Fichier ajouté.' : `${count} fichiers ajoutés.`);
       await fetchMedia(activeCategory);
     } catch {
       setUploadError('Erreur réseau lors de l\'upload.');
+      adminNotify.error('Erreur réseau lors de l\'upload.');
     } finally {
       setUploading(false);
     }
@@ -146,16 +153,20 @@ export function MediaLibrary() {
       });
       if (!res.ok) {
         const d = await res.json();
-        setUrlError(d.error ?? 'Erreur lors de l\'enregistrement.');
+        const msg = d.error ?? 'Erreur lors de l\'enregistrement.';
+        setUrlError(msg);
+        adminNotify.error(msg);
         return;
       }
       setUrlInput('');
       setUrlFilename('');
       setUrlAltText('');
       setShowUrlForm(false);
+      adminNotify.success('Image importée.');
       await fetchMedia(activeCategory);
     } catch {
       setUrlError('Erreur réseau.');
+      adminNotify.error('Erreur réseau.');
     } finally {
       setUrlSaving(false);
     }
@@ -170,9 +181,14 @@ export function MediaLibrary() {
   async function deleteMedia(item: MediaItem) {
     if (!confirm(`Supprimer "${item.filename}" ?`)) return;
     setDeleting(item.id);
-    await fetch(`/api/admin/media?id=${item.id}`, { method: 'DELETE' });
-    setMedia((prev) => prev.filter((m) => m.id !== item.id));
-    if (selected?.id === item.id) setSelected(null);
+    const res = await fetch(`/api/admin/media?id=${item.id}`, { method: 'DELETE' });
+    if (res.ok) {
+      setMedia((prev) => prev.filter((m) => m.id !== item.id));
+      if (selected?.id === item.id) setSelected(null);
+      adminNotify.success('Média supprimé.');
+    } else {
+      adminNotify.error('Suppression impossible.');
+    }
     setDeleting(null);
   }
 

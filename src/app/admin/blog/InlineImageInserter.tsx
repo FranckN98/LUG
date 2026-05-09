@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 export type InlineImageInserterHandle = {
   open: () => void;
@@ -83,10 +84,12 @@ export const InlineImageInserter = forwardRef<InlineImageInserterHandle, Props>(
       const file = list[0]; // one image at a time for inline insert
       if (!file.type.startsWith('image/')) {
         setError('Seules les images sont acceptées.');
+        adminNotify.error('Seules les images sont acceptées.');
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
         setError('Fichier trop lourd (max 10 Mo).');
+        adminNotify.error('Fichier trop lourd (max 10 Mo).');
         return;
       }
       setError('');
@@ -98,7 +101,9 @@ export const InlineImageInserter = forwardRef<InlineImageInserterHandle, Props>(
         const res = await fetch('/api/admin/media/upload', { method: 'POST', body: fd });
         if (!res.ok) {
           const d = await res.json().catch(() => ({}));
-          setError(d.error ?? "Erreur lors de l'upload.");
+          const msg = d.error ?? "Erreur lors de l'upload.";
+          setError(msg);
+          adminNotify.error(msg);
           setStage('choose');
           return;
         }
@@ -106,8 +111,10 @@ export const InlineImageInserter = forwardRef<InlineImageInserterHandle, Props>(
         setPendingUrl(data.url);
         setPendingAlt(data.altText ?? file.name.replace(/\.[^.]+$/, ''));
         setStage('caption');
+        adminNotify.success('Image téléversée.');
       } catch {
         setError("Erreur réseau lors de l'upload.");
+        adminNotify.error("Erreur réseau lors de l'upload.");
         setStage('choose');
       }
     }

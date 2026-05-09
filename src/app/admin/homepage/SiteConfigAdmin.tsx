@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type SiteConfig = {
   headerLogoUrl: string;
@@ -285,14 +286,17 @@ export default function SiteConfigAdmin() {
   async function save() {
     if (!form.headerJoinLink.trim() || !form.headerSponsorLink.trim()) {
       flash('err', 'Les liens des deux boutons header sont requis.');
+      adminNotify.error('Les liens des deux boutons header sont requis.');
       return;
     }
     if (joinLinkType === 'external' && !isExternalLink(form.headerJoinLink)) {
       flash('err', 'Le lien externe du bouton Rejoindre doit commencer par http:// ou https://');
+      adminNotify.error('Lien externe Rejoindre invalide (http:// ou https://).');
       return;
     }
     if (sponsorLinkType === 'external' && !isExternalLink(form.headerSponsorLink)) {
       flash('err', 'Le lien externe du bouton Sponsor doit commencer par http:// ou https://');
+      adminNotify.error('Lien externe Sponsor invalide (http:// ou https://).');
       return;
     }
 
@@ -305,8 +309,10 @@ export default function SiteConfigAdmin() {
       });
       if (!res.ok) throw new Error();
       flash('ok', 'Configuration enregistree.');
+      adminNotify.success('Configuration enregistrée.');
     } catch {
       flash('err', 'Erreur lors de la sauvegarde.');
+      adminNotify.error('Erreur lors de la sauvegarde.');
     } finally {
       setSaving(false);
     }

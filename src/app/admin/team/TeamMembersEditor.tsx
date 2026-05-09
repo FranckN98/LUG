@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { CORE_TEAM_MEMBERS } from '@/content/core-team';
 import { MediaPicker } from '@/app/admin/components/MediaPicker';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type DbMember = {
   id: string;
@@ -61,6 +62,7 @@ export function TeamMembersEditor({ initialData }: Props) {
   async function save(member: DbMember) {
     if (!member.name.trim()) {
       setError(member.id);
+      adminNotify.error('Le nom du membre est requis.');
       return;
     }
 
@@ -94,8 +96,10 @@ export function TeamMembersEditor({ initialData }: Props) {
       setMembers((prev) => prev.map((m) => (m.id === member.id ? savedMember : m)));
       setSaved(savedMember.id);
       setTimeout(() => setSaved(null), 2500);
+      adminNotify.success(isDraft ? 'Membre ajouté.' : 'Membre mis à jour.');
     } catch {
       setError(member.id);
+      adminNotify.error('Erreur lors de l’enregistrement du membre.');
     } finally {
       setSaving(null);
     }
@@ -114,6 +118,9 @@ export function TeamMembersEditor({ initialData }: Props) {
       const res = await fetch(`/api/admin/team?id=${member.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Erreur serveur');
       setMembers((prev) => prev.filter((m) => m.id !== member.id));
+      adminNotify.success('Membre supprimé.');
+    } catch {
+      adminNotify.error('Suppression impossible.');
     } finally {
       setDeleting(null);
     }

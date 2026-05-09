@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { buildCampaignHtml, buildMultilingualCampaignHtml, type MultilingualSection } from '@/lib/sendCampaignEmail';
 import { NewsletterRichEditor } from '@/components/admin/NewsletterRichEditor';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Subscriber {
@@ -298,6 +299,7 @@ export default function NewsletterAdmin() {
   const [toast, setToast] = useState<{ msg: string; kind: 'success' | 'error' } | null>(null);
   const showToast = useCallback((msg: string, kind: 'success' | 'error' = 'success') => {
     setToast({ msg, kind });
+    if (kind === 'error') adminNotify.error(msg); else adminNotify.success(msg);
   }, []);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────

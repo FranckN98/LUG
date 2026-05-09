@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { MediaPicker } from '@/app/admin/components/MediaPicker';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 export const PARTNER_CATEGORIES = [
   { value: 'partner',          label: 'Partenaire',               color: 'text-sky-400 bg-sky-500/15 border-sky-500/25' },
@@ -70,33 +71,44 @@ export function PartnersSection() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim()) { setError('Le nom est requis.'); return; }
+    if (!form.name.trim()) { setError('Le nom est requis.'); adminNotify.error('Le nom est requis.'); return; }
     setSaving(true); setError('');
     try {
       const payload = { name: form.name.trim(), logoUrl: form.logoUrl.trim(), websiteUrl: form.websiteUrl.trim() || null, category: form.category, sortOrder: form.sortOrder, visible: form.visible };
       const res = editingId
         ? await fetch(`/api/admin/partners/${editingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         : await fetch('/api/admin/partners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-      if (!res.ok) { const d = await res.json(); setError(d.error ?? 'Erreur serveur.'); return; }
+      if (!res.ok) { const d = await res.json(); const msg = d.error ?? 'Erreur serveur.'; setError(msg); adminNotify.error(msg); return; }
       const saved = await res.json();
       const id = saved.id ?? editingId;
       setFlashId(id); setTimeout(() => setFlashId(null), 2500);
+      adminNotify.success(editingId ? 'Partenaire mis à jour.' : 'Partenaire ajouté.');
       cancelEdit(); await load();
-    } catch { setError('Erreur réseau.'); } finally { setSaving(false); }
+    } catch { setError('Erreur réseau.'); adminNotify.error('Erreur réseau.'); } finally { setSaving(false); }
   }
 
   async function handleDelete(p: Partner) {
     if (!confirm(`Supprimer "${p.name}" définitivement ?`)) return;
     setDeleting(p.id);
-    await fetch(`/api/admin/partners/${p.id}`, { method: 'DELETE' });
-    setPartners(prev => prev.filter(x => x.id !== p.id));
-    if (editingId === p.id) cancelEdit();
+    const res = await fetch(`/api/admin/partners/${p.id}`, { method: 'DELETE' });
+    if (res.ok) {
+      setPartners(prev => prev.filter(x => x.id !== p.id));
+      if (editingId === p.id) cancelEdit();
+      adminNotify.success('Partenaire supprimé.');
+    } else {
+      adminNotify.error('Suppression impossible.');
+    }
     setDeleting(null);
   }
 
   async function toggleVisible(p: Partner) {
-    await fetch(`/api/admin/partners/${p.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ visible: !p.visible }) });
-    setPartners(prev => prev.map(x => x.id === p.id ? { ...x, visible: !x.visible } : x));
+    const res = await fetch(`/api/admin/partners/${p.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ visible: !p.visible }) });
+    if (res.ok) {
+      setPartners(prev => prev.map(x => x.id === p.id ? { ...x, visible: !x.visible } : x));
+      adminNotify.success(p.visible ? 'Partenaire masqué.' : 'Partenaire visible.');
+    } else {
+      adminNotify.error('Mise à jour impossible.');
+    }
   }
 
   const usedCats = PARTNER_CATEGORIES.filter(c => partners.some(p => p.category === c.value));

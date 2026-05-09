@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Member {
@@ -170,6 +171,7 @@ export default function MembersAdmin() {
   const [toast, setToast] = useState<{ msg: string; kind: 'success' | 'error' } | null>(null);
   const showToast = useCallback((msg: string, kind: 'success' | 'error' = 'success') => {
     setToast({ msg, kind });
+    if (kind === 'error') adminNotify.error(msg); else adminNotify.success(msg);
   }, []);
 
   const fetchAll = useCallback(async () => {

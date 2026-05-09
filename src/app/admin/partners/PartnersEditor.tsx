@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { MediaPicker } from '@/app/admin/components/MediaPicker';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type Partner = {
   id: string;
@@ -97,7 +98,9 @@ export function PartnersEditor() {
 
       if (!res.ok) {
         const d = await res.json();
-        setError(d.error ?? 'Erreur serveur.');
+        const msg = d.error ?? 'Erreur serveur.';
+        setError(msg);
+        adminNotify.error(msg);
         return;
       }
 
@@ -105,9 +108,11 @@ export function PartnersEditor() {
       setTimeout(() => setSaved(false), 2000);
       setEditingId(null);
       setForm({ ...EMPTY_FORM });
+      adminNotify.success(editingId ? 'Partenaire mis à jour.' : 'Partenaire ajouté.');
       await fetchPartners();
     } catch {
       setError('Erreur réseau.');
+      adminNotify.error('Erreur réseau.');
     } finally {
       setSaving(false);
     }
@@ -116,19 +121,29 @@ export function PartnersEditor() {
   async function handleDelete(p: Partner) {
     if (!confirm(`Supprimer "${p.name}" ?`)) return;
     setDeleting(p.id);
-    await fetch(`/api/admin/partners/${p.id}`, { method: 'DELETE' });
-    setPartners((prev) => prev.filter((x) => x.id !== p.id));
-    if (editingId === p.id) cancelEdit();
+    const res = await fetch(`/api/admin/partners/${p.id}`, { method: 'DELETE' });
+    if (res.ok) {
+      setPartners((prev) => prev.filter((x) => x.id !== p.id));
+      if (editingId === p.id) cancelEdit();
+      adminNotify.success('Partenaire supprimé.');
+    } else {
+      adminNotify.error('Suppression impossible.');
+    }
     setDeleting(null);
   }
 
   async function toggleVisible(p: Partner) {
-    await fetch(`/api/admin/partners/${p.id}`, {
+    const res = await fetch(`/api/admin/partners/${p.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ visible: !p.visible }),
     });
-    setPartners((prev) => prev.map((x) => x.id === p.id ? { ...x, visible: !x.visible } : x));
+    if (res.ok) {
+      setPartners((prev) => prev.map((x) => x.id === p.id ? { ...x, visible: !x.visible } : x));
+      adminNotify.success(p.visible ? 'Partenaire masqué.' : 'Partenaire visible.');
+    } else {
+      adminNotify.error('Mise à jour impossible.');
+    }
   }
 
   const isEditing = editingId !== null;

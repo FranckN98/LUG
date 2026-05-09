@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type Stat = {
   id: string;
@@ -74,6 +75,7 @@ export default function StatsAdmin() {
   async function createStat() {
     if (!draft.labelEn.trim()) {
       setError('Le libellé (EN) est obligatoire.');
+      adminNotify.error('Le libellé (EN) est obligatoire.');
       return;
     }
     setSavingId('__new');
@@ -86,11 +88,14 @@ export default function StatsAdmin() {
     setSavingId(null);
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
-      setError(d.error ?? 'Erreur lors de la création.');
+      const msg = d.error ?? 'Erreur lors de la création.';
+      setError(msg);
+      adminNotify.error(msg);
       return;
     }
     setCreatingFor(null);
     setDraft(EMPTY);
+    adminNotify.success('KPI créé.');
     fetchAll();
   }
 
@@ -104,16 +109,20 @@ export default function StatsAdmin() {
     setSavingId(null);
     if (!res.ok) {
       setError('Erreur lors de la sauvegarde.');
+      adminNotify.error('Erreur lors de la sauvegarde du KPI.');
       return;
     }
+    adminNotify.success('KPI mis à jour.');
     fetchAll();
   }
 
   async function deleteStat(id: string) {
     if (!confirm('Supprimer ce KPI ?')) return;
     setSavingId(id);
-    await fetch(`/api/admin/stats/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/stats/${id}`, { method: 'DELETE' });
     setSavingId(null);
+    if (res.ok) adminNotify.success('KPI supprimé.');
+    else adminNotify.error('Suppression impossible.');
     fetchAll();
   }
 

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type EventRow = {
   id: string;
@@ -39,7 +40,12 @@ export default function EventsAdminList({ events }: { events: EventRow[] }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
-      if (response.ok) router.refresh();
+      if (response.ok) {
+        adminNotify.success('Statut de l’événement mis à jour.');
+        router.refresh();
+      } else {
+        adminNotify.error('Mise à jour du statut impossible.');
+      }
     } finally {
       setPendingId(null);
     }
@@ -50,7 +56,12 @@ export default function EventsAdminList({ events }: { events: EventRow[] }) {
     setPendingId(id);
     try {
       const response = await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
-      if (response.ok) router.refresh();
+      if (response.ok) {
+        adminNotify.success('Événement supprimé.');
+        router.refresh();
+      } else {
+        adminNotify.error('Suppression impossible.');
+      }
     } finally {
       setPendingId(null);
     }

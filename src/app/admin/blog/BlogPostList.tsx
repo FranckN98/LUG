@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type Post = {
   id: string;
@@ -20,21 +21,31 @@ export default function BlogPostList({ posts }: { posts: Post[] }) {
 
   async function togglePublish(post: Post) {
     setLoading(post.id + '-toggle');
-    await fetch(`/api/admin/blog/${post.id}`, {
+    const res = await fetch(`/api/admin/blog/${post.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ published: !post.published }),
     });
     setLoading(null);
-    router.refresh();
+    if (res.ok) {
+      adminNotify.success(post.published ? 'Article dépublié.' : 'Article publié.');
+      router.refresh();
+    } else {
+      adminNotify.error('Impossible de modifier la publication.');
+    }
   }
 
   async function deletePost(id: string) {
     if (!confirm('Supprimer cet article définitivement ?')) return;
     setLoading(id + '-delete');
-    await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/blog/${id}`, { method: 'DELETE' });
     setLoading(null);
-    router.refresh();
+    if (res.ok) {
+      adminNotify.success('Article supprimé.');
+      router.refresh();
+    } else {
+      adminNotify.error('Impossible de supprimer l’article.');
+    }
   }
 
   if (posts.length === 0) {

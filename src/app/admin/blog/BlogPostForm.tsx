@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Locale } from '@/i18n/config';
 import { MediaPicker } from '@/app/admin/components/MediaPicker';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 import { InlineImageInserter, type InlineImageInserterHandle } from './InlineImageInserter';
 
 const CATEGORIES = ['Événements', 'Carrière', 'Études', 'Entrepreneuriat', 'Intégration', 'Impact'];
@@ -357,17 +358,20 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
     if (res.ok) {
       if (mode === 'new') {
         try { localStorage.removeItem(DRAFT_KEY); } catch {/* ignore */}
+        adminNotify.success('Article créé avec succès.');
         router.push('/admin/blog');
         router.refresh();
       } else {
         initialRef.current = form;
         setSuccess(true);
         setTimeout(() => setSuccess(false), 2500);
+        adminNotify.success('Modifications enregistrées.');
       }
     } else {
       let msg = 'Erreur lors de la sauvegarde.';
       try { const d = await res.json(); if (d?.error) msg = d.error; } catch {/* ignore */}
       setError(msg);
+      adminNotify.error(msg);
     }
   }, [form, mode, postId, router, saving]);
 

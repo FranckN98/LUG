@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { EventCommunicationPopup, type EventCommunicationPopupData } from '@/components/EventCommunicationPopup';
+import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type CommunicationSettings = {
   id: string;
@@ -76,8 +77,11 @@ export default function CommunicationAdmin({ initialSettings, events }: Props) {
 
       setForm(body as CommunicationSettings);
       setMessage('Configuration enregistrée.');
+      adminNotify.success('Configuration enregistrée.');
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Erreur de sauvegarde.');
+      const msg = saveError instanceof Error ? saveError.message : 'Erreur de sauvegarde.';
+      setError(msg);
+      adminNotify.error(msg);
     } finally {
       setSaving(false);
     }
