@@ -162,7 +162,7 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
                 <p className="text-xs font-semibold uppercase tracking-widest text-accent/70">{t.ibanLabel}</p>
                 {/* IBAN flouté */}
                 <p className="font-mono text-white/80 text-sm blur-sm select-none" title="IBAN masqué pour sécurité">{t.iban}</p>
-                <p className="font-mono text-white/80 text-sm">{t.bic}</p>
+                <p className="font-mono text-white/80 text-sm blur-sm select-none" title="BIC masqué pour sécurité">{t.bic}</p>
                 <div className="pt-2">
                   <a
                     href="https://www.paypal.com"
