@@ -25,9 +25,9 @@ Behind the scenes of the first Level Up in Germany conference: speakers, real st
 
 ### Body
 
-When we talk about Level Up in Germany, you could call it a conference. But honestly, this first edition was much more than that.
+When we talk about **Level Up in Germany**, you could call it a conference. But honestly, this first edition was much more than that.
 
-It was a moment of meeting. A moment when the African diaspora in Germany came together to talk about what they really live: arrival in a new country, the language, studies, work, money, loneliness, doubts, but also ambition, discipline, faith and the will to succeed.
+It was a moment of meeting. A moment when the African diaspora in Germany came together to talk about what they really live: **arrival in a new country, the language, studies, work, money, loneliness, doubts, but also ambition, discipline, faith and the will to succeed.**
 
 From the opening, the tone was set: you don't succeed alone.
 
@@ -35,13 +35,13 @@ And that's exactly what we felt throughout the day.
 
 The speakers didn't come to tell perfect stories. They spoke with sincerity. They shared their beginnings, their mistakes, their hard moments, but also the decisions that allowed them to move forward.
 
-Ted Nguelemo reminded us that you sometimes have to dare to speak, even when you're afraid. In Germany, many people don't dare to express themselves because of their accent, the way others look at them or the fear of making mistakes. But his message was clear: waiting until you're perfect to start often means staying stuck. Courage begins precisely when you act despite the fear.
+**Ted Nguelemo** reminded us that you sometimes have to dare to speak, even when you're afraid. In Germany, many people don't dare to express themselves because of their accent, the way others look at them or the fear of making mistakes. But his message was clear: waiting until you're perfect to start often means staying stuck. Courage begins precisely when you act despite the fear.
 
 The day also allowed us to talk about a very important subject: inner balance. Between studies, work, family responsibilities and the pressure to succeed, many end up forgetting themselves. The exchanges around discrimination, self-confidence and mental health showed one thing: recognizing your wounds is not a weakness. It is often the beginning of rebuilding.
 
-Another strong moment was the part on finance. Cedric Folepe spoke about money in a simple and concrete way. Not with big words, but with realities many people know: the salary that arrives and disappears too fast, the bills, the bad habits, the lack of strategy. His message was very clear: financial freedom starts with discipline. Save, track your expenses, invest in yourself, start small but start early. These are simple pieces of advice, but they can really change a trajectory.
+Another strong moment was the part on finance. **Cedric Folepe** spoke about money in a simple and concrete way. Not with big words, but with realities many people know: the salary that arrives and disappears too fast, the bills, the bad habits, the lack of strategy. His message was very clear: financial freedom starts with discipline. Save, track your expenses, invest in yourself, start small but start early. These are simple pieces of advice, but they can really change a trajectory.
 
-Calixte Kenmogne, for his part, spoke about salary negotiation and a professional mindset. What I took away is that knowing your value doesn't mean being arrogant. In Germany, knowing how to present yourself, talk about your skills, negotiate your salary and prepare seriously is part of the professional game. We can't expect others to recognize our value if we ourselves don't know how to claim it.
+**Calixte Kenmogne**, for his part, spoke about salary negotiation and a professional mindset. What I took away is that knowing your value doesn't mean being arrogant. In Germany, knowing how to present yourself, talk about your skills, negotiate your salary and prepare seriously is part of the professional game. We can't expect others to recognize our value if we ourselves don't know how to claim it.
 
 The part on studies and professional integration was also very rich. Several journeys showed that succeeding here requires more than good grades. You have to inform yourself, look for mentors, read your university emails, attend events, build a network, seize Werkstudent opportunities and, above all, stay consistent. Each testimony reminded us, in its own way, that success doesn't happen by chance. It is built with method.
 
@@ -81,9 +81,9 @@ Hinter den Kulissen der ersten Level Up in Germany Konferenz: Speaker, echte Ges
 
 ### Body
 
-Wenn man von Level Up in Germany spricht, könnte man es eine Konferenz nennen. Aber ehrlich gesagt war diese erste Ausgabe viel mehr als das.
+Wenn man von **Level Up in Germany** spricht, könnte man es eine Konferenz nennen. Aber ehrlich gesagt war diese erste Ausgabe viel mehr als das.
 
-Es war ein Moment der Begegnung. Ein Moment, in dem sich die afrikanische Diaspora in Deutschland zusammengefunden hat, um über das zu sprechen, was sie wirklich erlebt: die Ankunft in einem neuen Land, die Sprache, das Studium, die Arbeit, das Geld, die Einsamkeit, die Zweifel, aber auch die Ambition, die Disziplin, den Glauben und den Wunsch, erfolgreich zu sein.
+Es war ein Moment der Begegnung. Ein Moment, in dem sich die afrikanische Diaspora in Deutschland zusammengefunden hat, um über das zu sprechen, was sie wirklich erlebt: **die Ankunft in einem neuen Land, die Sprache, das Studium, die Arbeit, das Geld, die Einsamkeit, die Zweifel, aber auch die Ambition, die Disziplin, den Glauben und den Wunsch, erfolgreich zu sein.**
 
 Schon zur Eröffnung war der Ton gesetzt: Man wird nicht allein erfolgreich.
 
@@ -91,13 +91,13 @@ Und genau das haben wir den ganzen Tag über gespürt.
 
 Die Speaker kamen nicht, um perfekte Geschichten zu erzählen. Sie sprachen mit Aufrichtigkeit. Sie teilten ihre Anfänge, ihre Fehler, ihre schwierigen Momente, aber auch die Entscheidungen, die es ihnen ermöglicht haben, voranzukommen.
 
-Ted Nguelemo hat uns daran erinnert, dass man manchmal den Mut haben muss zu sprechen, selbst wenn man Angst hat. In Deutschland trauen sich viele Menschen nicht, sich auszudrücken — wegen ihres Akzents, wegen der Blicke der anderen oder aus Angst, Fehler zu machen. Aber seine Botschaft war klar: Zu warten, bis man perfekt ist, bedeutet oft, blockiert zu bleiben. Mut beginnt genau dann, wenn man trotz der Angst handelt.
+**Ted Nguelemo** hat uns daran erinnert, dass man manchmal den Mut haben muss zu sprechen, selbst wenn man Angst hat. In Deutschland trauen sich viele Menschen nicht, sich auszudrücken — wegen ihres Akzents, wegen der Blicke der anderen oder aus Angst, Fehler zu machen. Aber seine Botschaft war klar: Zu warten, bis man perfekt ist, bedeutet oft, blockiert zu bleiben. Mut beginnt genau dann, wenn man trotz der Angst handelt.
 
 Der Tag hat auch erlaubt, über ein sehr wichtiges Thema zu sprechen: das innere Gleichgewicht. Zwischen Studium, Arbeit, familiären Verpflichtungen und dem Erfolgsdruck vergessen viele am Ende sich selbst. Die Gespräche über Diskriminierung, Selbstvertrauen und mentale Gesundheit haben eines gezeigt: Seine Wunden zu erkennen ist keine Schwäche. Es ist oft der Beginn des Wiederaufbaus.
 
-Ein weiterer starker Moment war der Teil über Finanzen. Cedric Folepe hat einfach und konkret über Geld gesprochen. Nicht mit großen Worten, sondern mit Realitäten, die viele kennen: das Gehalt, das kommt und zu schnell wieder verschwindet, die Rechnungen, die schlechten Gewohnheiten, der Mangel an Strategie. Seine Botschaft war sehr klar: Finanzielle Freiheit beginnt mit Disziplin. Sparen, seine Ausgaben verfolgen, in sich selbst investieren, klein anfangen, aber früh anfangen. Das sind einfache Ratschläge, aber sie können einen Werdegang wirklich verändern.
+Ein weiterer starker Moment war der Teil über Finanzen. **Cedric Folepe** hat einfach und konkret über Geld gesprochen. Nicht mit großen Worten, sondern mit Realitäten, die viele kennen: das Gehalt, das kommt und zu schnell wieder verschwindet, die Rechnungen, die schlechten Gewohnheiten, der Mangel an Strategie. Seine Botschaft war sehr klar: Finanzielle Freiheit beginnt mit Disziplin. Sparen, seine Ausgaben verfolgen, in sich selbst investieren, klein anfangen, aber früh anfangen. Das sind einfache Ratschläge, aber sie können einen Werdegang wirklich verändern.
 
-Calixte Kenmogne wiederum hat über Gehaltsverhandlung und professionelles Mindset gesprochen. Was ich mir gemerkt habe: Seinen Wert zu kennen, bedeutet nicht, arrogant zu sein. In Deutschland gehört es zum beruflichen Spiel, sich präsentieren zu können, über seine Kompetenzen zu sprechen, sein Gehalt zu verhandeln und sich seriös vorzubereiten. Wir können nicht erwarten, dass andere unseren Wert anerkennen, wenn wir ihn selbst nicht zu vertreten wissen.
+**Calixte Kenmogne** wiederum hat über Gehaltsverhandlung und professionelles Mindset gesprochen. Was ich mir gemerkt habe: Seinen Wert zu kennen, bedeutet nicht, arrogant zu sein. In Deutschland gehört es zum beruflichen Spiel, sich präsentieren zu können, über seine Kompetenzen zu sprechen, sein Gehalt zu verhandeln und sich seriös vorzubereiten. Wir können nicht erwarten, dass andere unseren Wert anerkennen, wenn wir ihn selbst nicht zu vertreten wissen.
 
 Auch der Teil über Studium und beruflichen Einstieg war sehr reichhaltig. Mehrere Werdegänge haben gezeigt, dass Erfolg hier mehr verlangt als gute Noten. Man muss sich informieren, Mentoren suchen, seine Universitäts-E-Mails lesen, an Veranstaltungen teilnehmen, ein Netzwerk aufbauen, Werkstudenten-Möglichkeiten nutzen und vor allem konstant bleiben. Jedes Zeugnis hat auf seine Weise daran erinnert, dass Erfolg nicht zufällig kommt. Er wird mit Methode aufgebaut.
 

@@ -39,7 +39,7 @@ The Level Up Business Tour is therefore more than a visit. It's an immersion.
 
 We travel, we discover a universe, we put a journey in the spotlight, we create connection, we give visibility and we inspire those who watch from afar and might be telling themselves: "I too can build something here."
 
-### Changing the narrative, one story at a time
+**Changing the narrative, one story at a time**
 
 For too long, our communities have sometimes been told through the same angles: difficulties, integration, obstacles, administrative or professional struggles.
 
@@ -57,9 +57,9 @@ Putting them in the spotlight isn't just about giving them visibility. It's send
 
 ![image](https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/media/8b15e77d-c4a1-43bf-8efa-86256b0b7b19.png)
 
-### First stop: in Cologne, in the world of Majid The Stylist
+**First stop: in Cologne, in the world of Majid The Stylist**
 
-For this first edition of the Level Up Business Tour, we went to meet Majid The Stylist, a tailor and creator based in Cologne.
+For this first edition of the Level Up Business Tour, we went to meet **Majid The Stylist, a tailor and creator based in Cologne**.
 
 His universe isn't just about clothes. With him, every piece tells something. Every fabric, every cut, every detail seems to carry an intention. As the project's presentation shows, Majid sees clothing as a way to give a voice to the body, to allow a person to tell their story without necessarily saying a word.
 
@@ -69,7 +69,7 @@ His workshop then becomes more than a place of production. It's a space of memor
 
 **Why this kind of journey matters**
 
-Meeting Majid is a reminder of something essential: there are several ways to succeed in Germany.
+Meeting Majid is a reminder of something essential: **there are several ways to succeed in Germany.**
 
 Success is not limited to a degree, a corporate position or a classic path. It can also come through creation, fashion, art, entrepreneurship, service, passion and the ability to build a brand around your own universe.
 
@@ -137,7 +137,7 @@ Die Level Up Business Tour ist also mehr als ein Besuch. Sie ist ein Eintauchen.
 
 Wir reisen, wir entdecken ein Universum, wir rücken einen Werdegang ins Licht, wir schaffen Verbindungen, wir geben Sichtbarkeit und inspirieren diejenigen, die von Weitem zuschauen und sich vielleicht sagen: „Auch ich kann hier etwas aufbauen."
 
-### Das Narrativ ändern, eine Geschichte nach der anderen
+**Das Narrativ ändern, eine Geschichte nach der anderen**
 
 Zu lange wurden unsere Communities manchmal durch die gleichen Blickwinkel erzählt: Schwierigkeiten, Integration, Hindernisse, administrative oder berufliche Hürden.
 
@@ -155,9 +155,9 @@ Sie ins Rampenlicht zu rücken, ist nicht nur Werbung für sie. Es ist eine star
 
 ![image](https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/media/8b15e77d-c4a1-43bf-8efa-86256b0b7b19.png)
 
-### Erste Station: in Köln, im Universum von Majid The Stylist
+**Erste Station: in Köln, im Universum von Majid The Stylist**
 
-Für diese erste Ausgabe der Level Up Business Tour haben wir Majid The Stylist getroffen, einen in Köln ansässigen Schneider und Designer.
+Für diese erste Ausgabe der Level Up Business Tour haben wir **Majid The Stylist, einen in Köln ansässigen Schneider und Designer**, getroffen.
 
 Sein Universum lässt sich nicht auf Kleidung reduzieren. Bei ihm erzählt jedes Stück etwas. Jedes Material, jeder Schnitt, jedes Detail scheint eine Absicht zu tragen. Wie die Präsentation des Projekts zeigt, sieht Majid Kleidung als eine Möglichkeit, dem Körper eine Stimme zu geben, einer Person zu erlauben, ihre Geschichte zu erzählen, ohne unbedingt ein Wort zu sagen.
 
@@ -167,7 +167,7 @@ Sein Atelier wird so mehr als ein Produktionsort. Es ist ein Raum der Erinnerung
 
 **Warum diese Art von Werdegang zählt**
 
-Majid zu treffen erinnert an etwas Wesentliches: Es gibt mehrere Wege, in Deutschland erfolgreich zu sein.
+Majid zu treffen erinnert an etwas Wesentliches: **Es gibt mehrere Wege, in Deutschland erfolgreich zu sein.**
 
 Erfolg beschränkt sich nicht auf einen Abschluss, eine Position im Unternehmen oder einen klassischen Werdegang. Er kann auch durch Kreation, Mode, Kunst, Unternehmertum, Dienstleistung, Leidenschaft und die Fähigkeit entstehen, eine Marke rund um das eigene Universum aufzubauen.
 
