@@ -174,14 +174,14 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
                   </a>
                 </div>
               </div>
-              {/* PDF FSCon intégré, affichage agrandi, lien de lecture */}
+              {/* PDF FSCon intégré, agrandi, sans description */}
               <div className="mt-8 flex flex-col items-center gap-2">
                 <FsconPdfViewer />
                 <a
                   href="/downloads/fscon.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block mt-2 text-accent underline text-sm hover:text-accent-light transition-colors"
+                  className="text-accent underline text-sm hover:text-accent-light transition-colors mt-2"
                 >
                   Ouvrir le PDF dans un nouvel onglet
                 </a>
