@@ -177,7 +177,7 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
               {/* PDF FSCon intégré, lecture seule, pas de téléchargement */}
               <div className="mt-8">
                 <FsconPdfViewer />
-                <p className="mt-2 text-xs text-white/40 text-center">Document FSCon – consultation uniquement, téléchargement désactivé</p>
+                <p className="mt-2 text-xs text-white/40 text-center">Aperçu du guide FSCon : lecture seule, aucune extraction ni téléchargement possible. Pour obtenir le document complet, contactez l’équipe.</p>
               </div>
             </RevealOnScroll>
           </div>
