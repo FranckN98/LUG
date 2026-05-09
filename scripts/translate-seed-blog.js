@@ -1,24 +1,25 @@
 /* eslint-disable no-console */
 /*
- * ⚠️ DEPRECATED — DO NOT RUN.
+ * ⚠️ DEPRECATED — kept as a NO-OP for backwards-compatibility with the
+ * Vercel "Build Command" override that still chains this script.
  *
- * This script previously seeded EN/DE translations for blog-post-001/002/003
- * with PLACEHOLDER content (e.g. "Mega Conference 2025", "5 essential tips",
- * "2025 Impact Report") that overwrites the proper translations stored in
- * `tmp/blog-translations/blog-post-NNN.md`.
+ * The previous implementation seeded EN/DE translations from a hardcoded
+ * placeholder set ("Mega Conference 2025", "5 essential tips", "2025 Impact
+ * Report") and OVERWROTE the proper translations on every redeploy.
  *
- * The original implementation is preserved at
- * `scripts/translate-seed-blog.js.deprecated` for reference.
+ * Original implementation preserved at
+ *   scripts/translate-seed-blog.js.deprecated
  *
- * To (re-)import the proper EN/DE translations, run:
+ * To (re-)import the real EN/DE translations from
+ * `tmp/blog-translations/*.md`, run locally:
  *   node scripts/import-blog-translations.mjs
  *
- * If you really need to re-run the legacy seed, restore the .deprecated file
- * manually — but first make sure you understand the consequences.
+ * TODO: Once the Vercel project's Build Command override is updated to
+ * remove the `&& node scripts/translate-seed-blog.js` step, this file can
+ * be deleted.
  */
-console.error(
-  '[translate-seed-blog] This script is deprecated. ' +
-    'It would overwrite the production EN/DE translations with placeholder seed content. ' +
-    'Use scripts/import-blog-translations.mjs instead.',
+console.log(
+  '[translate-seed-blog] no-op (deprecated). ' +
+    'See scripts/import-blog-translations.mjs to import real translations.',
 );
-process.exit(1);
+process.exit(0);
