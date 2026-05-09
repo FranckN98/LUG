@@ -8,11 +8,11 @@ import React from 'react';
  */
 export function FsconPdfViewer() {
   return (
-    <div className="relative w-full max-w-2xl mx-auto aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+    <div className="relative w-full max-w-4xl mx-auto aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
       <iframe
         src="/downloads/fscon.pdf"
         title="FSCon PDF"
-        className="w-full h-full min-h-[600px] bg-white"
+        className="w-full h-full min-h-[800px] bg-white"
         aria-label="FSCon PDF"
         allowFullScreen
       />

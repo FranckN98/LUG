@@ -174,10 +174,17 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
                   </a>
                 </div>
               </div>
-              {/* PDF FSCon intégré, lecture seule, pas de téléchargement */}
-              <div className="mt-8">
+              {/* PDF FSCon intégré, affichage agrandi, lien de lecture */}
+              <div className="mt-8 flex flex-col items-center gap-2">
                 <FsconPdfViewer />
-                <p className="mt-2 text-xs text-white/40 text-center">Aperçu du guide FSCon : lecture seule, aucune extraction ni téléchargement possible. Pour obtenir le document complet, contactez l’équipe.</p>
+                <a
+                  href="/downloads/fscon.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-2 text-accent underline text-sm hover:text-accent-light transition-colors"
+                >
+                  Ouvrir le PDF dans un nouvel onglet
+                </a>
               </div>
             </RevealOnScroll>
           </div>
