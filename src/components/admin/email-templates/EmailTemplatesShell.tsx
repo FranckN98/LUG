@@ -79,6 +79,8 @@ export function EmailTemplatesShell() {
 
   useEffect(() => {
     if (!flash) return;
+    // Only auto-dismiss success messages. Errors stay until the user dismisses them.
+    if (flash.kind === "err") return;
     const id = setTimeout(() => setFlash(null), 4000);
     return () => clearTimeout(id);
   }, [flash]);
@@ -265,13 +267,28 @@ export function EmailTemplatesShell() {
 
         {flash && (
           <div
-            className={`mb-4 px-4 py-3 rounded-lg text-sm font-medium border ${
+            role={flash.kind === "err" ? "alert" : "status"}
+            className={`mb-4 px-4 py-3 rounded-lg text-sm font-medium border flex items-start gap-3 ${
               flash.kind === "ok"
                 ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                : "bg-red-50 border-red-200 text-red-800"
+                : "bg-red-50 border-red-300 text-red-800 shadow-sm"
             }`}
           >
-            {flash.msg}
+            <span className="flex-1 whitespace-pre-wrap break-words">
+              {flash.kind === "err" ? "⚠ " : ""}{flash.msg}
+            </span>
+            <button
+              type="button"
+              onClick={() => setFlash(null)}
+              aria-label="Dismiss"
+              className={`shrink-0 -mr-1 px-2 py-0.5 rounded text-xs font-bold ${
+                flash.kind === "ok"
+                  ? "text-emerald-700 hover:bg-emerald-100"
+                  : "text-red-700 hover:bg-red-100"
+              }`}
+            >
+              ✕
+            </button>
           </div>
         )}
 

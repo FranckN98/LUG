@@ -142,7 +142,9 @@ export async function POST(req: NextRequest) {
   });
 
   const apiKey = process.env.RESEND_API_KEY;
-  const fromAddress = process.env.FORMS_FROM_EMAIL || "Level Up in Germany <info@levelupingermany.com>";
+  // Always send from the verified Level Up in Germany address.
+  // (Ignore FORMS_FROM_EMAIL on purpose so deployments can't fall back to onboarding@resend.dev.)
+  const fromAddress = "Level Up in Germany <info@levelupingermany.com>";
 
   let status: "sent" | "failed" | "test" = mode === "test" ? "test" : "sent";
   let errorMessage: string | null = null;
