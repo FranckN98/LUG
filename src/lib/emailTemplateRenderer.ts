@@ -134,7 +134,7 @@ export function renderEmailHtml({
             <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" arcsize="50%" stroked="false" fillcolor="#ffffff" style="width:220px;height:220px;v-text-anchor:middle;mso-position-horizontal:center;">
               <v:fill type="solid" color="#ffffff" />
               <center style="font-size:0;line-height:0;">
-                <img src="${esc(headerImage)}" alt="Level Up in Germany" width="164" style="border:0;display:inline-block;" />
+                <img src="${esc(headerImage)}" alt="Level Up in Germany" width="130" style="border:0;display:inline-block;" />
               </center>
             </v:roundrect>
             <![endif]-->
@@ -142,7 +142,7 @@ export function renderEmailHtml({
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#ffffff" style="margin:0 auto;background:#ffffff;border-radius:110px;border-collapse:separate;">
               <tr>
                 <td align="center" valign="middle" width="220" height="220" bgcolor="#ffffff" style="width:220px;height:220px;background:#ffffff;background-color:#ffffff;border-radius:110px;text-align:center;vertical-align:middle;">
-                  <img src="${esc(headerImage)}" alt="Level Up in Germany" width="164" style="display:inline-block;max-width:164px;height:auto;border:0;outline:none;text-decoration:none;background:#ffffff;" />
+                  <img src="${esc(headerImage)}" alt="Level Up in Germany" width="130" style="display:inline-block;max-width:130px;height:auto;border:0;outline:none;text-decoration:none;background:#ffffff;" />
                 </td>
               </tr>
             </table>
