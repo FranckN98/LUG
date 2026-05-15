@@ -131,7 +131,7 @@ export function renderEmailHtml({
         <tr>
           <td class="lug-hero" align="center" style="background-color:${BRAND.primary};background-image:url(&quot;data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'><circle cx='2' cy='2' r='1.1' fill='%23ffffff' fill-opacity='0.09'/><circle cx='19' cy='19' r='1.1' fill='%23ffffff' fill-opacity='0.06'/></svg>&quot;),radial-gradient(circle at 18% 18%,rgba(255,255,255,0.18),transparent 55%),radial-gradient(circle at 82% 86%,rgba(233,140,11,0.32),transparent 60%),linear-gradient(135deg,${BRAND.primary} 0%,${BRAND.primaryDark} 100%);padding:44px 32px 38px;position:relative;">
             <!--[if mso]>
-            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" arcsize="50%" stroked="false" fillcolor="#ffffff" style="width:220px;height:220px;v-text-anchor:middle;mso-position-horizontal:center;">
+            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" arcsize="50%" stroked="false" fillcolor="#ffffff" style="width:201px;height:201px;v-text-anchor:middle;mso-position-horizontal:center;">
               <v:fill type="solid" color="#ffffff" />
               <center style="font-size:0;line-height:0;">
                 <img src="${esc(headerImage)}" alt="Level Up in Germany" width="130" style="border:0;display:inline-block;" />
@@ -139,9 +139,9 @@ export function renderEmailHtml({
             </v:roundrect>
             <![endif]-->
             <!--[if !mso]><!-- -->
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#ffffff" style="margin:0 auto;background:#ffffff;border-radius:110px;border-collapse:separate;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#ffffff" style="margin:0 auto;background:#ffffff;border-radius:101px;border-collapse:separate;">
               <tr>
-                <td align="center" valign="middle" width="220" height="220" bgcolor="#ffffff" style="width:220px;height:220px;background:#ffffff;background-color:#ffffff;border-radius:110px;text-align:center;vertical-align:middle;">
+                <td align="center" valign="middle" width="201" height="201" bgcolor="#ffffff" style="width:201px;height:201px;background:#ffffff;background-color:#ffffff;border-radius:101px;text-align:center;vertical-align:middle;">
                   <img src="${esc(headerImage)}" alt="Level Up in Germany" width="130" style="display:inline-block;max-width:130px;height:auto;border:0;outline:none;text-decoration:none;background:#ffffff;" />
                 </td>
               </tr>
