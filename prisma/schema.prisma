@@ -777,6 +777,7 @@ model EmailTemplateRecord {
   headerImageUrl String?  @map("header_image_url")
   footerContact  String?  @map("footer_contact")
   signature      String?  @map("signature") // overrides default "Das Level Up in Germany Team" closing
+  tagline        String?  @map("tagline") // overrides default footer tagline (e.g. "Dare to be different.")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

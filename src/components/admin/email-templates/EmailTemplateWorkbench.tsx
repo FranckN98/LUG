@@ -93,6 +93,7 @@ export function EmailTemplateWorkbench(props: Props) {
           headerImageUrl: draft.headerImageUrl,
           footerContact: draft.footerContact,
           signature: draft.signature,
+          tagline: draft.tagline,
         },
         variables,
       )
@@ -112,6 +113,7 @@ export function EmailTemplateWorkbench(props: Props) {
     draft.headerImageUrl,
     draft.footerContact,
     draft.signature,
+    draft.tagline,
     variables,
   ]);
 
@@ -361,6 +363,19 @@ export function EmailTemplateWorkbench(props: Props) {
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   This replaces the bold name under the closing line ("Mit freundlichen Grüßen" / "Best regards" / "Cordialement"). Line breaks are preserved. You can use variables like <code className="font-mono">{"{firstName}"}</code>.
+                </p>
+              </div>
+              <div>
+                <label className={labelCls}>Footer tagline</label>
+                <input
+                  type="text"
+                  value={draft.tagline ?? ""}
+                  onChange={(e) => onDraftChange({ ...draft, tagline: e.target.value })}
+                  className={inputCls}
+                  placeholder="Leave empty for the default (e.g. Dare to be different.)"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  The italic phrase shown above the social links in the footer. Defaults per language: <em>Dare to be different.</em> / <em>Wage, anders zu sein.</em> / <em>Ose être différent.</em>
                 </p>
               </div>
             </div>

@@ -44,6 +44,7 @@ function emptyDraft(category: ContactCategory = "Event guest", language: Languag
     headerImageUrl: "",
     footerContact: "Level Up in Germany",
     signature: "",
+    tagline: "",
   };
 }
 
@@ -107,6 +108,7 @@ export function EmailTemplatesShell() {
       headerImageUrl: t.headerImageUrl,
       footerContact: t.footerContact,
       signature: t.signature ?? "",
+      tagline: t.tagline ?? "",
     });
     setDirty(false);
   }
@@ -150,6 +152,7 @@ export function EmailTemplatesShell() {
           headerImageUrl: draft.headerImageUrl,
           footerContact: draft.footerContact,
           signature: draft.signature,
+          tagline: draft.tagline,
         });
         setTemplates((prev) => [created, ...prev]);
         setSelectedId(created.id);
@@ -205,6 +208,7 @@ export function EmailTemplatesShell() {
               headerImageUrl: draft.headerImageUrl,
               footerContact: draft.footerContact,
               signature: draft.signature,
+              tagline: draft.tagline,
             },
         to: recipients.to,
         cc: recipients.cc,

@@ -48,6 +48,7 @@ export interface RenderEmailOptions {
   template: Pick<EmailTemplate, "subject" | "body" | "ctaText" | "ctaLink" | "headerImageUrl" | "footerContact"> & {
     language?: Language;
     signature?: string;
+    tagline?: string;
   };
   social: SocialLinks;
   siteBaseUrl?: string;
@@ -102,6 +103,8 @@ export function renderEmailHtml({
   const signatureHtml = signatureRaw
     ? esc(signatureRaw).replace(/\r?\n/g, "<br/>")
     : esc(footer.signature);
+  const taglineRaw = applyVariables(template.tagline ?? "", vars).trim();
+  const taglineText = taglineRaw || footer.tagline;
 
   return `<!doctype html>
 <html lang="${lang}">
@@ -159,7 +162,7 @@ export function renderEmailHtml({
         </tr>
         <tr>
           <td style="border-top:1px solid ${BRAND.border};background:#fbf8f3;padding:24px 40px;" align="center">
-            <p style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:${BRAND.primary};font-size:14px;font-weight:600;">${esc(footer.tagline)}</p>
+            <p style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:${BRAND.primary};font-size:14px;font-weight:600;">${esc(taglineText)}</p>
             <div style="margin-bottom:12px;">${socialRow}</div>
             <p style="margin:0;color:${BRAND.muted};font-size:12px;line-height:1.6;">${esc(footerContact)}</p>
             ${social.email ? `<p style="margin:6px 0 0;color:${BRAND.muted};font-size:12px;"><a href="mailto:${esc(social.email)}" style="color:${BRAND.primary};text-decoration:none;font-weight:600;">${esc(social.email)}</a></p>` : ""}

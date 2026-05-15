@@ -44,6 +44,8 @@ export interface EmailTemplate {
   footerContact: string;
   /** Optional signature override (e.g. "Franck Ngami\nFounder, Level Up in Germany"). When empty, the localized default team signature is used. */
   signature: string;
+  /** Optional footer tagline override. When empty, the localized default tagline is used. */
+  tagline: string;
   updatedAt: string;
   createdAt: string;
 }

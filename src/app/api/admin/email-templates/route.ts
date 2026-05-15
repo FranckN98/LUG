@@ -7,7 +7,7 @@ import { CONTACT_CATEGORIES, LANGUAGES } from "@/types/emailTemplate";
 function toApi(row: {
   id: string; name: string; category: string; language: string; subject: string; body: string;
   ctaText: string | null; ctaLink: string | null; headerImageUrl: string | null;
-  footerContact: string | null; signature: string | null; createdAt: Date; updatedAt: Date;
+  footerContact: string | null; signature: string | null; tagline: string | null; createdAt: Date; updatedAt: Date;
 }): EmailTemplate {
   return {
     id: row.id,
@@ -25,6 +25,7 @@ function toApi(row: {
     headerImageUrl: row.headerImageUrl ?? "",
     footerContact: row.footerContact ?? "",
     signature: row.signature ?? "",
+    tagline: row.tagline ?? "",
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
       headerImageUrl: typeof body.headerImageUrl === "string" ? body.headerImageUrl : null,
       footerContact: typeof body.footerContact === "string" ? body.footerContact : null,
       signature: typeof body.signature === "string" ? body.signature : null,
+      tagline: typeof body.tagline === "string" ? body.tagline : null,
     },
   });
   return NextResponse.json(toApi(created));

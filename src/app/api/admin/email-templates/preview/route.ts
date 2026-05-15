@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       headerImageUrl: String(t.headerImageUrl ?? ""),
       footerContact: String(t.footerContact ?? ""),
       signature: String(t.signature ?? ""),
+      tagline: String(t.tagline ?? ""),
       language,
     },
     social,
