@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
-import type { EmailTemplate, ContactCategory } from "@/types/emailTemplate";
-import { CONTACT_CATEGORIES } from "@/types/emailTemplate";
+import type { EmailTemplate, ContactCategory, Language } from "@/types/emailTemplate";
+import { CONTACT_CATEGORIES, LANGUAGES } from "@/types/emailTemplate";
 
 function toApi(row: {
-  id: string; name: string; category: string; subject: string; body: string;
+  id: string; name: string; category: string; language: string; subject: string; body: string;
   ctaText: string | null; ctaLink: string | null; headerImageUrl: string | null;
   footerContact: string | null; createdAt: Date; updatedAt: Date;
 }): EmailTemplate {
@@ -15,6 +15,9 @@ function toApi(row: {
     category: (CONTACT_CATEGORIES as readonly string[]).includes(row.category)
       ? (row.category as ContactCategory)
       : "Other",
+    language: (LANGUAGES as readonly string[]).includes(row.language)
+      ? (row.language as Language)
+      : "en",
     subject: row.subject ?? "",
     body: row.body ?? "",
     ctaText: row.ctaText ?? "",
@@ -31,6 +34,13 @@ function normalizeCategory(raw: unknown): ContactCategory {
     return raw as ContactCategory;
   }
   return "Other";
+}
+
+function normalizeLanguage(raw: unknown): Language {
+  if (typeof raw === "string" && (LANGUAGES as readonly string[]).includes(raw)) {
+    return raw as Language;
+  }
+  return "en";
 }
 
 export async function GET() {
@@ -54,6 +64,7 @@ export async function POST(req: NextRequest) {
     data: {
       name,
       category: normalizeCategory(body.category),
+      language: normalizeLanguage(body.language),
       subject: typeof body.subject === "string" ? body.subject : "",
       body: typeof body.body === "string" ? body.body : "",
       ctaText: typeof body.ctaText === "string" ? body.ctaText : null,

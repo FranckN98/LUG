@@ -55,6 +55,8 @@ export interface SendEmailInput {
   cc: string[];
   bcc: string[];
   mode?: "send" | "test";
+  language?: string;
+  variables?: Record<string, string>;
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; historyId: string }> {
@@ -87,11 +89,12 @@ export async function updateEmailSocialLinks(patch: Partial<SocialLinks>): Promi
 
 export async function fetchEmailPreviewHtml(
   template: Omit<EmailTemplate, "id" | "createdAt" | "updatedAt">,
+  variables: Record<string, string> = {},
 ): Promise<string> {
   const res = await fetch(`${BASE}/preview`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ template }),
+    body: JSON.stringify({ template, variables, language: template.language }),
   });
   if (!res.ok) throw new Error(`Preview failed (${res.status})`);
   return res.text();

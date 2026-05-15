@@ -18,8 +18,9 @@ import {
   type EmailTemplate,
   type EmailSendHistory,
   type SocialLinks,
+  type Language,
 } from "@/types/emailTemplate";
-import { CATEGORY_DEFAULTS } from "@/lib/emailCategoryDefaults";
+import { CATEGORY_TEMPLATES } from "@/lib/emailCategoryTemplates";
 import { EmailTemplateWorkbench } from "./EmailTemplateWorkbench";
 import { EmailHistoryTable } from "./EmailHistoryTable";
 import { SocialLinksEditor } from "./SocialLinksEditor";
@@ -30,11 +31,12 @@ export type Draft = Omit<EmailTemplate, "id" | "createdAt" | "updatedAt"> & {
   id?: string;
 };
 
-function emptyDraft(category: ContactCategory = "Other"): Draft {
-  const d = CATEGORY_DEFAULTS[category];
+function emptyDraft(category: ContactCategory = "Event guest", language: Language = "en"): Draft {
+  const d = CATEGORY_TEMPLATES[category][language];
   return {
     name: "Untitled template",
     category,
+    language,
     subject: d.subject,
     body: d.body,
     ctaText: d.ctaText,
@@ -94,6 +96,7 @@ export function EmailTemplatesShell() {
       id: t.id,
       name: t.name,
       category: t.category,
+      language: t.language,
       subject: t.subject,
       body: t.body,
       ctaText: t.ctaText,
@@ -135,6 +138,7 @@ export function EmailTemplatesShell() {
         const created = await createEmailTemplate({
           name: draft.name,
           category: draft.category,
+          language: draft.language,
           subject: draft.subject,
           body: draft.body,
           ctaText: draft.ctaText,
@@ -176,6 +180,7 @@ export function EmailTemplatesShell() {
   async function handleSend(
     mode: "send" | "test",
     recipients: { to: string; cc: string[]; bcc: string[] },
+    variables: Record<string, string>,
   ) {
     if (!draft) return;
     setBusy(true);
@@ -187,6 +192,7 @@ export function EmailTemplatesShell() {
           : {
               name: draft.name,
               category: draft.category,
+              language: draft.language,
               subject: draft.subject,
               body: draft.body,
               ctaText: draft.ctaText,
@@ -198,6 +204,8 @@ export function EmailTemplatesShell() {
         cc: recipients.cc,
         bcc: recipients.bcc,
         mode,
+        language: draft.language,
+        variables,
       });
       const h = await fetchEmailHistory();
       setHistory(h);
@@ -318,11 +326,12 @@ export function EmailTemplatesShell() {
                     setDraft(d);
                     setDirty(true);
                   }}
-                  applyCategoryFully={(cat: ContactCategory) => {
-                    const defaults = CATEGORY_DEFAULTS[cat];
+                  applyCategoryFully={(cat: ContactCategory, lang: Language) => {
+                    const defaults = CATEGORY_TEMPLATES[cat][lang];
                     setDraft({
                       ...(draft as Draft),
                       category: cat,
+                      language: lang,
                       subject: defaults.subject,
                       body: defaults.body,
                       ctaText: defaults.ctaText,

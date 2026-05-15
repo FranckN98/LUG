@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/adminAuth";
 import { renderEmailHtml } from "@/lib/emailTemplateRenderer";
 import { getEmailSocialLinks } from "@/lib/emailSocialLinks";
-import { MANDATORY_BCC, type ContactCategory } from "@/types/emailTemplate";
+import { MANDATORY_BCC, LANGUAGES, type ContactCategory, type Language } from "@/types/emailTemplate";
+import { applyVariables } from "@/lib/emailVariables";
 
 const EMAIL_RE = /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/;
 
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
   let templateData: {
     name: string;
     category: ContactCategory | string;
+    language: Language;
     subject: string;
     body: string;
     ctaText: string;
@@ -66,6 +68,18 @@ export async function POST(req: NextRequest) {
     headerImageUrl: string;
     footerContact: string;
   } | null = null;
+
+  const variables: Record<string, string> = {};
+  if (body.variables && typeof body.variables === "object") {
+    for (const [k, v] of Object.entries(body.variables as Record<string, unknown>)) {
+      if (typeof v === "string" && v.length > 0) variables[k] = v;
+    }
+  }
+
+  const overrideLang =
+    typeof body.language === "string" && (LANGUAGES as readonly string[]).includes(body.language)
+      ? (body.language as Language)
+      : null;
 
   if (templateId) {
     const row = await prisma.emailTemplateRecord.findUnique({ where: { id: templateId } });
@@ -75,6 +89,7 @@ export async function POST(req: NextRequest) {
     templateData = {
       name: row.name,
       category: row.category,
+      language: overrideLang ?? ((LANGUAGES as readonly string[]).includes(row.language) ? (row.language as Language) : "en"),
       subject: row.subject,
       body: row.body,
       ctaText: row.ctaText ?? "",
@@ -83,9 +98,14 @@ export async function POST(req: NextRequest) {
       footerContact: row.footerContact ?? "",
     };
   } else if (body.inline && typeof body.inline === "object") {
+    const inlineLang =
+      typeof body.inline.language === "string" && (LANGUAGES as readonly string[]).includes(body.inline.language)
+        ? (body.inline.language as Language)
+        : "en";
     templateData = {
       name: String(body.inline.name ?? "Untitled"),
       category: String(body.inline.category ?? "Other"),
+      language: overrideLang ?? inlineLang,
       subject: String(body.inline.subject ?? ""),
       body: String(body.inline.body ?? ""),
       ctaText: String(body.inline.ctaText ?? ""),
@@ -102,7 +122,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Email subject is required" }, { status: 400 });
   }
 
-  const subject = mode === "test" ? `[TEST] ${templateData.subject}` : templateData.subject;
+  const subjectResolved = applyVariables(templateData.subject, variables);
+  const subject = mode === "test" ? `[TEST] ${subjectResolved}` : subjectResolved;
 
   const social = await getEmailSocialLinks();
   const html = renderEmailHtml({
@@ -113,8 +134,11 @@ export async function POST(req: NextRequest) {
       ctaLink: templateData.ctaLink,
       headerImageUrl: templateData.headerImageUrl,
       footerContact: templateData.footerContact,
+      language: templateData.language,
     },
     social,
+    language: templateData.language,
+    variables,
   });
 
   const apiKey = process.env.RESEND_API_KEY;

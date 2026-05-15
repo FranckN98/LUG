@@ -768,7 +768,8 @@ model EventDocumentTranslation {
 model EmailTemplateRecord {
   id             String   @id @default(uuid())
   name           String
-  category       String // ContactCategory enum (Sponsor, Partner, Business Tour guest, Speaker / panelist, Event guest, Participant, Institution, Other)
+  category       String // ContactCategory enum (Sponsor, Partner, Business Tour guest, Speaker / panelist, Event guest, Participant, Institution, Follow-up, Other)
+  language       String   @default("en") // "en" | "de" | "fr"
   subject        String
   body           String // HTML body content
   ctaText        String?  @map("cta_text")

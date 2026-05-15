@@ -1,27 +1,55 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { MANDATORY_BCC, type ContactCategory } from "@/types/emailTemplate";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  MANDATORY_BCC,
+  LANGUAGES,
+  LANGUAGE_LABELS,
+  type ContactCategory,
+  type Language,
+} from "@/types/emailTemplate";
 import { fetchEmailPreviewHtml } from "@/lib/emailTemplatesApi";
+import { detectVariables } from "@/lib/emailVariables";
 import type { Draft } from "./EmailTemplatesShell";
 
 interface Props {
   draft: Draft;
   onDraftChange: (d: Draft) => void;
-  applyCategoryFully: (c: ContactCategory) => void;
+  applyCategoryFully: (c: ContactCategory, l: Language) => void;
   dirty: boolean;
   busy: boolean;
   isExisting: boolean;
   onSave: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
-  onSend: (mode: "send" | "test", r: { to: string; cc: string[]; bcc: string[] }) => void;
+  onSend: (
+    mode: "send" | "test",
+    r: { to: string; cc: string[]; bcc: string[] },
+    variables: Record<string, string>,
+  ) => void;
   categories: readonly ContactCategory[];
 }
 
 const inputCls =
   "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-[#1A1A1A] focus:outline-none focus:border-[#E98C0B] focus:ring-2 focus:ring-[#E98C0B]/20 transition";
 const labelCls = "block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1.5";
+
+const VARIABLE_PLACEHOLDERS: Record<string, string> = {
+  firstName: "Jane",
+  lastName: "Doe",
+  fullName: "Jane Doe",
+  companyName: "Acme GmbH",
+  organizationName: "Acme Foundation",
+  eventName: "Berlin Edition",
+  eventDate: "April 19, 2026",
+  eventCity: "Berlin",
+  eventLocation: "Kreuzberg HQ",
+  panelTopic: "Building a career in Germany",
+  businessField: "African luxury skincare",
+  fieldOrTopic: "fintech for the diaspora",
+  topic: "our last conversation",
+  lastEventParticipants: "120",
+};
 
 function parseEmails(raw: string): string[] {
   return raw
@@ -39,21 +67,34 @@ export function EmailTemplateWorkbench(props: Props) {
   const [ccRaw, setCcRaw] = useState("");
   const [bccRaw, setBccRaw] = useState("");
   const [confirmSend, setConfirmSend] = useState(false);
+  const [variables, setVariables] = useState<Record<string, string>>({});
 
-  // Debounced preview
+  // For new drafts (no id), auto-load the preset when category or language changes.
+  // Stops auto-loading once the user manually edits subject/body/CTA fields.
+  const userEditedRef = useRef(false);
+
+  const detectedVars = useMemo(
+    () => detectVariables(draft.subject, draft.body, draft.ctaText, draft.ctaLink),
+    [draft.subject, draft.body, draft.ctaText, draft.ctaLink],
+  );
+
   useEffect(() => {
     const handle = setTimeout(() => {
       setPreviewLoading(true);
-      void fetchEmailPreviewHtml({
-        name: draft.name,
-        category: draft.category,
-        subject: draft.subject,
-        body: draft.body,
-        ctaText: draft.ctaText,
-        ctaLink: draft.ctaLink,
-        headerImageUrl: draft.headerImageUrl,
-        footerContact: draft.footerContact,
-      })
+      void fetchEmailPreviewHtml(
+        {
+          name: draft.name,
+          category: draft.category,
+          language: draft.language,
+          subject: draft.subject,
+          body: draft.body,
+          ctaText: draft.ctaText,
+          ctaLink: draft.ctaLink,
+          headerImageUrl: draft.headerImageUrl,
+          footerContact: draft.footerContact,
+        },
+        variables,
+      )
         .then(setPreviewHtml)
         .catch(() => setPreviewHtml("<p style='padding:24px;color:#888'>Preview unavailable</p>"))
         .finally(() => setPreviewLoading(false));
@@ -62,19 +103,45 @@ export function EmailTemplateWorkbench(props: Props) {
   }, [
     draft.name,
     draft.category,
+    draft.language,
     draft.subject,
     draft.body,
     draft.ctaText,
     draft.ctaLink,
     draft.headerImageUrl,
     draft.footerContact,
+    variables,
   ]);
 
   const ccList = useMemo(() => parseEmails(ccRaw), [ccRaw]);
   const bccList = useMemo(() => parseEmails(bccRaw), [bccRaw]);
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
+    if (key === "subject" || key === "body" || key === "ctaText" || key === "ctaLink") {
+      userEditedRef.current = true;
+    }
     onDraftChange({ ...draft, [key]: value });
+  }
+
+  function handleCategoryChange(cat: ContactCategory) {
+    if (!isExisting && !userEditedRef.current) {
+      applyCategoryFully(cat, draft.language);
+    } else {
+      onDraftChange({ ...draft, category: cat });
+    }
+  }
+
+  function handleLanguageChange(lang: Language) {
+    if (!isExisting && !userEditedRef.current) {
+      applyCategoryFully(draft.category, lang);
+    } else {
+      onDraftChange({ ...draft, language: lang });
+    }
+  }
+
+  function handleUseSuggested() {
+    applyCategoryFully(draft.category, draft.language);
+    userEditedRef.current = false;
   }
 
   function handleSendClick(mode: "send" | "test") {
@@ -86,18 +153,17 @@ export function EmailTemplateWorkbench(props: Props) {
       setConfirmSend(true);
       return;
     }
-    props.onSend(mode, { to: to.trim(), cc: ccList, bcc: bccList });
+    props.onSend(mode, { to: to.trim(), cc: ccList, bcc: bccList }, variables);
     setConfirmSend(false);
   }
 
   return (
     <div className="space-y-6">
-      {/* Toolbar */}
       <div className="bg-white rounded-xl border border-gray-200 p-3 flex flex-wrap items-center gap-2 sticky top-0 z-10">
         <input
           type="text"
           value={draft.name}
-          onChange={(e) => update("name", e.target.value)}
+          onChange={(e) => onDraftChange({ ...draft, name: e.target.value })}
           className="flex-1 min-w-[200px] border-0 text-base font-semibold text-[#1A1A1A] focus:outline-none focus:ring-2 focus:ring-[#E98C0B]/30 rounded px-2 py-1"
           placeholder="Template name"
         />
@@ -130,7 +196,6 @@ export function EmailTemplateWorkbench(props: Props) {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* LEFT: editor */}
         <div className="space-y-6">
           <section className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-sm font-bold uppercase tracking-wider text-[#1A1A1A] mb-4">Content</h2>
@@ -140,7 +205,7 @@ export function EmailTemplateWorkbench(props: Props) {
                 <div className="flex gap-2">
                   <select
                     value={draft.category}
-                    onChange={(e) => update("category", e.target.value as ContactCategory)}
+                    onChange={(e) => handleCategoryChange(e.target.value as ContactCategory)}
                     className={inputCls}
                   >
                     {props.categories.map((c) => (
@@ -149,14 +214,39 @@ export function EmailTemplateWorkbench(props: Props) {
                   </select>
                   <button
                     type="button"
-                    onClick={() => applyCategoryFully(draft.category)}
-                    title="Replace subject, body and CTA with the recommended template for this category"
+                    onClick={handleUseSuggested}
+                    title="Replace subject, body and CTA with the recommended template for this category + language"
                     className="whitespace-nowrap text-xs font-semibold px-3 py-2 border border-[#E98C0B]/40 text-[#c77409] rounded-lg hover:bg-[#fff4e3]"
                   >
                     Use suggested
                   </button>
                 </div>
+                <p className="mt-1.5 text-xs text-gray-500">
+                  Pick a category and the matching template loads automatically. Only the language remains to choose below.
+                </p>
               </div>
+
+              <div>
+                <label className={labelCls}>Language</label>
+                <div className="inline-flex bg-gray-100 rounded-lg p-1 gap-1">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => handleLanguageChange(l)}
+                      className={`px-3 py-1.5 text-xs font-bold rounded-md uppercase tracking-wider transition ${
+                        draft.language === l
+                          ? "bg-[#8C1A1A] text-white shadow-sm"
+                          : "text-gray-600 hover:text-[#1A1A1A]"
+                      }`}
+                      aria-pressed={draft.language === l}
+                    >
+                      {l} · {LANGUAGE_LABELS[l]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div>
                 <label className={labelCls}>Email subject</label>
                 <input
@@ -164,7 +254,7 @@ export function EmailTemplateWorkbench(props: Props) {
                   value={draft.subject}
                   onChange={(e) => update("subject", e.target.value)}
                   className={inputCls}
-                  placeholder="e.g. Partnering with Level Up in Germany"
+                  placeholder="e.g. Invitation to Level Up in Germany"
                 />
               </div>
               <div>
@@ -172,12 +262,13 @@ export function EmailTemplateWorkbench(props: Props) {
                 <textarea
                   value={draft.body}
                   onChange={(e) => update("body", e.target.value)}
-                  rows={12}
+                  rows={14}
                   className={`${inputCls} font-sans leading-relaxed resize-y`}
-                  placeholder="Write your message. Plain paragraphs are auto-formatted. HTML is also supported."
+                  placeholder="Write your message. Plain paragraphs are auto-formatted. Use {firstName}, {eventDate}, etc. as variables."
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Tip: Leave a blank line between paragraphs. HTML tags are supported for advanced formatting.
+                  Tip: Use <span className="font-mono">{"{firstName}"}</span>,{" "}
+                  <span className="font-mono">{"{eventDate}"}</span> and other placeholders — fill them in the Variables panel below.
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -188,7 +279,7 @@ export function EmailTemplateWorkbench(props: Props) {
                     value={draft.ctaText}
                     onChange={(e) => update("ctaText", e.target.value)}
                     className={inputCls}
-                    placeholder="e.g. Schedule a Call"
+                    placeholder="e.g. Schedule a call"
                   />
                 </div>
                 <div>
@@ -205,6 +296,32 @@ export function EmailTemplateWorkbench(props: Props) {
             </div>
           </section>
 
+          {detectedVars.length > 0 && (
+            <section className="bg-white rounded-xl border border-gray-200 p-5">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[#1A1A1A] mb-1">Variables</h2>
+              <p className="text-xs text-gray-500 mb-4">
+                These placeholders were detected in your template. Provide values to personalize the email before sending.
+                Social URLs (<span className="font-mono">{"{websiteUrl}"}</span>, <span className="font-mono">{"{linkedInUrl}"}</span>, …) are filled automatically from the Social Footer tab.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {detectedVars.map((name) => (
+                  <div key={name}>
+                    <label className={labelCls}>{`{${name}}`}</label>
+                    <input
+                      type="text"
+                      value={variables[name] ?? ""}
+                      onChange={(e) =>
+                        setVariables((prev) => ({ ...prev, [name]: e.target.value }))
+                      }
+                      className={inputCls}
+                      placeholder={VARIABLE_PLACEHOLDERS[name] ?? `Value for ${name}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className="bg-white rounded-xl border border-gray-200 p-5">
             <h2 className="text-sm font-bold uppercase tracking-wider text-[#1A1A1A] mb-4">Branding</h2>
             <div className="space-y-4">
@@ -213,7 +330,7 @@ export function EmailTemplateWorkbench(props: Props) {
                 <input
                   type="url"
                   value={draft.headerImageUrl}
-                  onChange={(e) => update("headerImageUrl", e.target.value)}
+                  onChange={(e) => onDraftChange({ ...draft, headerImageUrl: e.target.value })}
                   className={inputCls}
                   placeholder="Leave empty to use /logo.png"
                 />
@@ -223,7 +340,7 @@ export function EmailTemplateWorkbench(props: Props) {
                 <input
                   type="text"
                   value={draft.footerContact}
-                  onChange={(e) => update("footerContact", e.target.value)}
+                  onChange={(e) => onDraftChange({ ...draft, footerContact: e.target.value })}
                   className={inputCls}
                   placeholder="e.g. Level Up in Germany — Berlin, Germany"
                 />
@@ -317,11 +434,12 @@ export function EmailTemplateWorkbench(props: Props) {
           </section>
         </div>
 
-        {/* RIGHT: preview */}
         <div>
           <div className="bg-white rounded-xl border border-gray-200 p-3 sticky top-20">
             <div className="flex items-center justify-between mb-3 px-1">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-[#1A1A1A]">Live preview</h2>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[#1A1A1A]">
+                Live preview <span className="ml-2 text-[10px] font-bold text-[#8C1A1A]">{draft.language.toUpperCase()}</span>
+              </h2>
               <div className="flex bg-gray-100 rounded-lg p-1">
                 <button
                   onClick={() => setPreviewMode("desktop")}

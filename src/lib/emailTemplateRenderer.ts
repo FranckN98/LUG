@@ -1,4 +1,6 @@
-import type { EmailTemplate, SocialLinks } from "@/types/emailTemplate";
+import type { EmailTemplate, Language, SocialLinks } from "@/types/emailTemplate";
+import { FOOTER_COPY } from "@/lib/emailCategoryTemplates";
+import { applyVariables, buildSocialVariableBag } from "@/lib/emailVariables";
 
 /** Brand palette mirrored from tailwind.config.ts so HTML email matches the site. */
 const BRAND = {
@@ -43,16 +45,37 @@ function socialLink(label: string, url: string): string {
 }
 
 export interface RenderEmailOptions {
-  template: Pick<EmailTemplate, "subject" | "body" | "ctaText" | "ctaLink" | "headerImageUrl" | "footerContact">;
+  template: Pick<EmailTemplate, "subject" | "body" | "ctaText" | "ctaLink" | "headerImageUrl" | "footerContact"> & {
+    language?: Language;
+  };
   social: SocialLinks;
   siteBaseUrl?: string;
+  /** User-provided variable values (e.g. firstName, eventDate). Social URLs are auto-injected. */
+  variables?: Record<string, string>;
+  /** Optional explicit language override (otherwise read from template.language). */
+  language?: Language;
 }
 
-export function renderEmailHtml({ template, social, siteBaseUrl = "https://www.levelupingermany.com" }: RenderEmailOptions): string {
+export function renderEmailHtml({
+  template,
+  social,
+  siteBaseUrl = "https://www.levelupingermany.com",
+  variables = {},
+  language,
+}: RenderEmailOptions): string {
+  const lang: Language = (language ?? template.language ?? "en") as Language;
+  const vars: Record<string, string> = { ...buildSocialVariableBag(social), ...variables };
+  const subject = applyVariables(template.subject || "", vars);
+  const ctaTextRaw = applyVariables(template.ctaText || "", vars);
+  const ctaLinkRaw = applyVariables(template.ctaLink || "", vars);
+  const bodyRaw = applyVariables(template.body || "", vars);
+  vars.ctaButtonText = ctaTextRaw;
+  vars.ctaButtonLink = ctaLinkRaw;
   const headerImage = template.headerImageUrl?.trim() || `${siteBaseUrl}/logo.png`;
-  const ctaText = template.ctaText?.trim();
-  const ctaLink = template.ctaLink?.trim();
-  const bodyHtml = renderBody(template.body || "");
+  const ctaText = ctaTextRaw.trim();
+  const ctaLink = ctaLinkRaw.trim();
+  const bodyHtml = renderBody(bodyRaw);
+  const footer = FOOTER_COPY[lang] ?? FOOTER_COPY.en;
 
   const ctaBlock = ctaText && ctaLink
     ? `
@@ -76,13 +99,13 @@ export function renderEmailHtml({ template, social, siteBaseUrl = "https://www.l
   const footerContact = template.footerContact?.trim() || "Level Up in Germany — Berlin, Germany";
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <meta name="color-scheme" content="light" />
 <meta name="supported-color-schemes" content="light" />
-<title>${esc(template.subject || "Level Up in Germany")}</title>
+<title>${esc(subject || "Level Up in Germany")}</title>
 <style>
   @media (max-width:620px){
     .lug-container{width:100% !important;border-radius:0 !important;}
@@ -93,7 +116,7 @@ export function renderEmailHtml({ template, social, siteBaseUrl = "https://www.l
 </style>
 </head>
 <body style="margin:0;padding:0;background:${BRAND.bg};font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:${BRAND.text};">
-  <span style="display:none !important;opacity:0;visibility:hidden;max-height:0;max-width:0;overflow:hidden;">${esc(template.subject || "")}</span>
+  <span style="display:none !important;opacity:0;visibility:hidden;max-height:0;max-width:0;overflow:hidden;">${esc(subject || "")}</span>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BRAND.bg};">
     <tr><td align="center" style="padding:32px 12px;">
       <table role="presentation" class="lug-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:${BRAND.card};border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(26,26,26,.08);">
@@ -104,7 +127,7 @@ export function renderEmailHtml({ template, social, siteBaseUrl = "https://www.l
         </tr>
         <tr>
           <td class="lug-pad" style="padding:36px 40px 8px;">
-            <h1 class="lug-h1" style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;color:${BRAND.dark};font-size:26px;line-height:1.25;font-weight:700;">${esc(template.subject || "")}</h1>
+            <h1 class="lug-h1" style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;color:${BRAND.dark};font-size:26px;line-height:1.25;font-weight:700;">${esc(subject || "")}</h1>
             <div style="height:3px;width:48px;background:${BRAND.accent};border-radius:2px;margin:0 0 22px;"></div>
           </td>
         </tr>
@@ -116,14 +139,16 @@ export function renderEmailHtml({ template, social, siteBaseUrl = "https://www.l
         ${ctaBlock}
         <tr>
           <td class="lug-pad" style="padding:8px 40px 28px;">
-            <p style="margin:0;color:${BRAND.muted};font-size:13px;line-height:1.6;">With warm regards,<br/><strong style="color:${BRAND.dark};">The Level Up in Germany Team</strong></p>
+            <p style="margin:0;color:${BRAND.muted};font-size:13px;line-height:1.6;">${esc(footer.closing)}<br/><strong style="color:${BRAND.dark};">${esc(footer.signature)}</strong></p>
           </td>
         </tr>
         <tr>
           <td style="border-top:1px solid ${BRAND.border};background:#fbf8f3;padding:24px 40px;" align="center">
+            <p style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:${BRAND.primary};font-size:14px;font-weight:600;">${esc(footer.tagline)}</p>
             <div style="margin-bottom:12px;">${socialRow}</div>
             <p style="margin:0;color:${BRAND.muted};font-size:12px;line-height:1.6;">${esc(footerContact)}</p>
             ${social.email ? `<p style="margin:6px 0 0;color:${BRAND.muted};font-size:12px;"><a href="mailto:${esc(social.email)}" style="color:${BRAND.primary};text-decoration:none;font-weight:600;">${esc(social.email)}</a></p>` : ""}
+            <p style="margin:14px 0 0;color:${BRAND.muted};font-size:11px;line-height:1.55;font-style:italic;">${esc(footer.disclaimer)}</p>
           </td>
         </tr>
         <tr>
