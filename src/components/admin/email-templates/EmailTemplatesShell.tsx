@@ -42,7 +42,7 @@ function emptyDraft(category: ContactCategory = "Event guest", language: Languag
     ctaText: d.ctaText,
     ctaLink: d.ctaLink,
     headerImageUrl: "",
-    footerContact: "Level Up in Germany — Berlin, Germany",
+    footerContact: "Level Up in Germany",
   };
 }
 
@@ -278,45 +278,56 @@ export function EmailTemplatesShell() {
         {loading ? (
           <div className="text-sm text-gray-500">Loading…</div>
         ) : tab === "templates" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-            <aside className="bg-white rounded-xl border border-gray-200 p-3 h-fit">
-              <button
-                onClick={startNew}
-                className="w-full mb-3 inline-flex items-center justify-center gap-2 bg-[#8C1A1A] hover:bg-[#6b1414] text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition"
-              >
-                + New template
-              </button>
-              {templates.length === 0 ? (
-                <p className="text-xs text-gray-500 px-2 py-4 text-center">
-                  No templates yet. Create your first one.
-                </p>
-              ) : (
-                <ul className="space-y-1 max-h-[60vh] overflow-y-auto">
-                  {templates.map((t) => (
-                    <li key={t.id}>
-                      <button
-                        onClick={() => pickTemplate(t.id)}
-                        className={`w-full text-left px-3 py-2.5 rounded-lg transition ${
-                          selectedId === t.id
-                            ? "bg-[#fff4e3] border border-[#E98C0B]/40"
-                            : "hover:bg-gray-50 border border-transparent"
-                        }`}
-                      >
-                        <div className="text-sm font-semibold text-[#1A1A1A] truncate">{t.name}</div>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-[10px] uppercase tracking-wider font-bold text-[#8C1A1A]">
-                            {t.category}
-                          </span>
-                          <span className="text-[10px] text-gray-400">
-                            {new Date(t.updatedAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </aside>
+          <div className="space-y-5">
+            {/* Templates rail — inline "+ New" + horizontal scroll of templates */}
+            <div className="bg-white rounded-xl border border-gray-200 p-3">
+              <div className="flex items-stretch gap-3">
+                <button
+                  onClick={startNew}
+                  className="shrink-0 inline-flex items-center gap-2 bg-[#8C1A1A] hover:bg-[#6b1414] text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition shadow-sm"
+                >
+                  <span className="text-lg leading-none">＋</span>
+                  <span>New template</span>
+                </button>
+                <div className="h-auto w-px bg-gray-200 shrink-0" />
+                {templates.length === 0 ? (
+                  <div className="flex-1 flex items-center text-xs text-gray-500 px-2">
+                    No templates yet — click <span className="font-semibold mx-1">＋ New template</span> to create your first one.
+                  </div>
+                ) : (
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 -mb-1 [scrollbar-width:thin]">
+                      {templates.map((t) => {
+                        const active = selectedId === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            onClick={() => pickTemplate(t.id)}
+                            className={`shrink-0 text-left px-3 py-2 rounded-lg border transition min-w-[180px] max-w-[240px] ${
+                              active
+                                ? "bg-[#fff4e3] border-[#E98C0B]/50 shadow-sm"
+                                : "bg-white border-gray-200 hover:border-[#E98C0B]/40 hover:bg-[#fffaf2]"
+                            }`}
+                          >
+                            <div className={`text-sm font-semibold truncate ${active ? "text-[#1A1A1A]" : "text-[#1A1A1A]"}`}>
+                              {t.name}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="text-[9px] uppercase tracking-wider font-bold text-[#8C1A1A] truncate">
+                                {t.category}
+                              </span>
+                              <span className="text-[9px] uppercase tracking-wider font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                                {t.language}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
             <section>
               {draft ? (

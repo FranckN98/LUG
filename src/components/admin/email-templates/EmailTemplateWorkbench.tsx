@@ -342,7 +342,7 @@ export function EmailTemplateWorkbench(props: Props) {
                   value={draft.footerContact}
                   onChange={(e) => onDraftChange({ ...draft, footerContact: e.target.value })}
                   className={inputCls}
-                  placeholder="e.g. Level Up in Germany — Berlin, Germany"
+                  placeholder="e.g. Level Up in Germany"
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   Social links and the contact email come from the Social Footer tab and apply to every template automatically.
