@@ -12,51 +12,51 @@ datasource db {
 }
 
 model NewsletterSubscriber {
-  id               String   @id @default(uuid())
-  email            String   @unique
-  createdAt        DateTime @default(now()) @map("created_at")
-  source           String
-  consent          Boolean  @default(false)
-  name             String?
-  tags             String?  @default("levelup_event")
-  firstName        String?  @map("first_name")
-  lastName         String?  @map("last_name")
-  address          String?
-  city             String?
-  status           String   @default("active")
-  locale           String?  @default("fr")
-  unsubscribeToken String?  @unique @map("unsubscribe_token")
+  id                      String                   @id @default(uuid())
+  email                   String                   @unique
+  createdAt               DateTime                 @default(now()) @map("created_at")
+  source                  String
+  consent                 Boolean                  @default(false)
+  name                    String?
+  tags                    String?                  @default("levelup_event")
+  firstName               String?                  @map("first_name")
+  lastName                String?                  @map("last_name")
+  address                 String?
+  city                    String?
+  status                  String                   @default("active")
+  locale                  String?                  @default("fr")
+  unsubscribeToken        String?                  @unique @map("unsubscribe_token")
   eventCommunicationLeads EventCommunicationLead[]
 
   @@map("newsletter_subscribers")
 }
 
 model CommunicationSettings {
-  id                         String   @id @default(uuid())
-  isCommunicationModeActive  Boolean  @default(false) @map("is_communication_mode_active")
-  popupDelaySeconds          Int      @default(5) @map("popup_delay_seconds")
-  title                      String   @default("Something is coming...")
-  description                String   @default("Be among the first to receive updates about the next Level Up event.")
-  buttonText                 String   @default("Join the list") @map("button_text")
-  eventId                    String?  @unique @map("event_id")
-  createdAt                  DateTime @default(now()) @map("created_at")
-  updatedAt                  DateTime @updatedAt @map("updated_at")
-  event                      Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  id                        String   @id @default(uuid())
+  isCommunicationModeActive Boolean  @default(false) @map("is_communication_mode_active")
+  popupDelaySeconds         Int      @default(5) @map("popup_delay_seconds")
+  title                     String   @default("Something is coming...")
+  description               String   @default("Be among the first to receive updates about the next Level Up event.")
+  buttonText                String   @default("Join the list") @map("button_text")
+  eventId                   String?  @unique @map("event_id")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+  event                     Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
 
   @@map("communication_settings")
 }
 
 model EventCommunicationLead {
-  id                    String                @id @default(uuid())
-  eventId               String                @map("event_id")
-  email                 String
-  firstName             String?               @map("first_name")
-  subscriberId          String?               @map("subscriber_id")
-  source                String                @default("event_communication_popup")
-  createdAt             DateTime              @default(now()) @map("created_at")
-  updatedAt             DateTime              @updatedAt @map("updated_at")
-  event                 Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  subscriber            NewsletterSubscriber? @relation(fields: [subscriberId], references: [id], onDelete: SetNull)
+  id           String                @id @default(uuid())
+  eventId      String                @map("event_id")
+  email        String
+  firstName    String?               @map("first_name")
+  subscriberId String?               @map("subscriber_id")
+  source       String                @default("event_communication_popup")
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
+  event        Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  subscriber   NewsletterSubscriber? @relation(fields: [subscriberId], references: [id], onDelete: SetNull)
 
   @@unique([eventId, email])
   @@index([subscriberId])
@@ -64,36 +64,36 @@ model EventCommunicationLead {
 }
 
 model NewsletterCampaign {
-  id          String    @id @default(uuid())
-  subject     String
-  previewText String?   @map("preview_text")
-  titleText   String?   @map("title_text")
-  bodyContent      String    @map("body_content")
-  headerImageUrl   String?   @map("header_image_url")
-  campaignImageUrl String?   @map("campaign_image_url")
-  ctaLabel         String?   @map("cta_label")
-  ctaUrl           String?   @map("cta_url")
-  footerNote       String?   @map("footer_note")
-  status      String    @default("draft")
-  sentAt      DateTime? @map("sent_at")
-  sentCount   Int       @default(0) @map("sent_count")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  translations NewsletterCampaignTranslation[]
-  attachments  NewsletterCampaignAttachment[]
+  id               String                          @id @default(uuid())
+  subject          String
+  previewText      String?                         @map("preview_text")
+  titleText        String?                         @map("title_text")
+  bodyContent      String                          @map("body_content")
+  headerImageUrl   String?                         @map("header_image_url")
+  campaignImageUrl String?                         @map("campaign_image_url")
+  ctaLabel         String?                         @map("cta_label")
+  ctaUrl           String?                         @map("cta_url")
+  footerNote       String?                         @map("footer_note")
+  status           String                          @default("draft")
+  sentAt           DateTime?                       @map("sent_at")
+  sentCount        Int                             @default(0) @map("sent_count")
+  createdAt        DateTime                        @default(now()) @map("created_at")
+  updatedAt        DateTime                        @updatedAt @map("updated_at")
+  translations     NewsletterCampaignTranslation[]
+  attachments      NewsletterCampaignAttachment[]
 
   @@map("newsletter_campaigns")
 }
 
 model NewsletterCampaignAttachment {
-  id          String   @id @default(uuid())
-  campaignId  String   @map("campaign_id")
+  id          String             @id @default(uuid())
+  campaignId  String             @map("campaign_id")
   filename    String
   url         String
-  contentType String?  @map("content_type")
+  contentType String?            @map("content_type")
   size        Int?
-  position    Int      @default(0)
-  createdAt   DateTime @default(now()) @map("created_at")
+  position    Int                @default(0)
+  createdAt   DateTime           @default(now()) @map("created_at")
   campaign    NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
@@ -101,17 +101,17 @@ model NewsletterCampaignAttachment {
 }
 
 model NewsletterCampaignTranslation {
-  id          String   @id @default(uuid())
-  campaignId  String   @map("campaign_id")
+  id          String             @id @default(uuid())
+  campaignId  String             @map("campaign_id")
   locale      String
   subject     String
-  previewText String?  @map("preview_text")
-  titleText   String?  @map("title_text")
-  bodyContent String   @map("body_content")
-  ctaLabel    String?  @map("cta_label")
-  footerNote  String?  @map("footer_note")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  previewText String?            @map("preview_text")
+  titleText   String?            @map("title_text")
+  bodyContent String             @map("body_content")
+  ctaLabel    String?            @map("cta_label")
+  footerNote  String?            @map("footer_note")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
   campaign    NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@unique([campaignId, locale])
@@ -131,27 +131,27 @@ model ContactMessage {
 }
 
 model Member {
-  id                String    @id @default(uuid())
-  firstName         String    @map("first_name")
-  lastName          String    @map("last_name")
-  birthDate         DateTime  @map("birth_date")
-  address           String
-  email             String    @unique
-  phone             String?
-  activityDomain    String    @map("activity_domain")
-  motivation        String?
-  helpDomains       String    @map("help_domains")
-  applicationStatus String    @default("pending") @map("application_status")
-  rejectionReason   String?   @map("rejection_reason")
-  membershipFeePaid Boolean   @default(false) @map("membership_fee_paid")
-  lastPaymentDate   DateTime? @map("last_payment_date")
-  consentGiven      Boolean   @default(true) @map("consent_given")
+  id                 String    @id @default(uuid())
+  firstName          String    @map("first_name")
+  lastName           String    @map("last_name")
+  birthDate          DateTime  @map("birth_date")
+  address            String
+  email              String    @unique
+  phone              String?
+  activityDomain     String    @map("activity_domain")
+  motivation         String?
+  helpDomains        String    @map("help_domains")
+  applicationStatus  String    @default("pending") @map("application_status")
+  rejectionReason    String?   @map("rejection_reason")
+  membershipFeePaid  Boolean   @default(false) @map("membership_fee_paid")
+  lastPaymentDate    DateTime? @map("last_payment_date")
+  consentGiven       Boolean   @default(true) @map("consent_given")
   welcomeShortSentAt DateTime? @map("welcome_short_sent_at")
   welcomeFullSentAt  DateTime? @map("welcome_full_sent_at")
   infoPackSentAt     DateTime? @map("info_pack_sent_at")
   lastCustomEmailAt  DateTime? @map("last_custom_email_at")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   @@map("members")
 }
@@ -202,48 +202,48 @@ model HomeButton {
 }
 
 model SiteConfig {
-  id                      String   @id @default("singleton")
-  headerLogoUrl           String?  @map("header_logo_url")
-  headerJoinLabelFr       String?  @map("header_join_label_fr")
-  headerJoinLabelDe       String?  @map("header_join_label_de")
-  headerJoinLabelEn       String?  @map("header_join_label_en")
-  headerJoinLink          String?  @map("header_join_link")
+  id                        String   @id @default("singleton")
+  headerLogoUrl             String?  @map("header_logo_url")
+  headerJoinLabelFr         String?  @map("header_join_label_fr")
+  headerJoinLabelDe         String?  @map("header_join_label_de")
+  headerJoinLabelEn         String?  @map("header_join_label_en")
+  headerJoinLink            String?  @map("header_join_link")
   headerJoinOpenInNewTab    Boolean  @default(false) @map("header_join_open_in_new_tab")
   headerJoinColorVariant    String?  @default("red") @map("header_join_color_variant")
   headerJoinIsActive        Boolean  @default(true) @map("header_join_is_active")
   headerSponsorColorVariant String?  @default("yellow") @map("header_sponsor_color_variant")
   headerSponsorLabelFr      String?  @map("header_sponsor_label_fr")
-  headerSponsorLabelDe    String?  @map("header_sponsor_label_de")
-  headerSponsorLabelEn    String?  @map("header_sponsor_label_en")
-  headerSponsorLink       String?  @map("header_sponsor_link")
-  headerSponsorOpenInNewTab Boolean @default(false) @map("header_sponsor_open_in_new_tab")
+  headerSponsorLabelDe      String?  @map("header_sponsor_label_de")
+  headerSponsorLabelEn      String?  @map("header_sponsor_label_en")
+  headerSponsorLink         String?  @map("header_sponsor_link")
+  headerSponsorOpenInNewTab Boolean  @default(false) @map("header_sponsor_open_in_new_tab")
   headerSponsorIsActive     Boolean  @default(true) @map("header_sponsor_is_active")
-  membershipHeroHeadingFr String?  @map("membership_hero_heading_fr")
-  membershipHeroHeadingDe String?  @map("membership_hero_heading_de")
-  membershipHeroHeadingEn String?  @map("membership_hero_heading_en")
-  membershipHeroSubFr     String?  @map("membership_hero_sub_fr")
-  membershipHeroSubDe     String?  @map("membership_hero_sub_de")
-  membershipHeroSubEn     String?  @map("membership_hero_sub_en")
-  membershipHeroBgUrl     String?  @map("membership_hero_bg_url")
-  createdAt               DateTime @default(now()) @map("created_at")
-  updatedAt               DateTime @updatedAt @map("updated_at")
+  membershipHeroHeadingFr   String?  @map("membership_hero_heading_fr")
+  membershipHeroHeadingDe   String?  @map("membership_hero_heading_de")
+  membershipHeroHeadingEn   String?  @map("membership_hero_heading_en")
+  membershipHeroSubFr       String?  @map("membership_hero_sub_fr")
+  membershipHeroSubDe       String?  @map("membership_hero_sub_de")
+  membershipHeroSubEn       String?  @map("membership_hero_sub_en")
+  membershipHeroBgUrl       String?  @map("membership_hero_bg_url")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
 
   @@map("site_config")
 }
 
 model BlogPost {
-  id          String    @id @default(uuid())
-  title       String
-  body        String
-  coverImage  String?
-  author      String    @default("Équipe Level Up in Germany")
-  category    String?
-  published   Boolean   @default(false)
-  publishedAt DateTime? @map("published_at")
-  likes       Int       @default(0)
-  shares      Int       @default(0)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id           String                @id @default(uuid())
+  title        String
+  body         String
+  coverImage   String?
+  author       String                @default("Équipe Level Up in Germany")
+  category     String?
+  published    Boolean               @default(false)
+  publishedAt  DateTime?             @map("published_at")
+  likes        Int                   @default(0)
+  shares       Int                   @default(0)
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
   interactions BlogInteraction[]
   translations BlogPostTranslation[]
 
@@ -284,23 +284,23 @@ model BlogInteraction {
 }
 
 model AnalyticsEvent {
-  id           String   @id @default(uuid())
-  name         String // 'page_view' | 'newsletter_signup' | 'contact_form_submit' | etc.
-  page         String? // pathname, e.g. '/fr/event-2026'
-  locale       String?
-  referrer     String?
-  utmSource    String?  @map("utm_source")
-  utmMedium    String?  @map("utm_medium")
-  utmCampaign  String?  @map("utm_campaign")
-  utmTerm      String?  @map("utm_term")
-  utmContent   String?  @map("utm_content")
-  source       String? // 'tiktok' | 'instagram' | 'whatsapp' | 'linkedin' | 'google' | 'direct' | 'newsletter' | …
-  visitorHash  String?  @map("visitor_hash")
-  sessionId    String?  @map("session_id")
-  country      String?
-  device       String? // 'mobile' | 'tablet' | 'desktop'
-  properties   String? // JSON string with event-specific extras
-  createdAt    DateTime @default(now()) @map("created_at")
+  id          String   @id @default(uuid())
+  name        String // 'page_view' | 'newsletter_signup' | 'contact_form_submit' | etc.
+  page        String? // pathname, e.g. '/fr/event-2026'
+  locale      String?
+  referrer    String?
+  utmSource   String?  @map("utm_source")
+  utmMedium   String?  @map("utm_medium")
+  utmCampaign String?  @map("utm_campaign")
+  utmTerm     String?  @map("utm_term")
+  utmContent  String?  @map("utm_content")
+  source      String? // 'tiktok' | 'instagram' | 'whatsapp' | 'linkedin' | 'google' | 'direct' | 'newsletter' | …
+  visitorHash String?  @map("visitor_hash")
+  sessionId   String?  @map("session_id")
+  country     String?
+  device      String? // 'mobile' | 'tablet' | 'desktop'
+  properties  String? // JSON string with event-specific extras
+  createdAt   DateTime @default(now()) @map("created_at")
 
   @@index([name, createdAt])
   @@index([page, createdAt])
@@ -356,15 +356,15 @@ model Media {
 }
 
 model Partner {
-  id          String   @id @default(uuid())
-  name        String
-  logoUrl     String   @default("") @map("logo_url")
-  websiteUrl  String?  @map("website_url")
-  category    String   @default("partner") // partner | sponsor
-  sortOrder   Int      @default(0) @map("sort_order")
-  visible     Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  name       String
+  logoUrl    String   @default("") @map("logo_url")
+  websiteUrl String?  @map("website_url")
+  category   String   @default("partner") // partner | sponsor
+  sortOrder  Int      @default(0) @map("sort_order")
+  visible    Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   @@index([visible, sortOrder])
   @@map("partners")
@@ -402,40 +402,40 @@ model VenueTranslation {
 }
 
 model Event {
-  id                 String              @id @default(uuid())
-  year               Int                 @unique
-  slug               String              @unique
-  status             String              @default("draft")
-  sortOrder          Int                 @default(0) @map("sort_order")
-  startsAt           DateTime?           @map("starts_at")
-  endsAt             DateTime?           @map("ends_at")
-  timezone           String              @default("Europe/Berlin")
-  isDateConfirmed    Boolean             @default(false) @map("is_date_confirmed")
-  heroImageUrl       String?             @map("hero_image_url")
-  heroBadge          String?             @map("hero_badge")
-  primaryCtaUrl      String?             @map("primary_cta_url")
-  secondaryCtaUrl    String?             @map("secondary_cta_url")
-  contactEmail       String?             @map("contact_email")
-  contactPhone       String?             @map("contact_phone")
-  contactInstagram   String?             @map("contact_instagram")
-  showPrice          Boolean             @default(true) @map("show_price")
-  priceBlurred       Boolean             @default(false) @map("price_blurred")
-  ticketingStatus    String              @default("coming_soon") @map("ticketing_status")
-  publishedAt        DateTime?           @map("published_at")
-  venueId            String?             @map("venue_id")
-  deletedAt          DateTime?           @map("deleted_at")
-  createdAt          DateTime            @default(now()) @map("created_at")
-  updatedAt          DateTime            @updatedAt @map("updated_at")
-  venue              Venue?              @relation(fields: [venueId], references: [id], onDelete: SetNull)
-  translations       EventTranslation[]
-  prices             EventPrice[]
-  highlights         EventHighlight[]
-  scheduleSections   ScheduleSection[]
-  scheduleItems      ScheduleItem[]
-  eventSpeakers      EventSpeaker[]
-  eventOrganizations EventOrganization[]
-  mediaItems         EventMedia[]
-  documents          EventDocument[]
+  id                   String                   @id @default(uuid())
+  year                 Int                      @unique
+  slug                 String                   @unique
+  status               String                   @default("draft")
+  sortOrder            Int                      @default(0) @map("sort_order")
+  startsAt             DateTime?                @map("starts_at")
+  endsAt               DateTime?                @map("ends_at")
+  timezone             String                   @default("Europe/Berlin")
+  isDateConfirmed      Boolean                  @default(false) @map("is_date_confirmed")
+  heroImageUrl         String?                  @map("hero_image_url")
+  heroBadge            String?                  @map("hero_badge")
+  primaryCtaUrl        String?                  @map("primary_cta_url")
+  secondaryCtaUrl      String?                  @map("secondary_cta_url")
+  contactEmail         String?                  @map("contact_email")
+  contactPhone         String?                  @map("contact_phone")
+  contactInstagram     String?                  @map("contact_instagram")
+  showPrice            Boolean                  @default(true) @map("show_price")
+  priceBlurred         Boolean                  @default(false) @map("price_blurred")
+  ticketingStatus      String                   @default("coming_soon") @map("ticketing_status")
+  publishedAt          DateTime?                @map("published_at")
+  venueId              String?                  @map("venue_id")
+  deletedAt            DateTime?                @map("deleted_at")
+  createdAt            DateTime                 @default(now()) @map("created_at")
+  updatedAt            DateTime                 @updatedAt @map("updated_at")
+  venue                Venue?                   @relation(fields: [venueId], references: [id], onDelete: SetNull)
+  translations         EventTranslation[]
+  prices               EventPrice[]
+  highlights           EventHighlight[]
+  scheduleSections     ScheduleSection[]
+  scheduleItems        ScheduleItem[]
+  eventSpeakers        EventSpeaker[]
+  eventOrganizations   EventOrganization[]
+  mediaItems           EventMedia[]
+  documents            EventDocument[]
   communicationSetting CommunicationSettings?
   communicationLeads   EventCommunicationLead[]
 
@@ -760,4 +760,58 @@ model EventDocumentTranslation {
 
   @@unique([eventDocumentId, locale])
   @@map("event_document_translations")
+}
+
+// =============================================================
+// Email Templates (admin outreach mailer)
+// =============================================================
+model EmailTemplateRecord {
+  id             String   @id @default(uuid())
+  name           String
+  category       String // ContactCategory enum (Sponsor, Partner, Business Tour guest, Speaker / panelist, Event guest, Participant, Institution, Other)
+  subject        String
+  body           String // HTML body content
+  ctaText        String?  @map("cta_text")
+  ctaLink        String?  @map("cta_link")
+  headerImageUrl String?  @map("header_image_url")
+  footerContact  String?  @map("footer_contact")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  history EmailSendHistoryRecord[]
+
+  @@index([category])
+  @@map("email_templates")
+}
+
+model EmailSendHistoryRecord {
+  id           String               @id @default(uuid())
+  templateId   String?              @map("template_id")
+  toAddress    String               @map("to_address")
+  ccAddresses  String?              @map("cc_addresses") // comma-separated
+  bccAddresses String?              @map("bcc_addresses") // comma-separated
+  subject      String
+  category     String
+  status       String // "sent" | "failed" | "test"
+  errorMessage String?              @map("error_message")
+  sentAt       DateTime             @default(now()) @map("sent_at")
+  template     EmailTemplateRecord? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([sentAt])
+  @@index([templateId])
+  @@map("email_send_history")
+}
+
+model EmailSocialLinks {
+  id        Int      @id @default(1)
+  website   String   @default("")
+  linkedin  String   @default("")
+  instagram String   @default("")
+  tiktok    String   @default("")
+  youtube   String   @default("")
+  whatsapp  String   @default("")
+  email     String   @default("")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("email_social_links")
 }
