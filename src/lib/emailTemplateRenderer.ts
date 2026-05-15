@@ -73,7 +73,7 @@ export function renderEmailHtml({
   const bodyRaw = applyVariables(template.body || "", vars);
   vars.ctaButtonText = ctaTextRaw;
   vars.ctaButtonLink = ctaLinkRaw;
-  const headerImage = template.headerImageUrl?.trim() || `${siteBaseUrl}/logo.png`;
+  const headerImage = template.headerImageUrl?.trim() || `${siteBaseUrl}/footer-logo-light.png`;
   const ctaText = ctaTextRaw.trim();
   const ctaLink = ctaLinkRaw.trim();
   const bodyHtml = renderBody(bodyRaw);
@@ -130,23 +130,13 @@ export function renderEmailHtml({
       <table role="presentation" class="lug-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:${BRAND.card};border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(26,26,26,.08);">
         <tr>
           <td class="lug-hero" align="center" style="background-color:${BRAND.primary};background-image:url(&quot;data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'><circle cx='2' cy='2' r='1.1' fill='%23ffffff' fill-opacity='0.09'/><circle cx='19' cy='19' r='1.1' fill='%23ffffff' fill-opacity='0.06'/></svg>&quot;),radial-gradient(circle at 18% 18%,rgba(255,255,255,0.18),transparent 55%),radial-gradient(circle at 82% 86%,rgba(233,140,11,0.32),transparent 60%),linear-gradient(135deg,${BRAND.primary} 0%,${BRAND.primaryDark} 100%);padding:44px 32px 38px;position:relative;">
-            <!--[if mso]>
-            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" arcsize="50%" stroked="false" fillcolor="#ffffff" style="width:220px;height:220px;v-text-anchor:middle;mso-position-horizontal:center;">
-              <v:fill type="solid" color="#ffffff" />
-              <center style="font-size:0;line-height:0;">
-                <img src="${esc(headerImage)}" alt="Level Up in Germany" width="164" style="border:0;display:inline-block;" />
-              </center>
-            </v:roundrect>
-            <![endif]-->
-            <!--[if !mso]><!-- -->
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#ffffff" style="margin:0 auto;background:#ffffff;border-radius:110px;border-collapse:separate;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
               <tr>
-                <td align="center" valign="middle" width="220" height="220" bgcolor="#ffffff" style="width:220px;height:220px;background:#ffffff;background-color:#ffffff;border-radius:110px;text-align:center;vertical-align:middle;">
-                  <img src="${esc(headerImage)}" alt="Level Up in Germany" width="164" style="display:inline-block;max-width:164px;height:auto;border:0;outline:none;text-decoration:none;background:#ffffff;" />
+                <td align="center" valign="middle" width="220" height="220" style="width:220px;height:220px;text-align:center;vertical-align:middle;">
+                  <img src="${esc(headerImage)}" alt="Level Up in Germany" width="200" style="display:inline-block;max-width:200px;height:auto;border:0;outline:none;text-decoration:none;border-radius:100px;" />
                 </td>
               </tr>
             </table>
-            <!--<![endif]-->
             <div style="margin:18px auto 0;width:54px;height:2px;background:linear-gradient(90deg,transparent,${BRAND.accent},transparent);"></div>
           </td>
         </tr>
