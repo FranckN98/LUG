@@ -162,13 +162,37 @@ export async function POST(req: NextRequest) {
         html,
         replyTo: social.email || undefined,
       });
-      if ((result as { error?: { message?: string } }).error) {
+      const resendError = (result as { error?: { message?: string; name?: string; statusCode?: number } }).error;
+      if (resendError) {
         status = "failed";
-        errorMessage = (result as { error: { message?: string } }).error.message ?? "Unknown send error";
+        errorMessage = resendError.message ?? "Unknown send error";
+        console.error("[email-templates/send] Resend rejected the message", {
+          from: fromAddress,
+          to,
+          cc,
+          bcc,
+          mode,
+          resendError,
+        });
+      } else {
+        console.log("[email-templates/send] Resend accepted", {
+          from: fromAddress,
+          to,
+          mode,
+          id: (result as { data?: { id?: string } }).data?.id,
+        });
       }
     } catch (err) {
       status = "failed";
       errorMessage = err instanceof Error ? err.message : "Unknown error";
+      console.error("[email-templates/send] Resend threw", {
+        from: fromAddress,
+        to,
+        cc,
+        bcc,
+        mode,
+        error: err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : err,
+      });
     }
   }
 
