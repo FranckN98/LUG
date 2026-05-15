@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
     ctaLink: string;
     headerImageUrl: string;
     footerContact: string;
+    signature: string;
   } | null = null;
 
   const variables: Record<string, string> = {};
@@ -96,6 +97,7 @@ export async function POST(req: NextRequest) {
       ctaLink: row.ctaLink ?? "",
       headerImageUrl: row.headerImageUrl ?? "",
       footerContact: row.footerContact ?? "",
+      signature: row.signature ?? "",
     };
   } else if (body.inline && typeof body.inline === "object") {
     const inlineLang =
@@ -112,6 +114,7 @@ export async function POST(req: NextRequest) {
       ctaLink: String(body.inline.ctaLink ?? ""),
       headerImageUrl: String(body.inline.headerImageUrl ?? ""),
       footerContact: String(body.inline.footerContact ?? ""),
+      signature: String(body.inline.signature ?? ""),
     };
   }
 
@@ -134,6 +137,7 @@ export async function POST(req: NextRequest) {
       ctaLink: templateData.ctaLink,
       headerImageUrl: templateData.headerImageUrl,
       footerContact: templateData.footerContact,
+      signature: templateData.signature,
       language: templateData.language,
     },
     social,

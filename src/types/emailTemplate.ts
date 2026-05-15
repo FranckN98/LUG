@@ -42,6 +42,8 @@ export interface EmailTemplate {
   ctaLink: string;
   headerImageUrl: string;
   footerContact: string;
+  /** Optional signature override (e.g. "Franck Ngami\nFounder, Level Up in Germany"). When empty, the localized default team signature is used. */
+  signature: string;
   updatedAt: string;
   createdAt: string;
 }

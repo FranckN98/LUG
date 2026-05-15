@@ -47,6 +47,7 @@ function socialLink(label: string, url: string): string {
 export interface RenderEmailOptions {
   template: Pick<EmailTemplate, "subject" | "body" | "ctaText" | "ctaLink" | "headerImageUrl" | "footerContact"> & {
     language?: Language;
+    signature?: string;
   };
   social: SocialLinks;
   siteBaseUrl?: string;
@@ -97,6 +98,10 @@ export function renderEmailHtml({
   ].filter(Boolean).join("");
 
   const footerContact = template.footerContact?.trim() || "Level Up in Germany";
+  const signatureRaw = applyVariables(template.signature ?? "", vars).trim();
+  const signatureHtml = signatureRaw
+    ? esc(signatureRaw).replace(/\r?\n/g, "<br/>")
+    : esc(footer.signature);
 
   return `<!doctype html>
 <html lang="${lang}">
@@ -149,7 +154,7 @@ export function renderEmailHtml({
         ${ctaBlock}
         <tr>
           <td class="lug-pad" style="padding:8px 40px 28px;">
-            <p style="margin:0;color:${BRAND.muted};font-size:13px;line-height:1.6;">${esc(footer.closing)}<br/><strong style="color:${BRAND.dark};">${esc(footer.signature)}</strong></p>
+            <p style="margin:0;color:${BRAND.muted};font-size:13px;line-height:1.6;">${esc(footer.closing)}<br/><strong style="color:${BRAND.dark};">${signatureHtml}</strong></p>
           </td>
         </tr>
         <tr>

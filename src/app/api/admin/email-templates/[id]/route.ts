@@ -20,7 +20,7 @@ function normalizeLanguage(raw: unknown): Language {
 function toApi(row: {
   id: string; name: string; category: string; language: string; subject: string; body: string;
   ctaText: string | null; ctaLink: string | null; headerImageUrl: string | null;
-  footerContact: string | null; createdAt: Date; updatedAt: Date;
+  footerContact: string | null; signature: string | null; createdAt: Date; updatedAt: Date;
 }): EmailTemplate {
   return {
     id: row.id,
@@ -33,6 +33,7 @@ function toApi(row: {
     ctaLink: row.ctaLink ?? "",
     headerImageUrl: row.headerImageUrl ?? "",
     footerContact: row.footerContact ?? "",
+    signature: row.signature ?? "",
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -55,6 +56,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         ctaLink: typeof body.ctaLink === "string" ? body.ctaLink : undefined,
         headerImageUrl: typeof body.headerImageUrl === "string" ? body.headerImageUrl : undefined,
         footerContact: typeof body.footerContact === "string" ? body.footerContact : undefined,
+        signature: typeof body.signature === "string" ? body.signature : undefined,
       },
     });
     return NextResponse.json(toApi(updated));

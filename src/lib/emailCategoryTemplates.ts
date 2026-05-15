@@ -523,21 +523,21 @@ export const FOOTER_COPY: Record<Language, { closing: string; signature: string;
   en: {
     closing: "Kind regards,",
     signature: "The Level Up in Germany Team",
-    tagline: "Moving forward, together.",
+    tagline: "Dare to be different.",
     disclaimer:
       "You are receiving this email because we believe that an exchange or collaboration with Level Up in Germany could be relevant.",
   },
   de: {
     closing: "Mit freundlichen Grüßen",
     signature: "Das Level Up in Germany Team",
-    tagline: "Gemeinsam den nächsten Schritt gehen.",
+    tagline: "Wage, anders zu sein.",
     disclaimer:
       "Sie erhalten diese E-Mail, weil wir glauben, dass ein Austausch oder eine Zusammenarbeit mit Level Up in Germany relevant sein könnte.",
   },
   fr: {
     closing: "Bien cordialement,",
     signature: "L'équipe Level Up in Germany",
-    tagline: "Monter d'un cap, ensemble.",
+    tagline: "Ose être différent.",
     disclaimer:
       "Vous recevez cet e-mail car nous pensons qu'une collaboration ou un échange avec Level Up in Germany pourrait être pertinent.",
   },

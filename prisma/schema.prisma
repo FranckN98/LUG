@@ -776,6 +776,7 @@ model EmailTemplateRecord {
   ctaLink        String?  @map("cta_link")
   headerImageUrl String?  @map("header_image_url")
   footerContact  String?  @map("footer_contact")
+  signature      String?  @map("signature") // overrides default "Das Level Up in Germany Team" closing
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

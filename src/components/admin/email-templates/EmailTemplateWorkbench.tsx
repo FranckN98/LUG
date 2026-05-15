@@ -92,6 +92,7 @@ export function EmailTemplateWorkbench(props: Props) {
           ctaLink: draft.ctaLink,
           headerImageUrl: draft.headerImageUrl,
           footerContact: draft.footerContact,
+          signature: draft.signature,
         },
         variables,
       )
@@ -110,6 +111,7 @@ export function EmailTemplateWorkbench(props: Props) {
     draft.ctaLink,
     draft.headerImageUrl,
     draft.footerContact,
+    draft.signature,
     variables,
   ]);
 
@@ -346,6 +348,19 @@ export function EmailTemplateWorkbench(props: Props) {
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   Social links and the contact email come from the Social Footer tab and apply to every template automatically.
+                </p>
+              </div>
+              <div>
+                <label className={labelCls}>Signature (sign-off)</label>
+                <textarea
+                  value={draft.signature ?? ""}
+                  onChange={(e) => onDraftChange({ ...draft, signature: e.target.value })}
+                  className={`${inputCls} min-h-[68px] resize-y leading-snug`}
+                  placeholder={"Leave empty for the default team signature\nExample:\nFranck Ngami\nFounder, Level Up in Germany"}
+                  rows={3}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  This replaces the bold name under the closing line ("Mit freundlichen Grüßen" / "Best regards" / "Cordialement"). Line breaks are preserved. You can use variables like <code className="font-mono">{"{firstName}"}</code>.
                 </p>
               </div>
             </div>
