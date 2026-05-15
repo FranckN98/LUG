@@ -73,7 +73,7 @@ export function renderEmailHtml({
   const bodyRaw = applyVariables(template.body || "", vars);
   vars.ctaButtonText = ctaTextRaw;
   vars.ctaButtonLink = ctaLinkRaw;
-  const headerImage = template.headerImageUrl?.trim() || `${siteBaseUrl}/logo.png`;
+  const headerImage = template.headerImageUrl?.trim() || `${siteBaseUrl}/footer-logo-light.png`;
   const ctaText = ctaTextRaw.trim();
   const ctaLink = ctaLinkRaw.trim();
   const bodyHtml = renderBody(bodyRaw);
@@ -130,10 +130,10 @@ export function renderEmailHtml({
       <table role="presentation" class="lug-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:${BRAND.card};border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(26,26,26,.08);">
         <tr>
           <td class="lug-hero" align="center" style="background-color:${BRAND.primary};background-image:url(&quot;data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'><circle cx='2' cy='2' r='1.1' fill='%23ffffff' fill-opacity='0.09'/><circle cx='19' cy='19' r='1.1' fill='%23ffffff' fill-opacity='0.06'/></svg>&quot;),radial-gradient(circle at 18% 18%,rgba(255,255,255,0.18),transparent 55%),radial-gradient(circle at 82% 86%,rgba(233,140,11,0.32),transparent 60%),linear-gradient(135deg,${BRAND.primary} 0%,${BRAND.primaryDark} 100%);padding:44px 32px 38px;position:relative;">
-            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#ffffff" style="margin:0 auto;background:#ffffff;border-radius:89px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
               <tr>
-                <td align="center" valign="middle" width="177" height="177" bgcolor="#ffffff" style="width:177px;height:177px;background:#ffffff;background-color:#ffffff;border-radius:89px;box-shadow:0 10px 30px rgba(0,0,0,0.28),0 0 0 4px rgba(233,140,11,0.22);text-align:center;vertical-align:middle;">
-                  <img src="${esc(headerImage)}" alt="Level Up in Germany" width="132" style="display:inline-block;max-width:132px;height:auto;border:0;outline:none;text-decoration:none;background:#ffffff;" />
+                <td align="center" valign="middle" style="text-align:center;vertical-align:middle;">
+                  <img src="${esc(headerImage)}" alt="Level Up in Germany" width="160" style="display:inline-block;max-width:160px;height:auto;border:0;outline:none;text-decoration:none;" />
                 </td>
               </tr>
             </table>
