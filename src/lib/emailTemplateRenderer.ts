@@ -141,7 +141,7 @@ export function renderEmailHtml({
             <!--[if !mso]><!-- -->
             <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="#ffffff" style="margin:0 auto;background:#ffffff;border-radius:110px;border-collapse:separate;">
               <tr>
-                <td align="center" valign="middle" width="220" height="220" bgcolor="#ffffff" style="width:220px;height:220px;background:#ffffff;background-color:#ffffff;border-radius:110px;box-shadow:0 10px 30px rgba(0,0,0,0.28),0 0 0 4px rgba(233,140,11,0.22);text-align:center;vertical-align:middle;">
+                <td align="center" valign="middle" width="220" height="220" bgcolor="#ffffff" style="width:220px;height:220px;background:#ffffff;background-color:#ffffff;border-radius:110px;text-align:center;vertical-align:middle;">
                   <img src="${esc(headerImage)}" alt="Level Up in Germany" width="164" style="display:inline-block;max-width:164px;height:auto;border:0;outline:none;text-decoration:none;background:#ffffff;" />
                 </td>
               </tr>
