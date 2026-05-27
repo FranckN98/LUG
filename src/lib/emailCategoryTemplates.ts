@@ -86,61 +86,223 @@ Nous serions ravis de vous compter parmi nous pour cette nouvelle édition.`,
   // ─────────────────────────────────────────────────────────────
   "Speaker / panelist": {
     en: {
-      subject: "Invitation as a Panelist — Level Up in Germany {eventName}",
+    subject: "Your speaker participation at Level Up in Germany — next steps",
       body: `Hello {firstName},
 
-I hope you are doing well.
+  thank you very much for our great conversation and for your interest in joining Level Up in Germany as a speaker.
 
-I am reaching out on behalf of Level Up in Germany, an initiative that connects, inspires and supports members of the African diaspora in Germany, especially students, young professionals and entrepreneurs.
+  We are very happy to plan you for our next event. With your background, experience and perspective, you can bring real value to our community.
 
-We have been following your journey with great interest, especially your work in {fieldOrTopic}. Your experience aligns strongly with the kind of perspective we would like to highlight at our next edition.
+  Level Up in Germany is a platform for people with an international background in Germany. Our goal is to create orientation, visibility and concrete development opportunities across career, studies, vocational training, entrepreneurship, finance, integration and personal growth.
 
-We would be honored to invite you as a panelist on the topic:
-"{panelTopic}"
+  More information:
+  - Website: https://www.levelupingermany.com
+  - Socials: https://www.linkedin.com/company/level-up-in-germany/ | https://www.instagram.com/levelupingermany/ | https://www.tiktok.com/@levelupingermany
+  - Event page: https://www.levelupingermany.com/en/events
 
-The goal is to give our audience practical insights, honest experiences and concrete advice from people who have successfully built their path in Germany.
+  Your planned contribution
 
-The event will take place on {eventDate} in {eventCity}. We would be happy to schedule a short call to present the concept in more detail.`,
-      ctaText: "Schedule a call",
-      ctaLink: "https://www.levelupingermany.com",
+  Format:
+  [Talk / Panel / Workshop / Interview / Fireside Chat]
+
+  Duration:
+  [e.g. 20 minutes + 10 minutes Q&A / 45 minutes panel / 60 minutes workshop]
+
+  Topic / placeholder:
+  [{panelTopic}]
+
+  Short description:
+  [2-5 sentences: What is the core topic? Which problem is addressed? What should participants take away concretely?]
+
+  Potential guiding questions:
+  - [Guiding question 1]
+  - [Guiding question 2]
+  - [Guiding question 3]
+
+  Speaker profile
+
+  To present you professionally on our website, social media and event programme, we kindly need:
+
+  - Speaker photo: [Please send a professional photo]
+  - Short bio: [around 100-150 words]
+  - Current role: [job title, company, project or activity]
+  - LinkedIn profile or website: [insert link]
+  - Short statement: [What drives you? Why is this topic important to you?]
+  - Travel and availability: [insert timeframe]
+
+  Organizational information
+
+  Planned event details:
+
+  - Date: {eventDate}
+  - Location: {eventLocation}, {eventCity}
+  - Time: [e.g. 09:00-18:00]
+  - Audience: students, apprentices, young professionals, founders and ambitious people with an international background in Germany.
+
+  About one week before the event, we will send all final details on agenda, timing, travel, tech setup and on-site contacts.
+
+  If you plan to use slides, feel free to send them in advance as PPTX or PDF. There are no strict design rules - the most important thing is clarity, practical value and audience relevance.
+
+  Next steps
+
+  You are pre-selected as a speaker for Level Up in Germany. As next step, please confirm:
+
+  - final topic or working title
+  - preferred format
+  - short bio
+  - speaker photo
+  - LinkedIn link
+  - rough availability on event day
+
+  We are looking forward to your contribution and to building a format that creates real value for our community.`,
+    ctaText: "Open the event page",
+    ctaLink: "https://www.levelupingermany.com/en/events",
     },
     de: {
-      subject: "Einladung als Panelgast — Level Up in Germany {eventName}",
+    subject: "Deine Speaker-Teilnahme bei Level Up in Germany - nächste Schritte",
       body: `Hallo {firstName},
 
-ich hoffe, es geht Ihnen gut.
+  vielen Dank für unser angenehmes Gespräch und dein Interesse, bei Level Up in Germany als Speaker:in dabei zu sein.
 
-Ich melde mich im Namen von Level Up in Germany, einer Initiative, die Menschen aus der afrikanischen Diaspora in Deutschland inspiriert, vernetzt und unterstützt.
+  Wir freuen uns sehr, dich für unsere nächste Veranstaltung einzuplanen. Mit deinem Werdegang, deiner Erfahrung und deiner Perspektive kannst du unserer Community einen echten Mehrwert bieten.
 
-Wir verfolgen Ihren Werdegang mit großem Interesse, insbesondere Ihre Arbeit im Bereich {fieldOrTopic}. Ihre Erfahrung passt sehr gut zu den Themen, die wir bei unserer nächsten Ausgabe sichtbar machen möchten.
+  Level Up in Germany ist eine Plattform für Menschen mit internationalem Hintergrund in Deutschland. Unser Ziel ist es, Orientierung, Sichtbarkeit und konkrete Entwicklungsmöglichkeiten zu schaffen - in den Bereichen Karriere, Studium, Ausbildung, Unternehmertum, Finanzen, Integration und persönliches Wachstum.
 
-Daher würden wir Sie gerne als Panelgast zu folgendem Thema einladen:
-„{panelTopic}"
+  Mehr Informationen:
+  - Website: https://www.levelupingermany.com
+  - Social Media: https://www.linkedin.com/company/level-up-in-germany/ | https://www.instagram.com/levelupingermany/ | https://www.tiktok.com/@levelupingermany
+  - Event-Seite: https://www.levelupingermany.com/de/events
 
-Unser Ziel ist es, dem Publikum konkrete Einblicke, ehrliche Erfahrungen und praxisnahe Impulse mitzugeben.
+  Dein geplanter Beitrag
 
-Die Veranstaltung findet am {eventDate} in {eventCity} statt. Gerne würden wir Ihnen das Konzept in einem kurzen Gespräch näher vorstellen.`,
-      ctaText: "Gespräch vereinbaren",
-      ctaLink: "https://www.levelupingermany.com",
+  Format:
+  [Vortrag / Panel / Workshop / Interview / Fireside Chat]
+
+  Dauer:
+  [z. B. 20 Minuten + 10 Minuten Q&A / 45 Minuten Panel / 60 Minuten Workshop]
+
+  Thema / Platzhalter:
+  [{panelTopic}]
+
+  Kurzbeschreibung:
+  [2-5 Sätze: Worum geht es? Welches Problem wird behandelt? Was sollen die Teilnehmer:innen konkret mitnehmen?]
+
+  Mögliche Leitfragen:
+  - [Leitfrage 1]
+  - [Leitfrage 2]
+  - [Leitfrage 3]
+
+  Speakerprofil
+
+  Damit wir dich professionell auf unserer Website, in den Social-Media-Beiträgen und im Eventprogramm vorstellen können, benötigen wir bitte:
+
+  - Speakerbild: [Bitte ein professionelles Foto senden]
+  - Kurzer Lebenslauf / Bio: [ca. 100-150 Wörter]
+  - Aktuelle Position / Rolle: [Jobtitel, Unternehmen, Projekt oder Tätigkeit]
+  - LinkedIn-Profil oder Website: [Link einfügen]
+  - Kurzstatement: [Was treibt dich an? Warum ist dir dieses Thema wichtig?]
+  - An- und Abreise / Verfügbarkeit: [Uhrzeit oder Zeitraum einfügen]
+
+  Organisatorische Informationen
+
+  Unsere Veranstaltung findet voraussichtlich statt am:
+
+  - Datum: {eventDate}
+  - Ort: {eventLocation}, {eventCity}
+  - Zeitraum: [z. B. 09:00-18:00 Uhr]
+  - Zielgruppe: Studierende, Auszubildende, Young Professionals, Gründer:innen und ambitionierte Menschen mit internationalem Hintergrund in Deutschland.
+
+  Etwa eine Woche vor der Veranstaltung senden wir dir noch einmal alle finalen Informationen zu Ablauf, Timing, Anreise, Technik und Ansprechpartner:innen vor Ort.
+
+  Falls du eine Präsentation nutzen möchtest, kannst du uns diese gerne vorab als PPTX oder PDF zusenden. Es gibt keine festen Designvorgaben - wichtig ist nur, dass die Inhalte klar, praxisnah und für unsere Zielgruppe verständlich sind.
+
+  Nächste Schritte
+
+  Du bist als Speaker:in für Level Up in Germany vorgemerkt. Als nächsten Schritt freuen wir uns über eine kurze Bestätigung zu:
+
+  - finalem Thema oder Arbeitstitel
+  - gewünschtem Format
+  - kurzer Bio
+  - Speakerbild
+  - LinkedIn-Link
+  - grober Verfügbarkeit am Eventtag
+
+  Wir freuen uns sehr auf deine Mitwirkung und darauf, gemeinsam ein Format zu schaffen, das unserer Community echten Mehrwert bietet.`,
+    ctaText: "Zur Event-Seite",
+    ctaLink: "https://www.levelupingermany.com/de/events",
     },
     fr: {
-      subject: "Invitation en tant que panéliste — Level Up in Germany {eventName}",
+    subject: "Ta participation comme speaker chez Level Up in Germany - prochaines étapes",
       body: `Bonjour {firstName},
 
-J'espère que vous allez bien.
+  merci encore pour notre échange et pour ton intérêt à participer comme speaker à Level Up in Germany.
 
-Je me permets de vous contacter au nom de Level Up in Germany, une initiative qui accompagne et inspire la diaspora africaine, notamment les étudiants, jeunes professionnels et entrepreneurs en Allemagne.
+  Nous sommes très heureux de te prévoir pour notre prochain événement. Avec ton parcours, ton expérience et ton regard, tu peux apporter une vraie valeur à notre communauté.
 
-Nous suivons votre parcours avec beaucoup d'intérêt, notamment votre travail dans {fieldOrTopic}. Votre expérience correspond exactement au type de témoignage que nous souhaitons mettre en avant lors de notre prochaine édition.
+  Level Up in Germany est une plateforme pour les personnes ayant un parcours international en Allemagne. Notre mission est de créer de l'orientation, de la visibilité et des opportunités concrètes de progression dans les domaines carrière, études, formation, entrepreneuriat, finances, intégration et développement personnel.
 
-Nous aimerions vous inviter en tant que panéliste sur le thème suivant :
-« {panelTopic} »
+  Plus d'informations:
+  - Website: https://www.levelupingermany.com
+  - Réseaux sociaux: https://www.linkedin.com/company/level-up-in-germany/ | https://www.instagram.com/levelupingermany/ | https://www.tiktok.com/@levelupingermany
+  - Page événement: https://www.levelupingermany.com/fr/events
 
-L'objectif est de permettre au public de bénéficier de votre expérience, de vos conseils concrets et de votre regard sur les réalités du parcours en Allemagne.
+  Ton intervention prévue
 
-L'événement aura lieu le {eventDate} à {eventCity}. Nous serions ravis d'échanger avec vous lors d'un court appel afin de vous présenter le concept plus en détail.`,
-      ctaText: "Planifier un appel",
-      ctaLink: "https://www.levelupingermany.com",
+  Format:
+  [Talk / Panel / Atelier / Interview / Fireside Chat]
+
+  Durée:
+  [par ex. 20 minutes + 10 minutes Q&A / 45 minutes panel / 60 minutes atelier]
+
+  Thème / placeholder:
+  [{panelTopic}]
+
+  Description courte:
+  [2-5 phrases: de quoi parle l'intervention? Quel problème est traité? Quels résultats concrets pour les participant(e)s?]
+
+  Questions directrices possibles:
+  - [Question 1]
+  - [Question 2]
+  - [Question 3]
+
+  Profil speaker
+
+  Pour te présenter de manière professionnelle sur notre site, nos réseaux sociaux et le programme de l'événement, nous avons besoin de:
+
+  - Photo speaker: [merci d'envoyer une photo professionnelle]
+  - Bio courte: [environ 100-150 mots]
+  - Poste / rôle actuel: [fonction, entreprise, projet ou activité]
+  - LinkedIn ou site web: [insérer le lien]
+  - Court statement: [qu'est-ce qui te motive? pourquoi ce sujet est important pour toi?]
+  - Arrivée / disponibilité: [horaire ou plage à indiquer]
+
+  Informations organisationnelles
+
+  L'événement est prévu:
+
+  - Date: {eventDate}
+  - Lieu: {eventLocation}, {eventCity}
+  - Horaires: [par ex. 09:00-18:00]
+  - Public: étudiants, alternants, young professionals, fondateurs et personnes ambitieuses avec un parcours international en Allemagne.
+
+  Environ une semaine avant l'événement, nous t'enverrons les informations finales sur le déroulé, le timing, le déplacement, la technique et les contacts sur place.
+
+  Si tu souhaites utiliser une présentation, tu peux nous l'envoyer à l'avance en PPTX ou PDF. Il n'y a pas de contrainte design stricte - l'essentiel est d'avoir un contenu clair, concret et utile pour notre public.
+
+  Prochaines étapes
+
+  Tu es pré-validé(e) comme speaker pour Level Up in Germany. Merci de confirmer:
+
+  - thème final ou titre de travail
+  - format souhaité
+  - bio courte
+  - photo speaker
+  - lien LinkedIn
+  - disponibilité approximative le jour de l'événement
+
+  Nous serons ravis de construire avec toi un format fort et utile pour la communauté.`,
+    ctaText: "Voir la page événement",
+    ctaLink: "https://www.levelupingermany.com/fr/events",
     },
   },
 
@@ -366,52 +528,100 @@ Nous serions ravis d'échanger avec vous pour identifier les synergies possibles
   // ─────────────────────────────────────────────────────────────
   "Follow-up": {
     en: {
-      subject: "Quick follow-up — Level Up in Germany",
+    subject: "Your participation as a speaker at Level Up in Germany",
       body: `Hello {firstName},
 
-I hope you are doing well.
+  thank you again for our conversation. We would be very happy to welcome you as a speaker at our next Level Up in Germany event.
 
-I wanted to briefly follow up on our previous message regarding {topic}.
+  Level Up in Germany is a platform for people with an international background in Germany. We create orientation, visibility and concrete development opportunities in career, studies, vocational training, entrepreneurship, finance, integration and personal growth.
 
-We would still be very happy to connect with you, as we believe your profile, experience or organization could bring real value to our community.
+  For your contribution, we currently have this placeholder:
 
-The idea would simply be to have a short conversation, present the concept and see whether a collaboration could make sense.
+  - Format: [Talk / Panel / Workshop / Interview]
+  - Duration: [e.g. 20 minutes + Q&A / 45 minutes panel]
+  - Topic: [{panelTopic}]
+  - Short description: [2-3 sentences about content and value]
 
-Thank you in advance for your feedback.`,
-      ctaText: "Schedule a short call",
-      ctaLink: "https://www.levelupingermany.com/contact",
+  To announce you professionally, we would kindly need:
+
+  - a speaker photo
+  - a short bio
+  - your current role / position
+  - your LinkedIn link
+  - your rough availability on event day
+
+  More info:
+  - Website: https://www.levelupingermany.com
+  - Event page: https://www.levelupingermany.com/en/events
+  - Socials: https://www.linkedin.com/company/level-up-in-germany/ | https://www.instagram.com/levelupingermany/ | https://www.tiktok.com/@levelupingermany
+
+  We are looking forward to your contribution and to building a strong format together for our community.`,
+    ctaText: "Open event details",
+    ctaLink: "https://www.levelupingermany.com/en/events",
     },
     de: {
-      subject: "Kurze Erinnerung — Level Up in Germany",
+    subject: "Deine Teilnahme als Speaker:in bei Level Up in Germany",
       body: `Hallo {firstName},
 
-ich hoffe, es geht Ihnen gut.
+  vielen Dank für unser angenehmes Gespräch. Wir würden uns sehr freuen, dich als Speaker:in bei unserer nächsten Level Up in Germany Veranstaltung dabei zu haben.
 
-Ich wollte mich kurz bezüglich unserer letzten Nachricht zum Thema {topic} bei Ihnen melden.
+  Level Up in Germany ist eine Plattform für Menschen mit internationalem Hintergrund in Deutschland. Wir schaffen Orientierung, Sichtbarkeit und konkrete Entwicklungsmöglichkeiten in den Bereichen Karriere, Studium, Ausbildung, Unternehmertum, Finanzen, Integration und persönliches Wachstum.
 
-Wir würden uns weiterhin sehr freuen, mit Ihnen ins Gespräch zu kommen, da wir überzeugt sind, dass Ihr Profil, Ihre Erfahrung oder Ihre Organisation einen echten Mehrwert für unsere Community bieten könnte.
+  Für deinen Beitrag haben wir aktuell folgenden Platzhalter vorgesehen:
 
-Es geht zunächst nur um einen kurzen Austausch, um Ihnen das Konzept vorzustellen und gemeinsam zu prüfen, ob eine Zusammenarbeit sinnvoll wäre.
+  - Format: [Vortrag / Panel / Workshop / Interview]
+  - Dauer: [z. B. 20 Minuten + Q&A / 45 Minuten Panel]
+  - Thema: [{panelTopic}]
+  - Kurzbeschreibung: [2-3 Sätze zum Inhalt und Mehrwert]
 
-Vielen Dank im Voraus für Ihre Rückmeldung.`,
-      ctaText: "Kurzes Gespräch vereinbaren",
-      ctaLink: "https://www.levelupingermany.com/contact",
+  Damit wir dich professionell ankündigen können, brauchen wir bitte:
+
+  - ein Speakerbild
+  - eine kurze Bio
+  - deine aktuelle Rolle / Position
+  - deinen LinkedIn-Link
+  - deine grobe Verfügbarkeit am Eventtag
+
+  Weitere Informationen:
+  - Website: https://www.levelupingermany.com
+  - Event-Seite: https://www.levelupingermany.com/de/events
+  - Social Media: https://www.linkedin.com/company/level-up-in-germany/ | https://www.instagram.com/levelupingermany/ | https://www.tiktok.com/@levelupingermany
+
+  Wir freuen uns sehr auf deine Mitwirkung und darauf, gemeinsam ein starkes Format für unsere Community zu schaffen.`,
+    ctaText: "Event-Seite öffnen",
+    ctaLink: "https://www.levelupingermany.com/de/events",
     },
     fr: {
-      subject: "Petit rappel — Level Up in Germany",
+    subject: "Ta participation comme speaker à Level Up in Germany",
       body: `Bonjour {firstName},
 
-J'espère que vous allez bien.
+  merci encore pour notre échange. Nous serions ravis de t'avoir comme speaker lors de notre prochain événement Level Up in Germany.
 
-Je me permets de revenir vers vous concernant notre précédent message au sujet de {topic}.
+  Level Up in Germany est une plateforme pour les personnes avec un parcours international en Allemagne. Nous créons de l'orientation, de la visibilité et des opportunités concrètes dans les domaines carrière, études, formation, entrepreneuriat, finances, intégration et développement personnel.
 
-Nous serions toujours très heureux d'échanger avec vous, car nous pensons que votre profil, votre expérience ou votre organisation pourrait apporter une vraie valeur à notre communauté.
+  Pour ton intervention, voici le placeholder prévu:
 
-L'idée n'est pas de vous prendre beaucoup de temps, mais simplement d'avoir un court échange pour vous présenter le concept et voir si une collaboration serait pertinente.
+  - Format: [Talk / Panel / Atelier / Interview]
+  - Durée: [ex. 20 minutes + Q&A / 45 minutes panel]
+  - Thème: [{panelTopic}]
+  - Description courte: [2-3 phrases sur le contenu et la valeur]
 
-Merci beaucoup pour votre retour.`,
-      ctaText: "Planifier un court appel",
-      ctaLink: "https://www.levelupingermany.com/contact",
+  Pour pouvoir t'annoncer de manière professionnelle, nous aurions besoin de:
+
+  - une photo speaker
+  - une bio courte
+  - ton poste / rôle actuel
+  - ton lien LinkedIn
+  - ta disponibilité approximative le jour de l'événement
+
+  Plus d'informations:
+  - Website: https://www.levelupingermany.com
+  - Page événement: https://www.levelupingermany.com/fr/events
+  - Réseaux sociaux: https://www.linkedin.com/company/level-up-in-germany/ | https://www.instagram.com/levelupingermany/ | https://www.tiktok.com/@levelupingermany
+
+  Nous serons très heureux de construire avec toi un format fort pour la communauté.`,
+    ctaText: "Ouvrir la page événement",
+    ctaLink: "https://www.levelupingermany.com/fr/events",
     },
   },
 
