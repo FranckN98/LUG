@@ -408,6 +408,15 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
     index: number,
     factory: () => EventFormPayload[K][number],
   ) {
+    const labels: Record<typeof field, string> = {
+      scheduleItems: 'cet élément du programme',
+      speakers: 'cet intervenant',
+      organizations: 'cette organisation',
+      gallery: 'ce média',
+      documents: 'ce document',
+    };
+    if (!confirm(`Supprimer ${labels[field]} ?`)) return;
+
     setFormData((prev) => {
       const nextItems = prev[field].filter((_, itemIndex) => itemIndex !== index);
       return {

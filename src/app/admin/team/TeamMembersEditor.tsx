@@ -107,6 +107,7 @@ export function TeamMembersEditor({ initialData }: Props) {
 
   async function removeMember(member: DbMember) {
     if (member.id.startsWith('draft-')) {
+      if (!confirm('Supprimer ce brouillon de membre ?')) return;
       setMembers((prev) => prev.filter((m) => m.id !== member.id));
       return;
     }

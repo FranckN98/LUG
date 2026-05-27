@@ -805,6 +805,9 @@ export default function NewsletterAdmin() {
   };
 
   const removeAttachment = (index: number) => {
+    const attachment = campaignForm.attachments[index];
+    const label = attachment?.filename ?? 'cette pièce jointe';
+    if (!confirm(`Retirer ${label} de la campagne ?`)) return;
     setCampaignForm((f) => ({
       ...f,
       attachments: f.attachments.filter((_, i) => i !== index),
