@@ -408,7 +408,7 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
     index: number,
     factory: () => EventFormPayload[K][number],
   ) {
-    const labels: Record<typeof field, string> = {
+    const labels: Record<'scheduleItems' | 'speakers' | 'organizations' | 'gallery' | 'documents', string> = {
       scheduleItems: 'cet élément du programme',
       speakers: 'cet intervenant',
       organizations: 'cette organisation',
