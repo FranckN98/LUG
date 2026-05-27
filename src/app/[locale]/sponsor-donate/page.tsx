@@ -178,7 +178,7 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
               <div className="mt-8 flex flex-col items-center gap-2">
                 <FsconPdfViewer />
                 <a
-                  href="/downloads/fscon-v2.pdf"
+                  href="/downloads/proposition-njoka.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-accent underline text-sm hover:text-accent-light transition-colors mt-2"
