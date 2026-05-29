@@ -4,13 +4,13 @@ import React from 'react';
 
 /**
  * Affiche un PDF de façon classique, avec tous les contrôles natifs.
- * Le PDF doit être placé dans /public/downloads/proposition-njoka.pdf
+ * Le PDF doit être placé dans /public/downloads/fscon-v2.pdf
  */
 export function FsconPdfViewer() {
   return (
     <div className="relative w-full max-w-4xl mx-auto aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
       <iframe
-        src="/downloads/proposition-njoka.pdf"
+        src="/downloads/fscon-v2.pdf"
         title="FSCon PDF"
         className="w-full h-full min-h-[800px] bg-white"
         aria-label="FSCon PDF"
