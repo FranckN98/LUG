@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import logoImage from '@/assets/logo.png';
+import logoImage from '@/assets/lug-mark-nobg.png';
 
 type Props = { locale: 'de' | 'en' | 'fr' };
 
@@ -68,11 +68,10 @@ export function CookieBanner({ locale }: Props) {
       >
         <img
           src={logoImage.src}
-          alt=""
+          alt="Level Up in Germany"
           width={280}
           height={76}
           className="h-12 w-auto max-w-[min(100%,280px)] object-contain object-left sm:h-14"
-          aria-hidden
         />
       </Link>
       <p className="mb-1 text-sm font-semibold text-gray-900">{copy.title}</p>
