@@ -231,6 +231,25 @@ model SiteConfig {
   @@map("site_config")
 }
 
+model CountdownConfig {
+  id             String   @id @default("singleton")
+  isActive       Boolean  @default(false) @map("is_active")
+  targetDate     DateTime @map("target_date")
+  titleFr        String?  @map("title_fr")
+  titleDe        String?  @map("title_de")
+  titleEn        String?  @map("title_en")
+  subtitleFr     String?  @map("subtitle_fr")
+  subtitleDe     String?  @map("subtitle_de")
+  subtitleEn     String?  @map("subtitle_en")
+  endedMessageFr String?  @map("ended_message_fr")
+  endedMessageDe String?  @map("ended_message_de")
+  endedMessageEn String?  @map("ended_message_en")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("countdown_config")
+}
+
 model BlogPost {
   id           String                @id @default(uuid())
   title        String

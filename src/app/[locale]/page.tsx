@@ -8,7 +8,7 @@ import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { getPublicCommunityGallery } from '@/lib/communityGallery';
 import { DEFAULT_HERO_IMAGES } from '@/lib/heroDefaults';
-import { getHomeStats } from '@/lib/siteStats';
+import { pickLocalized, type CountdownLocale } from '@/lib/countdown';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '');
@@ -24,7 +24,7 @@ export default async function LocaleHomePage({
   const t = homeContent[loc];
   const base = `/${loc}`;
   const joinWhatsAppUrl = getWhatsAppJoinUrl(loc);
-  const communityPhotos = await getPublicCommunityGallery();
+  const communityPhotos = getPublicCommunityGallery();
 
   // ── Hero images ─────────────────────────────────────────────────────────────
   let heroImages: string[] = [];
@@ -104,6 +104,26 @@ export default async function LocaleHomePage({
     // DB not available — fall through to all defaults
   }
 
+  // ── Countdown (optional, admin-controlled) ─────────────────────────────────
+  let countdownProp:
+    | { targetDate: string; locale: CountdownLocale; title: string | null; subtitle: string | null; endedMessage: string | null }
+    | null = null;
+  try {
+    const cd = await prisma.countdownConfig.findUnique({ where: { id: 'singleton' } });
+    if (cd && cd.isActive && cd.targetDate) {
+      const { title, subtitle, endedMessage } = pickLocalized(cd, loc as CountdownLocale);
+      countdownProp = {
+        targetDate: cd.targetDate.toISOString(),
+        locale: loc as CountdownLocale,
+        title,
+        subtitle,
+        endedMessage,
+      };
+    }
+  } catch {
+    // ignore — countdown is purely optional
+  }
+
   // ── Resolved props ──────────────────────────────────────────────────────────
   const heroTitle = dbHeroTitle || t.heroTitle;
   const heroSubtitle = dbHeroSubtitle || t.heroSubtitle;
@@ -117,10 +137,6 @@ export default async function LocaleHomePage({
         { label: t.heroBtnPartner, href: `${base}/contact` },
       ];
 
-  const dbHomeStats = await getHomeStats(loc);
-  const stats = dbHomeStats ?? t.stats;
-  const tWithStats = { ...t, stats };
-
   return (
     <>
       <HeroCarousel
@@ -128,13 +144,14 @@ export default async function LocaleHomePage({
         tagline={t.heroTagline}
         title={heroTitle}
         subtitle={heroSubtitle}
-        stats={stats}
+        stats={t.stats}
         primaryButton={primaryButton}
         buttons={buttons}
         autoplayInterval={6000}
+        countdown={countdownProp}
       />
       <HomePageSections
-        t={tWithStats}
+        t={t}
         base={base}
         joinWhatsAppUrl={joinWhatsAppUrl}
         locale={loc}
