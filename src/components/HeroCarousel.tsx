@@ -35,7 +35,7 @@ function AnimatedHeroTitle({ title }: { title: string }) {
 }
 
 // ── Button color variants (hero dark background context) ──────────────────────
-const BASE_BTN = 'group inline-flex items-center justify-center h-12 sm:h-14 px-8 rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base';
+const BASE_BTN = 'group inline-flex w-full sm:w-auto items-center justify-center h-12 sm:h-14 px-8 rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base';
 
 function heroBtnCls(variant: string): string {
   switch (variant) {
@@ -179,31 +179,31 @@ export default function HeroCarousel({
       />
 
       {/* ── Text content — bottom-left, cinematic anchoring ── */}
-      <div className="absolute inset-0 z-10 flex items-end pb-24 sm:pb-32 md:pb-36 px-6 sm:px-10 md:px-16 lg:px-20">
-        <div className="max-w-3xl">
+      <div className="absolute inset-0 z-10 flex items-end pb-16 sm:pb-28 md:pb-36 px-5 sm:px-10 md:px-16 lg:px-20">
+        <div className="w-full max-w-3xl">
           {tagline && (
-            <div className="animate-hero-tagline flex items-center gap-3 mb-5">
-              <span className="h-px w-10 bg-accent" />
-              <p className="text-[0.7rem] sm:text-xs font-bold uppercase tracking-[0.3em] text-accent"
+            <div className="animate-hero-tagline flex items-center gap-3 mb-3 sm:mb-5">
+              <span className="h-px w-8 sm:w-10 bg-accent" />
+              <p className="text-[0.65rem] sm:text-xs font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-accent"
                  style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
                 {tagline}
               </p>
             </div>
           )}
           {title && (
-            <h1 className="animate-hero-title mb-5 leading-[1.15]">
+            <h1 className="animate-hero-title mb-3 sm:mb-5 leading-[1.12]">
               <AnimatedHeroTitle title={title} />
             </h1>
           )}
           {subtitle && (
-            <p className="animate-hero-subtitle text-base sm:text-lg md:text-xl text-white/85 mb-8 max-w-xl leading-relaxed"
+            <p className="animate-hero-subtitle text-sm sm:text-lg md:text-xl text-white/85 mb-5 sm:mb-8 max-w-xl leading-relaxed"
                style={{ textShadow: '0 1px 12px rgba(0,0,0,0.35)' }}>
               {subtitle}
             </p>
           )}
 
           {countdown && countdown.targetDate && (
-            <div className="animate-hero-subtitle mb-8">
+            <div className="animate-hero-subtitle mb-5 sm:mb-8">
               <Countdown
                 targetDate={countdown.targetDate}
                 locale={countdown.locale}
@@ -216,7 +216,7 @@ export default function HeroCarousel({
 
           {infoLine && (
             <p
-              className="animate-hero-subtitle mb-8 text-xs sm:text-sm font-medium tracking-wide text-white/75 max-w-xl"
+              className="animate-hero-subtitle mb-5 sm:mb-8 text-[0.7rem] sm:text-sm font-medium tracking-wide text-white/75 max-w-xl"
               style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}
             >
               {infoLine}
@@ -224,7 +224,7 @@ export default function HeroCarousel({
           )}
 
           {(primaryButton || buttons.length > 0) && (
-            <div className="animate-hero-buttons flex flex-wrap items-center gap-4 sm:gap-5">
+            <div className="animate-hero-buttons flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-5 max-w-sm sm:max-w-none">
               {primaryButton && (() => {
                 const isExternal = /^https?:\/\//i.test(primaryButton.href);
                 const cls = heroBtnCls(primaryButton.colorVariant ?? 'yellow');
