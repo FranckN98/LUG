@@ -40,6 +40,45 @@ function IconBriefcase() {
 
 const profileIcons = [<IconUsers key="u" />, <IconRocket key="r" />, <IconBriefcase key="b" />];
 
+/* ── Decorative animated shapes (abstract, desktop only, non-intrusive) ──────────
+   Rings, blobs, dots and rotating squares that gently float around a section.
+   `tone` adapts opacity/colors for light vs. dark backgrounds.                    */
+function FloatingShapes({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
+  const ring = tone === 'dark' ? 'border-white/15' : 'border-primary/15';
+  const ring2 = tone === 'dark' ? 'border-accent/25' : 'border-accent/25';
+  const dot = tone === 'dark' ? 'bg-white/30' : 'bg-primary/25';
+  const square = tone === 'dark' ? 'border-white/15' : 'border-accent/30';
+  const blob =
+    tone === 'dark'
+      ? 'radial-gradient(circle, rgba(233,140,11,0.18) 0%, transparent 70%)'
+      : 'radial-gradient(circle, rgba(233,140,11,0.12) 0%, transparent 70%)';
+
+  return (
+    <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden>
+      {/* soft glow blob */}
+      <span
+        className="hero-float-el hero-float-b absolute right-[8%] top-[20%] h-40 w-40 rounded-full blur-2xl"
+        style={{ background: blob }}
+      />
+      {/* outlined rings */}
+      <span className={`hero-float-el hero-float-a absolute left-[6%] top-[24%] h-20 w-20 rounded-full border ${ring}`} />
+      <span
+        className={`hero-float-el hero-float-c absolute right-[12%] bottom-[18%] h-12 w-12 rounded-full border-2 ${ring2}`}
+        style={{ animationDelay: '0.5s' }}
+      />
+      {/* rotating square */}
+      <span
+        className={`hero-float-el hero-float-b absolute left-[14%] bottom-[22%] h-10 w-10 rotate-12 rounded-md border ${square}`}
+        style={{ animationDelay: '0.3s' }}
+      />
+      {/* floating dots */}
+      <span className={`hero-sparkle absolute left-[42%] top-[14%] h-2.5 w-2.5 rounded-full ${dot}`} style={{ animationDelay: '0.2s' }} />
+      <span className={`hero-sparkle absolute right-[28%] top-[40%] h-2 w-2 rounded-full ${dot}`} style={{ animationDelay: '1s' }} />
+      <span className={`hero-sparkle absolute left-[24%] top-[58%] h-1.5 w-1.5 rounded-full ${dot}`} style={{ animationDelay: '1.6s' }} />
+    </div>
+  );
+}
+
 // Section "Moments" labels (inline — no need to touch home.ts)
 const momentsCopy: Record<Locale, { eyebrow: string; title: string; hint: string }> = {
   de: {
@@ -76,24 +115,7 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
       {/* Problem */}
       <section className="relative overflow-hidden bg-gradient-to-b from-gray-50/80 to-white py-20 sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(140,26,26,0.08),transparent)]" />
-
-        {/* Floating themed accents (desktop only, subtle) */}
-        <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden>
-          <div
-            className="hero-float-el hero-float-a absolute left-[5%] top-[18%] flex items-center gap-2 rounded-full border border-accent/20 bg-white/80 px-4 py-2 shadow-[0_8px_28px_rgba(233,140,11,0.18)] backdrop-blur-sm"
-          >
-            <span className="text-base">🎯</span>
-            <span className="text-sm font-semibold text-gray-700">Objectifs clairs</span>
-          </div>
-          <div
-            className="hero-float-el hero-float-c absolute right-[5%] bottom-[16%] flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-2 shadow-[0_8px_28px_rgba(140,26,26,0.16)] backdrop-blur-sm"
-            style={{ animationDelay: '0.4s' }}
-          >
-            <span className="text-base">🌱</span>
-            <span className="text-sm font-semibold text-gray-700">Grandir ensemble</span>
-          </div>
-        </div>
-
+        <FloatingShapes tone="light" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
             <SectionHeading
@@ -153,8 +175,9 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
       </section>
 
       {/* Mission */}
-      <section className="py-20 sm:py-28 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <section className="relative overflow-hidden py-20 sm:py-28 bg-white">
+        <FloatingShapes tone="light" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
             <SectionHeading
               eyebrow={t.missionEyebrow}
@@ -184,6 +207,8 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
         <div className="absolute inset-0 opacity-[0.06] bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%221%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_80%_50%,rgba(233,140,11,0.12),transparent)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_10%_30%,rgba(140,26,26,0.18),transparent)]" />
+
+        <FloatingShapes tone="dark" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-start">
@@ -256,8 +281,9 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
       </section>
 
       {/* 3 profiles */}
-      <section className="py-20 sm:py-28 bg-gradient-to-b from-gray-50/60 to-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <section className="relative overflow-hidden py-20 sm:py-28 bg-gradient-to-b from-gray-50/60 to-white">
+        <FloatingShapes tone="light" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
             <SectionHeading
               eyebrow={t.profilesEyebrow}
