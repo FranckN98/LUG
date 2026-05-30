@@ -49,6 +49,8 @@ function heroBtnCls(variant: string): string {
       return `${BASE_BTN} bg-transparent text-white border-2 border-white hover:bg-white hover:text-[#0f0606]`;
     case 'outline-red':
       return `${BASE_BTN} bg-transparent text-white border-2 border-[#8c1a1a] hover:bg-[#8c1a1a]`;
+    case 'green':
+      return `${BASE_BTN} bg-[#2f5d3a] text-white shadow-[0_4px_20px_rgba(47,93,58,0.35)] hover:bg-[#377045] hover:shadow-[0_6px_28px_rgba(47,93,58,0.50)]`;
     case 'red':
     default:
       return `${BASE_BTN} bg-primary text-white shadow-[0_4px_20px_rgba(140,26,26,0.35)] hover:bg-primary-light hover:shadow-[0_6px_28px_rgba(140,26,26,0.45)] gap-2`;
