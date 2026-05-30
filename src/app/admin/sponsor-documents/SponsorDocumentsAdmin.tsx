@@ -265,8 +265,8 @@ function DocRow({
 
   return (
     <li className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
+      <div className="space-y-4">
+        <div className="min-w-0">
           {editing ? (
             <div className="space-y-2">
               <input
@@ -284,7 +284,7 @@ function DocRow({
           ) : (
             <>
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base font-semibold text-white truncate">{doc.title}</h3>
+                <h3 className="text-base font-semibold text-white break-words">{doc.title}</h3>
                 {doc.isFeatured && (
                   <span className="inline-flex items-center rounded-full bg-accent/20 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-accent">
                     Page sponsor
@@ -306,7 +306,7 @@ function DocRow({
             </>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">
           {editing ? (
             <>
               <button
@@ -367,7 +367,7 @@ function DocRow({
               </button>
               <button
                 onClick={onDelete}
-                className="rounded-md border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/10"
+                className="ml-auto rounded-md border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/10"
               >
                 Supprimer
               </button>
