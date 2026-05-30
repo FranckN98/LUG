@@ -11,6 +11,7 @@ interface HeroCarouselProps {
   title?: string;
   tagline?: string;
   subtitle?: string;
+  infoLine?: string;
   autoplayInterval?: number;
   primaryButton?: { label: string; href: string; colorVariant?: string };
   buttons?: { label: string; href: string; colorVariant?: string; openInNewTab?: boolean }[];
@@ -58,6 +59,7 @@ export default function HeroCarousel({
   title,
   tagline,
   subtitle,
+  infoLine,
   autoplayInterval = 4000,
   primaryButton,
   buttons = [],
@@ -125,18 +127,18 @@ export default function HeroCarousel({
       })}
 
       {/* ── Premium overlay: 3-layer branded system ── */}
-      {/* Layer 1 — Primary diagonal wash: brand red → brand dark, elegant depth */}
+      {/* Layer 1 — Strong left-side dark wash for text legibility, fading right */}
       <div
         className="absolute inset-0 z-[3] pointer-events-none"
         aria-hidden
         style={{
           background: `
-            linear-gradient(135deg,
-              rgba(140,26,26,0.52) 0%,
-              rgba(140,26,26,0.30) 25%,
-              rgba(26,26,26,0.22) 50%,
-              rgba(26,26,26,0.10) 70%,
-              transparent 90%
+            linear-gradient(to right,
+              rgba(15,6,6,0.82) 0%,
+              rgba(15,6,6,0.65) 25%,
+              rgba(15,6,6,0.40) 45%,
+              rgba(15,6,6,0.18) 65%,
+              transparent 85%
             )
           `,
         }}
@@ -192,14 +194,14 @@ export default function HeroCarousel({
             </h1>
           )}
           {subtitle && (
-            <p className="animate-hero-subtitle text-base sm:text-lg md:text-xl text-white/85 mb-10 max-w-xl leading-relaxed"
+            <p className="animate-hero-subtitle text-base sm:text-lg md:text-xl text-white/85 mb-8 max-w-xl leading-relaxed"
                style={{ textShadow: '0 1px 12px rgba(0,0,0,0.35)' }}>
               {subtitle}
             </p>
           )}
 
           {countdown && countdown.targetDate && (
-            <div className="animate-hero-subtitle mb-10">
+            <div className="animate-hero-subtitle mb-8">
               <Countdown
                 targetDate={countdown.targetDate}
                 locale={countdown.locale}
@@ -210,11 +212,20 @@ export default function HeroCarousel({
             </div>
           )}
 
+          {infoLine && (
+            <p
+              className="animate-hero-subtitle mb-8 text-xs sm:text-sm font-medium tracking-wide text-white/75 max-w-xl"
+              style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}
+            >
+              {infoLine}
+            </p>
+          )}
+
           {(primaryButton || buttons.length > 0) && (
             <div className="animate-hero-buttons flex flex-wrap items-center gap-4 sm:gap-5">
               {primaryButton && (() => {
                 const isExternal = /^https?:\/\//i.test(primaryButton.href);
-                const cls = heroBtnCls(primaryButton.colorVariant ?? 'red');
+                const cls = heroBtnCls(primaryButton.colorVariant ?? 'yellow');
                 const inner = (
                   <>
                     {primaryButton.label}
@@ -229,7 +240,7 @@ export default function HeroCarousel({
               })()}
               {buttons.map((btn, i) => {
                 const isExternal = /^https?:\/\//i.test(btn.href);
-                const cls = heroBtnCls(btn.colorVariant ?? (i === 0 ? 'white' : 'yellow'));
+                const cls = heroBtnCls(btn.colorVariant ?? 'white');
                 return isExternal ? (
                   <a key={i} href={btn.href} target={btn.openInNewTab ? '_blank' : undefined} rel="noopener noreferrer" className={cls}>
                     {btn.label}

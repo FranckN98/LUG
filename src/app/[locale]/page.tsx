@@ -136,16 +136,28 @@ export default async function LocaleHomePage({
     ? dbButtons
     : [
         { label: t.heroBtnAttend, href: `${base}/events` },
-        { label: t.heroBtnPartner, href: `${base}/contact` },
       ];
+
+  // ── Hero eyebrow + info-line (hardcoded, trilingual) ───────────────────────
+  const HERO_EYEBROW: Record<Locale, string> = {
+    fr: 'PROCHAINE ÉDITION • FRANCFORT 2026',
+    de: 'NÄCHSTE AUSGABE • FRANKFURT 2026',
+    en: 'NEXT EDITION • FRANKFURT 2026',
+  };
+  const HERO_INFO_LINE: Record<Locale, string> = {
+    fr: 'Francfort • Octobre 2026 • Networking • Carrière • Business • Communauté',
+    de: 'Frankfurt • Oktober 2026 • Networking • Karriere • Business • Community',
+    en: 'Frankfurt • October 2026 • Networking • Career • Business • Community',
+  };
 
   return (
     <>
       <HeroCarousel
         images={heroImages}
-        tagline={t.heroTagline}
+        tagline={HERO_EYEBROW[loc]}
         title={heroTitle}
         subtitle={countdownHidesSubtitle ? undefined : heroSubtitle}
+        infoLine={HERO_INFO_LINE[loc]}
         stats={t.stats}
         primaryButton={primaryButton}
         buttons={buttons}

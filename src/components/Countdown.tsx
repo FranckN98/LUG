@@ -80,11 +80,13 @@ export function Countdown({
         <div className="cd-ended">{resolvedEnded}</div>
       ) : (
         <>
-          <div className="cd-grid">
-            <Unit value={left.days} label={dLabel} width={left.days >= 100 ? 3 : 2} />
-            <Unit value={left.hours} label={hLabel} />
-            <Unit value={left.minutes} label={mLabel} />
-            <Unit value={left.seconds} label={sLabel} />
+          <div className="cd-frame">
+            <div className="cd-grid">
+              <Unit value={left.days} label={dLabel} width={left.days >= 100 ? 3 : 2} />
+              <Unit value={left.hours} label={hLabel} />
+              <Unit value={left.minutes} label={mLabel} />
+              <Unit value={left.seconds} label={sLabel} />
+            </div>
           </div>
           {resolvedSubtitle && <div className="cd-subtitle">{resolvedSubtitle}</div>}
         </>
