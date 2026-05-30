@@ -41,6 +41,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/events/') ||
     pathname.startsWith('/downloads/') ||
     pathname.startsWith('/hero/') ||
+    pathname.startsWith('/pdf/') ||
     /\.(ico|png|jpe?g|gif|webp|svg|avif|pdf|woff2?)$/i.test(pathname);
   if (isPublicStatic) return NextResponse.next();
 
