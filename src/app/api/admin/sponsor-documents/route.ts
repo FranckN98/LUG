@@ -3,6 +3,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
+import { buildUniqueSlug } from '@/lib/sponsorDocuments';
 
 const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
 const ALLOWED_TYPES = new Set(['application/pdf']);
@@ -37,6 +38,16 @@ async function saveFile(buffer: Buffer, savedFilename: string): Promise<string> 
 export async function GET() {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
+
+  // Backfill slugs for any legacy rows that don't have one yet.
+  const missing = await prisma.sponsorDocument.findMany({
+    where: { slug: null },
+    select: { id: true, title: true },
+  });
+  for (const row of missing) {
+    const slug = await buildUniqueSlug(row.title, row.id);
+    await prisma.sponsorDocument.update({ where: { id: row.id }, data: { slug } });
+  }
 
   const docs = await prisma.sponsorDocument.findMany({
     orderBy: [{ isFeatured: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
@@ -80,9 +91,13 @@ export async function POST(request: Request) {
 
   const url = await saveFile(buffer, savedFilename);
 
+  const finalTitle = title || base;
+  const slug = await buildUniqueSlug(finalTitle);
+
   const doc = await prisma.sponsorDocument.create({
     data: {
-      title: title || base,
+      title: finalTitle,
+      slug,
       description: description || null,
       filename: originalName,
       url,

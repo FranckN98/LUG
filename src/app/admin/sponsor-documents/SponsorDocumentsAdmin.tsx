@@ -6,6 +6,7 @@ import { adminNotify } from '@/app/admin/components/AdminToaster';
 type SponsorDoc = {
   id: string;
   title: string;
+  slug: string | null;
   description: string | null;
   filename: string;
   url: string;
@@ -18,6 +19,9 @@ type SponsorDoc = {
   updatedAt: string;
 };
 
+/** Canonical public host shown to partners/sponsors. */
+const PUBLIC_HOST = 'https://www.levelupingermany.com';
+
 function formatSize(bytes: number | null) {
   if (!bytes) return '—';
   if (bytes < 1024) return `${bytes} o`;
@@ -25,10 +29,10 @@ function formatSize(bytes: number | null) {
   return `${(bytes / 1024 / 1024).toFixed(2)} Mo`;
 }
 
-function buildShareUrl(url: string): string {
-  if (typeof window === 'undefined') return url;
-  if (url.startsWith('http')) return url;
-  return `${window.location.origin}${url}`;
+function buildShareUrl(doc: SponsorDoc): string {
+  if (doc.slug) return `${PUBLIC_HOST}/pdf/${doc.slug}`;
+  if (doc.url.startsWith('http')) return doc.url;
+  return `${PUBLIC_HOST}${doc.url}`;
 }
 
 export function SponsorDocumentsAdmin() {
@@ -140,11 +144,11 @@ export function SponsorDocumentsAdmin() {
     refresh();
   }
 
-  async function copyLink(url: string) {
-    const shareUrl = buildShareUrl(url);
+  async function copyLink(doc: SponsorDoc) {
+    const shareUrl = buildShareUrl(doc);
     try {
       await navigator.clipboard.writeText(shareUrl);
-      adminNotify.success('Lien copié.');
+      adminNotify.success('Lien copié : ' + shareUrl);
     } catch {
       adminNotify.error('Impossible de copier le lien.');
     }
@@ -230,7 +234,7 @@ export function SponsorDocumentsAdmin() {
                 onTogglePublic={() => togglePublic(doc)}
                 onSave={(t, d) => saveMeta(doc.id, t, d)}
                 onDelete={() => removeDoc(doc.id)}
-                onCopy={() => copyLink(doc.url)}
+                onCopy={() => copyLink(doc)}
               />
             ))}
           </ul>
@@ -295,6 +299,9 @@ function DocRow({
               {doc.description && <p className="mt-1 text-sm text-white/60">{doc.description}</p>}
               <p className="mt-1 text-xs text-white/40">
                 {doc.filename} · {formatSize(doc.size)}
+              </p>
+              <p className="mt-1 break-all text-xs text-accent/80">
+                {buildShareUrl(doc)}
               </p>
             </>
           )}

@@ -6,7 +6,7 @@ import type { Locale } from '@/i18n/config';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { generateMetadataForPath } from '@/lib/seo';
 import { FsconPdfViewer } from '@/components/FsconPdfViewer';
-import { getFeaturedSponsorPdfUrl, listPublicSponsorDocs } from '@/lib/sponsorDocuments';
+import { getFeaturedSponsorPdfUrl, listPublicSponsorDocs, publicShareUrl } from '@/lib/sponsorDocuments';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/sponsor-donate');
@@ -105,6 +105,8 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
   const base = `/${loc}`;
   const featuredPdfUrl = await getFeaturedSponsorPdfUrl();
   const allDocs = await listPublicSponsorDocs();
+  const featuredDoc = allDocs.find((d) => d.isFeatured);
+  const featuredPdfLink = featuredDoc ? publicShareUrl(featuredDoc.slug, featuredDoc.url) : featuredPdfUrl;
   const shareableDocs = allDocs.filter((d) => !d.isFeatured);
 
   return (
@@ -182,7 +184,7 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
               <div className="mt-8 flex flex-col items-center gap-2">
                 <FsconPdfViewer src={featuredPdfUrl} />
                 <a
-                  href={featuredPdfUrl}
+                  href={featuredPdfLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-accent underline text-sm hover:text-accent-light transition-colors mt-2"
@@ -201,7 +203,7 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
                           className="rounded-xl border border-white/10 bg-white/5 p-4 hover:border-accent/40 transition-colors"
                         >
                           <a
-                            href={d.url}
+                            href={publicShareUrl(d.slug, d.url)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-start gap-3"

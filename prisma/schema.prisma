@@ -822,6 +822,7 @@ model EmailSocialLinks {
 model SponsorDocument {
   id          String   @id @default(uuid())
   title       String
+  slug        String?  @unique
   description String?
   filename    String
   url         String

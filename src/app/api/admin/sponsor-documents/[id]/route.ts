@@ -3,6 +3,7 @@ import { unlink } from 'fs/promises';
 import { join } from 'path';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
+import { buildUniqueSlug } from '@/lib/sponsorDocuments';
 
 type Params = { params: { id: string } };
 
@@ -22,6 +23,9 @@ export async function PATCH(request: Request, { params }: Params) {
   if (typeof body.description === 'string') data.description = body.description.trim() || null;
   if (typeof body.isPublic === 'boolean') data.isPublic = body.isPublic;
   if (typeof body.sortOrder === 'number') data.sortOrder = body.sortOrder;
+  if (typeof body.slug === 'string' && body.slug.trim()) {
+    data.slug = await buildUniqueSlug(body.slug.trim(), params.id);
+  }
 
   // If marking as featured, unset all other featured docs in a transaction.
   if (typeof body.isFeatured === 'boolean') {
