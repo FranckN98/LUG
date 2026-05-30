@@ -173,7 +173,7 @@ const eventsContent: Record<
       gallery: [...gallery2025],
       videos: [],
       showPrice: false,
-      firstEditionBookUrl: '/downloads/level-up-livre-1re-edition.pdf',
+      firstEditionBookUrl: '/pdf/livre-1re-edition',
     },
     edition2026: {
       programme: [],
@@ -196,7 +196,7 @@ const eventsContent: Record<
       dateShort: '2026',
       gallery: [...EVENT_2026_GALLERY_PATHS],
       videos: [],
-      firstEditionBookUrl: '/downloads/level-up-livre-1re-edition.pdf',
+      firstEditionBookUrl: '/pdf/livre-1re-edition',
     },
   },
   en: {
@@ -261,7 +261,7 @@ const eventsContent: Record<
       gallery: [...gallery2025],
       videos: [],
       showPrice: false,
-      firstEditionBookUrl: '/downloads/level-up-livre-1re-edition.pdf',
+      firstEditionBookUrl: '/pdf/livre-1re-edition',
     },
     edition2026: {
       programme: [],
@@ -284,7 +284,7 @@ const eventsContent: Record<
       dateShort: '2026',
       gallery: [...EVENT_2026_GALLERY_PATHS],
       videos: [],
-      firstEditionBookUrl: '/downloads/level-up-livre-1re-edition.pdf',
+      firstEditionBookUrl: '/pdf/livre-1re-edition',
     },
   },
   fr: {
@@ -349,7 +349,7 @@ const eventsContent: Record<
       gallery: [...gallery2025],
       videos: [],
       showPrice: false,
-      firstEditionBookUrl: '/downloads/level-up-livre-1re-edition.pdf',
+      firstEditionBookUrl: '/pdf/livre-1re-edition',
     },
     edition2026: {
       programme: [],
@@ -372,7 +372,7 @@ const eventsContent: Record<
       dateShort: '2026',
       gallery: [...EVENT_2026_GALLERY_PATHS],
       videos: [],
-      firstEditionBookUrl: '/downloads/level-up-livre-1re-edition.pdf',
+      firstEditionBookUrl: '/pdf/livre-1re-edition',
     },
   },
 };

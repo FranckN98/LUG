@@ -1,9 +1,9 @@
 import type { EventEdition } from '@/content/events';
 
-/** PDF public paths (under /public) — validated server-side; do not trust client paths. */
+/** Public canonical PDF URLs (served by /pdf/[slug] under www.levelupingermany.com). */
 export const EVENT_PDF_PATH: Record<EventEdition, string> = {
-  '2025': '/downloads/level-up-livre-1re-edition.pdf',
-  '2026': '/downloads/level-up-livre-1re-edition.pdf',
+  '2025': '/pdf/livre-1re-edition',
+  '2026': '/pdf/livre-1re-edition',
 };
 
 /** Stored in DB `source` for segmentation / campaigns */
@@ -16,6 +16,8 @@ export function getSiteOrigin(): string {
   const u = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (u) return u.replace(/\/$/, '');
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  // Prefer the canonical production host so shared PDF links keep partner trust.
+  if (process.env.NODE_ENV === 'production') return 'https://www.levelupingermany.com';
   return 'http://localhost:3000';
 }
 

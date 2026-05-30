@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 /** Canonical public host used for all professional share links. */
 export const PUBLIC_HOST = 'https://www.levelupingermany.com';
 
-export const FALLBACK_SPONSOR_PDF = '/downloads/fscon-v2.pdf';
+export const FALLBACK_SPONSOR_PDF = '/pdf/sponsor-2026';
 
 export type PublicSponsorDoc = {
   id: string;
@@ -57,9 +57,10 @@ export async function getFeaturedSponsorPdfUrl(): Promise<string> {
   try {
     const doc = await prisma.sponsorDocument.findFirst({
       where: { isFeatured: true, isPublic: true },
-      select: { url: true },
+      select: { url: true, slug: true },
     });
-    return doc?.url ?? FALLBACK_SPONSOR_PDF;
+    if (!doc) return FALLBACK_SPONSOR_PDF;
+    return doc.slug ? `/pdf/${doc.slug}` : doc.url;
   } catch {
     return FALLBACK_SPONSOR_PDF;
   }
