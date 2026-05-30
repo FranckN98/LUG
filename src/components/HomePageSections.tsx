@@ -44,37 +44,41 @@ const profileIcons = [<IconUsers key="u" />, <IconRocket key="r" />, <IconBriefc
    Rings, blobs, dots and rotating squares that gently float around a section.
    `tone` adapts opacity/colors for light vs. dark backgrounds.                    */
 function FloatingShapes({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
-  const ring = tone === 'dark' ? 'border-white/15' : 'border-primary/15';
-  const ring2 = tone === 'dark' ? 'border-accent/25' : 'border-accent/25';
-  const dot = tone === 'dark' ? 'bg-white/30' : 'bg-primary/25';
-  const square = tone === 'dark' ? 'border-white/15' : 'border-accent/30';
+  const ring = tone === 'dark' ? 'border-white/25' : 'border-primary/30';
+  const ring2 = tone === 'dark' ? 'border-accent/40' : 'border-accent/45';
+  const dot = tone === 'dark' ? 'bg-white/50' : 'bg-primary/40';
+  const square = tone === 'dark' ? 'border-white/25' : 'border-accent/45';
   const blob =
     tone === 'dark'
-      ? 'radial-gradient(circle, rgba(233,140,11,0.18) 0%, transparent 70%)'
-      : 'radial-gradient(circle, rgba(233,140,11,0.12) 0%, transparent 70%)';
+      ? 'radial-gradient(circle, rgba(233,140,11,0.30) 0%, transparent 70%)'
+      : 'radial-gradient(circle, rgba(233,140,11,0.22) 0%, transparent 70%)';
 
   return (
-    <div className="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block" aria-hidden>
+    <div className="pointer-events-none absolute inset-0 hidden overflow-hidden sm:block" aria-hidden>
       {/* soft glow blob */}
       <span
-        className="hero-float-el hero-float-b absolute right-[8%] top-[20%] h-40 w-40 rounded-full blur-2xl"
+        className="hero-float-b absolute right-[8%] top-[18%] h-48 w-48 rounded-full blur-2xl"
+        style={{ background: blob }}
+      />
+      <span
+        className="hero-float-c absolute left-[6%] bottom-[14%] h-40 w-40 rounded-full blur-2xl"
         style={{ background: blob }}
       />
       {/* outlined rings */}
-      <span className={`hero-float-el hero-float-a absolute left-[6%] top-[24%] h-20 w-20 rounded-full border ${ring}`} />
+      <span className={`hero-float-a absolute left-[7%] top-[22%] h-24 w-24 rounded-full border-2 ${ring}`} />
       <span
-        className={`hero-float-el hero-float-c absolute right-[12%] bottom-[18%] h-12 w-12 rounded-full border-2 ${ring2}`}
+        className={`hero-float-c absolute right-[12%] bottom-[18%] h-16 w-16 rounded-full border-2 ${ring2}`}
         style={{ animationDelay: '0.5s' }}
       />
       {/* rotating square */}
       <span
-        className={`hero-float-el hero-float-b absolute left-[14%] bottom-[22%] h-10 w-10 rotate-12 rounded-md border ${square}`}
+        className={`hero-float-b absolute left-[16%] bottom-[24%] h-12 w-12 rotate-12 rounded-md border-2 ${square}`}
         style={{ animationDelay: '0.3s' }}
       />
       {/* floating dots */}
-      <span className={`hero-sparkle absolute left-[42%] top-[14%] h-2.5 w-2.5 rounded-full ${dot}`} style={{ animationDelay: '0.2s' }} />
-      <span className={`hero-sparkle absolute right-[28%] top-[40%] h-2 w-2 rounded-full ${dot}`} style={{ animationDelay: '1s' }} />
-      <span className={`hero-sparkle absolute left-[24%] top-[58%] h-1.5 w-1.5 rounded-full ${dot}`} style={{ animationDelay: '1.6s' }} />
+      <span className={`hero-sparkle absolute left-[42%] top-[14%] h-3 w-3 rounded-full ${dot}`} style={{ animationDelay: '0.2s' }} />
+      <span className={`hero-sparkle absolute right-[28%] top-[38%] h-2.5 w-2.5 rounded-full ${dot}`} style={{ animationDelay: '1s' }} />
+      <span className={`hero-sparkle absolute left-[26%] top-[56%] h-2 w-2 rounded-full ${dot}`} style={{ animationDelay: '1.6s' }} />
     </div>
   );
 }
