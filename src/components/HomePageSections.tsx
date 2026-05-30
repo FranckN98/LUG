@@ -57,28 +57,28 @@ function FloatingShapes({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
     <div className="pointer-events-none absolute inset-0 hidden overflow-hidden sm:block" aria-hidden>
       {/* soft glow blob */}
       <span
-        className="hero-float-b absolute right-[8%] top-[18%] h-48 w-48 rounded-full blur-2xl"
+        className="shape-float-3 absolute right-[8%] top-[18%] h-48 w-48 rounded-full blur-2xl"
         style={{ background: blob }}
       />
       <span
-        className="hero-float-c absolute left-[6%] bottom-[14%] h-40 w-40 rounded-full blur-2xl"
+        className="shape-float-2 absolute left-[6%] bottom-[14%] h-40 w-40 rounded-full blur-2xl"
         style={{ background: blob }}
       />
       {/* outlined rings */}
-      <span className={`hero-float-a absolute left-[7%] top-[22%] h-24 w-24 rounded-full border-2 ${ring}`} />
+      <span className={`shape-float-1 absolute left-[7%] top-[22%] h-24 w-24 rounded-full border-2 ${ring}`} />
       <span
-        className={`hero-float-c absolute right-[12%] bottom-[18%] h-16 w-16 rounded-full border-2 ${ring2}`}
+        className={`shape-float-2 absolute right-[12%] bottom-[18%] h-16 w-16 rounded-full border-2 ${ring2}`}
         style={{ animationDelay: '0.5s' }}
       />
       {/* rotating square */}
       <span
-        className={`hero-float-b absolute left-[16%] bottom-[24%] h-12 w-12 rotate-12 rounded-md border-2 ${square}`}
+        className={`shape-float-3 absolute left-[16%] bottom-[24%] h-12 w-12 rounded-md border-2 ${square}`}
         style={{ animationDelay: '0.3s' }}
       />
       {/* floating dots */}
-      <span className={`hero-sparkle absolute left-[42%] top-[14%] h-3 w-3 rounded-full ${dot}`} style={{ animationDelay: '0.2s' }} />
-      <span className={`hero-sparkle absolute right-[28%] top-[38%] h-2.5 w-2.5 rounded-full ${dot}`} style={{ animationDelay: '1s' }} />
-      <span className={`hero-sparkle absolute left-[26%] top-[56%] h-2 w-2 rounded-full ${dot}`} style={{ animationDelay: '1.6s' }} />
+      <span className={`shape-sparkle absolute left-[42%] top-[14%] h-3 w-3 rounded-full ${dot}`} style={{ animationDelay: '0.2s' }} />
+      <span className={`shape-sparkle absolute right-[28%] top-[38%] h-2.5 w-2.5 rounded-full ${dot}`} style={{ animationDelay: '0.7s' }} />
+      <span className={`shape-sparkle absolute left-[26%] top-[56%] h-2 w-2 rounded-full ${dot}`} style={{ animationDelay: '1.2s' }} />
     </div>
   );
 }

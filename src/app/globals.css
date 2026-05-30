@@ -433,6 +433,33 @@ body.paper-texture::after {
 }
 /* ── end hero floating elements ── */
 
+/* ── Decorative shapes — stronger, more visible motion ── */
+@keyframes shapeFloat1 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50%      { transform: translate3d(18px, -42px, 0) rotate(20deg); }
+}
+@keyframes shapeFloat2 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50%      { transform: translate3d(-26px, -34px, 0) rotate(-24deg); }
+}
+@keyframes shapeFloat3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  50%      { transform: translate3d(22px, 30px, 0) scale(1.12) rotate(16deg); }
+}
+@keyframes shapeSparkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.7); }
+  50%      { opacity: 1;   transform: scale(1.5); }
+}
+.shape-float-1 { animation: shapeFloat1 5s ease-in-out infinite; }
+.shape-float-2 { animation: shapeFloat2 6s ease-in-out infinite; }
+.shape-float-3 { animation: shapeFloat3 4.5s ease-in-out infinite; }
+.shape-sparkle { animation: shapeSparkle 2.2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shape-float-1, .shape-float-2, .shape-float-3, .shape-sparkle { animation: none; }
+}
+/* ── end decorative shapes ── */
+
 .animate-hero-buttons {
   animation: heroScaleIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
 }
