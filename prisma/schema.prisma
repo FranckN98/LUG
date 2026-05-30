@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -817,4 +817,23 @@ model EmailSocialLinks {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("email_social_links")
+}
+
+model SponsorDocument {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  filename    String
+  url         String
+  size        Int?
+  mimeType    String?  @map("mime_type")
+  isFeatured  Boolean  @default(false) @map("is_featured")
+  isPublic    Boolean  @default(true) @map("is_public")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isFeatured])
+  @@index([isPublic, sortOrder])
+  @@map("sponsor_documents")
 }

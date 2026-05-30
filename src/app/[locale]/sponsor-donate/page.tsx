@@ -6,6 +6,7 @@ import type { Locale } from '@/i18n/config';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { generateMetadataForPath } from '@/lib/seo';
 import { FsconPdfViewer } from '@/components/FsconPdfViewer';
+import { getFeaturedSponsorPdfUrl, listPublicSponsorDocs } from '@/lib/sponsorDocuments';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/sponsor-donate');
@@ -102,6 +103,9 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
   const t = content[loc];
   const base = `/${loc}`;
+  const featuredPdfUrl = await getFeaturedSponsorPdfUrl();
+  const allDocs = await listPublicSponsorDocs();
+  const shareableDocs = allDocs.filter((d) => !d.isFeatured);
 
   return (
     <div className="overflow-hidden">
@@ -176,15 +180,50 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
               </div>
               {/* PDF FSCon intégré, agrandi, sans description */}
               <div className="mt-8 flex flex-col items-center gap-2">
-                <FsconPdfViewer />
+                <FsconPdfViewer src={featuredPdfUrl} />
                 <a
-                  href="/downloads/fscon-v2.pdf"
+                  href={featuredPdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-accent underline text-sm hover:text-accent-light transition-colors mt-2"
                 >
                   Ouvrir le PDF dans un nouvel onglet
                 </a>
+                {shareableDocs.length > 0 && (
+                  <div className="mt-8 w-full max-w-4xl space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-accent/80">
+                      Autres documents
+                    </p>
+                    <ul className="grid gap-3 sm:grid-cols-2">
+                      {shareableDocs.map((d) => (
+                        <li
+                          key={d.id}
+                          className="rounded-xl border border-white/10 bg-white/5 p-4 hover:border-accent/40 transition-colors"
+                        >
+                          <a
+                            href={d.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-start gap-3"
+                          >
+                            <span className="mt-0.5 inline-flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-accent/15 text-accent">
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z" />
+                              </svg>
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-semibold text-white">{d.title}</span>
+                              {d.description && (
+                                <span className="block text-xs text-white/60 mt-0.5 line-clamp-2">{d.description}</span>
+                              )}
+                              <span className="block text-[0.7rem] text-accent/80 mt-1">Ouvrir le PDF →</span>
+                            </span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </RevealOnScroll>
           </div>
