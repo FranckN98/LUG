@@ -45,6 +45,10 @@ function HeroFloatingElements() {
         className="absolute right-[12%] top-[34%] h-80 w-80 rounded-full blur-3xl"
         style={{ background: 'radial-gradient(circle, rgba(233,140,11,0.26) 0%, transparent 70%)' }}
       />
+      <div
+        className="absolute right-[10%] bottom-[10%] h-64 w-64 rounded-full blur-3xl"
+        style={{ background: 'radial-gradient(circle, rgba(140,26,26,0.22) 0%, transparent 70%)' }}
+      />
 
       {/* Themes / pillars card (dark glass) */}
       <div
@@ -70,6 +74,32 @@ function HeroFloatingElements() {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Community badge (lower right) */}
+      <div
+        className="hero-float-el absolute right-[8%] bottom-[14%]"
+        style={{ animationDelay: '0.5s' }}
+      >
+        <div className="hero-float-a">
+          <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.1] px-4 py-2.5 shadow-[0_12px_36px_rgba(0,0,0,0.35)] backdrop-blur-md">
+            <span className="text-base">🌍</span>
+            <span className="text-sm font-semibold text-white">+15 nationalités</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Frankfurt pill (mid-lower right) */}
+      <div
+        className="hero-float-el absolute right-[26%] bottom-[26%]"
+        style={{ animationDelay: '0.65s' }}
+      >
+        <div className="hero-float-c">
+          <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-4 py-2 shadow-[0_12px_36px_rgba(233,140,11,0.4)]">
+            <span className="text-sm">📍</span>
+            <span className="text-sm font-bold tracking-wide text-white">Frankfurt · 2026</span>
           </div>
         </div>
       </div>
