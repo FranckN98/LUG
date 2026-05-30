@@ -31,7 +31,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
-  width: min(24rem, 88vw);
+  width: min(20rem, 80vw);
 }
 
 @media (min-width: 640px) {

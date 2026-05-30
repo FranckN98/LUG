@@ -203,7 +203,7 @@ export default function HeroCarousel({
           )}
 
           {countdown && countdown.targetDate && (
-            <div className="animate-hero-subtitle mb-5 sm:mb-8">
+            <div className="animate-hero-subtitle mb-5 sm:mb-8 flex justify-center sm:justify-start">
               <Countdown
                 targetDate={countdown.targetDate}
                 locale={countdown.locale}
