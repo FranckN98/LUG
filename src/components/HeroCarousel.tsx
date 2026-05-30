@@ -40,46 +40,15 @@ function AnimatedHeroTitle({ title }: { title: string }) {
 function HeroFloatingElements() {
   return (
     <div className="pointer-events-none absolute inset-0 z-[5] hidden lg:block" aria-hidden>
-      {/* Warm luminous halos behind the floating elements */}
+      {/* Warm luminous halo behind the themes card */}
       <div
-        className="absolute right-[8%] top-[18%] h-72 w-72 rounded-full blur-3xl"
-        style={{ background: 'radial-gradient(circle, rgba(233,140,11,0.30) 0%, transparent 70%)' }}
-      />
-      <div
-        className="absolute right-[26%] top-[48%] h-80 w-80 rounded-full blur-3xl"
-        style={{ background: 'radial-gradient(circle, rgba(140,26,26,0.28) 0%, transparent 70%)' }}
-      />
-      <div
-        className="absolute right-[14%] bottom-[14%] h-64 w-64 rounded-full blur-3xl"
-        style={{ background: 'radial-gradient(circle, rgba(47,93,58,0.22) 0%, transparent 70%)' }}
+        className="absolute right-[12%] top-[34%] h-80 w-80 rounded-full blur-3xl"
+        style={{ background: 'radial-gradient(circle, rgba(233,140,11,0.26) 0%, transparent 70%)' }}
       />
 
-      {/* Card 1 — Community notification (top right) */}
+      {/* Themes / pillars card (dark glass) */}
       <div
-        className="hero-float-el absolute right-[6%] top-[15%] w-72"
-        style={{ animationDelay: '0.15s' }}
-      >
-        <div className="hero-float-a">
-          <div className="rounded-2xl border border-white/15 bg-white/[0.92] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-accent to-primary text-lg">
-                🎉
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-[#1a1a1a]">Level Up Community</p>
-                <p className="truncate text-xs text-[#1a1a1a]/55">+300 membres actifs</p>
-              </div>
-            </div>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#1a1a1a]/10">
-              <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-accent to-primary" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Card 2 — Menu / pillars (mid right, dark glass) */}
-      <div
-        className="hero-float-el absolute right-[18%] top-[40%] w-60"
+        className="hero-float-el absolute right-[12%] top-[38%] w-64"
         style={{ animationDelay: '0.3s' }}
       >
         <div className="hero-float-b">
@@ -104,37 +73,6 @@ function HeroFloatingElements() {
           </div>
         </div>
       </div>
-
-      {/* Pill — Frankfurt 2026 (lower right, accent gradient) */}
-      <div
-        className="hero-float-el absolute right-[10%] bottom-[16%]"
-        style={{ animationDelay: '0.45s' }}
-      >
-        <div className="hero-float-c">
-          <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-5 py-2.5 shadow-[0_12px_36px_rgba(233,140,11,0.45)]">
-            <span className="text-sm">📍</span>
-            <span className="text-sm font-bold tracking-wide text-white">Frankfurt · 2026</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Small chat bubble (far right, subtle) */}
-      <div
-        className="hero-float-el absolute right-[30%] bottom-[30%]"
-        style={{ animationDelay: '0.55s' }}
-      >
-        <div className="hero-float-a">
-          <div className="rounded-2xl rounded-bl-sm border border-white/15 bg-white/[0.14] px-4 py-2.5 text-sm font-medium text-white shadow-[0_12px_36px_rgba(0,0,0,0.35)] backdrop-blur-md">
-            Willkommen! 👋
-          </div>
-        </div>
-      </div>
-
-      {/* Sparkles */}
-      <span className="hero-sparkle absolute right-[5%] top-[34%] h-2 w-2 rounded-full bg-accent" style={{ animationDelay: '0.2s' }} />
-      <span className="hero-sparkle absolute right-[34%] top-[24%] h-1.5 w-1.5 rounded-full bg-white" style={{ animationDelay: '1.1s' }} />
-      <span className="hero-sparkle absolute right-[22%] bottom-[22%] h-2 w-2 rounded-full bg-primary-light" style={{ animationDelay: '0.7s' }} />
-      <span className="hero-sparkle absolute right-[12%] top-[58%] h-1.5 w-1.5 rounded-full bg-accent" style={{ animationDelay: '1.6s' }} />
     </div>
   );
 }
