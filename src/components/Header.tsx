@@ -49,6 +49,27 @@ const navItems: { href: string; de: string; en: string; fr: string }[] = [
   { href: '/blog-impact', de: 'Blog & Impact', en: 'Blog & Impact', fr: 'Blog & Impact' },
 ];
 
+// Header CTA color variants — solid pill buttons over both light navbar and transparent hero.
+function headerBtnColorCls(variant?: string | null): string {
+  switch (variant) {
+    case 'yellow':
+      return 'bg-accent text-white shadow-accent/20 hover:bg-accent-light hover:shadow-accent/25';
+    case 'green':
+      return 'bg-[#2f5d3a] text-white shadow-[#2f5d3a]/25 hover:bg-[#377045] hover:shadow-[#2f5d3a]/30';
+    case 'white':
+      return 'bg-white text-[#0f0606] shadow-black/10 hover:bg-white/90';
+    case 'black':
+      return 'bg-[#0f0606] text-white shadow-black/25 hover:bg-[#1a1010]';
+    case 'outline-white':
+      return 'bg-transparent text-white border-2 border-white hover:bg-white hover:text-[#0f0606]';
+    case 'outline-red':
+      return 'bg-transparent text-primary border-2 border-primary hover:bg-primary hover:text-white';
+    case 'red':
+    default:
+      return 'bg-primary text-white shadow-primary/20 hover:bg-primary-light hover:shadow-primary/25';
+  }
+}
+
 export function Header({
   locale,
   joinWhatsAppUrl,
@@ -63,12 +84,12 @@ export function Header({
     headerJoinLabelEn?: string | null;
     headerJoinLink?: string | null;
     headerJoinOpenInNewTab?: boolean;
+    headerJoinColorVariant?: string | null;
     headerSponsorLabelFr?: string | null;
     headerSponsorLabelDe?: string | null;
     headerSponsorLabelEn?: string | null;
     headerSponsorLink?: string | null;
     headerSponsorOpenInNewTab?: boolean;
-    headerJoinColorVariant?: string | null;
     headerSponsorColorVariant?: string | null;
   } | null;
 }) {
@@ -77,19 +98,8 @@ export function Header({
   const [scrolled, setScrolled] = useState(false);
 
   // Only use transparent/white-text mode on the home page (which has a dark hero behind)
-  // Force opaque mode whenever the mobile menu is open so links stay readable.
   const isHomePage = pathname === `/${locale}` || pathname === `/${locale}/`;
-  const useTransparent = isHomePage && !scrolled && !menuOpen;
-
-  // Lock body scroll when the mobile menu is open
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    if (menuOpen) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = prev; };
-    }
-  }, [menuOpen]);
+  const useTransparent = isHomePage && !scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -119,21 +129,8 @@ export function Header({
       : locale === 'fr'
         ? siteConfig?.headerSponsorLabelFr || 'Sponsor / Don'
         : siteConfig?.headerSponsorLabelEn || 'Sponsor / Donate';
-
-  function colorVariantCls(variant: string | null | undefined, fallback: string): string {
-    switch (variant) {
-      case 'red':           return 'bg-[#8c1a1a] text-white shadow-[#8c1a1a]/20 hover:opacity-90';
-      case 'yellow':        return 'bg-[#e98c0b] text-white shadow-[#e98c0b]/20 hover:opacity-90';
-      case 'black':         return 'bg-[#0f0606] text-white hover:opacity-90';
-      case 'white':         return 'bg-white text-gray-900 hover:bg-gray-100';
-      case 'outline-white': return 'border-2 border-white text-white bg-transparent hover:bg-white/10';
-      case 'outline-red':   return 'border-2 border-[#8c1a1a] text-[#8c1a1a] bg-transparent hover:bg-[#8c1a1a]/10';
-      default:              return fallback;
-    }
-  }
-
-  const joinBtnCls = colorVariantCls(siteConfig?.headerJoinColorVariant, 'bg-primary text-white shadow-primary/20 hover:bg-primary-light');
-  const sponsorBtnCls = colorVariantCls(siteConfig?.headerSponsorColorVariant, 'bg-accent text-white shadow-accent/20 hover:bg-accent-light');
+  const joinBtnCls = headerBtnColorCls(siteConfig?.headerJoinColorVariant);
+  const sponsorBtnCls = headerBtnColorCls(siteConfig?.headerSponsorColorVariant);
   const getLabel = (item: (typeof navItems)[0]) => item[locale];
   return (
     <header
@@ -222,70 +219,51 @@ export function Header({
           </div>
         </div>
 
-      </div>
-
-      {/* Mobile nav — full-width, opaque, properly readable */}
-      {menuOpen && (
-        <>
-          {/* Backdrop to close menu on outside tap */}
-          <button
-            type="button"
-            aria-label="Close menu"
-            onClick={() => setMenuOpen(false)}
-            className="md:hidden fixed inset-0 top-16 bg-black/30 backdrop-blur-[2px] z-40"
-          />
-          <nav
-            id="mobile-nav"
-            className="md:hidden absolute left-0 right-0 top-full bg-white border-t border-gray-200 shadow-[0_12px_24px_-8px_rgba(0,0,0,0.18)] z-50"
-          >
-            <ul className="flex flex-col gap-1 px-4 py-4 max-h-[calc(100vh-4rem)] overflow-y-auto">
+        {/* Mobile nav */}
+        {menuOpen && (
+          <nav className="md:hidden py-4 border-t border-gray-100">
+            <ul className="flex flex-col gap-1">
               {navItems.map((item) => {
                 const href =
                   item.href === '/who-we-are' ? whoWeAreHref(locale) : item.href ? `${base}${item.href}` : base;
-                const isActive =
-                  item.href === '/who-we-are'
-                    ? isWhoWeArePathname(pathname)
-                    : pathname === href || (item.href ? pathname.startsWith(href) : false);
                 return (
                   <li key={item.href || 'home'}>
                     <Link
                       href={href}
                       onClick={() => setMenuOpen(false)}
-                      className={`block py-3 px-3 rounded-lg text-base font-medium transition-colors ${
-                        isActive
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-gray-800 hover:bg-gray-100 active:bg-gray-200'
-                      }`}
+                      className="block py-2 px-3 rounded-lg text-gray-700 hover:bg-gray-100"
                     >
                       {getLabel(item)}
                     </Link>
                   </li>
                 );
               })}
-              <li className="pt-2 mt-2 border-t border-gray-100 flex flex-col gap-2">
+              <li>
                 <Link
                   href={contactHref}
                   target={siteConfig?.headerJoinOpenInNewTab ? '_blank' : undefined}
                   rel={siteConfig?.headerJoinOpenInNewTab ? 'noopener noreferrer' : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className={`block text-center py-3 px-4 rounded-full text-sm font-semibold shadow-md ${joinBtnCls}`}
+                  className={`block py-2 px-3 rounded-lg font-medium ${joinBtnCls}`}
                 >
                   {joinLabel}
                 </Link>
+              </li>
+              <li>
                 <Link
                   href={sponsorHref}
                   target={siteConfig?.headerSponsorOpenInNewTab ? '_blank' : undefined}
                   rel={siteConfig?.headerSponsorOpenInNewTab ? 'noopener noreferrer' : undefined}
                   onClick={() => setMenuOpen(false)}
-                  className={`block text-center py-3 px-4 rounded-full text-sm font-semibold shadow-md ${sponsorBtnCls}`}
+                  className={`block py-2 px-3 rounded-lg font-medium ${sponsorBtnCls}`}
                 >
                   {sponsorLabel}
                 </Link>
               </li>
             </ul>
           </nav>
-        </>
-      )}
+        )}
+      </div>
     </header>
   );
 }

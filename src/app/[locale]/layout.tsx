@@ -44,11 +44,13 @@ export default async function LocaleLayout({
     headerJoinLabelEn?: string | null;
     headerJoinLink?: string | null;
     headerJoinOpenInNewTab?: boolean;
+    headerJoinColorVariant?: string | null;
     headerSponsorLabelFr?: string | null;
     headerSponsorLabelDe?: string | null;
     headerSponsorLabelEn?: string | null;
     headerSponsorLink?: string | null;
     headerSponsorOpenInNewTab?: boolean;
+    headerSponsorColorVariant?: string | null;
   } | null = null;
 
   try {
