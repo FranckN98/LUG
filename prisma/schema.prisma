@@ -232,9 +232,10 @@ model SiteConfig {
 }
 
 model CountdownConfig {
-  id             String   @id @default("singleton")
-  isActive       Boolean  @default(false) @map("is_active")
-  targetDate     DateTime @map("target_date")
+  id                String   @id @default("singleton")
+  isActive          Boolean  @default(false) @map("is_active")
+  hideHeroSubtitle  Boolean  @default(false) @map("hide_hero_subtitle")
+  targetDate        DateTime @map("target_date")
   titleFr        String?  @map("title_fr")
   titleDe        String?  @map("title_de")
   titleEn        String?  @map("title_en")

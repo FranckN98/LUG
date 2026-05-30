@@ -9,6 +9,7 @@ type Form = CountdownAdminPayload;
 
 const EMPTY_FORM: Form = {
   isActive: false,
+  hideHeroSubtitle: false,
   targetDate: null,
   titleFr: '', titleDe: '', titleEn: '',
   subtitleFr: '', subtitleDe: '', subtitleEn: '',
@@ -139,6 +140,22 @@ export function CountdownAdmin() {
               />
               <span className="text-sm font-medium text-gray-900 dark:text-white">
                 Afficher le countdown dans le hero
+              </span>
+            </label>
+
+            <label className="mt-3 flex items-start gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.hideHeroSubtitle}
+                onChange={(e) => set('hideHeroSubtitle', e.target.checked)}
+                disabled={!form.isActive}
+                className="w-4 h-4 mt-0.5 rounded border-gray-300 text-primary focus:ring-primary disabled:opacity-50"
+              />
+              <span className="text-sm text-gray-900 dark:text-white">
+                <span className="font-medium">Masquer le sous-titre du hero</span>
+                <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Quand le countdown est actif, le paragraphe de description sous le titre est caché pour laisser toute la place au compte à rebours. Le sous-titre du countdown (champ ci-dessous) reste affiché.
+                </span>
               </span>
             </label>
 

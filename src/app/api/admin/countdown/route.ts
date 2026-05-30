@@ -10,6 +10,7 @@ function toAdminPayload(row: Awaited<ReturnType<typeof prisma.countdownConfig.fi
   if (!row) {
     return {
       isActive: false,
+      hideHeroSubtitle: false,
       targetDate: null,
       titleFr: null, titleDe: null, titleEn: null,
       subtitleFr: null, subtitleDe: null, subtitleEn: null,
@@ -18,6 +19,7 @@ function toAdminPayload(row: Awaited<ReturnType<typeof prisma.countdownConfig.fi
   }
   return {
     isActive: row.isActive,
+    hideHeroSubtitle: row.hideHeroSubtitle,
     targetDate: row.targetDate.toISOString(),
     titleFr: row.titleFr,
     titleDe: row.titleDe,
@@ -56,6 +58,7 @@ export async function PATCH(req: Request) {
 
   const data = {
     isActive: !!body.isActive,
+    hideHeroSubtitle: !!body.hideHeroSubtitle,
     targetDate: parsed,
     titleFr: body.titleFr?.trim() || null,
     titleDe: body.titleDe?.trim() || null,

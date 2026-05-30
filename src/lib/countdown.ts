@@ -16,6 +16,7 @@ export type CountdownPayload = {
 
 export type CountdownAdminPayload = {
   isActive: boolean;
+  hideHeroSubtitle: boolean;
   targetDate: string | null;
   titleFr: string | null;
   titleDe: string | null;

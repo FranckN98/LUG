@@ -108,6 +108,7 @@ export default async function LocaleHomePage({
   let countdownProp:
     | { targetDate: string; locale: CountdownLocale; title: string | null; subtitle: string | null; endedMessage: string | null }
     | null = null;
+  let countdownHidesSubtitle = false;
   try {
     const cd = await prisma.countdownConfig.findUnique({ where: { id: 'singleton' } });
     if (cd && cd.isActive && cd.targetDate) {
@@ -119,6 +120,7 @@ export default async function LocaleHomePage({
         subtitle,
         endedMessage,
       };
+      countdownHidesSubtitle = cd.hideHeroSubtitle;
     }
   } catch {
     // ignore — countdown is purely optional
@@ -143,7 +145,7 @@ export default async function LocaleHomePage({
         images={heroImages}
         tagline={t.heroTagline}
         title={heroTitle}
-        subtitle={heroSubtitle}
+        subtitle={countdownHidesSubtitle ? undefined : heroSubtitle}
         stats={t.stats}
         primaryButton={primaryButton}
         buttons={buttons}
