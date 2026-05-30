@@ -27,6 +27,7 @@ const SITE_ROUTES = [
 const COLOR_VARIANTS = [
   { value: 'red',           label: 'Rouge',          preview: 'bg-[#8c1a1a]' },
   { value: 'yellow',        label: 'Jaune',          preview: 'bg-[#e98c0b]' },
+  { value: 'green',         label: 'Vert',           preview: 'bg-[#2f5d3a]' },
   { value: 'white',         label: 'Blanc (verre)',  preview: 'bg-white border border-gray-300' },
   { value: 'black',         label: 'Noir',           preview: 'bg-[#0f0606]' },
   { value: 'outline-white', label: 'Contour blanc',  preview: 'border-2 border-white bg-transparent' },
@@ -91,6 +92,7 @@ function buttonVariantPreviewClass(variant: string): string {
   switch (variant) {
     case 'red':           return 'bg-[#8c1a1a] text-white border border-[#8c1a1a]';
     case 'yellow':        return 'bg-[#e98c0b] text-white border border-[#e98c0b]';
+    case 'green':         return 'bg-[#2f5d3a] text-white border border-[#2f5d3a]';
     case 'white':         return 'bg-white text-slate-900 border border-white';
     case 'black':         return 'bg-[#0f0606] text-white border border-[#0f0606]';
     case 'outline-white': return 'bg-transparent text-white border border-white';
