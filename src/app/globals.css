@@ -398,6 +398,41 @@ body.paper-texture::after {
 }
 /* ── end typewriter ── */
 
+/* ── Hero floating decorative elements (premium landing, desktop only) ── */
+@keyframes heroFloatA {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-6deg); }
+  50%      { transform: translate3d(0, -14px, 0) rotate(-4deg); }
+}
+@keyframes heroFloatB {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(4deg); }
+  50%      { transform: translate3d(0, -20px, 0) rotate(6deg); }
+}
+@keyframes heroFloatC {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(8deg); }
+  50%      { transform: translate3d(0, 16px, 0) rotate(6deg); }
+}
+@keyframes heroFloatIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes heroSparkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.85); }
+  50%      { opacity: 0.9;  transform: scale(1.15); }
+}
+
+.hero-float-el {
+  animation: heroFloatIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-float-a { animation: heroFloatA 7s ease-in-out infinite; }
+.hero-float-b { animation: heroFloatB 8.5s ease-in-out infinite; }
+.hero-float-c { animation: heroFloatC 6.5s ease-in-out infinite; }
+.hero-sparkle { animation: heroSparkle 3.5s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float-a, .hero-float-b, .hero-float-c, .hero-sparkle { animation: none; }
+}
+/* ── end hero floating elements ── */
+
 .animate-hero-buttons {
   animation: heroScaleIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
 }

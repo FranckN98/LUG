@@ -34,6 +34,111 @@ function AnimatedHeroTitle({ title }: { title: string }) {
   );
 }
 
+/* ── Floating decorative themed elements (right side, desktop only) ──────────────
+   Inspired by premium SaaS landing heroes: glassmorphic cards, pills and badges
+   themed around Level Up in Germany (community, networking, career, Frankfurt).   */
+function HeroFloatingElements() {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[5] hidden lg:block" aria-hidden>
+      {/* Warm luminous halos behind the floating elements */}
+      <div
+        className="absolute right-[8%] top-[18%] h-72 w-72 rounded-full blur-3xl"
+        style={{ background: 'radial-gradient(circle, rgba(233,140,11,0.30) 0%, transparent 70%)' }}
+      />
+      <div
+        className="absolute right-[26%] top-[48%] h-80 w-80 rounded-full blur-3xl"
+        style={{ background: 'radial-gradient(circle, rgba(140,26,26,0.28) 0%, transparent 70%)' }}
+      />
+      <div
+        className="absolute right-[14%] bottom-[14%] h-64 w-64 rounded-full blur-3xl"
+        style={{ background: 'radial-gradient(circle, rgba(47,93,58,0.22) 0%, transparent 70%)' }}
+      />
+
+      {/* Card 1 — Community notification (top right) */}
+      <div
+        className="hero-float-el absolute right-[6%] top-[15%] w-72"
+        style={{ animationDelay: '0.15s' }}
+      >
+        <div className="hero-float-a">
+          <div className="rounded-2xl border border-white/15 bg-white/[0.92] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-accent to-primary text-lg">
+                🎉
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-[#1a1a1a]">Level Up Community</p>
+                <p className="truncate text-xs text-[#1a1a1a]/55">+300 membres actifs</p>
+              </div>
+            </div>
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#1a1a1a]/10">
+              <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-accent to-primary" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Card 2 — Menu / pillars (mid right, dark glass) */}
+      <div
+        className="hero-float-el absolute right-[18%] top-[40%] w-60"
+        style={{ animationDelay: '0.3s' }}
+      >
+        <div className="hero-float-b">
+          <div className="rounded-2xl border border-white/10 bg-[#1a1212]/85 p-3 shadow-[0_18px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+            {[
+              { icon: '🤝', label: 'Networking' },
+              { icon: '🚀', label: 'Carrière' },
+              { icon: '💡', label: 'Business' },
+            ].map((row) => (
+              <div
+                key={row.label}
+                className="mb-1.5 flex items-center gap-3 rounded-xl bg-white/[0.06] px-3 py-2 last:mb-0"
+              >
+                <span className="text-base">{row.icon}</span>
+                <span className="text-sm font-medium text-white/90">{row.label}</span>
+                <span className="ml-auto flex flex-col gap-[3px]">
+                  <span className="h-[2px] w-3.5 rounded bg-white/30" />
+                  <span className="h-[2px] w-3.5 rounded bg-white/30" />
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Pill — Frankfurt 2026 (lower right, accent gradient) */}
+      <div
+        className="hero-float-el absolute right-[10%] bottom-[16%]"
+        style={{ animationDelay: '0.45s' }}
+      >
+        <div className="hero-float-c">
+          <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-accent px-5 py-2.5 shadow-[0_12px_36px_rgba(233,140,11,0.45)]">
+            <span className="text-sm">📍</span>
+            <span className="text-sm font-bold tracking-wide text-white">Frankfurt · 2026</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Small chat bubble (far right, subtle) */}
+      <div
+        className="hero-float-el absolute right-[30%] bottom-[30%]"
+        style={{ animationDelay: '0.55s' }}
+      >
+        <div className="hero-float-a">
+          <div className="rounded-2xl rounded-bl-sm border border-white/15 bg-white/[0.14] px-4 py-2.5 text-sm font-medium text-white shadow-[0_12px_36px_rgba(0,0,0,0.35)] backdrop-blur-md">
+            Willkommen! 👋
+          </div>
+        </div>
+      </div>
+
+      {/* Sparkles */}
+      <span className="hero-sparkle absolute right-[5%] top-[34%] h-2 w-2 rounded-full bg-accent" style={{ animationDelay: '0.2s' }} />
+      <span className="hero-sparkle absolute right-[34%] top-[24%] h-1.5 w-1.5 rounded-full bg-white" style={{ animationDelay: '1.1s' }} />
+      <span className="hero-sparkle absolute right-[22%] bottom-[22%] h-2 w-2 rounded-full bg-primary-light" style={{ animationDelay: '0.7s' }} />
+      <span className="hero-sparkle absolute right-[12%] top-[58%] h-1.5 w-1.5 rounded-full bg-accent" style={{ animationDelay: '1.6s' }} />
+    </div>
+  );
+}
+
 // ── Button color variants (hero dark background context) ──────────────────────
 const BASE_BTN = 'group inline-flex w-full sm:w-auto items-center justify-center h-12 sm:h-14 px-8 rounded-full font-semibold hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 text-sm sm:text-base';
 
@@ -177,6 +282,9 @@ export default function HeroCarousel({
           `,
         }}
       />
+
+      {/* ── Floating decorative themed elements (premium landing, desktop only) ── */}
+      <HeroFloatingElements />
 
       {/* ── Text content — bottom-left, cinematic anchoring ── */}
       <div className="absolute inset-0 z-10 flex items-end pb-16 sm:pb-28 md:pb-36 px-5 sm:px-10 md:px-16 lg:px-20">
