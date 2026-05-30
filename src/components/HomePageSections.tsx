@@ -76,6 +76,24 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
       {/* Problem */}
       <section className="relative overflow-hidden bg-gradient-to-b from-gray-50/80 to-white py-20 sm:py-28">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(140,26,26,0.08),transparent)]" />
+
+        {/* Floating themed accents (desktop only, subtle) */}
+        <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden>
+          <div
+            className="hero-float-el hero-float-a absolute left-[5%] top-[18%] flex items-center gap-2 rounded-full border border-accent/20 bg-white/80 px-4 py-2 shadow-[0_8px_28px_rgba(233,140,11,0.18)] backdrop-blur-sm"
+          >
+            <span className="text-base">🎯</span>
+            <span className="text-sm font-semibold text-gray-700">Objectifs clairs</span>
+          </div>
+          <div
+            className="hero-float-el hero-float-c absolute right-[5%] bottom-[16%] flex items-center gap-2 rounded-full border border-primary/20 bg-white/80 px-4 py-2 shadow-[0_8px_28px_rgba(140,26,26,0.16)] backdrop-blur-sm"
+            style={{ animationDelay: '0.4s' }}
+          >
+            <span className="text-base">🌱</span>
+            <span className="text-sm font-semibold text-gray-700">Grandir ensemble</span>
+          </div>
+        </div>
+
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
             <SectionHeading
