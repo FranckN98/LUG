@@ -1,6 +1,7 @@
 import type { Locale } from '@/i18n/config';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
+import { seedSocialLinksIfEmpty } from '@/lib/socialLinks';
 
 type SocialLink = {
   id: string;
@@ -45,6 +46,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
 
   let links: SocialLink[] = [];
   try {
+    await seedSocialLinksIfEmpty();
     links = await prisma.socialLink.findMany({
       where: { isActive: true },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
