@@ -87,9 +87,9 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all hover:border-accent/50 hover:bg-white/[0.06]"
+                    className="group flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3 transition-all hover:border-accent/50 hover:bg-white/[0.06] sm:gap-4 sm:p-4"
                   >
-                    <div className="h-40 w-full overflow-hidden sm:h-48">
+                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 sm:h-24 sm:w-24">
                       <img
                         src={cover}
                         alt={link.title}
@@ -97,10 +97,11 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
                       />
                     </div>
 
-                    <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5">
+                    <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                       <div className="min-w-0">
                         <h2 className="truncate text-lg font-semibold text-white">{link.title}</h2>
                         {link.description && <p className="mt-1 text-sm text-white/65">{link.description}</p>}
+                        <p className="mt-1 truncate text-xs text-white/40">{link.url.replace(/^mailto:/, '')}</p>
                       </div>
                       <span className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
                         {t.cta}
