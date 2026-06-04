@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
+import { resolveSocialLinkCoverImage } from '@/lib/socialLinks';
 
 function parseUrl(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
   const value = raw.trim();
   if (!value) return null;
   if (value.startsWith('/')) return value;
+  if (value.startsWith('mailto:') || value.startsWith('tel:')) return value;
   try {
     const parsed = new URL(value);
     if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return value;
@@ -24,6 +26,11 @@ export async function PATCH(
   if (unauthorized) return unauthorized;
 
   const { id } = await params;
+
+  const current = await prisma.socialLink.findUnique({ where: { id } });
+  if (!current) {
+    return NextResponse.json({ error: 'Lien introuvable.' }, { status: 404 });
+  }
 
   let body: unknown;
   try {
@@ -52,7 +59,18 @@ export async function PATCH(
     data.coverImageUrl =
       typeof record.coverImageUrl === 'string' && record.coverImageUrl.trim()
         ? record.coverImageUrl.trim()
-        : null;
+        : resolveSocialLinkCoverImage(
+            typeof data.title === 'string' ? data.title : current.title,
+            typeof data.url === 'string' ? data.url : current.url,
+          );
+  } else {
+    const hasCurrentCover = Boolean(current.coverImageUrl && current.coverImageUrl.trim());
+    if (!hasCurrentCover) {
+      data.coverImageUrl = resolveSocialLinkCoverImage(
+        typeof data.title === 'string' ? data.title : current.title,
+        typeof data.url === 'string' ? data.url : current.url,
+      );
+    }
   }
   if (typeof record.sortOrder === 'number') data.sortOrder = record.sortOrder;
   if (typeof record.isActive === 'boolean') data.isActive = record.isActive;

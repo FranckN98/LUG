@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
-import { seedSocialLinksIfEmpty } from '@/lib/socialLinks';
+import { resolveSocialLinkCoverImage, seedSocialLinksIfEmpty } from '@/lib/socialLinks';
 
 function parseUrl(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       coverImageUrl:
         typeof data.coverImageUrl === 'string' && data.coverImageUrl.trim()
           ? data.coverImageUrl.trim()
-          : null,
+          : resolveSocialLinkCoverImage(title, url),
       sortOrder: typeof data.sortOrder === 'number' ? data.sortOrder : 0,
       isActive: typeof data.isActive === 'boolean' ? data.isActive : true,
     },

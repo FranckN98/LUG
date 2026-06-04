@@ -1,9 +1,37 @@
 import { prisma } from '@/lib/prisma';
 import { getEmailSocialLinks } from '@/lib/emailSocialLinks';
 
+export function resolveSocialLinkCoverImage(title: string, url: string): string {
+  const key = `${title} ${url}`.toLowerCase();
+
+  if (key.includes('instagram')) return '/hero/hero-2.png';
+  if (key.includes('tiktok')) return '/hero/hero-2.png';
+  if (key.includes('youtube') || key.includes('youtu.be')) return '/hero/hero-3.png';
+  if (key.includes('linkedin')) return '/hero/hero-3.png';
+  if (key.includes('whatsapp')) return '/hero/hero-1.png';
+  if (key.includes('mailto:') || key.includes('@')) return '/logo_neu.png';
+
+  return '/hero/hero-1.png';
+}
+
 export async function seedSocialLinksIfEmpty(): Promise<void> {
   const count = await prisma.socialLink.count();
-  if (count > 0) return;
+  if (count > 0) {
+    const missingCover = await prisma.socialLink.findMany({
+      where: {
+        OR: [{ coverImageUrl: null }, { coverImageUrl: '' }],
+      },
+      select: { id: true, title: true, url: true },
+    });
+
+    for (const link of missingCover) {
+      await prisma.socialLink.update({
+        where: { id: link.id },
+        data: { coverImageUrl: resolveSocialLinkCoverImage(link.title, link.url) },
+      });
+    }
+    return;
+  }
 
   const social = await getEmailSocialLinks();
 
@@ -37,6 +65,7 @@ export async function seedSocialLinksIfEmpty(): Promise<void> {
       title: item.title,
       url: item.url.trim(),
       description: item.description,
+      coverImageUrl: resolveSocialLinkCoverImage(item.title, item.url),
       sortOrder: item.sortOrder,
       isActive: true,
     })),

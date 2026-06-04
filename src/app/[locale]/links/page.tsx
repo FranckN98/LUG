@@ -1,7 +1,7 @@
 import type { Locale } from '@/i18n/config';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
-import { seedSocialLinksIfEmpty } from '@/lib/socialLinks';
+import { resolveSocialLinkCoverImage, seedSocialLinksIfEmpty } from '@/lib/socialLinks';
 
 type SocialLink = {
   id: string;
@@ -79,36 +79,37 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
           </p>
         ) : (
           <ul className="space-y-4">
-            {links.map((link) => (
-              <li key={link.id}>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all hover:border-accent/50 hover:bg-white/[0.06]"
-                >
-                  {link.coverImageUrl && (
+            {links.map((link) => {
+              const cover = link.coverImageUrl?.trim() || resolveSocialLinkCoverImage(link.title, link.url);
+              return (
+                <li key={link.id}>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition-all hover:border-accent/50 hover:bg-white/[0.06]"
+                  >
                     <div className="h-40 w-full overflow-hidden sm:h-48">
                       <img
-                        src={link.coverImageUrl}
+                        src={cover}
                         alt={link.title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                       />
                     </div>
-                  )}
 
-                  <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5">
-                    <div className="min-w-0">
-                      <h2 className="truncate text-lg font-semibold text-white">{link.title}</h2>
-                      {link.description && <p className="mt-1 text-sm text-white/65">{link.description}</p>}
+                    <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5">
+                      <div className="min-w-0">
+                        <h2 className="truncate text-lg font-semibold text-white">{link.title}</h2>
+                        {link.description && <p className="mt-1 text-sm text-white/65">{link.description}</p>}
+                      </div>
+                      <span className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
+                        {t.cta}
+                      </span>
                     </div>
-                    <span className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
-                      {t.cta}
-                    </span>
-                  </div>
-                </a>
-              </li>
-            ))}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
