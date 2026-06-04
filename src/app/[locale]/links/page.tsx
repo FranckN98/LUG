@@ -63,18 +63,18 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0606] text-white">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(140,26,26,0.28),transparent_40%)]" />
+    <div className="relative min-h-screen bg-[#f4f1eb] text-[#1a1a1a] dark:bg-[#0b0606] dark:text-white">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.12),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(140,26,26,0.12),transparent_40%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(140,26,26,0.28),transparent_40%)]" />
 
       <section className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="mb-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">{t.eyebrow}</p>
           <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl">{t.title}</h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-white/70 sm:text-base">{t.subtitle}</p>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-[#1a1a1a]/70 dark:text-white/70 sm:text-base">{t.subtitle}</p>
         </div>
 
         {links.length === 0 ? (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-6 text-center text-sm text-white/60">
+          <p className="rounded-2xl border border-[#1a1a1a]/10 bg-white/75 px-5 py-6 text-center text-sm text-[#1a1a1a]/60 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/60">
             {t.empty}
           </p>
         ) : (
@@ -87,9 +87,9 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3 transition-all hover:border-accent/50 hover:bg-white/[0.06] sm:gap-4 sm:p-4"
+                    className="group flex items-center gap-3 overflow-hidden rounded-2xl border border-[#1a1a1a]/10 bg-white/75 p-3 transition-all hover:border-accent/50 hover:bg-white/90 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] sm:gap-4 sm:p-4"
                   >
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 sm:h-24 sm:w-24">
+                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-[#1a1a1a]/10 dark:border-white/10 sm:h-24 sm:w-24">
                       <img
                         src={cover}
                         alt={link.title}
@@ -99,9 +99,9 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
 
                     <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <h2 className="truncate text-lg font-semibold text-white">{link.title}</h2>
-                        {link.description && <p className="mt-1 text-sm text-white/65">{link.description}</p>}
-                        <p className="mt-1 truncate text-xs text-white/40">{link.url.replace(/^mailto:/, '')}</p>
+                        <h2 className="truncate text-lg font-semibold text-[#1a1a1a] dark:text-white">{link.title}</h2>
+                        {link.description && <p className="mt-1 text-sm text-[#1a1a1a]/65 dark:text-white/65">{link.description}</p>}
+                        <p className="mt-1 truncate text-xs text-[#1a1a1a]/45 dark:text-white/40">{link.url.replace(/^mailto:/, '')}</p>
                       </div>
                       <span className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
                         {t.cta}
