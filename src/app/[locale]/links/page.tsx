@@ -63,10 +63,29 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   }
 
   return (
-    <div className="relative min-h-screen bg-[#f4f1eb] text-[#1a1a1a] dark:bg-[#0b0606] dark:text-white">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.12),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(140,26,26,0.12),transparent_40%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.18),transparent_45%),radial-gradient(circle_at_80%_80%,rgba(140,26,26,0.28),transparent_40%)]" />
+    <div className="relative min-h-screen bg-[#f4f1eb] dark:bg-[#0b0606] text-[#1a1a1a] dark:text-white">
+      {/* Paper texture background — layered radial gradients matching site-wide design */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        {/* Base warm gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#faf8f4] via-[#f4f1eb] to-[#ebe6dd] dark:from-[#0b0606] dark:via-[#0b0606] dark:to-[#0b0606]" />
+        
+        {/* Top highlight ellipse */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[250%] h-[200%] -top-1/4
+          bg-[radial-gradient(ellipse_130%_85%_at_50%_-25%,rgba(255,255,255,0.72)_0%,transparent_58%)]
+          dark:bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.12),transparent_45%)]" />
+        
+        {/* Left shadow ellipse */}
+        <div className="absolute top-1/3 left-0 w-[180%] h-[140%]
+          bg-[radial-gradient(ellipse_70%_55%_at_12%_38%,rgba(0,0,0,0.035)_0%,transparent_52%)]
+          dark:bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.15),transparent_45%)]" />
+        
+        {/* Right shadow ellipse */}
+        <div className="absolute -top-1/4 right-0 w-[150%] h-[160%]
+          bg-[radial-gradient(ellipse_55%_45%_at_88%_72%,rgba(0,0,0,0.028)_0%,transparent_50%)]
+          dark:bg-[radial-gradient(circle_at_80%_80%,rgba(140,26,26,0.18),transparent_40%)]" />
+      </div>
 
-      <section className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+      <section className="relative mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 sm:py-20 z-10">
         <div className="mb-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">{t.eyebrow}</p>
           <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl">{t.title}</h1>
