@@ -118,6 +118,15 @@ const navItems = [
     ),
   },
   {
+    href: '/admin/social-links',
+    label: 'Linktree',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 8h8M8 12h8M8 16h8M5 8h.01M5 12h.01M5 16h.01" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/countdown',
     label: 'Countdown',
     icon: (

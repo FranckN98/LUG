@@ -390,6 +390,21 @@ model Partner {
   @@map("partners")
 }
 
+model SocialLink {
+  id           String   @id @default(uuid())
+  title        String
+  url          String
+  description  String?  @default("")
+  coverImageUrl String? @map("cover_image_url")
+  sortOrder    Int      @default(0) @map("sort_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, sortOrder])
+  @@map("social_links")
+}
+
 model Venue {
   id            String             @id @default(uuid())
   name          String

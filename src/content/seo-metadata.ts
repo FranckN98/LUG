@@ -252,6 +252,20 @@ export const SEO_BY_PATH: Record<string, Record<Locale, SeoEntry>> = {
       description: 'Soutenez Level Up in Germany : sponsoring et dons.',
     },
   },
+  '/links': {
+    de: {
+      title: 'Alle Links',
+      description: 'Zentraler Link-Hub mit den wichtigsten Level Up in Germany Profilen und Projekten.',
+    },
+    en: {
+      title: 'All links',
+      description: 'Central link hub with the most important Level Up in Germany profiles and projects.',
+    },
+    fr: {
+      title: 'Tous les liens',
+      description: 'Hub central des liens importants de Level Up in Germany et de ses projets.',
+    },
+  },
   '/services': {
     de: {
       title: 'Services',
