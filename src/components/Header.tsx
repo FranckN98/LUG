@@ -46,7 +46,6 @@ const navItems: { href: string; de: string; en: string; fr: string }[] = [
   { href: '/events', de: 'Events', en: 'Events', fr: 'Événements' },
   { href: '/who-we-are', de: 'Wer wir sind', en: 'Who we are', fr: 'Qui sommes-nous ?' },
   { href: '/partners', de: 'Partner', en: 'Partners', fr: 'Partenaires' },
-  { href: '/links', de: 'Links', en: 'Links', fr: 'Liens' },
   { href: '/blog-impact', de: 'Blog & Impact', en: 'Blog & Impact', fr: 'Blog & Impact' },
 ];
 

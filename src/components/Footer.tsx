@@ -159,6 +159,11 @@ export function Footer({ locale, joinWhatsAppUrl }: { locale: Locale; joinWhatsA
                   {whoWeAreExploreLabel}
                 </Link>
               </li>
+              <li>
+                <Link href={`${base}/links`} className={linkClass}>
+                  {locale === 'de' ? 'Alle Links' : locale === 'fr' ? 'Tous les liens' : 'All links'}
+                </Link>
+              </li>
             </NavColumn>
 
             <NavColumn title={legalTitle} ariaLabel={legalTitle}>
