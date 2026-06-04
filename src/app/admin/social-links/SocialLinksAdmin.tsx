@@ -61,7 +61,22 @@ export function SocialLinksAdmin() {
     try {
       const res = await fetch('/api/admin/social-links', { cache: 'no-store' });
       if (!res.ok) throw new Error('load failed');
-      const data = (await res.json()) as SocialLink[];
+      let data = (await res.json()) as SocialLink[];
+
+      // Auto-normalize sort orders if duplicates or non-sequential values are detected
+      const sorted = [...data].sort((a, b) => a.sortOrder - b.sortOrder || a.createdAt.localeCompare(b.createdAt));
+      const needsNormalize = sorted.some((link, i) => link.sortOrder !== i);
+      if (needsNormalize && sorted.length > 0) {
+        const reorderRes = await fetch('/api/admin/social-links/reorder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: sorted.map((l) => l.id) }),
+        });
+        if (reorderRes.ok) {
+          data = (await reorderRes.json()) as SocialLink[];
+        }
+      }
+
       setLinks(data);
     } catch {
       adminNotify.error('Impossible de charger les liens.');
@@ -76,7 +91,8 @@ export function SocialLinksAdmin() {
 
   function startAdd() {
     setEditingId(null);
-    setForm({ ...EMPTY_FORM, sortOrder: links.length });
+    const nextOrder = links.length === 0 ? 0 : Math.max(...links.map((l) => l.sortOrder)) + 1;
+    setForm({ ...EMPTY_FORM, sortOrder: nextOrder });
   }
 
   function startEdit(link: SocialLink) {
@@ -169,37 +185,30 @@ export function SocialLinksAdmin() {
   }
 
   async function move(link: SocialLink, direction: 'up' | 'down') {
-    const sorted = [...links].sort((a, b) => a.sortOrder - b.sortOrder);
+    const sorted = [...links].sort((a, b) => a.sortOrder - b.sortOrder || a.createdAt.localeCompare(b.createdAt));
     const index = sorted.findIndex((x) => x.id === link.id);
     if (index < 0) return;
 
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= sorted.length) return;
 
-    const target = sorted[targetIndex];
+    // Swap positions in the sorted array, then send the full ordered list to the server
+    const reordered = [...sorted];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
 
-    const first = await fetch(`/api/admin/social-links/${link.id}`, {
-      method: 'PATCH',
+    const res = await fetch('/api/admin/social-links/reorder', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sortOrder: target.sortOrder }),
+      body: JSON.stringify({ ids: reordered.map((l) => l.id) }),
     });
-    if (!first.ok) {
+
+    if (!res.ok) {
       adminNotify.error('Réorganisation impossible.');
       return;
     }
 
-    const second = await fetch(`/api/admin/social-links/${target.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sortOrder: link.sortOrder }),
-    });
-
-    if (!second.ok) {
-      adminNotify.error('Réorganisation impossible.');
-      return;
-    }
-
-    refresh();
+    const updated = (await res.json()) as SocialLink[];
+    setLinks(updated);
   }
 
   return (
