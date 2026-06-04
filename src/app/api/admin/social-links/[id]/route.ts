@@ -74,6 +74,7 @@ export async function PATCH(
   }
   if (typeof record.sortOrder === 'number') data.sortOrder = record.sortOrder;
   if (typeof record.isActive === 'boolean') data.isActive = record.isActive;
+  if (typeof record.isNew === 'boolean') data.isNew = record.isNew;
 
   try {
     const updated = await prisma.socialLink.update({ where: { id }, data });

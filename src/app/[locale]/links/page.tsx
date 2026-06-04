@@ -9,29 +9,36 @@ type SocialLink = {
   url: string;
   description: string | null;
   coverImageUrl: string | null;
+  isNew: boolean;
 };
 
-const copy: Record<Locale, { eyebrow: string; title: string; subtitle: string; empty: string; cta: string }> = {
+const copy: Record<Locale, { eyebrow: string; title: string; subtitle: string; empty: string; cta: string; newBadge: string }> = {
   de: {
-    eyebrow: 'Link Hub',
-    title: 'Alle wichtigen Links',
-    subtitle: 'Socials, Projekte und Kontaktpunkte an einem Ort.',
-    empty: 'Noch keine aktiven Links verfügbar.',
+    eyebrow: 'Willkommen',
+    title: 'Schön, dich hier zu sehen 👋',
+    subtitle:
+      'Hier findest du alle Wege, mit unserer Community in Verbindung zu bleiben — Socials, Ressourcen und Projekte. Folge uns, schreib uns oder klick rein, wo es dich neugierig macht.',
+    empty: 'Bald gibt es hier neue Links zu entdecken.',
     cta: 'Öffnen',
+    newBadge: 'Neu',
   },
   en: {
-    eyebrow: 'Link hub',
-    title: 'All important links',
-    subtitle: 'Socials, projects and key touchpoints in one place.',
-    empty: 'No active links available yet.',
+    eyebrow: 'Welcome',
+    title: 'So glad you stopped by 👋',
+    subtitle:
+      'All the ways to stay connected with our community in one place — socials, resources and projects. Follow along, reach out, or just explore whatever sparks your curiosity.',
+    empty: 'New links are coming soon — stay tuned.',
     cta: 'Open',
+    newBadge: 'New',
   },
   fr: {
-    eyebrow: 'Link hub',
-    title: 'Tous les liens importants',
-    subtitle: 'Réseaux, projets et points de contact au même endroit.',
-    empty: 'Aucun lien actif pour le moment.',
+    eyebrow: 'Bienvenue',
+    title: 'Heureux·se de te voir ici 👋',
+    subtitle:
+      'Tous les moyens de rester connecté·e à notre communauté en un seul endroit — réseaux, ressources et projets. Suis-nous, écris-nous, ou explore simplement ce qui éveille ta curiosité.',
+    empty: 'De nouveaux liens arrivent bientôt — reste à l’écoute.',
     cta: 'Ouvrir',
+    newBadge: 'Nouveau',
   },
 };
 
@@ -56,6 +63,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
         url: true,
         description: true,
         coverImageUrl: true,
+        isNew: true,
       },
     });
   } catch {
@@ -63,66 +71,80 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   }
 
   return (
-    <div className="relative min-h-screen bg-[#f4f1eb] dark:bg-[#0b0606] text-[#1a1a1a] dark:text-white">
-      {/* Paper texture background — layered radial gradients matching site-wide design */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-        {/* Base warm gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#faf8f4] via-[#f4f1eb] to-[#ebe6dd] dark:from-[#0b0606] dark:via-[#0b0606] dark:to-[#0b0606]" />
-        
-        {/* Top highlight ellipse */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[250%] h-[200%] -top-1/4
-          bg-[radial-gradient(ellipse_130%_85%_at_50%_-25%,rgba(255,255,255,0.72)_0%,transparent_58%)]
-          dark:bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.12),transparent_45%)]" />
-        
-        {/* Left shadow ellipse */}
-        <div className="absolute top-1/3 left-0 w-[180%] h-[140%]
-          bg-[radial-gradient(ellipse_70%_55%_at_12%_38%,rgba(0,0,0,0.035)_0%,transparent_52%)]
-          dark:bg-[radial-gradient(circle_at_20%_20%,rgba(233,140,11,0.15),transparent_45%)]" />
-        
-        {/* Right shadow ellipse */}
-        <div className="absolute -top-1/4 right-0 w-[150%] h-[160%]
-          bg-[radial-gradient(ellipse_55%_45%_at_88%_72%,rgba(0,0,0,0.028)_0%,transparent_50%)]
-          dark:bg-[radial-gradient(circle_at_80%_80%,rgba(140,26,26,0.18),transparent_40%)]" />
+    <div className="relative min-h-screen overflow-hidden bg-[#0b0606] text-white">
+      {/* Ambient background — warm glow on dark */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#120808] via-[#0b0606] to-[#070303]" />
+        <div className="absolute -top-1/3 left-1/2 h-[80vh] w-[120vw] -translate-x-1/2 bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,rgba(233,140,11,0.18),transparent_70%)]" />
+        <div className="absolute bottom-[-30%] right-[-10%] h-[70vh] w-[80vw] bg-[radial-gradient(circle_at_70%_70%,rgba(140,26,26,0.22),transparent_65%)]" />
+        <div className="absolute top-1/3 left-[-10%] h-[60vh] w-[60vw] bg-[radial-gradient(circle_at_30%_50%,rgba(233,140,11,0.08),transparent_60%)]" />
       </div>
 
-      <section className="relative mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 sm:py-20 z-10">
-        <div className="mb-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/80">{t.eyebrow}</p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight sm:text-5xl">{t.title}</h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-[#1a1a1a]/70 dark:text-white/70 sm:text-base">{t.subtitle}</p>
+      <section className="relative z-10 mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+        {/* Hero / welcome */}
+        <div className="mb-12 text-center">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-accent">{t.eyebrow}</p>
+          <h1 className="mt-4 text-balance text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-[3.25rem]">
+            {t.title}
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-balance text-base leading-relaxed text-white/70 sm:text-lg">
+            {t.subtitle}
+          </p>
+          <div className="mx-auto mt-8 h-px w-24 bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
         </div>
 
         {links.length === 0 ? (
-          <p className="rounded-2xl border border-[#1a1a1a]/10 bg-white/75 px-5 py-6 text-center text-sm text-[#1a1a1a]/60 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/60">
+          <p className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-sm text-white/60">
             {t.empty}
           </p>
         ) : (
           <ul className="space-y-4">
             {links.map((link) => {
               const cover = link.coverImageUrl?.trim() || resolveSocialLinkCoverImage(link.title, link.url);
+              const isHighlighted = link.isNew;
               return (
-                <li key={link.id}>
+                <li key={link.id} className="relative">
+                  {/* Subtle glow halo for NEW links */}
+                  {isHighlighted && (
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-accent/30 via-accent/10 to-accent/30 opacity-70 blur-md transition-opacity"
+                    />
+                  )}
                   <a
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-center gap-3 overflow-hidden rounded-2xl border border-[#1a1a1a]/10 bg-white/75 p-3 transition-all hover:border-accent/50 hover:bg-white/90 dark:border-white/10 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] sm:gap-4 sm:p-4"
+                    className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border bg-white/[0.04] p-3 backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.07] hover:shadow-[0_0_30px_-10px_rgba(233,140,11,0.4)] sm:gap-4 sm:p-4 ${
+                      isHighlighted
+                        ? 'border-accent/40 shadow-[0_0_24px_-12px_rgba(233,140,11,0.55)] hover:border-accent/60'
+                        : 'border-white/10 hover:border-accent/40'
+                    }`}
                   >
-                    <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-[#1a1a1a]/10 dark:border-white/10 sm:h-24 sm:w-24">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#0a0505] sm:h-24 sm:w-24">
                       <img
                         src={cover}
                         alt={link.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        className="h-full w-full object-cover opacity-90 transition-all duration-500 group-hover:scale-[1.05] group-hover:opacity-100"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
 
                     <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <h2 className="truncate text-lg font-semibold text-[#1a1a1a] dark:text-white">{link.title}</h2>
-                        {link.description && <p className="mt-1 text-sm text-[#1a1a1a]/65 dark:text-white/65">{link.description}</p>}
-                        <p className="mt-1 truncate text-xs text-[#1a1a1a]/45 dark:text-white/40">{link.url.replace(/^mailto:/, '')}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="truncate text-lg font-semibold text-white">{link.title}</h2>
+                          {isHighlighted && (
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-accent/50 bg-accent/15 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-accent shadow-[0_0_12px_-2px_rgba(233,140,11,0.5)]">
+                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+                              {t.newBadge}
+                            </span>
+                          )}
+                        </div>
+                        {link.description && <p className="mt-1 text-sm text-white/65">{link.description}</p>}
+                        <p className="mt-1 truncate text-xs text-white/40">{link.url.replace(/^mailto:/, '')}</p>
                       </div>
-                      <span className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
+                      <span className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent transition-colors group-hover:border-accent group-hover:bg-accent group-hover:text-[#0b0606]">
                         {t.cta}
                       </span>
                     </div>

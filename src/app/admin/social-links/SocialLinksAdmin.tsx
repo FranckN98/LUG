@@ -12,6 +12,7 @@ type SocialLink = {
   coverImageUrl: string | null;
   sortOrder: number;
   isActive: boolean;
+  isNew: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -23,6 +24,7 @@ type FormState = {
   coverImageUrl: string;
   sortOrder: number;
   isActive: boolean;
+  isNew: boolean;
 };
 
 const EMPTY_FORM: FormState = {
@@ -32,6 +34,7 @@ const EMPTY_FORM: FormState = {
   coverImageUrl: '',
   sortOrder: 0,
   isActive: true,
+  isNew: false,
 };
 
 function toFormState(link: SocialLink): FormState {
@@ -42,6 +45,7 @@ function toFormState(link: SocialLink): FormState {
     coverImageUrl: link.coverImageUrl ?? '',
     sortOrder: link.sortOrder,
     isActive: link.isActive,
+    isNew: link.isNew,
   };
 }
 
@@ -106,6 +110,7 @@ export function SocialLinksAdmin() {
         coverImageUrl: form.coverImageUrl.trim() || null,
         sortOrder: form.sortOrder,
         isActive: form.isActive,
+        isNew: form.isNew,
       };
 
       const res = editingId
@@ -211,6 +216,7 @@ export function SocialLinksAdmin() {
           coverImageUrl: form.coverImageUrl || null,
           sortOrder: form.sortOrder,
           isActive: form.isActive,
+          isNew: form.isNew,
         };
       }
     } else if (form.title.trim() || form.url.trim() || form.description.trim() || form.coverImageUrl.trim()) {
@@ -222,6 +228,7 @@ export function SocialLinksAdmin() {
         coverImageUrl: form.coverImageUrl || null,
         sortOrder: form.sortOrder,
         isActive: form.isActive,
+        isNew: form.isNew,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -270,6 +277,11 @@ export function SocialLinksAdmin() {
                           <span className="rounded-full bg-white/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-white/60">
                             Ordre {link.sortOrder}
                           </span>
+                          {link.isNew && (
+                            <span className="rounded-full bg-accent/20 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-accent">
+                              New
+                            </span>
+                          )}
                           {!link.isActive && (
                             <span className="rounded-full bg-white/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-white/40">
                               Inactif
@@ -402,6 +414,26 @@ export function SocialLinksAdmin() {
                 </label>
               </div>
 
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-accent/25 bg-accent/5 px-4 py-3 transition hover:border-accent/40 hover:bg-accent/10">
+                <input
+                  type="checkbox"
+                  checked={form.isNew}
+                  onChange={(e) => setForm((prev) => ({ ...prev, isNew: e.target.checked }))}
+                  className="mt-0.5 h-4 w-4 accent-accent"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-white">
+                    Marquer comme nouveau
+                    <span className="ml-2 inline-flex items-center rounded-full bg-accent/25 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-accent">
+                      New
+                    </span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-white/55">
+                    Affiche un badge « NEW » sur la page publique pour mettre ce lien en avant.
+                  </p>
+                </div>
+              </label>
+
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <button
                   type="submit"
@@ -439,7 +471,14 @@ export function SocialLinksAdmin() {
                   )}
                   <div className="flex items-center justify-between gap-3 px-4 py-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">{link.title}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-semibold text-white">{link.title}</p>
+                        {link.isNew && (
+                          <span className="rounded-full bg-accent/25 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-accent">
+                            New
+                          </span>
+                        )}
+                      </div>
                       {link.description && <p className="text-xs text-white/60">{link.description}</p>}
                     </div>
                     {!link.isActive && (

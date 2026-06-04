@@ -60,6 +60,7 @@ export async function POST(request: Request) {
           : resolveSocialLinkCoverImage(title, url),
       sortOrder: typeof data.sortOrder === 'number' ? data.sortOrder : 0,
       isActive: typeof data.isActive === 'boolean' ? data.isActive : true,
+      isNew: typeof data.isNew === 'boolean' ? data.isNew : false,
     },
   });
 

@@ -398,6 +398,7 @@ model SocialLink {
   coverImageUrl String? @map("cover_image_url")
   sortOrder    Int      @default(0) @map("sort_order")
   isActive     Boolean  @default(true) @map("is_active")
+  isNew        Boolean  @default(false) @map("is_new")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
