@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { MediaPicker } from '@/app/admin/components/MediaPicker';
 import { adminNotify } from '@/app/admin/components/AdminToaster';
 
@@ -201,41 +201,6 @@ export function SocialLinksAdmin() {
 
     refresh();
   }
-
-  const previewLinks = useMemo(() => {
-    const base = [...links];
-
-    if (editingId) {
-      const i = base.findIndex((item) => item.id === editingId);
-      if (i >= 0) {
-        base[i] = {
-          ...base[i],
-          title: form.title,
-          url: form.url,
-          description: form.description,
-          coverImageUrl: form.coverImageUrl || null,
-          sortOrder: form.sortOrder,
-          isActive: form.isActive,
-          isNew: form.isNew,
-        };
-      }
-    } else if (form.title.trim() || form.url.trim() || form.description.trim() || form.coverImageUrl.trim()) {
-      base.push({
-        id: 'preview-draft',
-        title: form.title || 'Nouveau lien',
-        url: form.url || '#',
-        description: form.description || null,
-        coverImageUrl: form.coverImageUrl || null,
-        sortOrder: form.sortOrder,
-        isActive: form.isActive,
-        isNew: form.isNew,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    }
-
-    return base.sort((a, b) => a.sortOrder - b.sortOrder);
-  }, [links, editingId, form]);
 
   return (
     <div className="max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
@@ -455,43 +420,6 @@ export function SocialLinksAdmin() {
             </form>
           </section>
         </div>
-
-        <section className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:p-6">
-          <h2 className="text-lg font-semibold text-white">Prévisualisation publique</h2>
-          {previewLinks.length === 0 ? (
-            <p className="text-sm text-white/50">Ajoutez un premier lien pour voir le rendu.</p>
-          ) : (
-            <ul className="space-y-3">
-              {previewLinks.map((link) => (
-                <li key={link.id} className="overflow-hidden rounded-xl border border-white/10 bg-[#120909]">
-                  {link.coverImageUrl && (
-                    <div className="h-28 w-full overflow-hidden">
-                      <img src={link.coverImageUrl} alt={link.title} className="h-full w-full object-cover" />
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between gap-3 px-4 py-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-sm font-semibold text-white">{link.title}</p>
-                        {link.isNew && (
-                          <span className="rounded-full bg-accent/25 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-accent">
-                            New
-                          </span>
-                        )}
-                      </div>
-                      {link.description && <p className="text-xs text-white/60">{link.description}</p>}
-                    </div>
-                    {!link.isActive && (
-                      <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-white/40">
-                        Inactif
-                      </span>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
       </div>
     </div>
   );
