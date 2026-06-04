@@ -155,7 +155,8 @@ export function SponsorDocumentsAdmin() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
+      <div className="space-y-8">
       <header className="space-y-2">
         <p className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-accent/70">Documents</p>
         <h1 className="text-2xl md:text-3xl font-bold text-white">PDFs Sponsors & Partenaires</h1>
@@ -240,6 +241,7 @@ export function SponsorDocumentsAdmin() {
           </ul>
         )}
       </section>
+      </div>
     </div>
   );
 }
@@ -367,7 +369,7 @@ function DocRow({
               </button>
               <button
                 onClick={onDelete}
-                className="ml-auto rounded-md border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/10"
+                className="rounded-md border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-300 hover:bg-red-500/10 sm:ml-auto"
               >
                 Supprimer
               </button>
