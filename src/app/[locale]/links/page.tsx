@@ -207,8 +207,8 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="truncate text-base font-semibold text-white sm:text-lg">{link.title}</h2>
                           {isHighlighted && (
-                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-accent/50 bg-accent/15 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-accent shadow-[0_0_12px_-2px_rgba(233,140,11,0.5)]">
-                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#25D366]/50 bg-[#25D366]/15 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#25D366] shadow-[0_0_12px_-2px_rgba(37,211,102,0.55)]">
+                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#25D366]" />
                               {t.newBadge}
                             </span>
                           )}
