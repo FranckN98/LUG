@@ -33,9 +33,9 @@ const copy: Record<Locale, { eyebrow: string; title: string; subtitle: string; e
   },
   fr: {
     eyebrow: 'Bienvenue',
-    title: 'Heureux·se de te voir ici 👋',
+    title: 'Heureux de te voir ici 👋',
     subtitle:
-      'Tous les moyens de rester connecté·e à notre communauté en un seul endroit — réseaux, ressources et projets. Suis-nous, écris-nous, ou explore simplement ce qui éveille ta curiosité.',
+      'Tous les moyens de rester connecté à notre communauté en un seul endroit — réseaux, ressources et projets. Suis-nous, écris-nous, ou explore simplement ce qui éveille ta curiosité.',
     empty: 'De nouveaux liens arrivent bientôt — reste à l’écoute.',
     cta: 'Ouvrir',
     newBadge: 'Nouveau',
