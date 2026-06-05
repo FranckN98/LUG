@@ -95,7 +95,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
             />
             <div className="relative grid h-24 w-24 place-items-center overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-28 sm:w-28">
               <img
-                src="/logo-round.png"
+                src="/logo.png"
                 alt="Level Up in Germany"
                 className="h-[82%] w-[82%] object-contain"
               />
