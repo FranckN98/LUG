@@ -99,7 +99,7 @@ export function Header({
 
   // Only use transparent/white-text mode on the home page (which has a dark hero behind)
   const isHomePage = pathname === `/${locale}` || pathname === `/${locale}/`;
-  const useTransparent = isHomePage && !scrolled;
+  const useTransparent = isHomePage && !scrolled && !menuOpen;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
