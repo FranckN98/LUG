@@ -7,11 +7,12 @@ function esc(s: string): string {
 }
 
 import { emailLinksFooterHtml, emailLinksFooterText, emailHeaderLogoHtml } from './emailFooter';
+import { getLinktreeWhatsAppUrl } from './linktreeWhatsApp';
 
 const SUBJECT =
   'Merci pour votre intérêt · Thank you for your interest · Vielen Dank für Ihr Interesse — Level Up in Germany';
 
-const BODY_TEXT = (pdfUrl: string) =>
+const BODY_TEXT = (pdfUrl: string, waUrl: string) =>
   `=== Français ===
 
 Bonjour,
@@ -52,9 +53,9 @@ ${pdfUrl}
 Wir hoffen, es bringt Ihnen Mehrwert und Inspiration, und freuen uns, Sie bei der nächsten Ausgabe begrüßen zu dürfen.
 
 Bis bald,
-Das Level Up Team${emailLinksFooterText()}`;
+Das Level Up Team${emailLinksFooterText(waUrl)}`;
 
-const BODY_HTML = (pdfUrl: string) => `
+const BODY_HTML = (pdfUrl: string, waUrl: string) => `
 <!DOCTYPE html><html><body style="margin:0;padding:0;background:#f6f4f4;font-family:system-ui,Segoe UI,sans-serif;line-height:1.6;color:#1a1a1a">
 <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden">
 ${emailHeaderLogoHtml()}
@@ -88,7 +89,7 @@ ${emailHeaderLogoHtml()}
   <p>Wir freuen uns, Sie bei der nächsten Ausgabe begrüßen zu dürfen.</p>
   <p>Bis bald,<br/>Das Level Up Team</p>
 
-  ${emailLinksFooterHtml()}
+  ${emailLinksFooterHtml(waUrl)}
   <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
   <p style="font-size:12px;color:#666">Level Up in Germany · ${new Date().toISOString()}</p>
 </div>
@@ -113,6 +114,8 @@ export async function sendNewsletterPdfEmail(toEmail: string, pdfAbsoluteUrl: st
     throw new Error('email_not_configured');
   }
 
+  const waUrl = await getLinktreeWhatsAppUrl();
+
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -123,8 +126,8 @@ export async function sendNewsletterPdfEmail(toEmail: string, pdfAbsoluteUrl: st
       from,
       to: [toEmail],
       subject: SUBJECT,
-      text: BODY_TEXT(pdfAbsoluteUrl),
-      html: BODY_HTML(pdfAbsoluteUrl),
+      text: BODY_TEXT(pdfAbsoluteUrl, waUrl),
+      html: BODY_HTML(pdfAbsoluteUrl, waUrl),
     }),
   });
 

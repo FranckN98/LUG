@@ -2,7 +2,7 @@
  * Shared, trilingual (FR / DE / EN) email footer with links to:
  *  - main website
  *  - social networks (LinkedIn, Instagram, TikTok)
- *  - ambassadors WhatsApp community
+ *  - WhatsApp community (kept in sync with the public Linktree page)
  *
  * Used by transactional emails (newsletter PDF, member status, etc.).
  *
@@ -21,7 +21,14 @@ import { SOCIAL_LINKS } from '@/data/social';
 const SITE_URL =
   (process.env.EMAIL_SITE_URL?.trim() || 'https://www.levelupingermany.com').replace(/\/$/, '');
 
-const AMBASSADOR_WHATSAPP_URL = 'https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst';
+/**
+ * Fallback WhatsApp URL used by the email footer when no Linktree URL is
+ * explicitly provided. The send pipeline normally calls
+ * `getLinktreeWhatsAppUrl()` (see `lib/linktreeWhatsApp.ts`) and passes the
+ * resolved URL into the footer renderers so emails stay in sync with the
+ * public Linktree page.
+ */
+export const DEFAULT_WHATSAPP_URL = 'https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst';
 
 /** Direct WhatsApp/phone contact (kept in sync with /contact and /imprint pages). */
 const CONTACT_PHONE_DISPLAY = '+49 152 04256840';
@@ -61,7 +68,7 @@ const TEXT = {
     stayConnected: 'Restez connecté à Level Up in Germany',
     visitSite: 'Notre site',
     followUs: 'Suivez-nous',
-    joinAmbassadors: 'Rejoignez notre communauté WhatsApp des Ambassadeurs',
+    joinAmbassadors: 'Rejoignez notre communauté WhatsApp',
     contactUs: 'Nous contacter',
     writeUs: 'Écrivez-nous',
     callOrWhatsApp: 'Appel ou WhatsApp',
@@ -70,7 +77,7 @@ const TEXT = {
     stayConnected: 'Bleiben Sie mit Level Up in Germany in Verbindung',
     visitSite: 'Unsere Website',
     followUs: 'Folgen Sie uns',
-    joinAmbassadors: 'Treten Sie unserer Botschafter-WhatsApp-Community bei',
+    joinAmbassadors: 'Treten Sie unserer WhatsApp-Community bei',
     contactUs: 'Kontakt',
     writeUs: 'Schreiben Sie uns',
     callOrWhatsApp: 'Anruf oder WhatsApp',
@@ -79,7 +86,7 @@ const TEXT = {
     stayConnected: 'Stay connected with Level Up in Germany',
     visitSite: 'Our website',
     followUs: 'Follow us',
-    joinAmbassadors: 'Join our Ambassadors WhatsApp community',
+    joinAmbassadors: 'Join our WhatsApp community',
     contactUs: 'Get in touch',
     writeUs: 'Write to us',
     callOrWhatsApp: 'Call or WhatsApp',
@@ -87,7 +94,8 @@ const TEXT = {
 } as const;
 
 /** HTML block to append inside the email body (before any <hr/>/footer). */
-export function emailLinksFooterHtml(): string {
+export function emailLinksFooterHtml(whatsappUrl?: string): string {
+  const waUrl = whatsappUrl || DEFAULT_WHATSAPP_URL;
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:32px 0 0;border-top:1px solid #eee;padding-top:20px">
   <tr><td style="font-family:system-ui,'Segoe UI',Arial,sans-serif;color:#1a0a0a;font-size:14px;line-height:1.6">
@@ -126,10 +134,10 @@ export function emailLinksFooterHtml(): string {
     </p>
 
     <p style="margin:0 0 8px">
-      💬 <a href="${AMBASSADOR_WHATSAPP_URL}" style="color:#25D366;text-decoration:none;font-weight:600">${TEXT.fr.joinAmbassadors}</a>
+      💬 <a href="${waUrl}" style="color:#25D366;text-decoration:none;font-weight:600">${TEXT.fr.joinAmbassadors}</a>
     </p>
     <p style="margin:0 0 4px;font-size:13px;color:#666">
-      ${TEXT.de.joinAmbassadors} · <a href="${AMBASSADOR_WHATSAPP_URL}" style="color:#25D366;text-decoration:none">${AMBASSADOR_WHATSAPP_URL.replace(/^https?:\/\//, '')}</a>
+      ${TEXT.de.joinAmbassadors} · <a href="${waUrl}" style="color:#25D366;text-decoration:none">${waUrl.replace(/^https?:\/\//, '')}</a>
     </p>
     <p style="margin:0 0 0;font-size:13px;color:#666">
       ${TEXT.en.joinAmbassadors}
@@ -143,7 +151,8 @@ export function emailLinksFooterHtml(): string {
  * emails (which already include per-language sections in the body so the
  * footer should not duplicate that).
  */
-export function emailLinksFooterEnglishHtml(): string {
+export function emailLinksFooterEnglishHtml(whatsappUrl?: string): string {
+  const waUrl = whatsappUrl || DEFAULT_WHATSAPP_URL;
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:32px 0 0;border-top:1px solid #eee;padding-top:20px">
   <tr><td style="font-family:system-ui,'Segoe UI',Arial,sans-serif;color:#1a0a0a;font-size:14px;line-height:1.6">
@@ -178,14 +187,15 @@ export function emailLinksFooterEnglishHtml(): string {
     </p>
 
     <p style="margin:0">
-      💬 <a href="${AMBASSADOR_WHATSAPP_URL}" style="color:#25D366;text-decoration:none;font-weight:600">${TEXT.en.joinAmbassadors}</a>
+      💬 <a href="${waUrl}" style="color:#25D366;text-decoration:none;font-weight:600">${TEXT.en.joinAmbassadors}</a>
     </p>
   </td></tr>
 </table>`;
 }
 
 /** Plain-text English-only equivalent for newsletter campaigns. */
-export function emailLinksFooterEnglishText(): string {
+export function emailLinksFooterEnglishText(whatsappUrl?: string): string {
+  const waUrl = whatsappUrl || DEFAULT_WHATSAPP_URL;
   return [
     '',
     '— — —',
@@ -198,13 +208,14 @@ export function emailLinksFooterEnglishText(): string {
     `   Instagram: ${SOCIAL_LINKS.instagram}`,
     `   TikTok:    ${SOCIAL_LINKS.tiktok}`,
     '',
-    `💬 ${TEXT.en.joinAmbassadors}: ${AMBASSADOR_WHATSAPP_URL}`,
+    `💬 ${TEXT.en.joinAmbassadors}: ${waUrl}`,
     '',
   ].join('\n');
 }
 
 /** Plain-text equivalent for the same footer, appended to text-only bodies. */
-export function emailLinksFooterText(): string {
+export function emailLinksFooterText(whatsappUrl?: string): string {
+  const waUrl = whatsappUrl || DEFAULT_WHATSAPP_URL;
   return [
     '',
     '— — —',
@@ -227,7 +238,7 @@ export function emailLinksFooterText(): string {
     `💬 ${TEXT.fr.joinAmbassadors}:`,
     `   ${TEXT.de.joinAmbassadors}`,
     `   ${TEXT.en.joinAmbassadors}`,
-    `   ${AMBASSADOR_WHATSAPP_URL}`,
+    `   ${waUrl}`,
     '',
   ].join('\n');
 }

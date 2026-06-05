@@ -37,6 +37,7 @@ export function buildCampaignHtml(
   content: CampaignContent,
   unsubscribeUrl: string,
   siteBaseUrl: string,
+  whatsappUrl?: string,
 ): string {
   const { subject, previewText, titleText, bodyContent, headerImageUrl, campaignImageUrl, ctaLabel, ctaUrl, footerNote } = content;
   const normalizedHeaderImageUrl = absoluteUrl(headerImageUrl, siteBaseUrl);
@@ -136,7 +137,7 @@ export function buildCampaignHtml(
         <!-- ══ CONTACT & SOCIAL FOOTER ══ -->
         <tr>
           <td style="background-color:#ffffff;padding:0 40px 8px">
-            ${emailLinksFooterEnglishHtml()}
+            ${emailLinksFooterEnglishHtml(whatsappUrl)}
           </td>
         </tr>
 
@@ -177,7 +178,7 @@ export function buildCampaignHtml(
 </html>`;
 }
 
-export function buildCampaignText(content: CampaignContent, unsubscribeUrl: string): string {
+export function buildCampaignText(content: CampaignContent, unsubscribeUrl: string, whatsappUrl?: string): string {
   const lines: string[] = [];
   if (content.titleText) {
     lines.push(content.titleText, '='.repeat(content.titleText.length), '');
@@ -190,7 +191,7 @@ export function buildCampaignText(content: CampaignContent, unsubscribeUrl: stri
   if (content.ctaLabel && content.ctaUrl) {
     lines.push(`→ ${content.ctaLabel}: ${content.ctaUrl}`, '');
   }
-  lines.push(emailLinksFooterEnglishText());
+  lines.push(emailLinksFooterEnglishText(whatsappUrl));
   lines.push('--', 'The Level Up in Germany Team', 'Germany', '');
   lines.push(`Unsubscribe: ${unsubscribeUrl}`);
   return lines.join('\n');
@@ -230,6 +231,7 @@ export function buildMultilingualCampaignHtml(
   unsubscribeUrl: string,
   siteBaseUrl: string,
   sharedSubject?: string,
+  whatsappUrl?: string,
 ): string {
   if (sections.length === 0) {
     throw new Error('buildMultilingualCampaignHtml: at least one section required');
@@ -391,7 +393,7 @@ export function buildMultilingualCampaignHtml(
 
         <tr>
           <td style="background-color:#ffffff;padding:0 40px 8px">
-            ${emailLinksFooterEnglishHtml()}
+            ${emailLinksFooterEnglishHtml(whatsappUrl)}
           </td>
         </tr>
 
@@ -434,6 +436,7 @@ export function buildMultilingualCampaignHtml(
 export function buildMultilingualCampaignText(
   sections: ReadonlyArray<MultilingualSection>,
   unsubscribeUrl: string,
+  whatsappUrl?: string,
 ): string {
   const lines: string[] = [];
   for (const s of sections) {
@@ -453,7 +456,7 @@ export function buildMultilingualCampaignText(
     }
     lines.push('');
   }
-  lines.push(emailLinksFooterEnglishText());
+  lines.push(emailLinksFooterEnglishText(whatsappUrl));
   lines.push('--', 'The Level Up in Germany Team', 'Germany', '');
   lines.push(`Unsubscribe: ${unsubscribeUrl}`);
   return lines.join('\n');
@@ -577,8 +580,10 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
 
   const personalized = personalizeContent(params.content, params.recipientFirstName);
   const unsubscribeUrl = `${params.siteBaseUrl}/api/unsubscribe?token=${encodeURIComponent(params.unsubscribeToken)}`;
-  const html = buildCampaignHtml(personalized, unsubscribeUrl, params.siteBaseUrl);
-  const text = buildCampaignText(personalized, unsubscribeUrl);
+  const { getLinktreeWhatsAppUrl } = await import('./linktreeWhatsApp');
+  const waUrl = await getLinktreeWhatsAppUrl();
+  const html = buildCampaignHtml(personalized, unsubscribeUrl, params.siteBaseUrl, waUrl);
+  const text = buildCampaignText(personalized, unsubscribeUrl, waUrl);
 
   if (!apiKey) {
     console.warn('[newsletter] RESEND_API_KEY manquant — email non envoyé à', params.toEmail);
@@ -660,8 +665,10 @@ export async function sendMultilingualCampaignEmail(
 
   const subject = personalizedSections[0].content.subject;
   const unsubscribeUrl = `${params.siteBaseUrl}/api/unsubscribe?token=${encodeURIComponent(params.unsubscribeToken)}`;
-  const html = buildMultilingualCampaignHtml(personalizedSections, unsubscribeUrl, params.siteBaseUrl, subject);
-  const text = buildMultilingualCampaignText(personalizedSections, unsubscribeUrl);
+  const { getLinktreeWhatsAppUrl } = await import('./linktreeWhatsApp');
+  const waUrl = await getLinktreeWhatsAppUrl();
+  const html = buildMultilingualCampaignHtml(personalizedSections, unsubscribeUrl, params.siteBaseUrl, subject, waUrl);
+  const text = buildMultilingualCampaignText(personalizedSections, unsubscribeUrl, waUrl);
 
   if (!apiKey) {
     console.warn('[newsletter] RESEND_API_KEY manquant — email non envoyé à', params.toEmail);

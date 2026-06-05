@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { emailLinksFooterHtml, emailLinksFooterText, emailHeaderLogoHtml } from './emailFooter';
+import { getLinktreeWhatsAppUrl } from './linktreeWhatsApp';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM =
@@ -49,6 +50,7 @@ const LANG_DIVIDER = '<hr style="border:none;border-top:1px solid #eee;margin:18
 
 // ── Welcome email ──────────────────────────────────────────────────────────────
 export async function sendMemberWelcomeEmail(email: string, firstName: string) {
+  const waUrl = await getLinktreeWhatsAppUrl();
   const html = wrapHtml(`
     <div class="header">
       <h1>Bienvenue · Welcome · Willkommen</h1>
@@ -74,7 +76,7 @@ export async function sendMemberWelcomeEmail(email: string, firstName: string) {
       <p>wir freuen uns, dir mitteilen zu können, dass dein Mitgliedsantrag bei <strong>Level Up in Germany</strong> angenommen wurde.</p>
       <p>Willkommen in unserer Community. Wir melden uns in Kürze mit den nächsten Schritten und Möglichkeiten zur Teilnahme.</p>
       <p>Bis bald,<br/><strong>Das Team von Level Up in Germany</strong></p>
-      ${emailLinksFooterHtml()}
+      ${emailLinksFooterHtml(waUrl)}
     </div>
   `);
 
@@ -100,7 +102,7 @@ Hallo ${firstName},
 dein Mitgliedsantrag bei Level Up in Germany wurde angenommen. Willkommen in unserer Community. Wir melden uns in Kürze mit den nächsten Schritten.
 
 Bis bald,
-Das Team von Level Up in Germany${emailLinksFooterText()}`;
+Das Team von Level Up in Germany${emailLinksFooterText(waUrl)}`;
 
   return resend.emails.send({
     from: FROM,
@@ -117,6 +119,7 @@ export async function sendMemberRejectionEmail(
   firstName: string,
   reason: string,
 ) {
+  const waUrl = await getLinktreeWhatsAppUrl();
   const reasonBlockFr = reason ? `<div class="highlight"><strong>Raison :</strong> ${reason}</div>` : '';
   const reasonBlockEn = reason ? `<div class="highlight"><strong>Reason:</strong> ${reason}</div>` : '';
   const reasonBlockDe = reason ? `<div class="highlight"><strong>Begründung:</strong> ${reason}</div>` : '';
@@ -149,7 +152,7 @@ export async function sendMemberRejectionEmail(
       ${reasonBlockDe}
       <p>Wir danken dir für dein Verständnis und wünschen dir viel Erfolg.</p>
       <p>Mit freundlichen Grüßen,<br/><strong>Das Team von Level Up in Germany</strong></p>
-      ${emailLinksFooterHtml()}
+      ${emailLinksFooterHtml(waUrl)}
     </div>
   `);
 
@@ -181,7 +184,7 @@ vielen Dank für dein Interesse an Level Up in Germany. Nach Prüfung können wi
 Begründung: ${reason}` : ''}
 
 Mit freundlichen Grüßen,
-Das Team von Level Up in Germany${emailLinksFooterText()}`;
+Das Team von Level Up in Germany${emailLinksFooterText(waUrl)}`;
 
   return resend.emails.send({
     from: FROM,
@@ -194,6 +197,7 @@ Das Team von Level Up in Germany${emailLinksFooterText()}`;
 
 // ── Payment reminder email ─────────────────────────────────────────────────────
 export async function sendMemberPaymentReminderEmail(email: string, firstName: string) {
+  const waUrl = await getLinktreeWhatsAppUrl();
   const html = wrapHtml(`
     <div class="header">
       <h1>Rappel cotisation · Membership reminder · Beitragserinnerung</h1>
@@ -222,7 +226,7 @@ export async function sendMemberPaymentReminderEmail(email: string, firstName: s
       <div class="highlight">Laut unseren Unterlagen wurde der Beitrag noch nicht erfasst oder muss erneuert werden.</div>
       <p>Bitte begleiche ihn baldmöglichst, um deinen aktiven Mitgliedsstatus zu behalten. Bei Fragen: <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;">info@levelupingermany.com</a>.</p>
       <p>Mit freundlichen Grüßen,<br/><strong>Das Team von Level Up in Germany</strong></p>
-      ${emailLinksFooterHtml()}
+      ${emailLinksFooterHtml(waUrl)}
     </div>
   `);
 
@@ -248,7 +252,7 @@ Hallo ${firstName},
 wir kontaktieren dich bezüglich deines jährlichen Mitgliedsbeitrags für Level Up in Germany. Laut unseren Unterlagen wurde er noch nicht erfasst oder muss erneuert werden. Bitte begleiche ihn baldmöglichst.
 
 Kontakt: info@levelupingermany.com
-Das Team von Level Up in Germany${emailLinksFooterText()}`;
+Das Team von Level Up in Germany${emailLinksFooterText(waUrl)}`;
 
   return resend.emails.send({
     from: FROM,
@@ -268,7 +272,7 @@ type CustomEmailParams = {
   preset?: 'welcome-full' | 'info-pack';
 };
 
-const FULL_WELCOME_HTML = (firstName: string) => `
+const FULL_WELCOME_HTML = (firstName: string, waUrl: string) => `
   <div class="header">
     <h1>Bienvenue dans la famille Level Up in Germany</h1>
     <p>Ton parcours commence ici</p>
@@ -316,7 +320,7 @@ const FULL_WELCOME_HTML = (firstName: string) => `
 
     <p><strong>Tes 3 prochains pas recommandés :</strong></p>
     <ol style="line-height:1.8;padding-left:20px">
-      <li>Rejoins notre <a href="https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst" style="color:#8C1A1A;font-weight:600">communauté WhatsApp des Ambassadeurs</a> pour rencontrer les autres membres.</li>
+      <li>Rejoins notre <a href="${waUrl}" style="color:#8C1A1A;font-weight:600">communauté WhatsApp</a> pour rencontrer les autres membres.</li>
       <li>Suis-nous sur <a href="https://www.linkedin.com/company/level-up-in-germany" style="color:#8C1A1A">LinkedIn</a> et <a href="https://www.instagram.com/levelupingermany" style="color:#8C1A1A">Instagram</a> pour ne rien rater.</li>
       <li>Réserve la date de notre prochaine <a href="https://www.levelupingermany.com/events" style="color:#8C1A1A;font-weight:600">Mega Conference</a>.</li>
     </ol>
@@ -337,7 +341,7 @@ const FULL_WELCOME_HTML = (firstName: string) => `
     <p>Hello ${firstName}, welcome to <strong>Level Up in Germany e.V.</strong> 🎉 — the francophone &amp; international community in Germany helping the diaspora level up in their career, integration, entrepreneurship and studies.</p>
     <p>As a member you get: priority access to our annual <strong>Mega Conference</strong>, workshops &amp; mentoring programs, the private Ambassadors WhatsApp community, our monthly newsletter and partner discounts (coming soon).</p>
     <p><strong>💛 Membership fee — €30 / year.</strong> It funds venues, content, ambassadors and keeps the association independent. Members pay reduced prices on the Mega Conference, get early-bird access, voting rights at the AGM and visibility for their projects.</p>
-    <p>💳 To pay your fee, write to <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a>. Join our <a href="https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst" style="color:#8C1A1A">WhatsApp Ambassadors community</a> and follow us on <a href="https://www.linkedin.com/company/level-up-in-germany" style="color:#8C1A1A">LinkedIn</a> &amp; <a href="https://www.instagram.com/levelupingermany" style="color:#8C1A1A">Instagram</a>.</p>
+    <p>💳 To pay your fee, write to <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a>. Join our <a href="${waUrl}" style="color:#8C1A1A">WhatsApp community</a> and follow us on <a href="https://www.linkedin.com/company/level-up-in-germany" style="color:#8C1A1A">LinkedIn</a> &amp; <a href="https://www.instagram.com/levelupingermany" style="color:#8C1A1A">Instagram</a>.</p>
     <p>See you soon,<br/><strong>The Level Up in Germany team</strong></p>
 
     <hr style="border:none;border-top:1px solid #eee;margin:32px 0" />
@@ -345,14 +349,14 @@ const FULL_WELCOME_HTML = (firstName: string) => `
     <p>Hallo ${firstName}, willkommen bei <strong>Level Up in Germany e.V.</strong> 🎉 — der frankophonen &amp; internationalen Community in Deutschland, die die Diaspora bei Karriere, Integration, Unternehmertum und Studium unterst&uuml;tzt.</p>
     <p>Als Mitglied erh&auml;ltst du: priorit&auml;ren Zugang zur j&auml;hrlichen <strong>Mega Conference</strong>, Workshops &amp; Mentoring-Programme, die private Botschafter-WhatsApp-Community, unseren monatlichen Newsletter und Partner-Rabatte (in K&uuml;rze).</p>
     <p><strong>💛 Mitgliedsbeitrag — 30&nbsp;€ / Jahr.</strong> Er finanziert R&auml;ume, Inhalte und Botschafter und h&auml;lt den Verein unabh&auml;ngig. Mitglieder profitieren von verg&uuml;nstigten Preisen bei der Mega Conference, fr&uuml;hzeitigem Zugang, Stimmrecht in der Mitgliederversammlung und Sichtbarkeit f&uuml;r ihre Projekte.</p>
-    <p>💳 F&uuml;r deinen Beitrag schreibe an <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a>. Tritt unserer <a href="https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst" style="color:#8C1A1A">WhatsApp-Botschafter-Community</a> bei und folge uns auf <a href="https://www.linkedin.com/company/level-up-in-germany" style="color:#8C1A1A">LinkedIn</a> &amp; <a href="https://www.instagram.com/levelupingermany" style="color:#8C1A1A">Instagram</a>.</p>
+    <p>💳 F&uuml;r deinen Beitrag schreibe an <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A;font-weight:600">info@levelupingermany.com</a>. Tritt unserer <a href="${waUrl}" style="color:#8C1A1A">WhatsApp-Community</a> bei und folge uns auf <a href="https://www.linkedin.com/company/level-up-in-germany" style="color:#8C1A1A">LinkedIn</a> &amp; <a href="https://www.instagram.com/levelupingermany" style="color:#8C1A1A">Instagram</a>.</p>
     <p>Bis bald,<br/><strong>Das Team von Level Up in Germany</strong></p>
 
-    ${emailLinksFooterHtml()}
+    ${emailLinksFooterHtml(waUrl)}
   </div>
 `;
 
-const FULL_WELCOME_TEXT = (firstName: string) => `Bonjour ${firstName},
+const FULL_WELCOME_TEXT = (firstName: string, waUrl: string) => `Bonjour ${firstName},
 
 Nous sommes vraiment heureux de t'accueillir officiellement parmi les membres de Level Up in Germany e.V. 🎉
 
@@ -377,7 +381,7 @@ En tant que membre cotisant, tu profites en plus :
 💳 Pour régler ta cotisation, écris-nous à info@levelupingermany.com — on te transmet les coordonnées bancaires et le reçu officiel.
 
 Tes 3 prochains pas :
-  1. Rejoins notre communauté WhatsApp : https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst
+  1. Rejoins notre communauté WhatsApp : ${waUrl}
   2. Suis-nous sur LinkedIn et Instagram (@levelupingermany)
   3. Réserve la date de notre prochaine Mega Conference : https://www.levelupingermany.com/events
 
@@ -387,9 +391,9 @@ Bienvenue. On a hâte de bâtir avec toi.
 
 À très vite,
 L'équipe Level Up in Germany
-— Ensemble, on monte d'un cran.${emailLinksFooterText()}`;
+— Ensemble, on monte d'un cran.${emailLinksFooterText(waUrl)}`;
 
-const INFO_PACK_HTML = (firstName: string) => `
+const INFO_PACK_HTML = (firstName: string, waUrl: string) => `
   <div class="header">
     <h1>Toutes les infos pour bien démarrer</h1>
     <p>Ton kit Level Up in Germany</p>
@@ -423,7 +427,7 @@ const INFO_PACK_HTML = (firstName: string) => `
       <li>Email général :
         <a href="mailto:info@levelupingermany.com" style="color:#8C1A1A">info@levelupingermany.com</a></li>
       <li>WhatsApp Ambassadeurs :
-        <a href="https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst" style="color:#25D366;font-weight:600">rejoindre la communauté</a></li>
+        <a href="${waUrl}" style="color:#25D366;font-weight:600">rejoindre la communauté</a></li>
       <li>LinkedIn :
         <a href="https://www.linkedin.com/company/level-up-in-germany" style="color:#8C1A1A">@level-up-in-germany</a></li>
       <li>Instagram :
@@ -460,11 +464,11 @@ const INFO_PACK_HTML = (firstName: string) => `
     <p>À très vite,<br/>
       <strong>L'équipe Level Up in Germany</strong></p>
 
-    ${emailLinksFooterHtml()}
+    ${emailLinksFooterHtml(waUrl)}
   </div>
 `;
 
-const INFO_PACK_TEXT = (firstName: string) => `Bonjour ${firstName},
+const INFO_PACK_TEXT = (firstName: string, waUrl: string) => `Bonjour ${firstName},
 
 Voici un résumé pratique de tout ce qu'il faut savoir sur Level Up in Germany.
 
@@ -481,7 +485,7 @@ Calendrier : https://www.levelupingermany.com/events
 
 📬 NOUS CONTACTER
   • Email : info@levelupingermany.com
-  • WhatsApp Ambassadeurs : https://chat.whatsapp.com/Ip3P51uCMGu0TblrkVBSst
+  • WhatsApp Ambassadeurs : ${waUrl}
   • LinkedIn : https://www.linkedin.com/company/level-up-in-germany
   • Instagram : @levelupingermany
   • TikTok : @levelupingermany
@@ -502,7 +506,7 @@ En tant que cotisant, tu profites en plus : tarif préférentiel sur la Mega Con
 Toute question ? info@levelupingermany.com
 
 À très vite,
-L'équipe Level Up in Germany${emailLinksFooterText()}`;
+L'équipe Level Up in Germany${emailLinksFooterText(waUrl)}`;
 
 /**
  * Send a custom OR preset email to a member.
@@ -512,18 +516,19 @@ L'équipe Level Up in Germany${emailLinksFooterText()}`;
  */
 export async function sendMemberCustomEmail(params: CustomEmailParams) {
   const { email, firstName, subject, message, preset } = params;
+  const waUrl = await getLinktreeWhatsAppUrl();
 
   let html: string;
   let text: string;
   let finalSubject: string;
 
   if (preset === 'welcome-full') {
-    html = wrapHtml(FULL_WELCOME_HTML(firstName));
-    text = FULL_WELCOME_TEXT(firstName);
+    html = wrapHtml(FULL_WELCOME_HTML(firstName, waUrl));
+    text = FULL_WELCOME_TEXT(firstName, waUrl);
     finalSubject = `Bienvenue dans Level Up in Germany, ${firstName} 🎉`;
   } else if (preset === 'info-pack') {
-    html = wrapHtml(INFO_PACK_HTML(firstName));
-    text = INFO_PACK_TEXT(firstName);
+    html = wrapHtml(INFO_PACK_HTML(firstName, waUrl));
+    text = INFO_PACK_TEXT(firstName, waUrl);
     finalSubject = 'Toutes les infos Level Up in Germany';
   } else {
     // Custom message: turn line breaks into paragraphs, escape HTML.
@@ -545,10 +550,10 @@ export async function sendMemberCustomEmail(params: CustomEmailParams) {
         <p>Bonjour ${firstName},</p>
         ${paragraphs}
         <p>À très vite,<br/><strong>L'équipe Level Up in Germany</strong></p>
-        ${emailLinksFooterHtml()}
+        ${emailLinksFooterHtml(waUrl)}
       </div>
     `);
-    text = `Bonjour ${firstName},\n\n${message}\n\nÀ très vite,\nL'équipe Level Up in Germany${emailLinksFooterText()}`;
+    text = `Bonjour ${firstName},\n\n${message}\n\nÀ très vite,\nL'équipe Level Up in Germany${emailLinksFooterText(waUrl)}`;
     finalSubject = subject;
   }
 
