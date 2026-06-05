@@ -82,42 +82,62 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
 
       <section className="relative z-10 mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Hero / welcome */}
-        <div className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.015] px-6 py-10 text-center shadow-[0_30px_80px_-40px_rgba(233,140,11,0.35)] sm:px-10 sm:py-12">
-          {/* Decorative dotted pattern */}
+        <header className="relative mb-12 flex flex-col items-center text-center">
+          {/* Avatar with glow halo */}
+          <div className="relative mb-6">
+            <div
+              aria-hidden
+              className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(233,140,11,0.45),transparent_70%)] blur-2xl"
+            />
+            <div
+              aria-hidden
+              className="absolute -inset-1 rounded-full bg-gradient-to-tr from-accent via-[#C0392B] to-[#8C1A1A] opacity-90 blur-[2px]"
+            />
+            <div className="relative grid h-24 w-24 place-items-center overflow-hidden rounded-full border border-white/20 bg-[#130505] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-28 sm:w-28">
+              <img
+                src="/logo.png"
+                alt="Level Up in Germany"
+                className="h-[78%] w-[78%] object-contain"
+              />
+            </div>
+          </div>
+
+          {/* Verified handle */}
+          <div className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-white/90">
+            <span>@levelupingermany</span>
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              className="h-4 w-4 text-accent"
+              fill="currentColor"
+            >
+              <path d="M12 2l2.39 2.39 3.39-.05.06 3.39L20.24 10 17.84 12l2.4 2-2.4 2.27.05 3.39-3.39.06L12 22l-2.39-2.28-3.39.05-.06-3.39L3.76 14l2.4-2-2.4-2 2.4-2.27-.05-3.39 3.39-.06L12 2zm-1.18 13.07l5.6-5.6-1.41-1.41-4.19 4.18-1.8-1.79-1.41 1.41 3.21 3.21z" />
+            </svg>
+          </div>
+
+          {/* Eyebrow */}
+          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
+
+          {/* Title */}
+          <h1 className="mt-2 font-display text-balance text-[1.75rem] font-medium leading-[1.15] tracking-tight text-white sm:text-3xl">
+            {t.title}
+          </h1>
+
+          {/* Subtitle */}
+          <p className="mx-auto mt-3 max-w-md text-balance text-[0.85rem] leading-relaxed text-white/55 sm:text-sm">
+            {t.subtitle}
+          </p>
+
+          {/* Hairline divider */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.12]"
-            style={{
-              backgroundImage:
-                'radial-gradient(rgba(255,255,255,0.7) 1px, transparent 1px)',
-              backgroundSize: '18px 18px',
-              maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
-              WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
-            }}
-          />
-          {/* Top accent ribbon — kente-inspired tri-stripe */}
-          <div aria-hidden className="absolute inset-x-0 top-0 flex h-1">
-            <span className="flex-1 bg-accent" />
-            <span className="flex-1 bg-[#8C1A1A]" />
-            <span className="flex-1 bg-accent" />
+            className="mt-8 flex w-full max-w-xs items-center gap-3"
+          >
+            <span className="h-px flex-1 bg-gradient-to-r from-transparent to-white/15" />
+            <span className="h-1 w-1 rounded-full bg-accent/70" />
+            <span className="h-px flex-1 bg-gradient-to-l from-transparent to-white/15" />
           </div>
-          {/* Corner brackets */}
-          <span aria-hidden className="absolute left-4 top-4 h-4 w-4 border-l border-t border-accent/50" />
-          <span aria-hidden className="absolute right-4 top-4 h-4 w-4 border-r border-t border-accent/50" />
-          <span aria-hidden className="absolute bottom-4 left-4 h-4 w-4 border-b border-l border-accent/30" />
-          <span aria-hidden className="absolute bottom-4 right-4 h-4 w-4 border-b border-r border-accent/30" />
-
-          <div className="relative">
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
-            <h1 className="mt-3 font-display text-balance text-2xl font-medium leading-[1.15] tracking-tight text-white sm:text-3xl">
-              {t.title}
-            </h1>
-            <p className="mx-auto mt-3 max-w-md text-balance text-[0.85rem] leading-relaxed text-white/60 sm:text-sm">
-              {t.subtitle}
-            </p>
-            <div className="mx-auto mt-6 h-px w-16 bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
-          </div>
-        </div>
+        </header>
 
         {links.length === 0 ? (
           <p className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-sm text-white/60">
