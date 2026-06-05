@@ -82,15 +82,41 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
 
       <section className="relative z-10 mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Hero / welcome */}
-        <div className="mb-10 text-center">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
-          <h1 className="mt-3 font-display text-balance text-2xl font-medium leading-[1.15] tracking-tight text-white sm:text-3xl">
-            {t.title}
-          </h1>
-          <p className="mx-auto mt-3 max-w-md text-balance text-[0.85rem] leading-relaxed text-white/60 sm:text-sm">
-            {t.subtitle}
-          </p>
-          <div className="mx-auto mt-6 h-px w-16 bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
+        <div className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.015] px-6 py-10 text-center shadow-[0_30px_80px_-40px_rgba(233,140,11,0.35)] sm:px-10 sm:py-12">
+          {/* Decorative dotted pattern */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-[0.12]"
+            style={{
+              backgroundImage:
+                'radial-gradient(rgba(255,255,255,0.7) 1px, transparent 1px)',
+              backgroundSize: '18px 18px',
+              maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
+              WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 75%)',
+            }}
+          />
+          {/* Top accent ribbon — kente-inspired tri-stripe */}
+          <div aria-hidden className="absolute inset-x-0 top-0 flex h-1">
+            <span className="flex-1 bg-accent" />
+            <span className="flex-1 bg-[#8C1A1A]" />
+            <span className="flex-1 bg-accent" />
+          </div>
+          {/* Corner brackets */}
+          <span aria-hidden className="absolute left-4 top-4 h-4 w-4 border-l border-t border-accent/50" />
+          <span aria-hidden className="absolute right-4 top-4 h-4 w-4 border-r border-t border-accent/50" />
+          <span aria-hidden className="absolute bottom-4 left-4 h-4 w-4 border-b border-l border-accent/30" />
+          <span aria-hidden className="absolute bottom-4 right-4 h-4 w-4 border-b border-r border-accent/30" />
+
+          <div className="relative">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
+            <h1 className="mt-3 font-display text-balance text-2xl font-medium leading-[1.15] tracking-tight text-white sm:text-3xl">
+              {t.title}
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-balance text-[0.85rem] leading-relaxed text-white/60 sm:text-sm">
+              {t.subtitle}
+            </p>
+            <div className="mx-auto mt-6 h-px w-16 bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
+          </div>
         </div>
 
         {links.length === 0 ? (
