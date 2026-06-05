@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { sendMultilingualCampaignEmail, type MultilingualSection } from '@/lib/sendCampaignEmail';
+import { getLinktreeWhatsAppUrl } from '@/lib/linktreeWhatsApp';
 import { parseNameFromEmail } from '@/lib/emailName';
 import { CAMPAIGN_LOCALES, type CampaignLocale, pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
 import { resolveAttachmentsForResend } from '@/lib/newsletterAttachments';
@@ -68,6 +69,10 @@ export async function POST(
   if (!inlineLogo) {
     inlineLogo = (await getInlineLogoAttachment(siteBaseUrl)) ?? undefined;
   }
+
+  // Pull the WhatsApp URL from the admin-managed Linktree entry so the email
+  // footer always promotes whatever channel is currently featured publicly.
+  const whatsappUrl = await getLinktreeWhatsAppUrl();
 
   // Build per-locale content (subject/body/title/etc. come from translation; images & CTA URL are shared scalars)
   const buildContentFor = (locale: string) => {
@@ -148,6 +153,7 @@ export async function POST(
         recipientFirstName: resolveFirstName({ email: testEmail, firstName: null, name: null }),
         attachments: resolvedAttachments,
         inlineLogo,
+        whatsappUrl,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -196,6 +202,7 @@ export async function POST(
         recipientFirstName: resolveFirstName(sub),
         attachments: resolvedAttachments,
         inlineLogo,
+        whatsappUrl,
       });
       sentCount++;
     } catch (err) {

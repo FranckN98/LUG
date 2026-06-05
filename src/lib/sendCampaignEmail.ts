@@ -475,6 +475,12 @@ export interface SendCampaignParams {
    */
   recipientFirstName?: string | null;
   /**
+   * Optional WhatsApp URL injected into the email footer. When omitted, the
+   * built-in fallback ambassador URL is used. Resolve via
+   * `getLinktreeWhatsAppUrl()` in the calling server route.
+   */
+  whatsappUrl?: string;
+  /**
    * Optional list of files to attach to the email. Each entry must contain a
    * `filename` and a base64-encoded `content` (no data URL prefix). Forwarded
    * as-is to the Resend API.
@@ -580,10 +586,8 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
 
   const personalized = personalizeContent(params.content, params.recipientFirstName);
   const unsubscribeUrl = `${params.siteBaseUrl}/api/unsubscribe?token=${encodeURIComponent(params.unsubscribeToken)}`;
-  const { getLinktreeWhatsAppUrl } = await import('./linktreeWhatsApp');
-  const waUrl = await getLinktreeWhatsAppUrl();
-  const html = buildCampaignHtml(personalized, unsubscribeUrl, params.siteBaseUrl, waUrl);
-  const text = buildCampaignText(personalized, unsubscribeUrl, waUrl);
+  const html = buildCampaignHtml(personalized, unsubscribeUrl, params.siteBaseUrl, params.whatsappUrl);
+  const text = buildCampaignText(personalized, unsubscribeUrl, params.whatsappUrl);
 
   if (!apiKey) {
     console.warn('[newsletter] RESEND_API_KEY manquant — email non envoyé à', params.toEmail);
@@ -633,6 +637,8 @@ export interface SendMultilingualCampaignParams {
    */
   sections: ReadonlyArray<MultilingualSection>;
   recipientFirstName?: string | null;
+  /** Optional WhatsApp URL for the email footer (resolved from Linktree by the caller). */
+  whatsappUrl?: string;
   attachments?: ReadonlyArray<{ filename: string; content: string }>;
   inlineLogo?: { filename: string; content: string; content_id: string; content_type: string };
 }
@@ -665,10 +671,8 @@ export async function sendMultilingualCampaignEmail(
 
   const subject = personalizedSections[0].content.subject;
   const unsubscribeUrl = `${params.siteBaseUrl}/api/unsubscribe?token=${encodeURIComponent(params.unsubscribeToken)}`;
-  const { getLinktreeWhatsAppUrl } = await import('./linktreeWhatsApp');
-  const waUrl = await getLinktreeWhatsAppUrl();
-  const html = buildMultilingualCampaignHtml(personalizedSections, unsubscribeUrl, params.siteBaseUrl, subject, waUrl);
-  const text = buildMultilingualCampaignText(personalizedSections, unsubscribeUrl, waUrl);
+  const html = buildMultilingualCampaignHtml(personalizedSections, unsubscribeUrl, params.siteBaseUrl, subject, params.whatsappUrl);
+  const text = buildMultilingualCampaignText(personalizedSections, unsubscribeUrl, params.whatsappUrl);
 
   if (!apiKey) {
     console.warn('[newsletter] RESEND_API_KEY manquant — email non envoyé à', params.toEmail);
