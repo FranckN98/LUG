@@ -80,17 +80,17 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
         <div className="absolute top-1/3 left-[-10%] h-[60vh] w-[60vw] bg-[radial-gradient(circle_at_30%_50%,rgba(233,140,11,0.08),transparent_60%)]" />
       </div>
 
-      <section className="relative z-10 mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 sm:py-20">
+      <section className="relative z-10 mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Hero / welcome */}
-        <div className="mb-12 text-center">
-          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-accent">{t.eyebrow}</p>
-          <h1 className="mt-4 text-balance text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-[3.25rem]">
+        <div className="mb-10 text-center">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
+          <h1 className="mt-3 font-display text-balance text-2xl font-medium leading-[1.15] tracking-tight text-white sm:text-3xl">
             {t.title}
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-balance text-base leading-relaxed text-white/70 sm:text-lg">
+          <p className="mx-auto mt-3 max-w-md text-balance text-[0.85rem] leading-relaxed text-white/60 sm:text-sm">
             {t.subtitle}
           </p>
-          <div className="mx-auto mt-8 h-px w-24 bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
+          <div className="mx-auto mt-6 h-px w-16 bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
         </div>
 
         {links.length === 0 ? (
