@@ -72,6 +72,9 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0b0606] text-white">
+      {/* Hide the global site header on this landing-style page only */}
+      <style>{`body > div > header[class*="fixed"]{display:none!important}body > div > main{padding-top:0!important}`}</style>
+
       {/* Ambient background — warm glow on dark */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#120808] via-[#0b0606] to-[#070303]" />
