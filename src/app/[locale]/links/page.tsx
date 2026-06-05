@@ -93,7 +93,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
               aria-hidden
               className="absolute -inset-1 rounded-full bg-gradient-to-tr from-accent via-[#C0392B] to-[#8C1A1A] opacity-90 blur-[2px]"
             />
-            <div className="relative grid h-[6.3rem] w-[6.3rem] place-items-center overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-[7.35rem] sm:w-[7.35rem]">
+            <div className="relative grid h-[5.99rem] w-[5.99rem] place-items-center overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-[6.98rem] sm:w-[6.98rem]">
               <img
                 src="/logo.png"
                 alt="Level Up in Germany"
