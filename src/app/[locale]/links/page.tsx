@@ -1,4 +1,5 @@
 import type { Locale } from '@/i18n/config';
+import Link from 'next/link';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { resolveSocialLinkCoverImage, seedSocialLinksIfEmpty } from '@/lib/socialLinks';
@@ -74,6 +75,28 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
     <div className="relative min-h-screen overflow-hidden bg-[#0b0606] text-white">
       {/* Hide the global site header on this landing-style page only */}
       <style>{`header.fixed{display:none!important}main{padding-top:0!important}`}</style>
+
+      {/* Home button (top-right) */}
+      <Link
+        href={`/${loc}`}
+        aria-label="Home"
+        className="group fixed right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white/80 backdrop-blur-md transition-all hover:border-accent/60 hover:bg-accent/15 hover:text-accent sm:right-6 sm:top-6 sm:h-11 sm:w-11"
+      >
+        <svg
+          aria-hidden
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-5 w-5 transition-transform group-hover:-translate-y-0.5"
+        >
+          <path d="M3 11.5 12 4l9 7.5" />
+          <path d="M5 10v10h14V10" />
+          <path d="M10 20v-6h4v6" />
+        </svg>
+      </Link>
 
       {/* Ambient background — warm glow on dark */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
