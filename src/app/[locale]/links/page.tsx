@@ -97,7 +97,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
               <img
                 src="/logo.png"
                 alt="Level Up in Germany"
-                className="h-[82%] w-[82%] object-contain"
+                className="h-[95%] w-[95%] object-contain"
               />
             </div>
           </div>
