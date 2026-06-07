@@ -144,6 +144,23 @@ export function SponsorDocumentsAdmin() {
     refresh();
   }
 
+  async function replaceFile(id: string, file: File) {
+    if (file.type !== 'application/pdf') {
+      adminNotify.error('Le fichier doit être un PDF.');
+      return;
+    }
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch(`/api/admin/sponsor-documents/${id}/file`, { method: 'PUT', body: fd });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      adminNotify.error(data?.error ?? 'Remplacement échoué.');
+      return;
+    }
+    adminNotify.success('Fichier remplacé.');
+    refresh();
+  }
+
   async function copyLink(doc: SponsorDoc) {
     const shareUrl = buildShareUrl(doc);
     try {
@@ -236,6 +253,7 @@ export function SponsorDocumentsAdmin() {
                 onSave={(t, d) => saveMeta(doc.id, t, d)}
                 onDelete={() => removeDoc(doc.id)}
                 onCopy={() => copyLink(doc)}
+                onReplaceFile={(file) => replaceFile(doc.id, file)}
               />
             ))}
           </ul>
@@ -253,6 +271,7 @@ function DocRow({
   onSave,
   onDelete,
   onCopy,
+  onReplaceFile,
 }: {
   doc: SponsorDoc;
   onFeature: () => void;
@@ -260,10 +279,13 @@ function DocRow({
   onSave: (title: string, description: string) => void;
   onDelete: () => void;
   onCopy: () => void;
+  onReplaceFile: (file: File) => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(doc.title);
   const [description, setDescription] = useState(doc.description ?? '');
+  const [replacing, setReplacing] = useState(false);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <li className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 md:p-5">
@@ -366,6 +388,30 @@ function DocRow({
                 className="rounded-md border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/70 hover:bg-white/5"
               >
                 Modifier
+              </button>
+              <input
+                ref={replaceInputRef}
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  setReplacing(true);
+                  try {
+                    await onReplaceFile(f);
+                  } finally {
+                    setReplacing(false);
+                    if (replaceInputRef.current) replaceInputRef.current.value = '';
+                  }
+                }}
+              />
+              <button
+                onClick={() => replaceInputRef.current?.click()}
+                disabled={replacing}
+                className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 disabled:opacity-50"
+              >
+                {replacing ? 'Remplacement…' : 'Remplacer le fichier'}
               </button>
               <button
                 onClick={onDelete}

@@ -1,0 +1,109 @@
+import { NextResponse } from 'next/server';
+import { writeFile, mkdir, unlink } from 'fs/promises';
+import { join } from 'path';
+import { prisma } from '@/lib/prisma';
+import { requireAdmin } from '@/lib/adminAuth';
+
+const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
+const ALLOWED_TYPES = new Set(['application/pdf']);
+
+const useBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9.-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100) || 'document';
+}
+
+async function saveFile(buffer: Buffer, savedFilename: string): Promise<string> {
+  if (useBlob) {
+    const { put } = await import('@vercel/blob');
+    const blob = await put(`sponsor-documents/${savedFilename}`, buffer, {
+      access: 'public',
+      addRandomSuffix: false,
+    });
+    return blob.url;
+  }
+  const dir = join(process.cwd(), 'public', 'downloads');
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, savedFilename), buffer);
+  return `/downloads/${savedFilename}`;
+}
+
+async function removeOldFile(url: string): Promise<void> {
+  try {
+    if (url.startsWith('/downloads/')) {
+      const filename = url.replace('/downloads/', '');
+      await unlink(join(process.cwd(), 'public', 'downloads', filename));
+    } else if (url.startsWith('http') && process.env.BLOB_READ_WRITE_TOKEN) {
+      const { del } = await import('@vercel/blob');
+      await del(url);
+    }
+  } catch {
+    // Best-effort: DB row is the source of truth.
+  }
+}
+
+type Params = { params: { id: string } };
+
+export async function PUT(request: Request, { params }: Params) {
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
+
+  const existing = await prisma.sponsorDocument.findUnique({ where: { id: params.id } });
+  if (!existing) {
+    return NextResponse.json({ error: 'Introuvable.' }, { status: 404 });
+  }
+
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 });
+  }
+
+  const file = formData.get('file') as File | null;
+  if (!file) {
+    return NextResponse.json({ error: 'Aucun fichier reçu.' }, { status: 400 });
+  }
+  if (!ALLOWED_TYPES.has(file.type)) {
+    return NextResponse.json({ error: 'Seuls les fichiers PDF sont autorisés.' }, { status: 400 });
+  }
+  if (file.size === 0) {
+    return NextResponse.json({ error: 'Fichier vide.' }, { status: 400 });
+  }
+  if (file.size > MAX_SIZE) {
+    return NextResponse.json(
+      { error: `Fichier trop lourd (max ${Math.round(MAX_SIZE / 1024 / 1024)} Mo).` },
+      { status: 400 },
+    );
+  }
+
+  const originalName = file.name || 'document.pdf';
+  const base = originalName.replace(/\.pdf$/i, '');
+  const savedFilename = `${slugify(base)}-${Date.now()}.pdf`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const newUrl = await saveFile(buffer, savedFilename);
+
+  const updated = await prisma.sponsorDocument.update({
+    where: { id: params.id },
+    data: {
+      filename: originalName,
+      url: newUrl,
+      size: file.size,
+      mimeType: file.type,
+    },
+  });
+
+  // Best-effort cleanup of the old file after the DB row is safely updated.
+  if (existing.url && existing.url !== newUrl) {
+    await removeOldFile(existing.url);
+  }
+
+  return NextResponse.json(updated);
+}
