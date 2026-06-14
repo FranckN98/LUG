@@ -118,6 +118,15 @@ const navItems = [
     ),
   },
   {
+    href: '/admin/booth-reservations',
+    label: 'Stands',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M9 12h.01M15 12h.01" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/social-links',
     label: 'Linktree',
     icon: (

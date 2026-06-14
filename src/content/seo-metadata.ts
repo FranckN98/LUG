@@ -294,6 +294,20 @@ export const SEO_BY_PATH: Record<string, Record<Locale, SeoEntry>> = {
       description: 'Billets et participation aux \u00e9v\u00e9nements Level Up in Germany.',
     },
   },
+  '/booth-reservation': {
+    de: {
+      title: 'Stand reservieren',
+      description: 'Reservieren Sie Ihren Ausstellerstand bei Level Up in Germany.',
+    },
+    en: {
+      title: 'Book a booth',
+      description: 'Reserve your exhibitor booth at Level Up in Germany.',
+    },
+    fr: {
+      title: 'R\u00e9server un stand',
+      description: 'R\u00e9servez votre stand exposant \u00e0 Level Up in Germany.',
+    },
+  },
   '/imprint': {
     de: {
       title: 'Impressum',

@@ -874,3 +874,28 @@ model SponsorDocument {
   @@index([isPublic, sortOrder])
   @@map("sponsor_documents")
 }
+
+model BoothReservation {
+  id                  String   @id @default(uuid())
+  fullName            String   @map("full_name")
+  email               String
+  phone               String
+  brandName           String   @map("brand_name")
+  boothPurpose        String   @map("booth_purpose")
+  brandDescription    String   @map("brand_description")
+  visitorTakeaway     String   @map("visitor_takeaway")
+  exhibitionMaterials String?  @map("exhibition_materials")
+  equipmentNeeds      String?  @map("equipment_needs")
+  peopleCount         String   @map("people_count")
+  peopleNames         String?  @map("people_names")
+  websiteOrSocial     String?  @map("website_or_social")
+  additionalComment   String?  @map("additional_comment")
+  locale              String?
+  status              String   @default("new")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@index([email])
+  @@map("booth_reservations")
+}
