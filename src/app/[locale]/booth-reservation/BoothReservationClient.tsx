@@ -410,32 +410,33 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
   }
 
   return (
-    <div className="relative min-h-[100svh] w-full overflow-hidden text-white" style={{ background: 'radial-gradient(ellipse at 20% 0%, #7a2a1f 0%, #5a1c14 30%, #3a1109 70%, #2a0a06 100%)' }}>
+    <div className="relative min-h-[100svh] w-full overflow-hidden bg-[#120505] text-white">
       <style>{`
         @keyframes bk-orb-a { 0%,100%{transform:translate3d(-10%,-10%,0) scale(1);} 50%{transform:translate3d(15%,5%,0) scale(1.15);} }
         @keyframes bk-orb-b { 0%,100%{transform:translate3d(20%,0%,0) scale(1.1);} 50%{transform:translate3d(-15%,20%,0) scale(0.95);} }
         @keyframes bk-orb-c { 0%,100%{transform:translate3d(-5%,25%,0) scale(0.9);} 50%{transform:translate3d(10%,-10%,0) scale(1.2);} }
         @keyframes bk-conic { to { transform: translate(-50%,-50%) rotate(360deg); } }
         @keyframes bk-rise { 0%{opacity:0;transform:translateY(24px);} 100%{opacity:1;transform:translateY(0);} }
-        @keyframes bk-twinkle { 0%,100%{opacity:.25;transform:scale(1);} 50%{opacity:1;transform:scale(1.6);} }
+        @keyframes bk-twinkle { 0%,100%{opacity:.15;transform:scale(1);} 50%{opacity:.9;transform:scale(1.4);} }
         @keyframes bk-shimmer { 0%{background-position:-200% 0;} 100%{background-position:200% 0;} }
-        @keyframes bk-float-up { 0%{transform:translateY(0) rotate(-6deg);opacity:.0;} 15%{opacity:.55;} 85%{opacity:.55;} 100%{transform:translateY(-120vh) rotate(6deg);opacity:0;} }
-        @keyframes bk-tilt { 0%,100%{transform:rotate(-6deg) translateY(0);} 50%{transform:rotate(6deg) translateY(-12px);} }
-        @keyframes bk-pulse-ring { 0%{transform:scale(.6);opacity:.55;} 100%{transform:scale(1.6);opacity:0;} }
-        @keyframes bk-spark { 0%,100%{opacity:0;transform:scale(.5) rotate(0deg);} 50%{opacity:1;transform:scale(1) rotate(90deg);} }
+        @keyframes bk-icon-float { 0%{transform:translateY(110vh) rotate(-12deg);opacity:0;} 10%{opacity:.18;} 90%{opacity:.18;} 100%{transform:translateY(-20vh) rotate(8deg);opacity:0;} }
         .bk-rise{animation:bk-rise .7s cubic-bezier(0.22,1,0.36,1) both;}
         .bk-shimmer{background:linear-gradient(90deg,#ffffff 0%,#ffd58a 25%,#E98C0B 50%,#ffd58a 75%,#ffffff 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:bk-shimmer 6s linear infinite;}
         @media (prefers-reduced-motion: reduce) { .bk-no-motion{animation:none!important;} }
       `}</style>
 
-      {/* Background — warmer, lighter, booth-themed */}
-      <div aria-hidden className="bk-no-motion pointer-events-none absolute -top-40 -left-40 h-[60vmax] w-[60vmax] rounded-full bg-[#d33a3a] opacity-80 blur-[120px]" style={{ animation: 'bk-orb-a 18s ease-in-out infinite' }} />
-      <div aria-hidden className="bk-no-motion pointer-events-none absolute -bottom-40 -right-40 h-[55vmax] w-[55vmax] rounded-full bg-[#f4a83a] opacity-70 blur-[140px]" style={{ animation: 'bk-orb-b 22s ease-in-out infinite' }} />
-      <div aria-hidden className="bk-no-motion pointer-events-none absolute top-1/2 left-1/2 h-[40vmax] w-[40vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ffc066] opacity-40 blur-[110px]" style={{ animation: 'bk-orb-c 26s ease-in-out infinite' }} />
-      <div aria-hidden className="bk-no-motion pointer-events-none absolute top-1/2 left-1/2 h-[120vmin] w-[120vmin] rounded-full opacity-40" style={{ background: 'conic-gradient(from 0deg, transparent 0deg, rgba(244,168,58,0.55) 40deg, transparent 80deg, transparent 200deg, rgba(211,58,58,0.65) 250deg, transparent 290deg)', animation: 'bk-conic 40s linear infinite', filter: 'blur(40px)', transform: 'translate(-50%, -50%)' }} />
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+      {/* Animated orbs — matches /buy-ticket */}
+      <div aria-hidden className="bk-no-motion pointer-events-none absolute -top-40 -left-40 h-[60vmax] w-[60vmax] rounded-full bg-[#8C1A1A] opacity-60 blur-[120px]" style={{ animation: 'bk-orb-a 18s ease-in-out infinite' }} />
+      <div aria-hidden className="bk-no-motion pointer-events-none absolute -bottom-40 -right-40 h-[55vmax] w-[55vmax] rounded-full bg-[#E98C0B] opacity-40 blur-[140px]" style={{ animation: 'bk-orb-b 22s ease-in-out infinite' }} />
+      <div aria-hidden className="bk-no-motion pointer-events-none absolute top-1/2 left-1/2 h-[40vmax] w-[40vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#c77409] opacity-25 blur-[110px]" style={{ animation: 'bk-orb-c 26s ease-in-out infinite' }} />
 
-      {/* Stars / sparkles */}
+      {/* Conic gradient sweep */}
+      <div aria-hidden className="bk-no-motion pointer-events-none absolute top-1/2 left-1/2 h-[120vmin] w-[120vmin] rounded-full opacity-25" style={{ background: 'conic-gradient(from 0deg, transparent 0deg, rgba(233,140,11,0.35) 40deg, transparent 80deg, transparent 200deg, rgba(140,26,26,0.5) 250deg, transparent 290deg)', animation: 'bk-conic 40s linear infinite', filter: 'blur(40px)', transform: 'translate(-50%, -50%)' }} />
+
+      {/* Dot grid */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+
+      {/* Twinkling sparkles */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         {[
           { top: '12%', left: '18%', delay: '0s' },
@@ -446,47 +447,38 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
           { top: '78%', left: '36%', delay: '1.9s' },
           { top: '84%', left: '64%', delay: '0.3s' },
           { top: '15%', left: '52%', delay: '2.2s' },
+          { top: '48%', left: '92%', delay: '3.6s' },
+          { top: '92%', left: '20%', delay: '1.1s' },
         ].map((s, i) => (
           <span key={i} className="bk-no-motion absolute h-1 w-1 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" style={{ top: s.top, left: s.left, animation: `bk-twinkle 4.5s ease-in-out ${s.delay} infinite` }} />
         ))}
       </div>
 
-      {/* Floating booth-themed icons */}
+      {/* Floating booth-themed icons (replaces tickets) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         {[
-          { left: '6%', delay: '0s', duration: '22s', size: 28, type: 'booth' },
-          { left: '18%', delay: '6s', duration: '28s', size: 22, type: 'sparkle' },
-          { left: '32%', delay: '11s', duration: '24s', size: 26, type: 'badge' },
-          { left: '46%', delay: '3s', duration: '30s', size: 24, type: 'megaphone' },
-          { left: '60%', delay: '14s', duration: '26s', size: 30, type: 'booth' },
-          { left: '74%', delay: '8s', duration: '23s', size: 22, type: 'sparkle' },
-          { left: '86%', delay: '2s', duration: '29s', size: 26, type: 'badge' },
-          { left: '94%', delay: '17s', duration: '25s', size: 24, type: 'megaphone' },
+          { left: '8%', delay: '0s', duration: '24s', size: 44, type: 'booth' as const },
+          { left: '28%', delay: '6s', duration: '28s', size: 38, type: 'chair' as const },
+          { left: '50%', delay: '12s', duration: '22s', size: 48, type: 'megaphone' as const },
+          { left: '72%', delay: '3s', duration: '30s', size: 36, type: 'table' as const },
+          { left: '88%', delay: '9s', duration: '26s', size: 42, type: 'badge' as const },
         ].map((it, i) => (
           <span
             key={i}
-            className="bk-no-motion absolute bottom-[-10vh] text-accent/55"
+            className="bk-no-motion absolute text-[#E98C0B]"
             style={{
               left: it.left,
-              animation: `bk-float-up ${it.duration} linear ${it.delay} infinite`,
-              filter: 'drop-shadow(0 4px 14px rgba(233,140,11,0.35))',
+              top: 0,
+              animation: `bk-icon-float ${it.duration} linear ${it.delay} infinite`,
             }}
           >
-            <FloatingIcon type={it.type as 'booth' | 'sparkle' | 'badge' | 'megaphone'} size={it.size} />
+            <FloatingIcon type={it.type} size={it.size} />
           </span>
         ))}
       </div>
 
-      {/* Pulse rings near corners */}
-      <div aria-hidden className="pointer-events-none absolute top-[18%] left-[8%]">
-        <span className="bk-no-motion block h-24 w-24 rounded-full border border-accent/30" style={{ animation: 'bk-pulse-ring 4s ease-out infinite' }} />
-      </div>
-      <div aria-hidden className="pointer-events-none absolute bottom-[12%] right-[10%]">
-        <span className="bk-no-motion block h-28 w-28 rounded-full border border-[#a82323]/40" style={{ animation: 'bk-pulse-ring 5s ease-out infinite', animationDelay: '1.5s' }} />
-      </div>
-
-      {/* Soft vignette (lighter than before) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.2) 100%)' }} />
+      {/* Vignette — matches /buy-ticket */}
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)' }} />
 
       <main className="relative z-10 mx-auto w-full max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
         {/* HERO */}
@@ -510,7 +502,7 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="space-y-10 rounded-3xl border border-white/10 bg-[#1a0606]/85 p-6 backdrop-blur-md sm:p-10"
+              className="space-y-10 rounded-3xl border border-white/10 bg-[#1a0808]/70 p-6 backdrop-blur-md sm:p-10"
             >
               {/* Section: personal */}
               <FieldSection title={t.form.sectionPersonal}>
@@ -710,10 +702,10 @@ function ConfirmationCard({ t }: { t: Copy }) {
   );
 }
 
-function FloatingIcon({ type, size }: { type: 'booth' | 'sparkle' | 'badge' | 'megaphone'; size: number }) {
-  const common = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+function FloatingIcon({ type, size }: { type: 'booth' | 'chair' | 'table' | 'badge' | 'megaphone'; size: number }) {
+  const common = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.4, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
   if (type === 'booth') {
-    // exhibition booth / tent
+    // exhibition stand / tent
     return (
       <svg {...common}>
         <path d="M3 9l9-6 9 6" />
@@ -723,10 +715,21 @@ function FloatingIcon({ type, size }: { type: 'booth' | 'sparkle' | 'badge' | 'm
       </svg>
     );
   }
-  if (type === 'sparkle') {
+  if (type === 'chair') {
     return (
       <svg {...common}>
-        <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" />
+        <path d="M6 10V5a2 2 0 012-2h8a2 2 0 012 2v5" />
+        <path d="M4 14h16l-1 4H5l-1-4z" />
+        <path d="M7 18v3M17 18v3" />
+      </svg>
+    );
+  }
+  if (type === 'table') {
+    return (
+      <svg {...common}>
+        <path d="M3 9h18" />
+        <path d="M5 9v2a1 1 0 001 1h12a1 1 0 001-1V9" />
+        <path d="M7 12v8M17 12v8" />
       </svg>
     );
   }
@@ -739,7 +742,7 @@ function FloatingIcon({ type, size }: { type: 'booth' | 'sparkle' | 'badge' | 'm
       </svg>
     );
   }
-  // megaphone
+  // megaphone / talk
   return (
     <svg {...common}>
       <path d="M3 11v2a2 2 0 002 2h2l8 4V5L7 9H5a2 2 0 00-2 2z" />
