@@ -321,7 +321,7 @@ const COPY: Record<FormLocale, Copy> = {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function BoothReservationClient({ initialLocale }: { initialLocale: FormLocale }) {
-  const [lang, setLang] = useState<FormLocale>(initialLocale);
+  const lang = initialLocale;
   const t = useMemo(() => COPY[lang], [lang]);
 
   const [submitting, setSubmitting] = useState(false);
@@ -449,34 +449,6 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
       <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)' }} />
 
       <main className="relative z-10 mx-auto w-full max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
-        {/* Top bar: lang + back */}
-        <div className="bk-rise mb-10 flex flex-wrap items-center justify-between gap-3">
-          <Link
-            href={`/${lang}`}
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/70 backdrop-blur-sm transition hover:border-white/30 hover:bg-white/10"
-          >
-            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>
-            {t.back}
-          </Link>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 p-1 backdrop-blur-sm">
-            <span className="px-2 text-[0.6rem] font-bold uppercase tracking-[0.25em] text-white/40">{t.langLabel}</span>
-            {(['fr', 'en', 'de'] as FormLocale[]).map((code) => (
-              <button
-                key={code}
-                type="button"
-                onClick={() => setLang(code)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase transition ${
-                  lang === code
-                    ? 'bg-accent text-[#1a0606] shadow-[0_4px_14px_rgba(233,140,11,0.4)]'
-                    : 'text-white/60 hover:text-white'
-                }`}
-              >
-                {code}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* HERO */}
         <section className="bk-rise text-center" style={{ animationDelay: '0.1s' }}>
           <span className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.25em] text-accent backdrop-blur-sm">
