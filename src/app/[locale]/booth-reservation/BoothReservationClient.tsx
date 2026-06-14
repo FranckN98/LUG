@@ -43,6 +43,7 @@ type Copy = {
     exhibitionMaterialsPh: string;
     equipmentNeeds: string;
     equipmentOptions: { value: string; label: string }[];
+    equipmentOtherPh: string;
     peopleCount: string;
     peopleCountOptions: string[];
     peopleNames: string;
@@ -121,13 +122,11 @@ const COPY: Record<FormLocale, Copy> = {
       exhibitionMaterialsPh: 'Catalogue, échantillons, écran vidéo, brochures…',
       equipmentNeeds: 'Avez-vous besoin d’un équipement particulier ?',
       equipmentOptions: [
-        { value: 'table', label: 'Table' },
-        { value: 'chair', label: 'Chaise' },
         { value: 'power', label: 'Prise électrique' },
-        { value: 'rollup', label: 'Espace pour roll-up' },
         { value: 'internet', label: 'Connexion internet' },
         { value: 'other', label: 'Autre' },
       ],
+      equipmentOtherPh: 'Précisez votre besoin (matériel, dimension, etc.)',
       peopleCount: 'Combien de personnes seront présentes sur le stand ?',
       peopleCountOptions: ['1', '2', '3', 'Plus de 3'],
       peopleNames: 'Nom des personnes présentes sur le stand',
@@ -203,13 +202,11 @@ const COPY: Record<FormLocale, Copy> = {
       exhibitionMaterialsPh: 'Catalogue, samples, video screen, brochures…',
       equipmentNeeds: 'Do you need any specific equipment?',
       equipmentOptions: [
-        { value: 'table', label: 'Table' },
-        { value: 'chair', label: 'Chair' },
         { value: 'power', label: 'Power socket' },
-        { value: 'rollup', label: 'Space for roll-up banner' },
         { value: 'internet', label: 'Internet connection' },
         { value: 'other', label: 'Other' },
       ],
+      equipmentOtherPh: 'Please specify (item, size, etc.)',
       peopleCount: 'How many people will be present at the booth?',
       peopleCountOptions: ['1', '2', '3', 'More than 3'],
       peopleNames: 'Names of the people present at the booth',
@@ -286,13 +283,11 @@ const COPY: Record<FormLocale, Copy> = {
       exhibitionMaterialsPh: 'Katalog, Muster, Bildschirm, Broschüren…',
       equipmentNeeds: 'Benötigen Sie spezielles Equipment?',
       equipmentOptions: [
-        { value: 'table', label: 'Tisch' },
-        { value: 'chair', label: 'Stuhl' },
         { value: 'power', label: 'Steckdose' },
-        { value: 'rollup', label: 'Platz für Roll-up' },
         { value: 'internet', label: 'Internetverbindung' },
         { value: 'other', label: 'Sonstiges' },
       ],
+      equipmentOtherPh: 'Bitte angeben (Material, Größe etc.)',
       peopleCount: 'Wie viele Personen werden am Stand anwesend sein?',
       peopleCountOptions: ['1', '2', '3', 'Mehr als 3'],
       peopleNames: 'Namen der Personen am Stand',
@@ -337,6 +332,7 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
   const [visitorTakeaway, setVisitorTakeaway] = useState('');
   const [exhibitionMaterials, setExhibitionMaterials] = useState('');
   const [equipmentNeeds, setEquipmentNeeds] = useState<string[]>([]);
+  const [equipmentOther, setEquipmentOther] = useState('');
   const [peopleCount, setPeopleCount] = useState('');
   const [peopleNames, setPeopleNames] = useState('');
   const [websiteOrSocial, setWebsiteOrSocial] = useState('');
@@ -387,7 +383,9 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
           brandDescription,
           visitorTakeaway,
           exhibitionMaterials,
-          equipmentNeeds,
+          equipmentNeeds: equipmentNeeds.includes('other') && equipmentOther.trim()
+            ? [...equipmentNeeds.filter((v) => v !== 'other'), `other: ${equipmentOther.trim()}`]
+            : equipmentNeeds,
           peopleCount,
           peopleNames,
           websiteOrSocial,
@@ -519,7 +517,7 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
               {/* Section: logistics */}
               <FieldSection title={t.form.sectionExtras}>
                 <Field label={t.form.equipmentNeeds} reqLabel={t.form.optional} full>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                     {t.form.equipmentOptions.map((o) => {
                       const active = equipmentNeeds.includes(o.value);
                       return (
@@ -539,6 +537,15 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
                       );
                     })}
                   </div>
+                  {equipmentNeeds.includes('other') && (
+                    <input
+                      className={inputCls + ' mt-3'}
+                      value={equipmentOther}
+                      onChange={(e) => setEquipmentOther(e.target.value)}
+                      placeholder={t.form.equipmentOtherPh}
+                      maxLength={200}
+                    />
+                  )}
                 </Field>
 
                 <Field label={t.form.peopleCount} required reqLabel={t.form.required}>
