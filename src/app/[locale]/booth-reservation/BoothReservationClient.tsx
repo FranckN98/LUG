@@ -470,13 +470,6 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
           </a>
         </section>
 
-        {/* INFO */}
-        <section className="bk-rise mx-auto mt-16 max-w-3xl rounded-3xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm sm:p-8" style={{ animationDelay: '0.2s' }}>
-          <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-accent/70">{t.info.eyebrow}</p>
-          <h2 className="mt-2 font-display text-2xl font-bold text-white sm:text-3xl">{t.info.title}</h2>
-          <p className="mt-4 text-sm leading-relaxed text-white/70 sm:text-base">{t.info.body(t.info.deadline)}</p>
-        </section>
-
         {/* FORM or CONFIRM */}
         <section id="booth-form" className="bk-rise mt-16 scroll-mt-24" style={{ animationDelay: '0.3s' }}>
           {confirmed ? (
