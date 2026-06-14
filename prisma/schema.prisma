@@ -456,6 +456,7 @@ model Event {
   contactInstagram     String?                  @map("contact_instagram")
   showPrice            Boolean                  @default(true) @map("show_price")
   priceBlurred         Boolean                  @default(false) @map("price_blurred")
+  showProgramme        Boolean                  @default(true) @map("show_programme")
   ticketingStatus      String                   @default("coming_soon") @map("ticketing_status")
   publishedAt          DateTime?                @map("published_at")
   venueId              String?                  @map("venue_id")

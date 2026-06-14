@@ -130,6 +130,7 @@ function createInitialForm(event?: EditorEvent): EventFormPayload {
     sortOrder: event?.sortOrder ?? 0,
     showPrice: event?.showPrice ?? false,
     priceBlurred: event?.priceBlurred ?? false,
+    showProgramme: event?.showProgramme ?? true,
     heroBackgroundImage: event?.heroBackgroundImage ?? '',
     contactEmail: event?.contactEmail ?? '',
     contactPhone: event?.contactPhone ?? '',
@@ -623,6 +624,13 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
           </SectionCard>
 
           <SectionCard id="event-programme" eyebrow="Programme" title="Programme principal">
+            <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/80">
+              <input type="checkbox" checked={formData.showProgramme} onChange={(e) => updateField('showProgramme', e.target.checked)} />
+              <span>
+                <span className="font-semibold text-white">Afficher le programme sur la page publique</span>
+                <span className="ml-2 text-xs text-white/55">Décochez pour masquer entièrement la section « Programme de la journée ».</span>
+              </span>
+            </label>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">Titre du programme</label>

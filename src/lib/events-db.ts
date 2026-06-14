@@ -132,6 +132,7 @@ export type EventFormPayload = {
   sortOrder: number;
   showPrice: boolean;
   priceBlurred: boolean;
+  showProgramme: boolean;
   heroBackgroundImage: string;
   contactEmail: string;
   contactPhone: string;
@@ -460,6 +461,7 @@ export function normalizeEventPayload(input: unknown): EventFormPayload {
     sortOrder: integer(record.sortOrder, 0),
     showPrice: bool(record.showPrice, false),
     priceBlurred: bool(record.priceBlurred, false),
+    showProgramme: bool(record.showProgramme, true),
     heroBackgroundImage: text(record.heroBackgroundImage),
     contactEmail: text(record.contactEmail),
     contactPhone: text(record.contactPhone),
@@ -902,6 +904,7 @@ export async function createEventRecord(payload: EventFormPayload) {
         contactInstagram: payload.contactInstagram || null,
         showPrice: payload.showPrice,
         priceBlurred: payload.priceBlurred,
+        showProgramme: payload.showProgramme,
         publishedAt: payload.status === 'published' ? new Date() : null,
         venueId,
       },
@@ -933,6 +936,7 @@ export async function updateEventRecord(eventId: string, payload: EventFormPaylo
         contactInstagram: payload.contactInstagram || null,
         showPrice: payload.showPrice,
         priceBlurred: payload.priceBlurred,
+        showProgramme: payload.showProgramme,
         publishedAt: payload.status === 'published' ? new Date() : null,
         venueId,
       },
@@ -1010,6 +1014,7 @@ export function serializeEventForForm(event: EventWithRelations): EventFormPaylo
     sortOrder: event.sortOrder,
     showPrice: event.showPrice,
     priceBlurred: event.priceBlurred,
+    showProgramme: event.showProgramme,
     heroBackgroundImage: event.heroImageUrl || '',
     contactEmail: event.contactEmail || '',
     contactPhone: event.contactPhone || '',
@@ -1109,6 +1114,7 @@ export function mapEventToEventData(event: EventWithRelations, locale: Locale): 
     programmeSubtitle: isUpcoming ? undefined : content.programmeSubtitle || undefined,
     showPrice: shouldShowPrice,
     priceBlurred: form.priceBlurred,
+    showProgramme: form.showProgramme,
     price: content.price || undefined,
     heroBackgroundImage: form.heroBackgroundImage || undefined,
     audience: content.audience || undefined,

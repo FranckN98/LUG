@@ -323,7 +323,7 @@ export function EditionContent({
         </section>
       )}
 
-      {(hasBlocks || hasFlat) && (
+      {data.showProgramme !== false && (hasBlocks || hasFlat) && (
         <section>
           <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
             <IconCalendar />

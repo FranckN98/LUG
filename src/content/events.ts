@@ -36,6 +36,8 @@ export type EventData = {
   showPrice?: boolean;
   /** Placeholder visuel flouté (ex. 2026 avant annonce officielle). */
   priceBlurred?: boolean;
+  /** Si false, la section « Programme de la journée » est masquée sur la page publique. */
+  showProgramme?: boolean;
   price?: string;
   /** Image de fond optionnelle sous le dégradé (ex. bannière promo). */
   heroBackgroundImage?: string;
