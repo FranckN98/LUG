@@ -26,9 +26,9 @@ export async function POST(req: NextRequest) {
     const additionalComment = clean(body.additionalComment) || null;
     const locale = ['fr', 'en', 'de'].includes(String(body.locale)) ? String(body.locale) : null;
 
-    const equipmentNeedsRaw = Array.isArray(body.equipmentNeeds) ? body.equipmentNeeds : [];
+    const equipmentNeedsRaw: unknown[] = Array.isArray(body.equipmentNeeds) ? body.equipmentNeeds : [];
     const equipmentNeeds = equipmentNeedsRaw
-      .map((v) => clean(v, 100))
+      .map((v: unknown) => clean(v, 100))
       .filter(Boolean)
       .slice(0, 20)
       .join(', ') || null;
