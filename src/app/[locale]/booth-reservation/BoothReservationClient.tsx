@@ -459,13 +459,6 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
             <span className="bk-shimmer bk-no-motion block italic">{t.hero.highlight}</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base text-white/70 sm:text-lg">{t.hero.subtitle}</p>
-          <a
-            href="#booth-form"
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-accent px-7 py-3 text-sm font-semibold text-[#1a0606] shadow-[0_8px_30px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_10px_40px_rgba(233,140,11,0.6)]"
-          >
-            {t.hero.cta}
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
-          </a>
         </section>
 
         {/* FORM or CONFIRM */}
