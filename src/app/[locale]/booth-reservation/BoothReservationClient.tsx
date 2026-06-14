@@ -410,7 +410,7 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
   }
 
   return (
-    <div className="relative min-h-[100svh] w-full overflow-hidden text-white" style={{ background: 'radial-gradient(ellipse at 20% 0%, #3a1410 0%, #2a0c0a 35%, #1a0606 100%)' }}>
+    <div className="relative min-h-[100svh] w-full overflow-hidden text-white" style={{ background: 'radial-gradient(ellipse at 20% 0%, #7a2a1f 0%, #5a1c14 30%, #3a1109 70%, #2a0a06 100%)' }}>
       <style>{`
         @keyframes bk-orb-a { 0%,100%{transform:translate3d(-10%,-10%,0) scale(1);} 50%{transform:translate3d(15%,5%,0) scale(1.15);} }
         @keyframes bk-orb-b { 0%,100%{transform:translate3d(20%,0%,0) scale(1.1);} 50%{transform:translate3d(-15%,20%,0) scale(0.95);} }
@@ -429,10 +429,10 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
       `}</style>
 
       {/* Background — warmer, lighter, booth-themed */}
-      <div aria-hidden className="bk-no-motion pointer-events-none absolute -top-40 -left-40 h-[60vmax] w-[60vmax] rounded-full bg-[#a82323] opacity-70 blur-[120px]" style={{ animation: 'bk-orb-a 18s ease-in-out infinite' }} />
-      <div aria-hidden className="bk-no-motion pointer-events-none absolute -bottom-40 -right-40 h-[55vmax] w-[55vmax] rounded-full bg-[#E98C0B] opacity-55 blur-[140px]" style={{ animation: 'bk-orb-b 22s ease-in-out infinite' }} />
-      <div aria-hidden className="bk-no-motion pointer-events-none absolute top-1/2 left-1/2 h-[40vmax] w-[40vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#f0a73b] opacity-30 blur-[110px]" style={{ animation: 'bk-orb-c 26s ease-in-out infinite' }} />
-      <div aria-hidden className="bk-no-motion pointer-events-none absolute top-1/2 left-1/2 h-[120vmin] w-[120vmin] rounded-full opacity-30" style={{ background: 'conic-gradient(from 0deg, transparent 0deg, rgba(233,140,11,0.45) 40deg, transparent 80deg, transparent 200deg, rgba(168,35,35,0.55) 250deg, transparent 290deg)', animation: 'bk-conic 40s linear infinite', filter: 'blur(40px)', transform: 'translate(-50%, -50%)' }} />
+      <div aria-hidden className="bk-no-motion pointer-events-none absolute -top-40 -left-40 h-[60vmax] w-[60vmax] rounded-full bg-[#d33a3a] opacity-80 blur-[120px]" style={{ animation: 'bk-orb-a 18s ease-in-out infinite' }} />
+      <div aria-hidden className="bk-no-motion pointer-events-none absolute -bottom-40 -right-40 h-[55vmax] w-[55vmax] rounded-full bg-[#f4a83a] opacity-70 blur-[140px]" style={{ animation: 'bk-orb-b 22s ease-in-out infinite' }} />
+      <div aria-hidden className="bk-no-motion pointer-events-none absolute top-1/2 left-1/2 h-[40vmax] w-[40vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ffc066] opacity-40 blur-[110px]" style={{ animation: 'bk-orb-c 26s ease-in-out infinite' }} />
+      <div aria-hidden className="bk-no-motion pointer-events-none absolute top-1/2 left-1/2 h-[120vmin] w-[120vmin] rounded-full opacity-40" style={{ background: 'conic-gradient(from 0deg, transparent 0deg, rgba(244,168,58,0.55) 40deg, transparent 80deg, transparent 200deg, rgba(211,58,58,0.65) 250deg, transparent 290deg)', animation: 'bk-conic 40s linear infinite', filter: 'blur(40px)', transform: 'translate(-50%, -50%)' }} />
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
       {/* Stars / sparkles */}
@@ -486,7 +486,7 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
       </div>
 
       {/* Soft vignette (lighter than before) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.35) 100%)' }} />
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.2) 100%)' }} />
 
       <main className="relative z-10 mx-auto w-full max-w-5xl px-5 py-14 sm:px-8 sm:py-20">
         {/* HERO */}
@@ -510,7 +510,7 @@ export default function BoothReservationClient({ initialLocale }: { initialLocal
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="space-y-10 rounded-3xl border border-white/10 bg-[#1a0808]/70 p-6 backdrop-blur-md sm:p-10"
+              className="space-y-10 rounded-3xl border border-white/10 bg-[#1a0606]/85 p-6 backdrop-blur-md sm:p-10"
             >
               {/* Section: personal */}
               <FieldSection title={t.form.sectionPersonal}>
