@@ -93,9 +93,23 @@ type Props = {
   title: string;
   subtitle: string;
   t: EventsT;
+  /**
+   * Optional custom trigger. When provided, the default decorative card/button
+   * is NOT rendered; instead this function receives an `open` callback so you
+   * can wire the modal to any button anywhere (e.g. the home page).
+   */
+  renderTrigger?: (open: () => void) => React.ReactNode;
 };
 
-export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle, t }: Props) {
+export function EventPdfDownloadCta({
+  locale,
+  edition,
+  pdfPath,
+  title,
+  subtitle,
+  t,
+  renderTrigger,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
@@ -134,6 +148,17 @@ export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle,
       document.body.style.overflow = '';
     };
   }, [open]);
+
+  // Open the modal from any link pointing to "#ebook" (e.g. a hero button).
+  // Works on the same page and after navigating to a page that renders this component.
+  useEffect(() => {
+    const openFromHash = () => {
+      if (window.location.hash === '#ebook') setOpen(true);
+    };
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+    return () => window.removeEventListener('hashchange', openFromHash);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -369,7 +394,10 @@ export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle,
 
   return (
     <>
-      <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-[#1a0a0a] via-primary to-[#3d0f12] p-1 shadow-2xl shadow-primary/30">
+      {renderTrigger ? (
+        renderTrigger(() => setOpen(true))
+      ) : (
+        <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-[#1a0a0a] via-primary to-[#3d0f12] p-1 shadow-2xl shadow-primary/30">
         <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/30 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 left-1/4 h-32 w-32 rounded-full bg-accent/15 blur-2xl" />
         <div className="relative rounded-[1.35rem] bg-gradient-to-br from-white/[0.08] to-transparent px-5 py-6 sm:px-8 sm:py-8">
@@ -397,6 +425,7 @@ export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle,
           </button>
         </div>
       </section>
+      )}
       {modal}
     </>
   );

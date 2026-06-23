@@ -10,6 +10,7 @@ import { adminNotify } from '@/app/admin/components/AdminToaster';
 const SITE_ROUTES = [
   { label: 'Accueil', value: '/' },
   { label: 'Événements', value: '/events' },
+  { label: 'Télécharger le livre (eBook)', value: '/events#ebook' },
   { label: 'Conférence annuelle', value: '/annual-conference' },
   { label: 'Workshops', value: '/programme/workshops' },
   { label: 'Mentoring', value: '/programme/mentoring' },
