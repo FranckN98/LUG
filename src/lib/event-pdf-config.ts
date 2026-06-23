@@ -2,8 +2,8 @@ import type { EventEdition } from '@/content/events';
 
 /** Public canonical PDF URLs (served by /pdf/[slug] under www.levelupingermany.com). */
 export const EVENT_PDF_PATH: Record<EventEdition, string> = {
-  '2025': '/pdf/livre-1re-edition',
-  '2026': '/pdf/livre-1re-edition',
+  '2025': 'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
+  '2026': 'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
 };
 
 /** Stored in DB `source` for segmentation / campaigns */

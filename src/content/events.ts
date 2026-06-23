@@ -175,7 +175,7 @@ const eventsContent: Record<
       gallery: [...gallery2025],
       videos: [],
       showPrice: false,
-      firstEditionBookUrl: '/pdf/livre-1re-edition',
+      firstEditionBookUrl: 'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
     },
     edition2026: {
       programme: [],
@@ -198,7 +198,7 @@ const eventsContent: Record<
       dateShort: '2026',
       gallery: [...EVENT_2026_GALLERY_PATHS],
       videos: [],
-      firstEditionBookUrl: '/pdf/livre-1re-edition',
+      firstEditionBookUrl: 'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
     },
   },
   en: {
@@ -263,7 +263,7 @@ const eventsContent: Record<
       gallery: [...gallery2025],
       videos: [],
       showPrice: false,
-      firstEditionBookUrl: '/pdf/livre-1re-edition',
+      firstEditionBookUrl: 'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
     },
     edition2026: {
       programme: [],
@@ -286,7 +286,7 @@ const eventsContent: Record<
       dateShort: '2026',
       gallery: [...EVENT_2026_GALLERY_PATHS],
       videos: [],
-      firstEditionBookUrl: '/pdf/livre-1re-edition',
+      firstEditionBookUrl: 'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
     },
   },
   fr: {
@@ -351,7 +351,7 @@ const eventsContent: Record<
       gallery: [...gallery2025],
       videos: [],
       showPrice: false,
-      firstEditionBookUrl: '/pdf/livre-1re-edition',
+      firstEditionBookUrl: 'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
     },
     edition2026: {
       programme: [],
@@ -374,7 +374,7 @@ const eventsContent: Record<
       dateShort: '2026',
       gallery: [...EVENT_2026_GALLERY_PATHS],
       videos: [],
-      firstEditionBookUrl: '/pdf/livre-1re-edition',
+      firstEditionBookUrl: 'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
     },
   },
 };

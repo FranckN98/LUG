@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
 import { buildUniqueSlug } from '@/lib/sponsorDocuments';
 
-const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
+const MAX_SIZE = 100 * 1024 * 1024; // 100 MB (covers full book PDFs)
 const ALLOWED_TYPES = new Set(['application/pdf']);
 
 const useBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
@@ -59,6 +59,70 @@ export async function POST(request: Request) {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
+  const contentType = request.headers.get('content-type') || '';
+
+  // ── Path A — Finalize a client-direct upload (browser → Vercel Blob) ──
+  // Body: { url, filename, size, mimeType, title?, description?, isPublic? }
+  if (contentType.includes('application/json')) {
+    let payload: {
+      url?: string;
+      filename?: string;
+      size?: number;
+      mimeType?: string;
+      title?: string;
+      description?: string;
+      isPublic?: boolean;
+    };
+    try {
+      payload = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 });
+    }
+
+    const url = (payload.url || '').trim();
+    const filename = (payload.filename || 'document.pdf').trim();
+    const size = Number(payload.size ?? 0);
+    const mimeType = (payload.mimeType || 'application/pdf').trim();
+    const title = (payload.title || '').trim();
+    const description = (payload.description || '').trim();
+    const isPublic = payload.isPublic !== false;
+
+    if (!/^https?:\/\//i.test(url)) {
+      return NextResponse.json({ error: 'URL Blob invalide.' }, { status: 400 });
+    }
+    if (!ALLOWED_TYPES.has(mimeType)) {
+      return NextResponse.json({ error: 'Seuls les fichiers PDF sont autorisés.' }, { status: 400 });
+    }
+    if (!Number.isFinite(size) || size <= 0) {
+      return NextResponse.json({ error: 'Taille invalide.' }, { status: 400 });
+    }
+    if (size > MAX_SIZE) {
+      return NextResponse.json(
+        { error: `Fichier trop lourd (max ${Math.round(MAX_SIZE / 1024 / 1024)} Mo).` },
+        { status: 400 },
+      );
+    }
+
+    const finalTitle = title || filename.replace(/\.pdf$/i, '');
+    const slug = await buildUniqueSlug(finalTitle);
+
+    const doc = await prisma.sponsorDocument.create({
+      data: {
+        title: finalTitle,
+        slug,
+        description: description || null,
+        filename,
+        url,
+        size,
+        mimeType,
+        isPublic,
+      },
+    });
+
+    return NextResponse.json(doc, { status: 201 });
+  }
+
+  // ── Path B — Legacy multipart upload (small files / local dev) ──
   let formData: FormData;
   try {
     formData = await request.formData();

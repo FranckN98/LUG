@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { upload } from '@vercel/blob/client';
 import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type SponsorDoc = {
@@ -35,10 +36,54 @@ function buildShareUrl(doc: SponsorDoc): string {
   return `${PUBLIC_HOST}${doc.url}`;
 }
 
+/** Server-side small-file ceiling for the multipart fallback (matches Vercel's ~4.5 MB body limit). */
+const MULTIPART_SAFE_LIMIT = 4 * 1024 * 1024;
+
+function sanitiseFilename(name: string): string {
+  return (
+    name
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9.-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 100) || 'document.pdf'
+  );
+}
+
+type UploadedBlob = { url: string; size: number; mimeType: string; filename: string };
+
+async function uploadDirectToBlob(
+  file: File,
+  onProgress: (pct: number) => void,
+): Promise<UploadedBlob | 'not_configured'> {
+  const path = `sponsor-documents/${Date.now()}-${sanitiseFilename(file.name)}`;
+  try {
+    const blob = await upload(path, file, {
+      access: 'public',
+      handleUploadUrl: '/api/admin/sponsor-documents/upload-token',
+      contentType: file.type || 'application/pdf',
+      onUploadProgress: ({ percentage }) => onProgress(percentage),
+    });
+    return {
+      url: blob.url,
+      size: file.size,
+      mimeType: file.type || 'application/pdf',
+      filename: file.name,
+    };
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    // Token endpoint signals missing Blob token via 503 + JSON body.
+    if (/blob_not_configured|503/.test(msg)) return 'not_configured';
+    throw e;
+  }
+}
+
 export function SponsorDocumentsAdmin() {
   const [docs, setDocs] = useState<SponsorDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
@@ -75,13 +120,43 @@ export function SponsorDocumentsAdmin() {
     }
 
     setUploading(true);
+    setUploadProgress(0);
     try {
+      // Try direct upload to Vercel Blob first (no 4.5 MB serverless limit).
+      const direct = await uploadDirectToBlob(file, setUploadProgress);
+
+      if (direct !== 'not_configured') {
+        const res = await fetch('/api/admin/sponsor-documents', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...direct, title, description, isPublic }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          adminNotify.error(data?.error ?? "Erreur lors de l'enregistrement.");
+          return;
+        }
+        adminNotify.success('PDF ajouté.');
+        setTitle('');
+        setDescription('');
+        setIsPublic(true);
+        if (fileRef.current) fileRef.current.value = '';
+        await refresh();
+        return;
+      }
+
+      // Fallback: legacy multipart upload (local dev without Blob, small files only).
+      if (file.size > MULTIPART_SAFE_LIMIT) {
+        adminNotify.error(
+          'Upload direct indisponible (BLOB_READ_WRITE_TOKEN non configuré). Le fichier dépasse 4 Mo et ne peut pas passer par l’upload classique.',
+        );
+        return;
+      }
       const fd = new FormData();
       fd.append('file', file);
       fd.append('title', title);
       fd.append('description', description);
       fd.append('isPublic', String(isPublic));
-
       const res = await fetch('/api/admin/sponsor-documents', { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) {
@@ -94,10 +169,12 @@ export function SponsorDocumentsAdmin() {
       setIsPublic(true);
       if (fileRef.current) fileRef.current.value = '';
       await refresh();
-    } catch {
-      adminNotify.error("Erreur réseau lors de l'upload.");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Erreur réseau lors de l'upload.";
+      adminNotify.error(msg);
     } finally {
       setUploading(false);
+      setUploadProgress(null);
     }
   }
 
@@ -149,16 +226,45 @@ export function SponsorDocumentsAdmin() {
       adminNotify.error('Le fichier doit être un PDF.');
       return;
     }
-    const fd = new FormData();
-    fd.append('file', file);
-    const res = await fetch(`/api/admin/sponsor-documents/${id}/file`, { method: 'PUT', body: fd });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      adminNotify.error(data?.error ?? 'Remplacement échoué.');
-      return;
+    try {
+      const direct = await uploadDirectToBlob(file, () => undefined);
+
+      if (direct !== 'not_configured') {
+        const res = await fetch(`/api/admin/sponsor-documents/${id}/file`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(direct),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          adminNotify.error(data?.error ?? 'Remplacement échoué.');
+          return;
+        }
+        adminNotify.success('Fichier remplacé.');
+        refresh();
+        return;
+      }
+
+      if (file.size > MULTIPART_SAFE_LIMIT) {
+        adminNotify.error(
+          'Upload direct indisponible (BLOB_READ_WRITE_TOKEN non configuré). Le fichier dépasse 4 Mo.',
+        );
+        return;
+      }
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/api/admin/sponsor-documents/${id}/file`, { method: 'PUT', body: fd });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        adminNotify.error(data?.error ?? 'Remplacement échoué.');
+        return;
+      }
+      adminNotify.success('Fichier remplacé.');
+      refresh();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Remplacement échoué.';
+      adminNotify.error(msg);
     }
-    adminNotify.success('Fichier remplacé.');
-    refresh();
   }
 
   async function copyLink(doc: SponsorDoc) {
@@ -230,9 +336,25 @@ export function SponsorDocumentsAdmin() {
             disabled={uploading}
             className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black hover:bg-accent/90 disabled:opacity-50"
           >
-            {uploading ? 'Envoi…' : 'Téléverser'}
+            {uploading
+              ? uploadProgress !== null && uploadProgress < 100
+                ? `Envoi… ${Math.round(uploadProgress)}%`
+                : 'Finalisation…'
+              : 'Téléverser'}
           </button>
         </div>
+        {uploading && uploadProgress !== null && (
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full bg-accent transition-[width] duration-150"
+              style={{ width: `${Math.max(2, Math.min(100, uploadProgress))}%` }}
+            />
+          </div>
+        )}
+        <p className="text-xs text-white/40">
+          Taille max : 100 Mo. Les fichiers volumineux sont envoyés directement vers Vercel Blob (pas via l’API), donc les
+          gros PDF (livre complet, etc.) passent sans souci en production.
+        </p>
       </form>
 
       {/* List */}
