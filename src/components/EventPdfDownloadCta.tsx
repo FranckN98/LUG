@@ -187,10 +187,8 @@ export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle,
       setStatus('success');
       setCaptchaToken(null);
       setTurnstileKey((k) => k + 1);
-      if (data.pdfPath && typeof window !== 'undefined') {
-        const url = `${window.location.origin}${data.pdfPath}`;
-        window.open(url, '_blank', 'noopener,noreferrer');
-      }
+      // Intentionally no auto-open: the user retrieves the PDF via the
+      // download button inside the confirmation email.
     } catch {
       setDisplayError(i18n.genericError);
       setStatus('error');
