@@ -138,7 +138,7 @@ const eventsContent: Record<
     pdfSubmitLabel: 'PDF erhalten',
     pdfSendingLabel: 'Wird gesendet…',
     pdfSuccessMessage:
-      'Danke! Prüfen Sie Ihre E-Mails — wir haben den Link zum PDF gesendet. Der Download wurde in einem neuen Tab geöffnet.',
+      'Erfolgreich gesendet. Der Download-Link wurde an Ihre E-Mail-Adresse verschickt.',
     pdfConsentLabel:
       'Ich möchte Neuigkeiten zu Level Up erhalten und habe die Datenschutzerklärung zur Kenntnis genommen (optional).',
     pdfPrivacyLinkText: 'Datenschutz',
@@ -226,7 +226,7 @@ const eventsContent: Record<
     pdfSubmitLabel: 'Receive the PDF',
     pdfSendingLabel: 'Sending…',
     pdfSuccessMessage:
-      'Thank you! Check your inbox — we sent the PDF link. The download should have opened in a new tab.',
+      'Sent successfully. The download link has been emailed to you.',
     pdfConsentLabel:
       'I would like to receive updates about Level Up and I have read the privacy policy (optional).',
     pdfPrivacyLinkText: 'Privacy',
@@ -314,7 +314,7 @@ const eventsContent: Record<
     pdfSubmitLabel: 'Recevoir le PDF',
     pdfSendingLabel: 'Envoi en cours…',
     pdfSuccessMessage:
-      'Merci ! Vérifiez votre boîte mail — nous avons envoyé le lien vers le PDF. Le téléchargement s’est ouvert dans un nouvel onglet.',
+      'Envoi réussi. Le lien de téléchargement a bien été envoyé.',
     pdfConsentLabel:
       'Je souhaite recevoir des actualités sur Level Up et j’ai pris connaissance de la politique de confidentialité (optionnel).',
     pdfPrivacyLinkText: 'Confidentialité',

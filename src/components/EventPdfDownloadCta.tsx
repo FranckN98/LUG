@@ -60,7 +60,7 @@ const MODAL_I18N: Record<
       'Email not configured (RESEND_API_KEY in .env.local). Please contact the site admin.',
     emailSendFailed:
       'The mail service rejected the message. In Resend, check your domain, sender address, and recipient.',
-    genericError: 'Something went wrong. Please try again.',
+    genericError: 'Sending failed. Please try again.',
     invalidEmail: 'Please enter a valid email address.',
     rateLimited: 'Too many requests. Please try again later.',
     blocked: 'Please wait a moment and submit the form again.',
@@ -74,7 +74,7 @@ const MODAL_I18N: Record<
       "Envoi non configuré (RESEND_API_KEY dans .env.local). Contactez l'administrateur du site.",
     emailSendFailed:
       "Le service mail a refusé l'envoi. Vérifiez dans Resend : domaine, expéditeur et destinataire.",
-    genericError: 'Échec. Réessayez.',
+    genericError: 'L’envoi a échoué. Veuillez réessayer.',
     invalidEmail: 'Veuillez saisir une adresse e-mail valide.',
     rateLimited: 'Trop de demandes. Réessayez plus tard.',
     blocked: 'Attendez un instant et renvoyez le formulaire.',
@@ -233,7 +233,37 @@ export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle,
           </h2>
           <p className="mt-2 text-sm text-white/70">{t.pdfModalIntro}</p>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          {status === 'success' ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mt-6 flex flex-col items-center gap-4 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-5 py-6 text-center"
+            >
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/20 ring-2 ring-emerald-400/40">
+                <svg
+                  className="h-7 w-7 text-emerald-300"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+              <p className="text-base font-semibold text-emerald-100">
+                {t.pdfSuccessMessage}
+              </p>
+              <button
+                type="button"
+                onClick={close}
+                className="mt-1 w-full rounded-xl bg-white/10 py-3 text-sm font-bold text-white transition hover:bg-white/15"
+              >
+                {i18n.close}
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <input
               type="text"
               name="website"
@@ -298,17 +328,33 @@ export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle,
               {status === 'sending' ? t.pdfSendingLabel : t.pdfSubmitLabel}
             </button>
 
-            {status === 'success' && (
-              <p className="text-sm text-emerald-300/95" role="status">
-                {t.pdfSuccessMessage}
-              </p>
-            )}
             {status === 'error' && (
-              <p className="text-sm text-red-300/95" role="alert">
-                {displayError ?? i18n.genericError}
-              </p>
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="flex items-start gap-3 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3"
+              >
+                <svg
+                  className="mt-0.5 h-5 w-5 shrink-0 text-red-300"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.2}
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                  />
+                </svg>
+                <p className="text-sm font-medium text-red-100">
+                  {displayError ?? i18n.genericError}
+                </p>
+              </div>
             )}
           </form>
+          )}
         </div>
       </div>,
       document.body
