@@ -28,6 +28,14 @@ interface LocalisedCopy {
 const SITE_URL = 'https://www.levelupingermany.com';
 const CONTACT_EMAIL = 'info@levelupingermany.com';
 
+/** Canonical public download link for the 1st-edition book (kept verbatim). */
+const BOOK_PDF_URL =
+  'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf';
+
+/** Inline "click here" anchor in brand blue, shown inside the email body. */
+const inlineDownloadLink = (label: string) =>
+  `<a href="${BOOK_PDF_URL}" style="color:#1a73e8;font-weight:600;text-decoration:underline">${label}</a>`;
+
 function safeFirstName(name?: string | null): string | null {
   if (!name) return null;
   const trimmed = name.trim();
@@ -55,7 +63,9 @@ Merci infiniment pour votre intérêt pour <strong>Level Up in Germany</strong>.
   <li>et un aperçu de ce qui vous attend lors de la <strong>prochaine édition</strong>.</li>
 </ul>
 
-Cliquez sur le bouton ci-dessous pour ouvrir et télécharger votre exemplaire :`,
+Cliquez sur le bouton ci-dessous pour ouvrir et télécharger votre exemplaire :
+
+<p style="margin:0 0 16px;line-height:1.7">Ou ${inlineDownloadLink('cliquez ici pour télécharger')} directement.</p>`,
     ctaText: 'Télécharger le livre (PDF)',
     tagline: 'Ose être différent.',
     textVersion: ({ firstName, pdfUrl, waUrl }) => `Bonjour ${firstName ?? ''},
@@ -94,7 +104,9 @@ Inside, you will find:
   <li>and a preview of what is coming for the <strong>next edition</strong>.</li>
 </ul>
 
-Click the button below to open and download your copy:`,
+Click the button below to open and download your copy:
+
+<p style="margin:0 0 16px;line-height:1.7">Or ${inlineDownloadLink('click here to download')} directly.</p>`,
     ctaText: 'Download the book (PDF)',
     tagline: 'Dare to be different.',
     textVersion: ({ firstName, pdfUrl, waUrl }) => `Hello ${firstName ?? ''},
@@ -133,7 +145,9 @@ Das erwartet Sie darin:
   <li>und ein Ausblick auf die <strong>nächste Ausgabe</strong>.</li>
 </ul>
 
-Klicken Sie auf den Button unten, um Ihr Exemplar zu öffnen und herunterzuladen:`,
+Klicken Sie auf den Button unten, um Ihr Exemplar zu öffnen und herunterzuladen:
+
+<p style="margin:0 0 16px;line-height:1.7">Oder ${inlineDownloadLink('hier herunterladen')} klicken.</p>`,
     ctaText: 'Buch herunterladen (PDF)',
     tagline: 'Wage, anders zu sein.',
     textVersion: ({ firstName, pdfUrl, waUrl }) => `Hallo ${firstName ?? ''},
