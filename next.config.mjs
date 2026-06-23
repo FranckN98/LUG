@@ -38,6 +38,20 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    // Branded download URL: https://www.levelupingermany.com/ebook.pdf
+    // Transparently serves the 1st-edition book from Vercel Blob while keeping
+    // the short, on-domain link in the browser address bar and in emails.
+    return {
+      beforeFiles: [
+        {
+          source: '/ebook.pdf',
+          destination:
+            'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
+        },
+      ],
+    };
+  },
 };
 
 export default nextConfig;
