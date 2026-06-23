@@ -29,6 +29,7 @@ const MODAL_I18N: Record<
     captchaHint: string;
     captchaRequired: string;
     captchaFailed: string;
+    consentRequired: string;
     emailNotConfigured: string;
     emailSendFailed: string;
     genericError: string;
@@ -42,6 +43,7 @@ const MODAL_I18N: Record<
     captchaHint: 'Sicherheitsprüfung',
     captchaRequired: 'Bitte bestätigen Sie die Sicherheitsprüfung.',
     captchaFailed: 'Sicherheitsprüfung fehlgeschlagen. Bitte erneut versuchen.',
+    consentRequired: 'Bitte bestätigen Sie das Kästchen, um das PDF zu erhalten.',
     emailNotConfigured:
       'E-Mail-Versand nicht konfiguriert (RESEND_API_KEY in .env.local). Bitte den Betreiber kontaktieren.',
     emailSendFailed:
@@ -56,6 +58,7 @@ const MODAL_I18N: Record<
     captchaHint: 'Security check',
     captchaRequired: 'Please complete the security check.',
     captchaFailed: 'Security check failed. Please try again.',
+    consentRequired: 'Please tick the box to receive the PDF.',
     emailNotConfigured:
       'Email not configured (RESEND_API_KEY in .env.local). Please contact the site admin.',
     emailSendFailed:
@@ -70,6 +73,7 @@ const MODAL_I18N: Record<
     captchaHint: 'Vérification de sécurité',
     captchaRequired: 'Veuillez compléter la vérification de sécurité.',
     captchaFailed: 'Échec de la vérification. Réessayez.',
+    consentRequired: 'Veuillez cocher la case pour recevoir le PDF.',
     emailNotConfigured:
       "Envoi non configuré (RESEND_API_KEY dans .env.local). Contactez l'administrateur du site.",
     emailSendFailed:
@@ -137,6 +141,11 @@ export function EventPdfDownloadCta({ locale, edition, pdfPath, title, subtitle,
     const trimmed = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       setDisplayError(i18n.invalidEmail);
+      setStatus('error');
+      return;
+    }
+    if (!consent) {
+      setDisplayError(i18n.consentRequired);
       setStatus('error');
       return;
     }
