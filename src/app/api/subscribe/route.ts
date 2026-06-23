@@ -134,11 +134,12 @@ export async function POST(req: Request) {
     }
 
     const pdfAbsolute = /^https?:\/\//i.test(pdfPath) ? pdfPath : absolutePdfUrl(pdfPath);
+    const dedupedPdf = pdfAbsolute.replace(/^(https?:\/\/.+?)\1$/i, '$1');
     const subscriberFirstName =
       existing?.firstName?.trim() || parsedName.firstName || null;
     await sendNewsletterPdfEmail({
       toEmail: email,
-      pdfAbsoluteUrl: pdfAbsolute,
+      pdfAbsoluteUrl: dedupedPdf,
       locale: detectedLocale,
       firstName: subscriberFirstName,
       edition: knownEdition ?? edition,

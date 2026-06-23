@@ -164,6 +164,26 @@ export interface NewsletterPdfEmailParams {
 }
 
 /**
+ * Collapse an accidentally self-doubled URL (e.g. "https://x/a.pdfhttps://x/a.pdf")
+ * back to a single canonical URL. Defensive: keeps the email link valid even if an
+ * upstream caller concatenates the path twice.
+ */
+function normalisePdfUrl(raw: string): string {
+  const url = (raw || '').trim();
+  if (!url) return url;
+  const half = url.length / 2;
+  if (Number.isInteger(half)) {
+    const first = url.slice(0, half);
+    const second = url.slice(half);
+    if (first === second && /^https?:\/\//i.test(first)) return first;
+  }
+  // Generic case: two absolute URLs concatenated → keep the first.
+  const dupe = url.match(/^(https?:\/\/.+?)(https?:\/\/.+)$/i);
+  if (dupe && dupe[1] === dupe[2]) return dupe[1];
+  return url;
+}
+
+/**
  * Sends the localised, branded "your book is ready" e-mail via Resend.
  *
  * Throws:
@@ -189,6 +209,7 @@ export async function sendNewsletterPdfEmail(
   const edition = (params.edition ?? '2025').trim() || '2025';
   const firstName = safeFirstName(params.firstName);
   const copy = COPY[locale];
+  const pdfUrl = normalisePdfUrl(params.pdfAbsoluteUrl);
 
   const waUrl = await getLinktreeWhatsAppUrl();
 
@@ -210,7 +231,7 @@ export async function sendNewsletterPdfEmail(
       subject,
       body: copy.body(firstName),
       ctaText: copy.ctaText,
-      ctaLink: params.pdfAbsoluteUrl,
+      ctaLink: pdfUrl,
       headerImageUrl: `${SITE_URL}/logo.png`,
       footerContact: `Level Up in Germany · ${CONTACT_EMAIL}`,
       language: locale,
@@ -229,7 +250,7 @@ export async function sendNewsletterPdfEmail(
       `${match}<span style="display:none !important;opacity:0;visibility:hidden;max-height:0;max-width:0;overflow:hidden;color:transparent">${copy.previewText}</span>`,
   );
 
-  const text = copy.textVersion({ firstName, pdfUrl: params.pdfAbsoluteUrl, waUrl });
+  const text = copy.textVersion({ firstName, pdfUrl, waUrl });
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
