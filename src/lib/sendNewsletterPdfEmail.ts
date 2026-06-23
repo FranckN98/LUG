@@ -1,107 +1,178 @@
-function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+/**
+ * Transactional confirmation e-mail sent after someone signs up to download
+ * the Level Up in Germany event book (1ère édition / 2025).
+ *
+ * Uses the shared branded template (`renderEmailHtml`) so the e-mail matches
+ * the rest of the site: gradient hero with the logo, accent CTA button,
+ * social footer, signature. Localised to the visitor's detected language
+ * (fr / en / de) with personalised greeting when a first name is known.
+ */
+
+import type { SocialLinks } from '@/types/emailTemplate';
+import { renderEmailHtml } from '@/lib/emailTemplateRenderer';
+import { FOOTER_COPY } from '@/lib/emailCategoryTemplates';
+import { SOCIAL_LINKS } from '@/data/social';
+import { getLinktreeWhatsAppUrl } from '@/lib/linktreeWhatsApp';
+
+type Locale = 'fr' | 'en' | 'de';
+
+interface LocalisedCopy {
+  subject: (firstName: string | null, edition: string) => string;
+  previewText: string;
+  body: (firstName: string | null) => string;
+  ctaText: string;
+  tagline: string;
+  textVersion: (params: { firstName: string | null; pdfUrl: string; waUrl: string }) => string;
 }
 
-import { emailLinksFooterHtml, emailLinksFooterText, emailHeaderLogoHtml } from './emailFooter';
-import { getLinktreeWhatsAppUrl } from './linktreeWhatsApp';
+const SITE_URL = 'https://www.levelupingermany.com';
+const CONTACT_EMAIL = 'info@levelupingermany.com';
 
-const SUBJECT =
-  'Merci pour votre intérêt · Thank you for your interest · Vielen Dank für Ihr Interesse — Level Up in Germany';
+function safeFirstName(name?: string | null): string | null {
+  if (!name) return null;
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+  return trimmed.length > 30 ? null : trimmed;
+}
 
-const BODY_TEXT = (pdfUrl: string, waUrl: string) =>
-  `=== Français ===
+const COPY: Record<Locale, LocalisedCopy> = {
+  fr: {
+    subject: (firstName, edition) =>
+      firstName
+        ? `Merci ${firstName} — votre livre Level Up ${edition} est prêt à télécharger`
+        : `Merci pour votre intérêt — votre livre Level Up ${edition} est prêt`,
+    previewText:
+      "Téléchargez le livre de la 1ère édition de Level Up in Germany — rétrospective, temps forts et inspirations.",
+    body: (firstName) => `Bonjour ${firstName ?? ''},
 
-Bonjour,
+Merci infiniment pour votre intérêt pour <strong>Level Up in Germany</strong>. Votre demande a bien été reçue et le livre de notre 1ère édition est prêt à être téléchargé.
 
-Merci pour votre intérêt pour notre événement Level Up in Germany.
+À l'intérieur, vous retrouverez :
+<ul style="margin:8px 0 18px;padding-left:22px;line-height:1.7">
+  <li>les <strong>temps forts</strong> de l'événement,</li>
+  <li>les <strong>témoignages</strong> et retours d'expérience des intervenants,</li>
+  <li>des <strong>insights pratiques</strong> pour faire avancer votre parcours en Allemagne,</li>
+  <li>et un aperçu de ce qui vous attend lors de la <strong>prochaine édition</strong>.</li>
+</ul>
 
-Nous avons documenté les moments clés, les insights et les échanges dans ce mini-livre que vous pouvez télécharger ici :
+Cliquez sur le bouton ci-dessous pour ouvrir et télécharger votre exemplaire :`,
+    ctaText: 'Télécharger le livre (PDF)',
+    tagline: 'Ose être différent.',
+    textVersion: ({ firstName, pdfUrl, waUrl }) => `Bonjour ${firstName ?? ''},
+
+Merci pour votre intérêt pour Level Up in Germany. Votre livre de la 1ère édition est prêt à être téléchargé :
+
 ${pdfUrl}
 
-Nous espérons que cette lecture vous apportera de la valeur et vous inspirera. Nous serions ravis de vous compter parmi nous lors de la prochaine édition.
+À l'intérieur : les temps forts de l'événement, les témoignages, des insights pratiques et un aperçu de la prochaine édition.
+
+Restez connecté(e) :
+• Site : ${SITE_URL}
+• Communauté WhatsApp : ${waUrl}
+• Contact : ${CONTACT_EMAIL}
 
 À très bientôt,
-L'équipe Level Up
+L'équipe Level Up in Germany`,
+  },
 
-=== English ===
+  en: {
+    subject: (firstName, edition) =>
+      firstName
+        ? `Thank you ${firstName} — your Level Up ${edition} book is ready to download`
+        : `Thank you for your interest — your Level Up ${edition} book is ready`,
+    previewText:
+      'Download the book from the 1st edition of Level Up in Germany — recap, highlights and takeaways.',
+    body: (firstName) => `Hello ${firstName ?? ''},
 
-Hello,
+Thank you so much for your interest in <strong>Level Up in Germany</strong>. Your request has been received and the book from our 1st edition is ready to download.
 
-Thank you for your interest in our Level Up in Germany event.
+Inside, you will find:
+<ul style="margin:8px 0 18px;padding-left:22px;line-height:1.7">
+  <li>the <strong>highlights</strong> of the event,</li>
+  <li>real <strong>stories and testimonials</strong> from our speakers and guests,</li>
+  <li><strong>practical insights</strong> to help you move forward in Germany,</li>
+  <li>and a preview of what is coming for the <strong>next edition</strong>.</li>
+</ul>
 
-We have captured the key moments, insights and conversations in this mini-book, which you can download here:
+Click the button below to open and download your copy:`,
+    ctaText: 'Download the book (PDF)',
+    tagline: 'Dare to be different.',
+    textVersion: ({ firstName, pdfUrl, waUrl }) => `Hello ${firstName ?? ''},
+
+Thank you for your interest in Level Up in Germany. Your 1st edition book is ready to download:
+
 ${pdfUrl}
 
-We hope you find it valuable and inspiring, and we would love to welcome you at our next edition.
+Inside: event highlights, speaker stories, practical insights and a preview of the next edition.
+
+Stay connected:
+• Website: ${SITE_URL}
+• WhatsApp community: ${waUrl}
+• Contact: ${CONTACT_EMAIL}
 
 See you soon,
-The Level Up team
+The Level Up in Germany Team`,
+  },
 
-=== Deutsch ===
+  de: {
+    subject: (firstName, edition) =>
+      firstName
+        ? `Vielen Dank ${firstName} — Ihr Level Up ${edition} Buch steht bereit`
+        : `Vielen Dank für Ihr Interesse — Ihr Level Up ${edition} Buch ist bereit`,
+    previewText:
+      'Laden Sie das Buch zur 1. Ausgabe von Level Up in Germany herunter — Rückblick, Highlights und Impulse.',
+    body: (firstName) => `Hallo ${firstName ?? ''},
 
-Hallo,
+vielen Dank für Ihr Interesse an <strong>Level Up in Germany</strong>. Ihre Anfrage ist bei uns angekommen und das Buch zu unserer 1. Ausgabe steht für Sie zum Download bereit.
 
-vielen Dank für Ihr Interesse an unserer Level Up in Germany Veranstaltung.
+Das erwartet Sie darin:
+<ul style="margin:8px 0 18px;padding-left:22px;line-height:1.7">
+  <li>die <strong>Highlights</strong> der Veranstaltung,</li>
+  <li><strong>Erfahrungsberichte</strong> unserer Speaker und Gäste,</li>
+  <li><strong>praktische Impulse</strong> für Ihren Weg in Deutschland,</li>
+  <li>und ein Ausblick auf die <strong>nächste Ausgabe</strong>.</li>
+</ul>
 
-Wir haben die wichtigsten Momente, Erkenntnisse und Gespräche in diesem Mini-Buch zusammengefasst, das Sie hier herunterladen können:
+Klicken Sie auf den Button unten, um Ihr Exemplar zu öffnen und herunterzuladen:`,
+    ctaText: 'Buch herunterladen (PDF)',
+    tagline: 'Wage, anders zu sein.',
+    textVersion: ({ firstName, pdfUrl, waUrl }) => `Hallo ${firstName ?? ''},
+
+vielen Dank für Ihr Interesse an Level Up in Germany. Ihr Buch zur 1. Ausgabe steht zum Download bereit:
+
 ${pdfUrl}
 
-Wir hoffen, es bringt Ihnen Mehrwert und Inspiration, und freuen uns, Sie bei der nächsten Ausgabe begrüßen zu dürfen.
+Inhalte: Highlights der Veranstaltung, Erfahrungsberichte, praktische Impulse und ein Ausblick auf die nächste Ausgabe.
+
+Bleiben Sie verbunden:
+• Website: ${SITE_URL}
+• WhatsApp-Community: ${waUrl}
+• Kontakt: ${CONTACT_EMAIL}
 
 Bis bald,
-Das Level Up Team${emailLinksFooterText(waUrl)}`;
+Das Level Up in Germany Team`,
+  },
+};
 
-const BODY_HTML = (pdfUrl: string, waUrl: string) => `
-<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f6f4f4;font-family:system-ui,Segoe UI,sans-serif;line-height:1.6;color:#1a1a1a">
-<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden">
-${emailHeaderLogoHtml()}
-<div style="padding:8px 32px 32px">
-
-  <div style="margin:8px 0 4px;font-size:11px;font-weight:700;letter-spacing:0.18em;color:#8C1A1A;text-transform:uppercase">🇫🇷 Français</div>
-  <p>Bonjour,</p>
-  <p>Merci pour votre intérêt pour notre événement Level Up in Germany.</p>
-  <p>Nous avons documenté les moments clés, les insights et les échanges dans ce mini-livre que vous pouvez télécharger ici :</p>
-  <p><a href="${esc(pdfUrl)}" style="color:#8C1A1A;font-weight:600">${esc(pdfUrl)}</a></p>
-  <p>Nous serions ravis de vous compter parmi nous lors de la prochaine édition.</p>
-  <p>À très bientôt,<br/>L'équipe Level Up</p>
-
-  <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
-
-  <div style="margin:8px 0 4px;font-size:11px;font-weight:700;letter-spacing:0.18em;color:#8C1A1A;text-transform:uppercase">🇬🇧 English</div>
-  <p>Hello,</p>
-  <p>Thank you for your interest in our Level Up in Germany event.</p>
-  <p>We have captured the key moments, insights and conversations in this mini-book, which you can download here:</p>
-  <p><a href="${esc(pdfUrl)}" style="color:#8C1A1A;font-weight:600">${esc(pdfUrl)}</a></p>
-  <p>We would love to welcome you at our next edition.</p>
-  <p>See you soon,<br/>The Level Up team</p>
-
-  <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
-
-  <div style="margin:8px 0 4px;font-size:11px;font-weight:700;letter-spacing:0.18em;color:#8C1A1A;text-transform:uppercase">🇩🇪 Deutsch</div>
-  <p>Hallo,</p>
-  <p>vielen Dank für Ihr Interesse an unserer Level Up in Germany Veranstaltung.</p>
-  <p>Wir haben die wichtigsten Momente, Erkenntnisse und Gespräche in diesem Mini-Buch zusammengefasst, das Sie hier herunterladen können:</p>
-  <p><a href="${esc(pdfUrl)}" style="color:#8C1A1A;font-weight:600">${esc(pdfUrl)}</a></p>
-  <p>Wir freuen uns, Sie bei der nächsten Ausgabe begrüßen zu dürfen.</p>
-  <p>Bis bald,<br/>Das Level Up Team</p>
-
-  ${emailLinksFooterHtml(waUrl)}
-  <hr style="border:none;border-top:1px solid #eee;margin:24px 0" />
-  <p style="font-size:12px;color:#666">Level Up in Germany · ${new Date().toISOString()}</p>
-</div>
-</div>
-</body></html>`;
+export interface NewsletterPdfEmailParams {
+  toEmail: string;
+  pdfAbsoluteUrl: string;
+  locale?: Locale;
+  firstName?: string | null;
+  /** Event edition string used in the subject line (e.g. "2025"). Defaults to "2025". */
+  edition?: string;
+}
 
 /**
- * Sends the PDF link email to the subscriber (Resend).
- * Trilingual (FR / EN / DE).
- * From address must be verified in Resend (domain or sandbox).
+ * Sends the localised, branded "your book is ready" e-mail via Resend.
+ *
+ * Throws:
+ *  - `email_not_configured` when `RESEND_API_KEY` is missing,
+ *  - `resend_failed: <status> <body>` when the Resend API rejects the request.
  */
-export async function sendNewsletterPdfEmail(toEmail: string, pdfAbsoluteUrl: string): Promise<void> {
+export async function sendNewsletterPdfEmail(
+  params: NewsletterPdfEmailParams,
+): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from =
     process.env.NEWSLETTER_FROM_EMAIL?.trim() ||
@@ -110,11 +181,55 @@ export async function sendNewsletterPdfEmail(toEmail: string, pdfAbsoluteUrl: st
 
   if (!apiKey) {
     // eslint-disable-next-line no-console
-    console.warn('[subscribe] RESEND_API_KEY manquant — e-mail non envoyé vers', toEmail);
+    console.warn('[subscribe] RESEND_API_KEY manquant — e-mail non envoyé vers', params.toEmail);
     throw new Error('email_not_configured');
   }
 
+  const locale: Locale = params.locale ?? 'fr';
+  const edition = (params.edition ?? '2025').trim() || '2025';
+  const firstName = safeFirstName(params.firstName);
+  const copy = COPY[locale];
+
   const waUrl = await getLinktreeWhatsAppUrl();
+
+  const social: SocialLinks = {
+    website: SITE_URL,
+    linkedin: SOCIAL_LINKS.linkedin,
+    instagram: SOCIAL_LINKS.instagram,
+    tiktok: SOCIAL_LINKS.tiktok,
+    youtube: '',
+    whatsapp: waUrl,
+    email: CONTACT_EMAIL,
+  };
+
+  const subject = copy.subject(firstName, edition);
+  const footer = FOOTER_COPY[locale];
+
+  const html = renderEmailHtml({
+    template: {
+      subject,
+      body: copy.body(firstName),
+      ctaText: copy.ctaText,
+      ctaLink: params.pdfAbsoluteUrl,
+      headerImageUrl: `${SITE_URL}/logo.png`,
+      footerContact: `Level Up in Germany · ${CONTACT_EMAIL}`,
+      language: locale,
+      signature: footer.signature,
+      tagline: copy.tagline,
+    },
+    social,
+    siteBaseUrl: SITE_URL,
+    language: locale,
+  });
+
+  // Hidden inbox-preview snippet — shown by Gmail/Outlook in the message list.
+  const htmlWithPreview = html.replace(
+    /<body([^>]*)>/i,
+    (match) =>
+      `${match}<span style="display:none !important;opacity:0;visibility:hidden;max-height:0;max-width:0;overflow:hidden;color:transparent">${copy.previewText}</span>`,
+  );
+
+  const text = copy.textVersion({ firstName, pdfUrl: params.pdfAbsoluteUrl, waUrl });
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -124,17 +239,25 @@ export async function sendNewsletterPdfEmail(toEmail: string, pdfAbsoluteUrl: st
     },
     body: JSON.stringify({
       from,
-      to: [toEmail],
-      subject: SUBJECT,
-      text: BODY_TEXT(pdfAbsoluteUrl, waUrl),
-      html: BODY_HTML(pdfAbsoluteUrl, waUrl),
+      to: [params.toEmail],
+      subject,
+      text,
+      html: htmlWithPreview,
     }),
   });
 
   if (!res.ok) {
     const errText = await res.text();
     // eslint-disable-next-line no-console
-    console.error('[subscribe] Resend refusé:', res.status, errText, '| from:', from, '| to:', toEmail);
+    console.error(
+      '[subscribe] Resend refusé:',
+      res.status,
+      errText,
+      '| from:',
+      from,
+      '| to:',
+      params.toEmail,
+    );
     throw new Error(`resend_failed: ${res.status} ${errText}`);
   }
 }

@@ -134,7 +134,15 @@ export async function POST(req: Request) {
     }
 
     const pdfAbsolute = /^https?:\/\//i.test(pdfPath) ? pdfPath : absolutePdfUrl(pdfPath);
-    await sendNewsletterPdfEmail(email, pdfAbsolute);
+    const subscriberFirstName =
+      existing?.firstName?.trim() || parsedName.firstName || null;
+    await sendNewsletterPdfEmail({
+      toEmail: email,
+      pdfAbsoluteUrl: pdfAbsolute,
+      locale: detectedLocale,
+      firstName: subscriberFirstName,
+      edition: knownEdition ?? edition,
+    });
 
     return NextResponse.json({ ok: true, pdfPath });
   } catch (e) {
