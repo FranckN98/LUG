@@ -223,7 +223,6 @@ export async function sendNewsletterPdfEmail(
   const edition = (params.edition ?? '2025').trim() || '2025';
   const firstName = safeFirstName(params.firstName);
   const copy = COPY[locale];
-  const pdfUrl = normalisePdfUrl(params.pdfAbsoluteUrl);
 
   const waUrl = await getLinktreeWhatsAppUrl();
 
@@ -245,7 +244,7 @@ export async function sendNewsletterPdfEmail(
       subject,
       body: copy.body(firstName),
       ctaText: copy.ctaText,
-      ctaLink: pdfUrl,
+      ctaLink: BOOK_PDF_URL,
       headerImageUrl: `${SITE_URL}/logo.png`,
       footerContact: `Level Up in Germany · ${CONTACT_EMAIL}`,
       language: locale,
@@ -264,7 +263,7 @@ export async function sendNewsletterPdfEmail(
       `${match}<span style="display:none !important;opacity:0;visibility:hidden;max-height:0;max-width:0;overflow:hidden;color:transparent">${copy.previewText}</span>`,
   );
 
-  const text = copy.textVersion({ firstName, pdfUrl, waUrl });
+  const text = copy.textVersion({ firstName, pdfUrl: BOOK_PDF_URL, waUrl });
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
