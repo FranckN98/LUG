@@ -29,8 +29,7 @@ const SITE_URL = 'https://www.levelupingermany.com';
 const CONTACT_EMAIL = 'info@levelupingermany.com';
 
 /** Canonical public download link for the 1st-edition book (kept verbatim). */
-const BOOK_PDF_URL =
-  'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf';
+const BOOK_PDF_URL = 'https://www.levelupingermany.com/pdf/book';
 
 /** Inline "click here" anchor in brand blue, shown inside the email body. */
 const inlineDownloadLink = (label: string) =>
