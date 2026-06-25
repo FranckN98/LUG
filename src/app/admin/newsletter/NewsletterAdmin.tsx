@@ -100,6 +100,43 @@ const EMPTY_CAMPAIGN_FORM: CampaignFormShape = {
   attachments: [],
 };
 
+const READY_EBOOK_CAMPAIGN_FORM: CampaignFormShape = {
+  headerImageUrl: '',
+  campaignImageUrl: '',
+  ctaUrl: '/ebook.pdf',
+  translations: {
+    fr: {
+      subject: 'Revivez les moments forts de notre dernier event',
+      previewText: 'Le eBook Level Up in Germany est prêt: revivez les temps forts de la dernière édition.',
+      titleText: 'Revivez les moments forts',
+      bodyContent:
+        '<p>Bonjour {{firstName}},</p><p>Nous sommes heureux de vous partager à nouveau notre eBook.</p><p><strong>Revivez les moments forts de notre dernier event</strong>: les interventions marquantes, les témoignages inspirants et les insights clés à retenir.</p><p>Cliquez sur le bouton ci-dessous pour ouvrir votre eBook.</p>',
+      ctaLabel: 'Revivre les moments forts (PDF)',
+      footerNote: 'Merci de faire partie de la communauté Level Up in Germany.',
+    },
+    en: {
+      subject: 'Relive the highlights of our last event',
+      previewText: 'Your Level Up in Germany eBook is ready: relive the top moments from the last edition.',
+      titleText: 'Relive the highlights',
+      bodyContent:
+        '<p>Hello {{firstName}},</p><p>We are happy to share our eBook with you again.</p><p><strong>Relive the highlights of our last event</strong>: key talks, inspiring stories and practical takeaways.</p><p>Click the button below to open your eBook.</p>',
+      ctaLabel: 'Relive the highlights (PDF)',
+      footerNote: 'Thank you for being part of the Level Up in Germany community.',
+    },
+    de: {
+      subject: 'Erleben Sie die Highlights unseres letzten Events erneut',
+      previewText:
+        'Ihr Level Up in Germany eBook ist bereit: Erleben Sie die wichtigsten Momente der letzten Ausgabe erneut.',
+      titleText: 'Highlights erneut erleben',
+      bodyContent:
+        '<p>Hallo {{firstName}},</p><p>wir freuen uns, unser eBook erneut mit Ihnen zu teilen.</p><p><strong>Erleben Sie die Highlights unseres letzten Events erneut</strong>: starke Vorträge, inspirierende Erfahrungsberichte und zentrale Impulse.</p><p>Klicken Sie auf den Button unten, um Ihr eBook zu öffnen.</p>',
+      ctaLabel: 'Highlights erneut erleben (PDF)',
+      footerNote: 'Vielen Dank, dass Sie Teil der Level Up in Germany Community sind.',
+    },
+  },
+  attachments: [],
+};
+
 const EMPTY_ADD_FORM = {
   firstName: '',
   lastName: '',
@@ -408,9 +445,9 @@ export default function NewsletterAdmin() {
   }
 
   // ── Campaign actions ───────────────────────────────────────────────────────
-  function openNewCampaign() {
+  function openNewCampaign(mode: 'blank' | 'ebook' = 'blank') {
     setEditingCampaign(null);
-    setCampaignForm(EMPTY_CAMPAIGN_FORM);
+    setCampaignForm(mode === 'ebook' ? READY_EBOOK_CAMPAIGN_FORM : EMPTY_CAMPAIGN_FORM);
     setActiveLocale('fr');
     setTranslateError('');
     setTranslateProvider(null);
@@ -1658,13 +1695,19 @@ export default function NewsletterAdmin() {
                   {campaigns.length} campagne{campaigns.length !== 1 ? 's' : ''}
                 </p>
                 <button
-                  onClick={openNewCampaign}
+                  onClick={() => openNewCampaign('blank')}
                   className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/80 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   Créer une campagne
+                </button>
+                <button
+                  onClick={() => openNewCampaign('ebook')}
+                  className="rounded-xl border border-accent/40 bg-accent/15 px-4 py-2.5 text-sm font-bold text-accent hover:bg-accent/20 transition-colors"
+                >
+                  Template eBook prêt
                 </button>
               </div>
 
@@ -1674,10 +1717,16 @@ export default function NewsletterAdmin() {
                 <div className="rounded-2xl border border-dashed border-white/10 py-16 text-center">
                   <p className="text-white/30 text-sm mb-4">Aucune campagne pour l&apos;instant.</p>
                   <button
-                    onClick={openNewCampaign}
+                    onClick={() => openNewCampaign('blank')}
                     className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/80 transition-colors"
                   >
                     Créer ma première campagne
+                  </button>
+                  <button
+                    onClick={() => openNewCampaign('ebook')}
+                    className="ml-2 rounded-xl border border-accent/40 bg-accent/15 px-5 py-2.5 text-sm font-bold text-accent hover:bg-accent/20 transition-colors"
+                  >
+                    Utiliser le template eBook prêt
                   </button>
                 </div>
               ) : (
