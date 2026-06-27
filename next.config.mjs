@@ -38,19 +38,19 @@ const nextConfig = {
       },
     ];
   },
-  async rewrites() {
+  async redirects() {
     // Branded download URL: https://www.levelupingermany.com/ebook.pdf
-    // Transparently serves the 1st-edition book from Vercel Blob while keeping
-    // the short, on-domain link in the browser address bar and in emails.
-    return {
-      beforeFiles: [
-        {
-          source: '/ebook.pdf',
-          destination:
-            'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
-        },
-      ],
-    };
+    // Uses a redirect (not a rewrite) so the browser fetches the PDF directly
+    // from Vercel Blob, bypassing the 4.5 MB serverless response-body limit
+    // that would otherwise truncate the ~35 MB file and cause a load error.
+    return [
+      {
+        source: '/ebook.pdf',
+        destination:
+          'https://ilehbjm6jtrg2e7b.public.blob.vercel-storage.com/eBook/Level%20Up%20in%20Germany%202025%20EBook.pdf',
+        permanent: false,
+      },
+    ];
   },
 };
 
