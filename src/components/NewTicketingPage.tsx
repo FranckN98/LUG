@@ -82,16 +82,16 @@ function PassCard({
 
   return (
     <div
-      className={`group relative flex flex-col rounded-3xl transition-all duration-500 ${isSoldOut ? 'opacity-60' : 'hover:-translate-y-2'}`}
+      className={`group relative flex flex-col rounded-3xl ${isSoldOut ? 'opacity-60' : ''}`}
       style={{
         background: `linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.4) 100%)`,
         boxShadow: `0 20px 60px -20px ${pass.colorPrimary}66, 0 0 0 1px ${pass.colorPrimary}40 inset`,
       }}
     >
-      {/* Glow accent on hover */}
+      {/* Permanent glow accent */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-0.5 rounded-3xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        className="pointer-events-none absolute -inset-0.5 rounded-3xl"
         style={{
           background: `linear-gradient(135deg, ${pass.colorPrimary}55, ${pass.colorSecondary}33)`,
           filter: 'blur(20px)',
