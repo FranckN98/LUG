@@ -2,6 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { generateMetadataForPath } from '@/lib/seo';
+import { prisma } from '@/lib/prisma';
+import { NewTicketingPage } from '@/components/NewTicketingPage';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/buy-ticket');
@@ -61,6 +63,41 @@ export default async function BuyTicketPage({
 }) {
   const { locale } = await params;
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'de') as Locale;
+
+  // Check if the new ticketing experience is enabled
+  let ticketingConfig = null;
+  try {
+    ticketingConfig = await prisma.ticketingConfig.findUnique({
+      where: { id: 'singleton' },
+      include: {
+        passes: {
+          where: { isActive: true },
+          orderBy: { sortOrder: 'asc' },
+        },
+      },
+    });
+  } catch {
+    // DB not yet migrated in dev — fall back to coming-soon page
+  }
+
+  if (ticketingConfig?.isNewTicketingActive) {
+    return (
+      <NewTicketingPage
+        config={{
+          pageTitle: ticketingConfig.pageTitle,
+          pageSubtitle: ticketingConfig.pageSubtitle,
+          pageIntro: ticketingConfig.pageIntro,
+          eventDate: ticketingConfig.eventDate,
+          eventLocation: ticketingConfig.eventLocation,
+          ctaButtonText: ticketingConfig.ctaButtonText,
+          checkoutUrl: ticketingConfig.checkoutUrl,
+          passes: ticketingConfig.passes,
+        }}
+      />
+    );
+  }
+
+  // ── Original coming-soon page ────────────────────────────────────────────────
   const t = content[loc];
 
   return (

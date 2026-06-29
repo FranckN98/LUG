@@ -136,6 +136,16 @@ const navItems = [
     ),
   },
   {
+    href: '/admin/ticketing',
+    label: 'Billetterie 2026',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 9.5a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 9.5v1a2 2 0 0 0 0 4v1a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.5v-1a2 2 0 0 0 0-4v-1Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 8v8" strokeDasharray="2 2" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/countdown',
     label: 'Countdown',
     icon: (

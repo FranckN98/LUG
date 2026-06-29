@@ -799,6 +799,53 @@ model EventDocumentTranslation {
   @@map("event_document_translations")
 }
 
+// ── Billetterie 2026 ────────────────────────────────────────────────────────────
+
+model TicketingConfig {
+  id                   String          @id @default("singleton")
+  isNewTicketingActive Boolean         @default(false) @map("is_new_ticketing_active")
+  pageTitle            String          @default("Level Up in Germany 2026") @map("page_title")
+  pageSubtitle         String          @default("Une journée pour accélérer votre avenir en Allemagne.") @map("page_subtitle")
+  pageIntro            String          @default("") @map("page_intro")
+  eventDate            String          @default("17 octobre 2026") @map("event_date")
+  eventLocation        String          @default("Francfort") @map("event_location")
+  ctaButtonText        String          @default("Choisir mon billet") @map("cta_button_text")
+  checkoutUrl          String          @default("https://tickets.levelupingermany.com/checkout/view-event/id/8530693/chk/dedb8063676704001e57efe8d44b4302/?modal_widget=true&widget=true") @map("checkout_url")
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+  passes               TicketingPass[]
+
+  @@map("ticketing_config")
+}
+
+model TicketingPass {
+  id               String          @id @default(uuid())
+  configId         String          @default("singleton") @map("config_id")
+  name             String
+  label            String
+  targetAudience   String          @default("") @map("target_audience")
+  description      String          @default("")
+  highlights       String          @default("[]") // JSON array of strings
+  includes         String          @default("[]") // JSON array of strings
+  decisionPhrase   String          @default("") @map("decision_phrase")
+  priceCents       Int             @default(0) @map("price_cents")
+  oldPriceCents    Int?            @map("old_price_cents")
+  currency         String          @default("EUR")
+  status           String          @default("available") // available | coming_soon | sold_out
+  isActive         Boolean         @default(true) @map("is_active")
+  checkoutUrl      String          @default("") @map("checkout_url")
+  colorPrimary     String          @default("#1a4a2e") @map("color_primary")
+  colorSecondary   String          @default("#2d7a4f") @map("color_secondary")
+  sortOrder        Int             @default(0) @map("sort_order")
+  availabilityNote String?         @map("availability_note")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  config           TicketingConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId, isActive, sortOrder])
+  @@map("ticketing_passes")
+}
+
 // =============================================================
 // Email Templates (admin outreach mailer)
 // =============================================================
