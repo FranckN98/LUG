@@ -125,10 +125,7 @@ function PassCard({
         <h3 className="mb-1 font-display text-xl font-bold text-white leading-tight">{pass.name}</h3>
 
         {/* Target */}
-        <p className="mb-3 text-xs text-white/65 italic">{pass.targetAudience}</p>
-
-        {/* Description */}
-        <p className="mb-5 text-sm text-white/80 leading-relaxed">{pass.description}</p>
+        <p className="mb-4 text-xs text-white/65 italic">{pass.targetAudience}</p>
 
         {/* Highlights */}
         {highlights.length > 0 && (
@@ -334,6 +331,26 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
               ))}
             </div>
           )}
+
+          {/* ── Inclus dans tous les tickets ──────────────────────────────── */}
+          <div className="mx-auto mt-12 max-w-2xl rounded-2xl border border-[#2d7a4f]/30 bg-[#1a4a2e]/10 px-8 py-7">
+            <p className="mb-5 text-center text-xs font-bold uppercase tracking-widest text-[#4ade80]/80">
+              Inclus dans tous les tickets
+            </p>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {[
+                { emoji: '🍽️', text: 'Déjeuner inclus.' },
+                { emoji: '🥗', text: 'Repas et fingerfood inclus.' },
+                { emoji: '☕', text: 'Boissons à volonté toute la journée (eau, café, thé, jus et softs).' },
+                { emoji: '🏢', text: "Accès à l'espace exposants et aux partenaires." },
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="text-xl">{item.emoji}</span>
+                  <span className="text-sm text-white/80 leading-relaxed">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </section>
 
