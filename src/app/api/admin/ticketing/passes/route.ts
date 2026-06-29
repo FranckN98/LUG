@@ -7,6 +7,14 @@ function isAdmin() {
   return cookieStore.get('admin_session')?.value === 'authenticated';
 }
 
+function parseJsonList(val: unknown): string[] {
+  if (Array.isArray(val)) return val as string[];
+  if (typeof val === 'string') {
+    try { return JSON.parse(val); } catch { return []; }
+  }
+  return [];
+}
+
 function parsePassBody(body: Record<string, unknown>) {
   return {
     configId: 'singleton',
@@ -14,8 +22,8 @@ function parsePassBody(body: Record<string, unknown>) {
     label: String(body.label ?? ''),
     targetAudience: String(body.targetAudience ?? ''),
     description: String(body.description ?? ''),
-    highlights: JSON.stringify(Array.isArray(body.highlights) ? body.highlights : []),
-    includes: JSON.stringify(Array.isArray(body.includes) ? body.includes : []),
+    highlights: JSON.stringify(parseJsonList(body.highlights)),
+    includes: JSON.stringify(parseJsonList(body.includes)),
     decisionPhrase: String(body.decisionPhrase ?? ''),
     priceCents: Number(body.priceCents ?? 0),
     oldPriceCents: body.oldPriceCents != null ? Number(body.oldPriceCents) : null,
