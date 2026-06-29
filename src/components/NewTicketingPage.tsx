@@ -85,8 +85,8 @@ function PassCard({
     <div
       className={`relative flex flex-col rounded-2xl border transition-all ${isSoldOut ? 'opacity-70' : 'hover:shadow-2xl hover:-translate-y-1'}`}
       style={{
-        background: `linear-gradient(160deg, ${pass.colorPrimary}18 0%, #0f1a0f 100%)`,
-        borderColor: `${pass.colorPrimary}55`,
+        background: `linear-gradient(160deg, ${pass.colorPrimary}33 0%, #121f12 100%)`,
+        borderColor: `${pass.colorPrimary}66`,
         boxShadow: `0 4px 32px ${pass.colorPrimary}22`,
       }}
     >
@@ -115,8 +115,8 @@ function PassCard({
       <div className="flex flex-1 flex-col p-6 pt-8">
         {/* Label */}
         <span
-          className="mb-2 inline-block self-start rounded-full px-3 py-0.5 text-[0.65rem] font-bold uppercase tracking-widest"
-          style={{ background: `${pass.colorPrimary}33`, color: pass.colorSecondary }}
+          className="mb-2 inline-block self-start rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-white"
+          style={{ background: pass.colorSecondary }}
         >
           {pass.label}
         </span>
@@ -125,22 +125,22 @@ function PassCard({
         <h3 className="mb-1 font-display text-xl font-bold text-white leading-tight">{pass.name}</h3>
 
         {/* Target */}
-        <p className="mb-3 text-xs text-white/50 italic">{pass.targetAudience}</p>
+        <p className="mb-3 text-xs text-white/65 italic">{pass.targetAudience}</p>
 
         {/* Description */}
-        <p className="mb-5 text-sm text-white/65 leading-relaxed">{pass.description}</p>
+        <p className="mb-5 text-sm text-white/80 leading-relaxed">{pass.description}</p>
 
         {/* Highlights */}
         {highlights.length > 0 && (
           <div className="mb-5">
-            <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-widest text-white/40">
+            <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-widest text-white/55">
               Vous découvrirez notamment
             </p>
             <ul className="space-y-1.5">
               {highlights.map((h, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-white/70" style={{ color: pass.colorSecondary }}>
-                  <CheckIcon />
-                  <span className="text-white/70">{h}</span>
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <span style={{ color: pass.colorSecondary }}><CheckIcon /></span>
+                  <span className="text-white/80">{h}</span>
                 </li>
               ))}
             </ul>
@@ -153,10 +153,10 @@ function PassCard({
         {/* Includes */}
         {includes.length > 0 && (
           <div className="mb-5">
-            <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-widest text-white/40">Inclus</p>
+            <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-widest text-white/55">Inclus</p>
             <ul className="space-y-1">
               {includes.map((inc, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm text-white/65">
+                <li key={i} className="flex items-center gap-2 text-sm text-white/80">
                   <span className="text-xs" style={{ color: pass.colorSecondary }}>✓</span>
                   {inc}
                 </li>
@@ -168,8 +168,8 @@ function PassCard({
         {/* Decision phrase */}
         {pass.decisionPhrase && (
           <p
-            className="mb-5 rounded-xl p-3 text-xs italic leading-relaxed text-white/70"
-            style={{ background: `${pass.colorPrimary}22`, borderLeft: `3px solid ${pass.colorSecondary}` }}
+            className="mb-5 rounded-xl p-3 text-xs italic leading-relaxed text-white/85"
+            style={{ background: `${pass.colorPrimary}33`, borderLeft: `3px solid ${pass.colorSecondary}` }}
           >
             {pass.decisionPhrase}
           </p>
@@ -225,14 +225,13 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#080f08] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-[#080f08] text-white">
+      {/* Page-wide background orbs (consistent across header and sections) */}
+      <div aria-hidden className="pointer-events-none fixed -top-32 left-1/2 h-[70vmax] w-[70vmax] -translate-x-1/2 rounded-full bg-[#1a4a2e] opacity-15 blur-[120px]" />
+      <div aria-hidden className="pointer-events-none fixed -bottom-20 -right-20 h-[40vmax] w-[40vmax] rounded-full bg-[#c8910a] opacity-[0.07] blur-[100px]" />
 
       {/* ── Hero header ─────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden px-5 pb-20 pt-24 text-center sm:px-8 sm:pt-32">
-        {/* Background orbs */}
-        <div aria-hidden className="pointer-events-none absolute -top-32 left-1/2 h-[70vmax] w-[70vmax] -translate-x-1/2 rounded-full bg-[#1a4a2e] opacity-20 blur-[120px]" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-20 -right-20 h-[40vmax] w-[40vmax] rounded-full bg-[#c8910a] opacity-10 blur-[100px]" />
-
+      <section className="relative px-5 pb-12 pt-16 text-center sm:px-8 sm:pt-20">
         <div className="relative mx-auto max-w-4xl">
           {/* Eyebrow badge */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#2d7a4f]/40 bg-[#1a4a2e]/30 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-[#4ade80] backdrop-blur-sm">
@@ -275,9 +274,9 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       </section>
 
       {/* ── Ce qui vous attend ──────────────────────────────────────────────── */}
-      <section className="px-5 pb-20 sm:px-8">
+      <section className="relative z-10 px-5 pb-16 sm:px-8">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-10 text-center">
+          <div className="mb-8 text-center">
             <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">Ce qui vous attend</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -287,7 +286,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                 className="flex items-start gap-4 rounded-2xl border border-white/8 bg-white/[0.03] p-5 transition hover:border-[#2d7a4f]/40 hover:bg-[#1a4a2e]/10"
               >
                 <span className="text-2xl">{item.icon}</span>
-                <p className="text-sm leading-relaxed text-white/65">{item.text}</p>
+                <p className="text-sm leading-relaxed text-white/75">{item.text}</p>
               </div>
             ))}
           </div>
@@ -295,30 +294,30 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       </section>
 
       {/* ── Une journée, trois expériences ────────────────────────────────── */}
-      <section className="px-5 pb-16 sm:px-8">
+      <section className="relative z-10 px-5 pb-16 sm:px-8">
         <div className="mx-auto max-w-3xl rounded-2xl border border-[#2d7a4f]/30 bg-[#1a4a2e]/10 p-8 text-center">
           <h2 className="mb-4 font-display text-3xl font-bold text-white sm:text-4xl">
             Une journée, trois expériences
           </h2>
-          <p className="mb-4 text-base leading-relaxed text-white/65">
+          <p className="mb-4 text-base leading-relaxed text-white/75">
             Après les conférences du matin, chaque participant rejoint un{' '}
             <strong className="text-white">Deep Dive exclusif</strong> en fonction du billet choisi.
           </p>
           <div className="rounded-xl border border-[#4ade80]/20 bg-[#1a4a2e]/30 px-6 py-4">
             <p className="text-sm text-[#4ade80] font-medium">
               ✅ Tous les billets donnent accès à l'ensemble de l'événement.{' '}
-              <span className="text-white/70">Seule la session Deep Dive varie selon le parcours sélectionné.</span>
+              <span className="text-white/80">Seule la session Deep Dive varie selon le parcours sélectionné.</span>
             </p>
           </div>
         </div>
       </section>
 
       {/* ── Ticket cards ────────────────────────────────────────────────────── */}
-      <section id="tickets" className="px-5 pb-24 sm:px-8">
+      <section id="tickets" className="relative z-10 px-5 pb-24 pt-4 sm:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
+          <div className="mb-10 text-center">
             <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">Choisir votre parcours</h2>
-            <p className="mt-2 text-base text-white/50">Sélectionnez le billet qui correspond à votre objectif.</p>
+            <p className="mt-2 text-base text-white/60">Sélectionnez le billet qui correspond à votre objectif.</p>
           </div>
 
           {config.passes.length === 0 ? (
