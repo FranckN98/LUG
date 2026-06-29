@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { locales, type Locale } from '@/i18n/config';
 import { getWhatsAppJoinUrl } from '@/config/whatsapp';
 import { Header } from '@/components/Header';
@@ -59,14 +60,18 @@ export default async function LocaleLayout({
     siteConfig = null;
   }
 
+  const h = await headers();
+  const pathname = h.get('x-pathname') ?? '';
+  const hideShell = pathname.endsWith('/buy-ticket');
+
   return (
     <div className="min-h-screen flex flex-col">
       <DocumentLang locale={validLocale} />
       <JsonLdSite locale={validLocale} />
       <ScrollToHash />
-      <Header locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} siteConfig={siteConfig} />
-      <main className="flex-1 w-full pt-16 sm:pt-20 md:pt-[5.5rem]">{children}</main>
-      <Footer locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} />
+      {!hideShell && <Header locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} siteConfig={siteConfig} />}
+      <main className={`flex-1 w-full ${hideShell ? '' : 'pt-16 sm:pt-20 md:pt-[5.5rem]'}`}>{children}</main>
+      {!hideShell && <Footer locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} />}
       <EventCommunicationPopupGate locale={validLocale} />
       <CookieBanner locale={validLocale} />
       <AnalyticsProvider />

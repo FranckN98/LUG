@@ -59,6 +59,8 @@ export function middleware(request: NextRequest) {
     const urlLocale = (m?.[1] as Locale) ?? defaultLocale;
     const res = NextResponse.next();
     res.headers.set('x-locale', urlLocale);
+    // Surface the pathname so layouts can conditionally suppress chrome (header/footer).
+    res.headers.set('x-pathname', pathname);
     return res;
   }
   if (pathname === '/' || pathname === '') {
