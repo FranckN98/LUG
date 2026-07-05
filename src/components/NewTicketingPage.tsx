@@ -72,27 +72,15 @@ function PassCard({
 
   return (
     <div
-      className={`group relative flex flex-col rounded-3xl ${isSoldOut ? 'opacity-60' : ''}`}
+      className={`group relative flex flex-col rounded-3xl bg-white transition-transform duration-300 hover:-translate-y-1 ${isSoldOut ? 'opacity-70' : ''}`}
       style={{
-        background: `linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.4) 100%)`,
-        boxShadow: `0 20px 60px -20px ${pass.colorPrimary}66, 0 0 0 1px ${pass.colorPrimary}40 inset`,
+        boxShadow: `0 24px 60px -24px ${pass.colorPrimary}55, 0 0 0 1px ${pass.colorPrimary}22`,
       }}
     >
-      {/* Permanent glow accent */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-0.5 rounded-3xl"
-        style={{
-          background: `linear-gradient(135deg, ${pass.colorPrimary}55, ${pass.colorSecondary}33)`,
-          filter: 'blur(20px)',
-          zIndex: -1,
-        }}
-      />
-
       {/* Sold out overlay */}
       {isSoldOut && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-black/50 backdrop-blur-[2px]">
-          <span className="rounded-full border border-white/30 bg-black/60 px-5 py-2 text-sm font-bold uppercase tracking-widest text-white/80">Sold Out</span>
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/60 backdrop-blur-[2px]">
+          <span className="rounded-full border border-black/10 bg-white px-5 py-2 text-sm font-bold uppercase tracking-widest text-neutral-500 shadow">Sold Out</span>
         </div>
       )}
 
@@ -102,17 +90,17 @@ function PassCard({
         style={{ background: `linear-gradient(90deg, ${pass.colorPrimary}, ${pass.colorSecondary})` }}
       />
 
-      <div className="flex flex-1 flex-col p-7 sm:p-8">
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
         {/* Header: tier name (left) + price pill (right) — Mboa style */}
-        <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="mb-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="font-display text-2xl font-bold uppercase leading-none tracking-tight text-white sm:text-3xl">
+            <h3 className="font-display text-xl font-bold uppercase leading-none tracking-tight text-neutral-900 sm:text-2xl">
               {pass.name}
             </h3>
             {pass.label && (
               <span
                 className="mt-2 inline-block text-[0.7rem] font-bold uppercase tracking-[0.2em]"
-                style={{ color: pass.colorSecondary }}
+                style={{ color: pass.colorPrimary }}
               >
                 {pass.label}
               </span>
@@ -121,12 +109,12 @@ function PassCard({
           {pass.priceCents > 0 && (
             <div className="shrink-0 text-right">
               {pass.oldPriceCents && (
-                <div className="mb-1 text-xs text-white/30 line-through">
+                <div className="mb-1 text-xs text-neutral-400 line-through">
                   {formatPrice(pass.oldPriceCents, pass.currency)}
                 </div>
               )}
               <span
-                className="inline-block rounded-2xl px-4 py-2 font-display text-2xl font-bold leading-none text-white shadow-lg sm:text-3xl"
+                className="inline-block rounded-xl px-3.5 py-1.5 font-display text-xl font-bold leading-none text-white shadow-lg sm:text-2xl"
                 style={{ background: `linear-gradient(135deg, ${pass.colorPrimary}, ${pass.colorSecondary})` }}
               >
                 {formatPrice(pass.priceCents, pass.currency)}
@@ -137,32 +125,32 @@ function PassCard({
 
         {/* Availability sub-label — Mboa "PLACES LIMITÉES" style */}
         {pass.availabilityNote && (
-          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.28em] text-amber-400">
+          <p className="mb-2.5 text-[0.7rem] font-bold uppercase tracking-[0.28em] text-amber-600">
             {pass.availabilityNote}
           </p>
         )}
 
         {/* Target audience */}
         {pass.targetAudience && (
-          <p className="mb-5 text-sm leading-relaxed text-white/55">{pass.targetAudience}</p>
+          <p className="mb-3 text-sm leading-relaxed text-neutral-500">{pass.targetAudience}</p>
         )}
 
         {/* Divider */}
         <div
-          className="mb-5 h-px w-full"
-          style={{ background: `linear-gradient(90deg, ${pass.colorSecondary}66, transparent)` }}
+          className="mb-3 h-px w-full"
+          style={{ background: `linear-gradient(90deg, ${pass.colorSecondary}55, transparent)` }}
         />
 
         {/* Feature list — Mboa bullet-dot style inside tinted box */}
         {(highlights.length > 0 || includes.length > 0) && (
           <ul
-            className="mb-6 space-y-3 rounded-2xl border border-white/5 p-5"
-            style={{ background: `${pass.colorPrimary}12` }}
+            className="mb-4 space-y-2 rounded-2xl p-4"
+            style={{ background: `${pass.colorPrimary}0d` }}
           >
             {[...highlights, ...includes].map((f, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm leading-relaxed text-white/85">
+              <li key={i} className="flex items-start gap-2.5 text-[0.8rem] leading-snug text-neutral-700">
                 <span
-                  className="mt-[0.4rem] h-1.5 w-1.5 shrink-0 rounded-full"
+                  className="mt-[0.35rem] h-1.5 w-1.5 shrink-0 rounded-full"
                   style={{ background: pass.colorSecondary }}
                 />
                 <span>{f}</span>
@@ -174,42 +162,28 @@ function PassCard({
         {/* Decision phrase */}
         {pass.decisionPhrase && (
           <p
-            className="mb-5 rounded-xl border-l-2 p-3.5 text-xs italic leading-relaxed text-white/75"
-            style={{ background: `${pass.colorPrimary}1f`, borderLeftColor: pass.colorSecondary }}
+            className="mb-3 rounded-xl border-l-2 p-3 text-xs italic leading-snug text-neutral-600"
+            style={{ background: `${pass.colorPrimary}12`, borderLeftColor: pass.colorSecondary }}
           >
             {pass.decisionPhrase}
           </p>
         )}
 
         {/* Status footer (no per-card buy button — single CTA lives below the grid) */}
-        <div className="mt-auto pt-2">
-          {isAvailable && (
-            <div
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold"
-              style={{
-                borderColor: `${pass.colorSecondary}55`,
-                background: `${pass.colorPrimary}14`,
-                color: pass.colorSecondary,
-              }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: pass.colorSecondary }} />
-                <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: pass.colorSecondary }} />
-              </span>
-              Disponible à la billetterie
-            </div>
-          )}
-          {isComingSoon && (
-            <div className="w-full rounded-2xl border border-white/15 bg-white/[0.03] py-3 text-center text-sm font-bold text-white/45">
-              ⏳ Bientôt disponible
-            </div>
-          )}
-          {isSoldOut && (
-            <div className="w-full rounded-2xl bg-white/[0.05] py-3 text-center text-sm font-bold text-white/30">
-              Sold out
-            </div>
-          )}
-        </div>
+        {(isComingSoon || isSoldOut) && (
+          <div className="mt-auto pt-1">
+            {isComingSoon && (
+              <div className="w-full rounded-xl border border-neutral-200 bg-neutral-50 py-2.5 text-center text-sm font-bold text-neutral-400">
+                ⏳ Bientôt disponible
+              </div>
+            )}
+            {isSoldOut && (
+              <div className="w-full rounded-xl bg-neutral-100 py-2.5 text-center text-sm font-bold text-neutral-400">
+                Sold out
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -470,152 +444,203 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       </section>
 
       {/* ── Decorative divider ──────────────────────────────────────────────── */}
-      <div className="relative z-10 mx-auto mb-14 flex max-w-xs items-center justify-center gap-3 px-5">
+      <div className="relative z-10 mx-auto mb-16 flex max-w-xs items-center justify-center gap-3 px-5">
         <span className="h-px flex-1 bg-gradient-to-r from-transparent to-accent/40" />
         <span className="h-1.5 w-1.5 rotate-45 bg-accent" />
         <span className="h-px flex-1 bg-gradient-to-l from-transparent to-accent/40" />
       </div>
 
-      {/* ── Ce qui vous attend ──────────────────────────────────────────────── */}
-      <section className="relative z-10 px-5 pb-20 sm:px-8">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-10 text-center">
-            <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent/70">L'expérience</p>
-            <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">Ce qui vous attend</h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {WHAT_AWAITS.map((item, i) => (
-              <div
-                key={i}
-                className="group flex items-start gap-4 rounded-2xl border border-white/8 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-accent/30 hover:bg-white/[0.05] hover:shadow-[0_8px_24px_rgba(233,140,11,0.1)]"
-              >
-                <span className="text-2xl transition-transform group-hover:scale-110">{item.icon}</span>
-                <p className="text-sm leading-relaxed text-white/75">{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Une journée, trois expériences ────────────────────────────────── */}
-      <section className="relative z-10 px-5 pb-20 sm:px-8">
-        <div
-          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl p-8 text-center sm:p-10"
-          style={{
-            background:
-              'linear-gradient(135deg, rgba(140,26,26,0.25) 0%, rgba(233,140,11,0.12) 100%)',
-            boxShadow: '0 0 0 1px rgba(233,140,11,0.2) inset',
-          }}
-        >
-          <div aria-hidden className="absolute -top-20 -right-20 h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
-          <p className="relative mb-2 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent/80">Le concept</p>
-          <h2 className="relative mb-4 font-display text-3xl font-bold text-white sm:text-4xl">
-            Une journée, trois expériences
-          </h2>
-          <p className="relative mx-auto mb-5 max-w-xl text-base leading-relaxed text-white/75">
-            Après les conférences du matin, chaque participant rejoint un{' '}
-            <strong className="text-accent">Deep Dive exclusif</strong> en fonction du billet choisi.
-          </p>
-          <div className="relative rounded-2xl border border-accent/25 bg-black/30 px-6 py-4 backdrop-blur-sm">
-            <p className="text-sm text-white/85 leading-relaxed">
-              <span className="font-bold text-accent">Tous les billets</span> donnent accès à l'ensemble de
-              l'événement. Seule la session <strong className="text-white">Deep Dive</strong> varie selon le
-              parcours sélectionné.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Ticket cards ────────────────────────────────────────────────────── */}
-      <section id="tickets" className="relative z-10 scroll-mt-12 px-5 pb-16 sm:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent/70">La billetterie</p>
-            <h2 className="font-display text-3xl font-bold uppercase text-white sm:text-5xl">Choisissez votre formule</h2>
-            <p className="mt-3 text-base text-white/55">Sélectionnez la formule qui vous correspond.</p>
-          </div>
-
-          {config.passes.length === 0 ? (
-            <p className="text-center text-white/40">Aucun ticket disponible pour le moment.</p>
-          ) : (
-            <div className={`grid gap-7 ${config.passes.length === 1 ? 'max-w-md mx-auto' : config.passes.length === 2 ? 'sm:grid-cols-2 max-w-3xl mx-auto' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
-              {config.passes.map((pass) => (
-                <PassCard key={pass.id} pass={pass} />
-              ))}
-            </div>
-          )}
-
-          {/* Single animated CTA */}
-          {isOpen && (
-            <div className="mt-14 flex flex-col items-center animate-hero-buttons">
-              <button
-                onClick={handleBuy}
-                className="animate-cta-glow group/cta relative w-full max-w-md overflow-hidden rounded-2xl py-5 text-base font-extrabold text-[#1a0606] transition active:scale-[0.98]"
-                style={{ background: 'linear-gradient(135deg, #E98C0B, #f0a530)' }}
-              >
-                <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
-                  🎟️ Acheter mon billet
-                  <svg className="h-5 w-5 transition-transform group-hover/cta:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </span>
-                {/* Shimmer sweep */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                />
-              </button>
-              <p className="mt-4 flex items-center gap-2 text-xs font-medium text-white/50">
-                <svg className="h-4 w-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                Paiement 100 % sécurisé · Confirmation immédiate
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── Inclus dans tous les tickets ─────────────────────────────────────── */}
+      {/* ── Bloc immersif : le concept + l'expérience ───────────────────────── */}
       <section className="relative z-10 px-5 pb-24 sm:px-8">
         <div
-          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl px-8 py-9 sm:px-10"
+          className="relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] px-6 py-12 sm:px-12 sm:py-16"
           style={{
             background:
-              'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(233,140,11,0.08) 100%)',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.08) inset',
+              'linear-gradient(160deg, rgba(140,26,26,0.28) 0%, rgba(10,5,5,0.4) 45%, rgba(233,140,11,0.14) 100%)',
+            boxShadow: '0 0 0 1px rgba(233,140,11,0.18) inset, 0 40px 120px -40px rgba(0,0,0,0.7)',
           }}
         >
-          {/* corner gradient */}
-          <div aria-hidden className="absolute -top-12 -left-12 h-40 w-40 rounded-full bg-accent/10 blur-3xl" />
-          <div className="relative mb-6 text-center">
-            <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent/70">Avantages communs</p>
-            <h3 className="font-display text-2xl font-bold text-white sm:text-3xl">
-              Inclus dans tous les tickets
-            </h3>
+          {/* Ambient glows */}
+          <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-accent/15 blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
+
+          {/* Concept headline */}
+          <div className="relative mb-12 text-center">
+            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.35em] text-accent/80">Le concept</p>
+            <h2 className="mx-auto mb-5 max-w-2xl font-display text-3xl font-bold leading-tight text-white sm:text-5xl">
+              Une journée,{' '}
+              <span
+                className="bg-clip-text text-transparent"
+                style={{ backgroundImage: 'linear-gradient(90deg, #E98C0B, #f0a530)' }}
+              >
+                trois expériences
+              </span>
+            </h2>
+            <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
+              Après les conférences du matin, chaque participant rejoint un{' '}
+              <strong className="text-accent">Deep Dive exclusif</strong> selon le billet choisi.{' '}
+              <span className="text-white/90">Tous les billets</span> donnent accès à l'ensemble de l'événement —
+              seule la session <strong className="text-white">Deep Dive</strong> varie.
+            </p>
           </div>
-          <ul className="relative grid gap-4 sm:grid-cols-2">
-            {[
-              { emoji: '🍽️', text: 'Déjeuner inclus.' },
-              { emoji: '🥗', text: 'Repas et fingerfood inclus.' },
-              { emoji: '☕', text: 'Boissons à volonté toute la journée (eau, café, thé, jus et softs).' },
-              { emoji: '🏢', text: "Accès à l'espace exposants et aux partenaires." },
-            ].map((item, i) => (
-              <li key={i} className="flex items-start gap-3 rounded-2xl bg-black/20 p-4 backdrop-blur-sm">
-                <span className="text-2xl">{item.emoji}</span>
-                <span className="pt-0.5 text-sm leading-relaxed text-white/85">{item.text}</span>
-              </li>
-            ))}
-          </ul>
+
+          {/* Experience grid */}
+          <div className="relative">
+            <p className="mb-6 flex items-center justify-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent/70">
+              <span className="h-px w-8 bg-accent/50" />
+              Ce qui vous attend
+              <span className="h-px w-8 bg-accent/50" />
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {WHAT_AWAITS.map((item, i) => (
+                <div
+                  key={i}
+                  className="group flex items-start gap-4 rounded-2xl border border-white/8 bg-black/20 p-5 backdrop-blur-sm transition hover:-translate-y-1 hover:border-accent/40 hover:bg-black/30 hover:shadow-[0_12px_32px_rgba(233,140,11,0.15)]"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-xl transition-transform group-hover:scale-110">
+                    {item.icon}
+                  </span>
+                  <p className="pt-1 text-sm leading-relaxed text-white/80">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Footer signature ─────────────────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/5 px-5 pb-10 pt-6 text-center sm:px-8">
-        <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-white/30">
-          Level Up in Germany · {config.eventDate}
-        </p>
-      </footer>
+      {/* ══ Light zone (Mboa style) — tickets, includes & footer ═══════════════ */}
+      <div className="relative z-10 overflow-hidden">
+        {/* Light background with rounded top */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-t-[2.5rem]"
+          style={{
+            background:
+              'linear-gradient(180deg, #fbf7f1 0%, #fdfaf6 40%, #ffffff 100%)',
+            boxShadow: '0 -30px 80px -30px rgba(0,0,0,0.5)',
+          }}
+        />
+        {/* Local animated floating tickets (kept subtle on light bg) */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          {[
+            { left: '6%', delay: '0s', duration: '26s', size: 40 },
+            { left: '32%', delay: '7s', duration: '30s', size: 32 },
+            { left: '58%', delay: '13s', duration: '24s', size: 46 },
+            { left: '80%', delay: '4s', duration: '32s', size: 34 },
+          ].map((tk, i) => (
+            <svg
+              key={i}
+              viewBox="0 0 24 24"
+              className="lu-no-motion absolute text-[#E98C0B] opacity-[0.09]"
+              width={tk.size}
+              height={tk.size}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              style={{ left: tk.left, top: 0, animation: `lu-ticket-float ${tk.duration} linear ${tk.delay} infinite` }}
+            >
+              <path d="M3 9.5a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 9.5v1a2 2 0 0 0 0 4v1a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.5v-1a2 2 0 0 0 0-4v-1Z" />
+              <path d="M9 8v8" strokeDasharray="2 2" />
+            </svg>
+          ))}
+        </div>
+        {/* Warm ambient glows */}
+        <div aria-hidden className="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-accent/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute bottom-32 -left-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+
+        {/* ── Ticket cards ────────────────────────────────────────────────────── */}
+        <section id="tickets" className="relative z-10 scroll-mt-12 px-5 pb-16 pt-16 sm:px-8 sm:pt-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-12 text-center">
+              <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">La billetterie</p>
+              <h2 className="font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">Choisissez votre formule</h2>
+              <p className="mt-3 text-base text-neutral-500">Sélectionnez la formule qui vous correspond.</p>
+            </div>
+
+            {config.passes.length === 0 ? (
+              <p className="text-center text-neutral-400">Aucun ticket disponible pour le moment.</p>
+            ) : (
+              <div
+                className="grid gap-6"
+                style={{ gridTemplateColumns: `repeat(${config.passes.length}, minmax(0, 1fr))` }}
+              >
+                {config.passes.map((pass) => (
+                  <PassCard key={pass.id} pass={pass} />
+                ))}
+              </div>
+            )}
+
+            {/* Single animated CTA */}
+            {isOpen && (
+              <div className="mt-14 flex flex-col items-center animate-hero-buttons">
+                <button
+                  onClick={handleBuy}
+                  className="animate-cta-glow group/cta relative w-full max-w-md overflow-hidden rounded-2xl py-5 text-base font-extrabold text-[#1a0606] transition active:scale-[0.98]"
+                  style={{ background: 'linear-gradient(135deg, #E98C0B, #f0a530)' }}
+                >
+                  <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
+                    🎟️ Acheter mon billet
+                    <svg className="h-5 w-5 transition-transform group-hover/cta:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </span>
+                  {/* Shimmer sweep */}
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                  />
+                </button>
+                <p className="mt-4 flex items-center gap-2 text-xs font-medium text-neutral-500">
+                  <svg className="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  Paiement 100 % sécurisé · Confirmation immédiate
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ── Inclus dans tous les tickets ─────────────────────────────────────── */}
+        <section className="relative z-10 px-5 pb-24 sm:px-8">
+          <div
+            className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl px-8 py-9 sm:px-10"
+            style={{
+              background: 'linear-gradient(135deg, #fff 0%, rgba(233,140,11,0.08) 100%)',
+              boxShadow: '0 0 0 1px rgba(233,140,11,0.15) inset, 0 20px 50px -25px rgba(0,0,0,0.3)',
+            }}
+          >
+            {/* corner gradient */}
+            <div aria-hidden className="absolute -top-12 -left-12 h-40 w-40 rounded-full bg-accent/10 blur-3xl" />
+            <div className="relative mb-6 text-center">
+              <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">Avantages communs</p>
+              <h3 className="font-display text-2xl font-bold text-neutral-900 sm:text-3xl">
+                Inclus dans tous les tickets
+              </h3>
+            </div>
+            <ul className="relative grid gap-4 sm:grid-cols-2">
+              {[
+                { emoji: '🍽️', text: 'Déjeuner inclus.' },
+                { emoji: '🥗', text: 'Repas et fingerfood inclus.' },
+                { emoji: '☕', text: 'Boissons à volonté toute la journée (eau, café, thé, jus et softs).' },
+                { emoji: '🏢', text: "Accès à l'espace exposants et aux partenaires." },
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 rounded-2xl border border-black/[0.04] bg-white p-4 shadow-sm">
+                  <span className="text-2xl">{item.emoji}</span>
+                  <span className="pt-0.5 text-sm leading-relaxed text-neutral-700">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* ── Footer signature ─────────────────────────────────────────────────── */}
+        <footer className="relative z-10 border-t border-black/5 px-5 pb-10 pt-6 text-center sm:px-8">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-neutral-400">
+            Level Up in Germany · {config.eventDate}
+          </p>
+        </footer>
+      </div>
 
       {/* ── Modal ────────────────────────────────────────────────────────────── */}
       {modalOpen && (
