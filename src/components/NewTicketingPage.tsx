@@ -239,23 +239,139 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0a0505] text-white">
-      {/* Page-wide brand-aligned background: deep burgundy → black with gold accent */}
+    <div className="relative min-h-screen overflow-hidden bg-[#120505] text-white">
+      <style>{`
+        @keyframes lu-orb-drift-a {
+          0%, 100% { transform: translate3d(-10%, -10%, 0) scale(1); }
+          50% { transform: translate3d(15%, 5%, 0) scale(1.15); }
+        }
+        @keyframes lu-orb-drift-b {
+          0%, 100% { transform: translate3d(20%, 0%, 0) scale(1.1); }
+          50% { transform: translate3d(-15%, 20%, 0) scale(0.95); }
+        }
+        @keyframes lu-orb-drift-c {
+          0%, 100% { transform: translate3d(-5%, 25%, 0) scale(0.9); }
+          50% { transform: translate3d(10%, -10%, 0) scale(1.2); }
+        }
+        @keyframes lu-conic-spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+        @keyframes lu-twinkle {
+          0%, 100% { opacity: 0.15; transform: scale(1); }
+          50% { opacity: 0.9; transform: scale(1.4); }
+        }
+        @keyframes lu-ticket-float {
+          0% { transform: translateY(110vh) rotate(-12deg); opacity: 0; }
+          10% { opacity: 0.18; }
+          90% { opacity: 0.18; }
+          100% { transform: translateY(-20vh) rotate(8deg); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .lu-no-motion { animation: none !important; }
+        }
+      `}</style>
+
+      {/* Animated orbs */}
+      <div
+        aria-hidden
+        className="lu-no-motion pointer-events-none fixed -top-40 -left-40 h-[60vmax] w-[60vmax] rounded-full bg-[#8C1A1A] opacity-60 blur-[120px]"
+        style={{ animation: 'lu-orb-drift-a 18s ease-in-out infinite' }}
+      />
+      <div
+        aria-hidden
+        className="lu-no-motion pointer-events-none fixed -bottom-40 -right-40 h-[55vmax] w-[55vmax] rounded-full bg-[#E98C0B] opacity-40 blur-[140px]"
+        style={{ animation: 'lu-orb-drift-b 22s ease-in-out infinite' }}
+      />
+      <div
+        aria-hidden
+        className="lu-no-motion pointer-events-none fixed top-1/2 left-1/2 h-[40vmax] w-[40vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#c77409] opacity-25 blur-[110px]"
+        style={{ animation: 'lu-orb-drift-c 26s ease-in-out infinite' }}
+      />
+
+      {/* Slow conic gradient sweep behind content */}
+      <div
+        aria-hidden
+        className="lu-no-motion pointer-events-none fixed top-1/2 left-1/2 h-[120vmin] w-[120vmin] rounded-full opacity-25"
+        style={{
+          background:
+            'conic-gradient(from 0deg, transparent 0deg, rgba(233,140,11,0.35) 40deg, transparent 80deg, transparent 200deg, rgba(140,26,26,0.5) 250deg, transparent 290deg)',
+          animation: 'lu-conic-spin 40s linear infinite',
+          filter: 'blur(40px)',
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
+
+      {/* Dot grid */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
+
+      {/* Twinkling sparkles */}
+      <div aria-hidden className="pointer-events-none fixed inset-0">
+        {[
+          { top: '12%', left: '18%', delay: '0s' },
+          { top: '22%', left: '78%', delay: '1.4s' },
+          { top: '35%', left: '42%', delay: '2.8s' },
+          { top: '58%', left: '12%', delay: '0.6s' },
+          { top: '67%', left: '88%', delay: '3.2s' },
+          { top: '78%', left: '36%', delay: '1.9s' },
+          { top: '84%', left: '64%', delay: '0.3s' },
+          { top: '15%', left: '52%', delay: '2.2s' },
+          { top: '48%', left: '92%', delay: '3.6s' },
+          { top: '92%', left: '20%', delay: '1.1s' },
+        ].map((s, i) => (
+          <span
+            key={i}
+            className="lu-no-motion absolute h-1 w-1 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+            style={{
+              top: s.top,
+              left: s.left,
+              animation: `lu-twinkle 4.5s ease-in-out ${s.delay} infinite`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Floating ticket icons rising in background */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
+        {[
+          { left: '8%', delay: '0s', duration: '24s', size: 42 },
+          { left: '28%', delay: '6s', duration: '28s', size: 36 },
+          { left: '50%', delay: '12s', duration: '22s', size: 48 },
+          { left: '72%', delay: '3s', duration: '30s', size: 34 },
+          { left: '88%', delay: '9s', duration: '26s', size: 40 },
+        ].map((tk, i) => (
+          <svg
+            key={i}
+            viewBox="0 0 24 24"
+            className="lu-no-motion absolute text-[#E98C0B]"
+            width={tk.size}
+            height={tk.size}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            style={{
+              left: tk.left,
+              top: 0,
+              animation: `lu-ticket-float ${tk.duration} linear ${tk.delay} infinite`,
+            }}
+          >
+            <path d="M3 9.5a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 9.5v1a2 2 0 0 0 0 4v1a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.5v-1a2 2 0 0 0 0-4v-1Z" />
+            <path d="M9 8v8" strokeDasharray="2 2" />
+          </svg>
+        ))}
+      </div>
+
+      {/* Vignette */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0"
         style={{
           background:
-            'radial-gradient(ellipse at top, rgba(140,26,26,0.25) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(233,140,11,0.12) 0%, transparent 55%), #0a0505',
-        }}
-      />
-      {/* Subtle dot grid */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
+            'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)',
         }}
       />
 
