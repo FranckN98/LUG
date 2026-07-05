@@ -367,11 +367,11 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       />
 
       {/* ── Hero header ─────────────────────────────────────────────────────── */}
-      <section className="relative z-10 px-5 pb-16 pt-20 text-center sm:px-8 sm:pt-28">
+      <section className="relative z-10 px-5 pb-14 pt-20 text-center sm:px-8 sm:pt-28">
         <div className="relative mx-auto max-w-4xl">
           {/* Animated "billetterie ouverte" banner */}
           {isOpen && (
-            <div className="mb-8 flex justify-center animate-hero-tagline">
+            <div className="mb-9 flex justify-center animate-hero-tagline">
               <div
                 className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-accent/40 px-6 py-3 backdrop-blur-sm"
                 style={{
@@ -406,51 +406,75 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             </div>
           )}
 
-          {/* Eyebrow badge */}
-          <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.28em] text-accent backdrop-blur-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
-            </span>
-            {config.eventDate} · {config.eventLocation}
-          </div>
+          {/* Eyebrow */}
+          <p className="mb-5 animate-hero-tagline text-[0.7rem] font-bold uppercase tracking-[0.4em] text-accent/70">
+            Level Up in Germany · Billetterie
+          </p>
 
-          {/* Title */}
-          <h1 className="mb-5 font-display text-4xl font-bold leading-[1.05] tracking-tight text-white sm:text-6xl lg:text-7xl">
+          {/* Title with gradient highlight */}
+          <h1 className="mb-6 animate-hero-title font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl">
             {config.pageTitle}
           </h1>
 
-          {/* Decorative divider */}
-          <div className="mx-auto mb-6 flex items-center justify-center gap-3">
-            <span className="h-px w-12 bg-gradient-to-r from-transparent to-accent/60" />
-            <span className="h-1.5 w-1.5 rotate-45 bg-accent" />
-            <span className="h-px w-12 bg-gradient-to-l from-transparent to-accent/60" />
+          {/* Structured event meta chips */}
+          <div className="mb-7 flex animate-hero-subtitle flex-wrap items-center justify-center gap-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/85 backdrop-blur-sm">
+              <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+              {config.eventDate}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/85 backdrop-blur-sm">
+              <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
+              </svg>
+              {config.eventLocation}
+            </span>
+            {config.passes.length > 0 && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/85 backdrop-blur-sm">
+                <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9.5a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 9.5v1a2 2 0 0 0 0 4v1a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.5v-1a2 2 0 0 0 0-4v-1Z" /><path d="M9 8v8" strokeDasharray="2 2" />
+                </svg>
+                {config.passes.length} formules
+              </span>
+            )}
           </div>
 
           {/* Subtitle */}
-          <p className="mx-auto mb-6 max-w-2xl text-lg font-medium text-accent/90 sm:text-xl">
-            {config.pageSubtitle}
-          </p>
+          {config.pageSubtitle && (
+            <p className="mx-auto mb-4 max-w-2xl animate-hero-subtitle text-lg font-medium text-accent/90 sm:text-xl">
+              {config.pageSubtitle}
+            </p>
+          )}
 
           {/* Intro */}
           {config.pageIntro && (
-            <p className="mx-auto mb-10 max-w-3xl text-base leading-relaxed text-white/65 sm:text-lg">
+            <p className="mx-auto mb-10 max-w-3xl animate-hero-subtitle text-base leading-relaxed text-white/60 sm:text-lg">
               {config.pageIntro}
             </p>
           )}
 
-          {/* Anchor CTA */}
-          <a
-            href="#tickets"
-            className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-[#1a0606] shadow-[0_10px_40px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_14px_50px_rgba(233,140,11,0.6)]"
-          >
-            {config.ctaButtonText}
-            <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
-          </a>
+          {/* CTA */}
+          <div className="animate-hero-buttons">
+            <a
+              href="#tickets"
+              className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-[#1a0606] shadow-[0_10px_40px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_14px_50px_rgba(233,140,11,0.6)]"
+            >
+              {config.ctaButtonText}
+              <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <path d="M12 5v14M5 12l7 7 7-7" />
+              </svg>
+            </a>
+          </div>
         </div>
       </section>
+
+      {/* ── Decorative divider ──────────────────────────────────────────────── */}
+      <div className="relative z-10 mx-auto mb-14 flex max-w-xs items-center justify-center gap-3 px-5">
+        <span className="h-px flex-1 bg-gradient-to-r from-transparent to-accent/40" />
+        <span className="h-1.5 w-1.5 rotate-45 bg-accent" />
+        <span className="h-px flex-1 bg-gradient-to-l from-transparent to-accent/40" />
+      </div>
 
       {/* ── Ce qui vous attend ──────────────────────────────────────────────── */}
       <section className="relative z-10 px-5 pb-20 sm:px-8">
