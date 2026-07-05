@@ -229,8 +229,13 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           90% { opacity: 0.18; }
           100% { transform: translateY(-20vh) rotate(8deg); opacity: 0; }
         }
+        @keyframes lu-letter-wave {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-0.32em); }
+        }
         @media (prefers-reduced-motion: reduce) {
           .lu-no-motion { animation: none !important; }
+          .lu-letter { animation: none !important; }
         }
       `}</style>
 
@@ -357,7 +362,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.5)]" />
                 </span>
-                {/* Shining animated text */}
+                {/* Shining animated text with per-letter wave */}
                 <span
                   className="animate-text-shine bg-clip-text text-sm font-extrabold uppercase tracking-[0.22em] text-transparent sm:text-base"
                   style={{
@@ -366,7 +371,18 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                     backgroundSize: '200% auto',
                   }}
                 >
-                  La billetterie est ouverte
+                  {'La billetterie est ouverte'.split('').map((ch, i) => (
+                    <span
+                      key={i}
+                      className="lu-letter inline-block"
+                      style={{
+                        animation: `lu-letter-wave 2.4s ease-in-out ${i * 0.06}s infinite`,
+                        whiteSpace: ch === ' ' ? 'pre' : undefined,
+                      }}
+                    >
+                      {ch === ' ' ? '\u00a0' : ch}
+                    </span>
+                  ))}
                 </span>
                 <span className="text-lg leading-none">🎉</span>
                 {/* Shimmer sweep highlight */}
