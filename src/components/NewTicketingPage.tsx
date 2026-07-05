@@ -67,12 +67,8 @@ const WHAT_AWAITS = [
 
 function PassCard({
   pass,
-  globalCheckoutUrl,
-  onBuy,
 }: {
   pass: TicketingPass;
-  globalCheckoutUrl: string;
-  onBuy: (pass: TicketingPass) => void;
 }) {
   const highlights = parseJson(pass.highlights);
   const includes = parseJson(pass.includes);
@@ -194,42 +190,33 @@ function PassCard({
           <p className="mb-3 text-center text-xs font-semibold text-amber-400">⚡ {pass.availabilityNote}</p>
         )}
 
-        {/* CTA button */}
+        {/* Status footer (no per-card buy button — single CTA lives below the grid) */}
         <div className="mt-auto pt-2">
           {isAvailable && (
-            <button
-              onClick={() => onBuy(pass)}
-              className="group/btn relative w-full overflow-hidden rounded-2xl py-3.5 text-sm font-bold text-white shadow-lg transition active:scale-[0.98]"
-              style={{ background: `linear-gradient(135deg, ${pass.colorPrimary}, ${pass.colorSecondary})` }}
+            <div
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-bold"
+              style={{
+                borderColor: `${pass.colorSecondary}55`,
+                background: `${pass.colorPrimary}14`,
+                color: pass.colorSecondary,
+              }}
             >
-              <span className="relative z-10 inline-flex items-center justify-center gap-2">
-                Acheter mon billet
-                <svg className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70" style={{ background: pass.colorSecondary }} />
+                <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: pass.colorSecondary }} />
               </span>
-              <span
-                aria-hidden
-                className="absolute inset-0 opacity-0 transition-opacity group-hover/btn:opacity-100"
-                style={{ background: `linear-gradient(135deg, ${pass.colorSecondary}, ${pass.colorPrimary})` }}
-              />
-            </button>
+              Disponible à la billetterie
+            </div>
           )}
           {isComingSoon && (
-            <button
-              disabled
-              className="w-full cursor-not-allowed rounded-2xl border border-white/15 bg-white/[0.03] py-3.5 text-sm font-bold text-white/45"
-            >
+            <div className="w-full rounded-2xl border border-white/15 bg-white/[0.03] py-3 text-center text-sm font-bold text-white/45">
               ⏳ Bientôt disponible
-            </button>
+            </div>
           )}
           {isSoldOut && (
-            <button
-              disabled
-              className="w-full cursor-not-allowed rounded-2xl bg-white/[0.05] py-3.5 text-sm font-bold text-white/30"
-            >
+            <div className="w-full rounded-2xl bg-white/[0.05] py-3 text-center text-sm font-bold text-white/30">
               Sold out
-            </button>
+            </div>
           )}
         </div>
       </div>
@@ -240,12 +227,15 @@ function PassCard({
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export function NewTicketingPage({ config }: { config: TicketingConfig }) {
-  const [modalPass, setModalPass] = useState<TicketingPass | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  function handleBuy(pass: TicketingPass) {
-    const url = pass.checkoutUrl || config.checkoutUrl;
-    if (!url) return;
-    setModalPass(pass);
+  const hasCheckout = Boolean(config.checkoutUrl);
+  const hasAvailablePass = config.passes.some((p) => p.status === 'available');
+  const isOpen = hasCheckout && hasAvailablePass;
+
+  function handleBuy() {
+    if (!config.checkoutUrl) return;
+    setModalOpen(true);
   }
 
   return (
@@ -272,6 +262,43 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       {/* ── Hero header ─────────────────────────────────────────────────────── */}
       <section className="relative z-10 px-5 pb-16 pt-20 text-center sm:px-8 sm:pt-28">
         <div className="relative mx-auto max-w-4xl">
+          {/* Animated "billetterie ouverte" banner */}
+          {isOpen && (
+            <div className="mb-8 flex justify-center animate-hero-tagline">
+              <div
+                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-accent/40 px-6 py-3 backdrop-blur-sm"
+                style={{
+                  background:
+                    'linear-gradient(120deg, rgba(233,140,11,0.18), rgba(140,26,26,0.22), rgba(233,140,11,0.18))',
+                  boxShadow: '0 0 0 1px rgba(233,140,11,0.25) inset, 0 12px 40px rgba(233,140,11,0.25)',
+                }}
+              >
+                {/* Live pulsing dot */}
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-400 shadow-[0_0_10px_2px_rgba(74,222,128,0.6)]" />
+                </span>
+                {/* Shining animated text */}
+                <span
+                  className="animate-text-shine bg-clip-text text-sm font-extrabold uppercase tracking-[0.22em] text-transparent sm:text-base"
+                  style={{
+                    backgroundImage:
+                      'linear-gradient(90deg, #f0a530 0%, #ffffff 20%, #f0a530 40%, #f0a530 100%)',
+                    backgroundSize: '200% auto',
+                  }}
+                >
+                  La billetterie est ouverte
+                </span>
+                <span className="text-lg leading-none">🎉</span>
+                {/* Shimmer sweep highlight */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                />
+              </div>
+            </div>
+          )}
+
           {/* Eyebrow badge */}
           <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-[0.7rem] font-bold uppercase tracking-[0.28em] text-accent backdrop-blur-sm">
             <span className="relative flex h-2 w-2">
@@ -382,13 +409,37 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           ) : (
             <div className={`grid gap-7 ${config.passes.length === 1 ? 'max-w-md mx-auto' : config.passes.length === 2 ? 'sm:grid-cols-2 max-w-3xl mx-auto' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
               {config.passes.map((pass) => (
-                <PassCard
-                  key={pass.id}
-                  pass={pass}
-                  globalCheckoutUrl={config.checkoutUrl}
-                  onBuy={handleBuy}
-                />
+                <PassCard key={pass.id} pass={pass} />
               ))}
+            </div>
+          )}
+
+          {/* Single animated CTA */}
+          {isOpen && (
+            <div className="mt-14 flex flex-col items-center animate-hero-buttons">
+              <button
+                onClick={handleBuy}
+                className="animate-cta-glow group/cta relative w-full max-w-md overflow-hidden rounded-2xl py-5 text-base font-extrabold text-[#1a0606] transition active:scale-[0.98]"
+                style={{ background: 'linear-gradient(135deg, #E98C0B, #f0a530)' }}
+              >
+                <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
+                  🎟️ Acheter mon billet
+                  <svg className="h-5 w-5 transition-transform group-hover/cta:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </span>
+                {/* Shimmer sweep */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                />
+              </button>
+              <p className="mt-4 flex items-center gap-2 text-xs font-medium text-white/50">
+                <svg className="h-4 w-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Paiement 100 % sécurisé · Confirmation immédiate
+              </p>
             </div>
           )}
         </div>
@@ -436,11 +487,11 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       </footer>
 
       {/* ── Modal ────────────────────────────────────────────────────────────── */}
-      {modalPass && (
+      {modalOpen && (
         <TicketingModal
-          checkoutUrl={modalPass.checkoutUrl || config.checkoutUrl}
-          passName={modalPass.name}
-          onClose={() => setModalPass(null)}
+          checkoutUrl={config.checkoutUrl}
+          passName="Billetterie"
+          onClose={() => setModalOpen(false)}
         />
       )}
     </div>
