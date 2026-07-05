@@ -340,9 +340,9 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         }}
       />
 
-      {/* ── Hero header (full screen) ──────────────────────────────── */}
-      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center sm:px-8">
-        <div className="relative mx-auto max-w-4xl">
+      {/* ── Hero + concept (une seule section) ──────────────────────────────── */}
+      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-20 text-center sm:px-8">
+        <div className="relative mx-auto max-w-5xl">
           {/* Animated "billetterie ouverte" banner */}
           {isOpen && (
             <div className="mb-9 flex justify-center animate-hero-tagline">
@@ -379,16 +379,27 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           )}
 
           {/* Eyebrow */}
-          <p className="mb-5 animate-hero-tagline text-[0.7rem] font-bold uppercase tracking-[0.4em] text-accent">
+          <p className="mb-4 animate-hero-tagline text-[0.7rem] font-bold uppercase tracking-[0.4em] text-accent">
             Level Up in Germany · Billetterie
           </p>
 
           {/* Title with gradient highlight */}
-          <h1 className="mb-6 animate-hero-title font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
+          <h1 className="mb-5 animate-hero-title font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
             {config.pageTitle}
           </h1>
 
-          {/* Structured event meta chips */}
+          {/* Concept sub-headline */}
+          <h2 className="mx-auto mb-6 max-w-2xl animate-hero-title font-display text-2xl font-bold leading-tight text-neutral-800 sm:text-4xl">
+            Une journée,{' '}
+            <span
+              className="bg-clip-text text-transparent"
+              style={{ backgroundImage: 'linear-gradient(90deg, #8C1A1A, #E98C0B)' }}
+            >
+              trois expériences
+            </span>
+          </h2>
+
+          {/* Structured event meta badges */}
           <div className="mb-7 flex animate-hero-subtitle flex-wrap items-center justify-center gap-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm">
               <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -410,86 +421,30 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                 {config.passes.length} formules
               </span>
             )}
-          </div>
-
-          {/* Subtitle */}
-          {config.pageSubtitle && (
-            <p className="mx-auto mb-4 max-w-2xl animate-hero-subtitle text-lg font-semibold text-primary sm:text-xl">
-              {config.pageSubtitle}
-            </p>
-          )}
-
-          {/* Intro */}
-          {config.pageIntro && (
-            <p className="mx-auto mb-10 max-w-3xl animate-hero-subtitle text-base leading-relaxed text-neutral-600 sm:text-lg">
-              {config.pageIntro}
-            </p>
-          )}
-
-          {/* CTA */}
-          <div className="animate-hero-buttons">
-            <a
-              href="#tickets"
-              className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-[#1a0606] shadow-[0_10px_40px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_14px_50px_rgba(233,140,11,0.6)]"
-            >
-              {config.ctaButtonText}
-              <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-                <path d="M12 5v14M5 12l7 7 7-7" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-4 py-2 text-sm font-semibold text-primary shadow-sm">
+              <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
               </svg>
-            </a>
+              Deep Dive exclusif
+            </span>
           </div>
-        </div>
-      </section>
 
-      {/* ── Decorative divider ──────────────────────────────────────────────── */}
-      <div className="relative z-10 mx-auto mb-16 flex max-w-xs items-center justify-center gap-3 px-5">
-        <span className="h-px flex-1 bg-gradient-to-r from-transparent to-accent/50" />
-        <span className="h-1.5 w-1.5 rotate-45 bg-accent" />
-        <span className="h-px flex-1 bg-gradient-to-l from-transparent to-accent/50" />
-      </div>
-
-      {/* ── Bloc immersif : le concept + l'expérience ───────────────────────── */}
-      <section className="relative z-10 px-5 pb-24 sm:px-8">
-        <div
-          className="relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] px-6 py-12 sm:px-12 sm:py-16"
-          style={{
-            background:
-              'linear-gradient(160deg, #fff 0%, #fbf7f1 50%, rgba(233,140,11,0.08) 100%)',
-            boxShadow: '0 0 0 1px rgba(233,140,11,0.15) inset, 0 40px 120px -50px rgba(140,26,26,0.35)',
-          }}
-        >
-          {/* Ambient glows */}
-          <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
-          <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
-
-          {/* Concept headline */}
-          <div className="relative mb-12 text-center">
-            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.35em] text-accent">Le concept</p>
-            <h2 className="mx-auto mb-5 max-w-2xl font-display text-3xl font-bold leading-tight text-neutral-900 sm:text-5xl">
-              Une journée,{' '}
-              <span
-                className="bg-clip-text text-transparent"
-                style={{ backgroundImage: 'linear-gradient(90deg, #8C1A1A, #E98C0B)' }}
-              >
-                trois expériences
-              </span>
-            </h2>
-            <p className="mx-auto max-w-2xl text-base leading-relaxed text-neutral-600 sm:text-lg">
-              Après les conférences du matin, chaque participant rejoint un{' '}
-              <strong className="text-accent">Deep Dive exclusif</strong> selon le billet choisi.{' '}
-              <span className="text-neutral-900">Tous les billets</span> donnent accès à l'ensemble de l'événement —
-              seule la session <strong className="text-neutral-900">Deep Dive</strong> varie.
-            </p>
-          </div>
+          {/* Intro / concept explainer */}
+          <p className="mx-auto mb-9 max-w-2xl animate-hero-subtitle text-base leading-relaxed text-neutral-600 sm:text-lg">
+            Après les conférences du matin, chaque participant rejoint un{' '}
+            <strong className="text-accent">Deep Dive exclusif</strong> selon le billet choisi.{' '}
+            <span className="font-semibold text-neutral-900">Tous les billets</span> donnent accès à l'ensemble de
+            l'événement — seule la session Deep Dive varie.
+          </p>
 
           {/* Experience grid */}
-          <div className="relative">
-            <p className="mb-6 flex items-center justify-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">
+          <div className="relative mb-10">
+            <p className="mb-5 flex items-center justify-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">
               <span className="h-px w-8 bg-accent/50" />
               Ce qui vous attend
               <span className="h-px w-8 bg-accent/50" />
             </p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-3">
               {WHAT_AWAITS.map((item, i) => (
                 <div
                   key={i}
@@ -502,6 +457,19 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* CTA */}
+          <div className="animate-hero-buttons">
+            <a
+              href="#tickets"
+              className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-[#1a0606] shadow-[0_10px_40px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_14px_50px_rgba(233,140,11,0.6)]"
+            >
+              {config.ctaButtonText}
+              <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <path d="M12 5v14M5 12l7 7 7-7" />
+              </svg>
+            </a>
           </div>
         </div>
       </section>
