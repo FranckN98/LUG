@@ -49,12 +49,12 @@ function formatPrice(cents: number, currency: string): string {
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
 const WHAT_AWAITS = [
-  { icon: '🎤', text: 'Keynotes inspirantes animées par des dirigeants et experts reconnus.' },
-  { icon: '💬', text: "Panels interactifs autour de la carrière, l'entrepreneuriat, l'investissement et le développement personnel." },
-  { icon: '🔬', text: 'Deep Dives en petits groupes pour approfondir le sujet qui correspond à votre parcours.' },
-  { icon: '❓', text: "Sessions de questions-réponses avec les intervenants." },
-  { icon: '🤝', text: 'Espace networking pour rencontrer recruteurs, entrepreneurs, speakers et partenaires.' },
-  { icon: '🏢', text: 'Stands interactifs pour découvrir des entreprises, des opportunités et des projets.' },
+  { icon: '🎤', text: 'Keynotes inspirantes' },
+  { icon: '💬', text: 'Panels interactifs' },
+  { icon: '🔬', text: 'Deep Dives en petits groupes' },
+  { icon: '❓', text: 'Questions-réponses' },
+  { icon: '🤝', text: 'Espace networking' },
+  { icon: '🏢', text: 'Stands interactifs' },
 ];
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
@@ -378,11 +378,6 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             </div>
           )}
 
-          {/* Eyebrow */}
-          <p className="mb-4 animate-hero-tagline text-[0.7rem] font-bold uppercase tracking-[0.4em] text-accent">
-            Level Up in Germany · Billetterie
-          </p>
-
           {/* Title with gradient highlight */}
           <h1 className="mb-5 animate-hero-title font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
             {config.pageTitle}
@@ -444,33 +439,19 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
               Ce qui vous attend
               <span className="h-px w-8 bg-accent/50" />
             </p>
-            <div className="grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-wrap items-center justify-center gap-3">
               {WHAT_AWAITS.map((item, i) => (
                 <div
                   key={i}
-                  className="group flex items-start gap-4 rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_12px_32px_rgba(233,140,11,0.15)]"
+                  className="group inline-flex items-center gap-2.5 rounded-full border border-black/[0.06] bg-white px-5 py-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_10px_28px_rgba(233,140,11,0.15)]"
                 >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-xl transition-transform group-hover:scale-110">
-                    {item.icon}
-                  </span>
-                  <p className="pt-1 text-sm leading-relaxed text-neutral-700">{item.text}</p>
+                  <span className="text-lg transition-transform group-hover:scale-110">{item.icon}</span>
+                  <p className="text-sm font-semibold text-neutral-700">{item.text}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="animate-hero-buttons">
-            <a
-              href="#tickets"
-              className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-[#1a0606] shadow-[0_10px_40px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_14px_50px_rgba(233,140,11,0.6)]"
-            >
-              {config.ctaButtonText}
-              <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-                <path d="M12 5v14M5 12l7 7 7-7" />
-              </svg>
-            </a>
-          </div>
         </div>
       </section>
 
