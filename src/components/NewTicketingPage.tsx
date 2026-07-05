@@ -48,12 +48,6 @@ function formatPrice(cents: number, currency: string): string {
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
-const CheckIcon = () => (
-  <svg className="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 6 9 17l-5-5" />
-  </svg>
-);
-
 const WHAT_AWAITS = [
   { icon: '🎤', text: 'Keynotes inspirantes animées par des dirigeants et experts reconnus.' },
   { icon: '💬', text: "Panels interactifs autour de la carrière, l'entrepreneuriat, l'investissement et le développement personnel." },
@@ -108,72 +102,73 @@ function PassCard({
         style={{ background: `linear-gradient(90deg, ${pass.colorPrimary}, ${pass.colorSecondary})` }}
       />
 
-      <div className="flex flex-1 flex-col p-7">
-        {/* Header row: label + price */}
-        <div className="mb-5 flex items-start justify-between gap-3">
-          <span
-            className="inline-block rounded-full px-3 py-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-white shadow-sm"
-            style={{ background: pass.colorSecondary }}
-          >
-            {pass.label}
-          </span>
+      <div className="flex flex-1 flex-col p-7 sm:p-8">
+        {/* Header: tier name (left) + price pill (right) — Mboa style */}
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h3 className="font-display text-2xl font-bold uppercase leading-none tracking-tight text-white sm:text-3xl">
+              {pass.name}
+            </h3>
+            {pass.label && (
+              <span
+                className="mt-2 inline-block text-[0.7rem] font-bold uppercase tracking-[0.2em]"
+                style={{ color: pass.colorSecondary }}
+              >
+                {pass.label}
+              </span>
+            )}
+          </div>
           {pass.priceCents > 0 && (
-            <div className="text-right">
+            <div className="shrink-0 text-right">
               {pass.oldPriceCents && (
-                <div className="text-xs text-white/30 line-through leading-none">
+                <div className="mb-1 text-xs text-white/30 line-through">
                   {formatPrice(pass.oldPriceCents, pass.currency)}
                 </div>
               )}
-              <div
-                className="font-display text-3xl font-bold leading-none"
-                style={{ color: pass.colorSecondary }}
+              <span
+                className="inline-block rounded-2xl px-4 py-2 font-display text-2xl font-bold leading-none text-white shadow-lg sm:text-3xl"
+                style={{ background: `linear-gradient(135deg, ${pass.colorPrimary}, ${pass.colorSecondary})` }}
               >
                 {formatPrice(pass.priceCents, pass.currency)}
-              </div>
+              </span>
             </div>
           )}
         </div>
 
-        {/* Name + target */}
-        <h3 className="mb-1.5 font-display text-2xl font-bold text-white leading-tight">{pass.name}</h3>
-        <p className="mb-6 text-sm text-white/55 leading-relaxed">{pass.targetAudience}</p>
-
-        {/* Highlights */}
-        {highlights.length > 0 && (
-          <div className="mb-6">
-            <p className="mb-3 flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-white/45">
-              <span className="h-px w-6" style={{ background: pass.colorSecondary }} />
-              Vous découvrirez
-            </p>
-            <ul className="space-y-2">
-              {highlights.map((h, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed">
-                  <span className="mt-0.5 shrink-0" style={{ color: pass.colorSecondary }}>
-                    <CheckIcon />
-                  </span>
-                  <span className="text-white/80">{h}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Availability sub-label — Mboa "PLACES LIMITÉES" style */}
+        {pass.availabilityNote && (
+          <p className="mb-4 text-[0.7rem] font-bold uppercase tracking-[0.28em] text-amber-400">
+            {pass.availabilityNote}
+          </p>
         )}
 
-        {/* Includes */}
-        {includes.length > 0 && (
-          <div className="mb-6 rounded-2xl border border-white/5 bg-white/[0.02] p-4">
-            <p className="mb-2.5 flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-white/45">
-              <span className="h-px w-6" style={{ background: pass.colorSecondary }} />
-              Inclus
-            </p>
-            <ul className="space-y-1.5">
-              {includes.map((inc, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm text-white/75">
-                  <span className="text-sm font-bold" style={{ color: pass.colorSecondary }}>✓</span>
-                  {inc}
-                </li>
-              ))}
-            </ul>
-          </div>
+        {/* Target audience */}
+        {pass.targetAudience && (
+          <p className="mb-5 text-sm leading-relaxed text-white/55">{pass.targetAudience}</p>
+        )}
+
+        {/* Divider */}
+        <div
+          className="mb-5 h-px w-full"
+          style={{ background: `linear-gradient(90deg, ${pass.colorSecondary}66, transparent)` }}
+        />
+
+        {/* Feature list — Mboa bullet-dot style inside tinted box */}
+        {(highlights.length > 0 || includes.length > 0) && (
+          <ul
+            className="mb-6 space-y-3 rounded-2xl border border-white/5 p-5"
+            style={{ background: `${pass.colorPrimary}12` }}
+          >
+            {[...highlights, ...includes].map((f, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm leading-relaxed text-white/85">
+                <span
+                  className="mt-[0.4rem] h-1.5 w-1.5 shrink-0 rounded-full"
+                  style={{ background: pass.colorSecondary }}
+                />
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
         )}
 
         {/* Decision phrase */}
@@ -184,10 +179,6 @@ function PassCard({
           >
             {pass.decisionPhrase}
           </p>
-        )}
-
-        {pass.availabilityNote && (
-          <p className="mb-3 text-center text-xs font-semibold text-amber-400">⚡ {pass.availabilityNote}</p>
         )}
 
         {/* Status footer (no per-card buy button — single CTA lives below the grid) */}
@@ -515,9 +506,9 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       <section id="tickets" className="relative z-10 scroll-mt-12 px-5 pb-16 sm:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
-            <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent/70">Les billets</p>
-            <h2 className="font-display text-3xl font-bold text-white sm:text-5xl">Choisir votre parcours</h2>
-            <p className="mt-3 text-base text-white/55">Sélectionnez le billet qui correspond à votre objectif.</p>
+            <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent/70">La billetterie</p>
+            <h2 className="font-display text-3xl font-bold uppercase text-white sm:text-5xl">Choisissez votre formule</h2>
+            <p className="mt-3 text-base text-white/55">Sélectionnez la formule qui vous correspond.</p>
           </div>
 
           {config.passes.length === 0 ? (
