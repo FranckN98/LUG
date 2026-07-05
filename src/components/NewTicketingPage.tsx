@@ -204,7 +204,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#120505] text-white">
+    <div className="relative min-h-screen overflow-hidden bg-white text-neutral-900">
       <style>{`
         @keyframes lu-orb-drift-a {
           0%, 100% { transform: translate3d(-10%, -10%, 0) scale(1); }
@@ -237,27 +237,27 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       {/* Animated orbs */}
       <div
         aria-hidden
-        className="lu-no-motion pointer-events-none fixed -top-40 -left-40 h-[60vmax] w-[60vmax] rounded-full bg-[#8C1A1A] opacity-60 blur-[120px]"
+        className="lu-no-motion pointer-events-none fixed -top-40 -left-40 h-[60vmax] w-[60vmax] rounded-full bg-[#8C1A1A] opacity-[0.10] blur-[120px]"
         style={{ animation: 'lu-orb-drift-a 18s ease-in-out infinite' }}
       />
       <div
         aria-hidden
-        className="lu-no-motion pointer-events-none fixed -bottom-40 -right-40 h-[55vmax] w-[55vmax] rounded-full bg-[#E98C0B] opacity-40 blur-[140px]"
+        className="lu-no-motion pointer-events-none fixed -bottom-40 -right-40 h-[55vmax] w-[55vmax] rounded-full bg-[#E98C0B] opacity-[0.12] blur-[140px]"
         style={{ animation: 'lu-orb-drift-b 22s ease-in-out infinite' }}
       />
       <div
         aria-hidden
-        className="lu-no-motion pointer-events-none fixed top-1/2 left-1/2 h-[40vmax] w-[40vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#c77409] opacity-25 blur-[110px]"
+        className="lu-no-motion pointer-events-none fixed top-1/2 left-1/2 h-[40vmax] w-[40vmax] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#c77409] opacity-[0.08] blur-[110px]"
         style={{ animation: 'lu-orb-drift-c 26s ease-in-out infinite' }}
       />
 
       {/* Slow conic gradient sweep behind content */}
       <div
         aria-hidden
-        className="lu-no-motion pointer-events-none fixed top-1/2 left-1/2 h-[120vmin] w-[120vmin] rounded-full opacity-25"
+        className="lu-no-motion pointer-events-none fixed top-1/2 left-1/2 h-[120vmin] w-[120vmin] rounded-full opacity-[0.12]"
         style={{
           background:
-            'conic-gradient(from 0deg, transparent 0deg, rgba(233,140,11,0.35) 40deg, transparent 80deg, transparent 200deg, rgba(140,26,26,0.5) 250deg, transparent 290deg)',
+            'conic-gradient(from 0deg, transparent 0deg, rgba(233,140,11,0.5) 40deg, transparent 80deg, transparent 200deg, rgba(140,26,26,0.4) 250deg, transparent 290deg)',
           animation: 'lu-conic-spin 40s linear infinite',
           filter: 'blur(40px)',
           transform: 'translate(-50%, -50%)',
@@ -267,9 +267,9 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       {/* Dot grid */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 opacity-[0.07]"
+        className="pointer-events-none fixed inset-0 opacity-[0.05]"
         style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(rgba(0,0,0,0.9) 1px, transparent 1px)',
           backgroundSize: '28px 28px',
         }}
       />
@@ -290,7 +290,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         ].map((s, i) => (
           <span
             key={i}
-            className="lu-no-motion absolute h-1 w-1 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+            className="lu-no-motion absolute h-1 w-1 rounded-full bg-accent shadow-[0_0_8px_rgba(233,140,11,0.6)]"
             style={{
               top: s.top,
               left: s.left,
@@ -312,7 +312,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           <svg
             key={i}
             viewBox="0 0 24 24"
-            className="lu-no-motion absolute text-[#E98C0B]"
+            className="lu-no-motion absolute text-[#E98C0B] opacity-[0.10]"
             width={tk.size}
             height={tk.size}
             fill="none"
@@ -330,41 +330,39 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         ))}
       </div>
 
-      {/* Vignette */}
+      {/* Vignette (soft light) */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0"
         style={{
           background:
-            'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.55) 100%)',
+            'radial-gradient(ellipse at center, transparent 55%, rgba(255,255,255,0.85) 100%)',
         }}
       />
 
-      {/* ── Hero header ─────────────────────────────────────────────────────── */}
-      <section className="relative z-10 px-5 pb-14 pt-20 text-center sm:px-8 sm:pt-28">
+      {/* ── Hero header (full screen) ──────────────────────────────── */}
+      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-16 text-center sm:px-8">
         <div className="relative mx-auto max-w-4xl">
           {/* Animated "billetterie ouverte" banner */}
           {isOpen && (
             <div className="mb-9 flex justify-center animate-hero-tagline">
               <div
-                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-accent/40 px-6 py-3 backdrop-blur-sm"
+                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-accent/40 bg-white px-6 py-3 shadow-sm"
                 style={{
-                  background:
-                    'linear-gradient(120deg, rgba(233,140,11,0.18), rgba(140,26,26,0.22), rgba(233,140,11,0.18))',
-                  boxShadow: '0 0 0 1px rgba(233,140,11,0.25) inset, 0 12px 40px rgba(233,140,11,0.25)',
+                  boxShadow: '0 0 0 1px rgba(233,140,11,0.25) inset, 0 12px 40px rgba(233,140,11,0.18)',
                 }}
               >
                 {/* Live pulsing dot */}
                 <span className="relative flex h-2.5 w-2.5 shrink-0">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-400 shadow-[0_0_10px_2px_rgba(74,222,128,0.6)]" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.5)]" />
                 </span>
                 {/* Shining animated text */}
                 <span
                   className="animate-text-shine bg-clip-text text-sm font-extrabold uppercase tracking-[0.22em] text-transparent sm:text-base"
                   style={{
                     backgroundImage:
-                      'linear-gradient(90deg, #f0a530 0%, #ffffff 20%, #f0a530 40%, #f0a530 100%)',
+                      'linear-gradient(90deg, #8C1A1A 0%, #E98C0B 25%, #8C1A1A 50%, #8C1A1A 100%)',
                     backgroundSize: '200% auto',
                   }}
                 >
@@ -374,38 +372,38 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                 {/* Shimmer sweep highlight */}
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-accent/20 to-transparent"
                 />
               </div>
             </div>
           )}
 
           {/* Eyebrow */}
-          <p className="mb-5 animate-hero-tagline text-[0.7rem] font-bold uppercase tracking-[0.4em] text-accent/70">
+          <p className="mb-5 animate-hero-tagline text-[0.7rem] font-bold uppercase tracking-[0.4em] text-accent">
             Level Up in Germany · Billetterie
           </p>
 
           {/* Title with gradient highlight */}
-          <h1 className="mb-6 animate-hero-title font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl">
+          <h1 className="mb-6 animate-hero-title font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
             {config.pageTitle}
           </h1>
 
           {/* Structured event meta chips */}
           <div className="mb-7 flex animate-hero-subtitle flex-wrap items-center justify-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/85 backdrop-blur-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm">
               <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
               </svg>
               {config.eventDate}
             </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/85 backdrop-blur-sm">
+            <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm">
               <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
               </svg>
               {config.eventLocation}
             </span>
             {config.passes.length > 0 && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/85 backdrop-blur-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm">
                 <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 9.5a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 9.5v1a2 2 0 0 0 0 4v1a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.5v-1a2 2 0 0 0 0-4v-1Z" /><path d="M9 8v8" strokeDasharray="2 2" />
                 </svg>
@@ -416,14 +414,14 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
 
           {/* Subtitle */}
           {config.pageSubtitle && (
-            <p className="mx-auto mb-4 max-w-2xl animate-hero-subtitle text-lg font-medium text-accent/90 sm:text-xl">
+            <p className="mx-auto mb-4 max-w-2xl animate-hero-subtitle text-lg font-semibold text-primary sm:text-xl">
               {config.pageSubtitle}
             </p>
           )}
 
           {/* Intro */}
           {config.pageIntro && (
-            <p className="mx-auto mb-10 max-w-3xl animate-hero-subtitle text-base leading-relaxed text-white/60 sm:text-lg">
+            <p className="mx-auto mb-10 max-w-3xl animate-hero-subtitle text-base leading-relaxed text-neutral-600 sm:text-lg">
               {config.pageIntro}
             </p>
           )}
@@ -445,9 +443,9 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
 
       {/* ── Decorative divider ──────────────────────────────────────────────── */}
       <div className="relative z-10 mx-auto mb-16 flex max-w-xs items-center justify-center gap-3 px-5">
-        <span className="h-px flex-1 bg-gradient-to-r from-transparent to-accent/40" />
+        <span className="h-px flex-1 bg-gradient-to-r from-transparent to-accent/50" />
         <span className="h-1.5 w-1.5 rotate-45 bg-accent" />
-        <span className="h-px flex-1 bg-gradient-to-l from-transparent to-accent/40" />
+        <span className="h-px flex-1 bg-gradient-to-l from-transparent to-accent/50" />
       </div>
 
       {/* ── Bloc immersif : le concept + l'expérience ───────────────────────── */}
@@ -456,37 +454,37 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           className="relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] px-6 py-12 sm:px-12 sm:py-16"
           style={{
             background:
-              'linear-gradient(160deg, rgba(140,26,26,0.28) 0%, rgba(10,5,5,0.4) 45%, rgba(233,140,11,0.14) 100%)',
-            boxShadow: '0 0 0 1px rgba(233,140,11,0.18) inset, 0 40px 120px -40px rgba(0,0,0,0.7)',
+              'linear-gradient(160deg, #fff 0%, #fbf7f1 50%, rgba(233,140,11,0.08) 100%)',
+            boxShadow: '0 0 0 1px rgba(233,140,11,0.15) inset, 0 40px 120px -50px rgba(140,26,26,0.35)',
           }}
         >
           {/* Ambient glows */}
-          <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-accent/15 blur-3xl" />
-          <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+          <div aria-hidden className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
 
           {/* Concept headline */}
           <div className="relative mb-12 text-center">
-            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.35em] text-accent/80">Le concept</p>
-            <h2 className="mx-auto mb-5 max-w-2xl font-display text-3xl font-bold leading-tight text-white sm:text-5xl">
+            <p className="mb-3 text-[0.7rem] font-bold uppercase tracking-[0.35em] text-accent">Le concept</p>
+            <h2 className="mx-auto mb-5 max-w-2xl font-display text-3xl font-bold leading-tight text-neutral-900 sm:text-5xl">
               Une journée,{' '}
               <span
                 className="bg-clip-text text-transparent"
-                style={{ backgroundImage: 'linear-gradient(90deg, #E98C0B, #f0a530)' }}
+                style={{ backgroundImage: 'linear-gradient(90deg, #8C1A1A, #E98C0B)' }}
               >
                 trois expériences
               </span>
             </h2>
-            <p className="mx-auto max-w-2xl text-base leading-relaxed text-white/70 sm:text-lg">
+            <p className="mx-auto max-w-2xl text-base leading-relaxed text-neutral-600 sm:text-lg">
               Après les conférences du matin, chaque participant rejoint un{' '}
               <strong className="text-accent">Deep Dive exclusif</strong> selon le billet choisi.{' '}
-              <span className="text-white/90">Tous les billets</span> donnent accès à l'ensemble de l'événement —
-              seule la session <strong className="text-white">Deep Dive</strong> varie.
+              <span className="text-neutral-900">Tous les billets</span> donnent accès à l'ensemble de l'événement —
+              seule la session <strong className="text-neutral-900">Deep Dive</strong> varie.
             </p>
           </div>
 
           {/* Experience grid */}
           <div className="relative">
-            <p className="mb-6 flex items-center justify-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent/70">
+            <p className="mb-6 flex items-center justify-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">
               <span className="h-px w-8 bg-accent/50" />
               Ce qui vous attend
               <span className="h-px w-8 bg-accent/50" />
@@ -495,12 +493,12 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
               {WHAT_AWAITS.map((item, i) => (
                 <div
                   key={i}
-                  className="group flex items-start gap-4 rounded-2xl border border-white/8 bg-black/20 p-5 backdrop-blur-sm transition hover:-translate-y-1 hover:border-accent/40 hover:bg-black/30 hover:shadow-[0_12px_32px_rgba(233,140,11,0.15)]"
+                  className="group flex items-start gap-4 rounded-2xl border border-black/[0.06] bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_12px_32px_rgba(233,140,11,0.15)]"
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-xl transition-transform group-hover:scale-110">
                     {item.icon}
                   </span>
-                  <p className="pt-1 text-sm leading-relaxed text-white/80">{item.text}</p>
+                  <p className="pt-1 text-sm leading-relaxed text-neutral-700">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -508,18 +506,8 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         </div>
       </section>
 
-      {/* ══ Light zone (Mboa style) — tickets, includes & footer ═══════════════ */}
+      {/* ══ Tickets, includes & footer ═════════════════════════════════════════ */}
       <div className="relative z-10 overflow-hidden">
-        {/* Light background with rounded top */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-t-[2.5rem]"
-          style={{
-            background:
-              'linear-gradient(180deg, #fbf7f1 0%, #fdfaf6 40%, #ffffff 100%)',
-            boxShadow: '0 -30px 80px -30px rgba(0,0,0,0.5)',
-          }}
-        />
         {/* Local animated floating tickets (kept subtle on light bg) */}
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           {[
