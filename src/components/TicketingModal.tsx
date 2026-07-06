@@ -50,7 +50,7 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
           border: '2.5px solid transparent',
           backgroundClip: 'padding-box',
           boxShadow:
-            '0 0 0 2.5px #1a4a2e, 0 32px 80px rgba(0,0,0,0.55), 0 0 60px rgba(26,74,46,0.25)',
+            '0 0 0 2.5px #8C1A1A, 0 32px 80px rgba(0,0,0,0.55), 0 0 60px rgba(140,26,26,0.25)',
           maxHeight: '90vh',
         }}
       >
@@ -58,7 +58,7 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
         <div
           className="flex shrink-0 items-center justify-between px-5 py-3"
           style={{
-            background: 'linear-gradient(135deg, #1a4a2e 0%, #2d7a4f 60%, #c8910a 100%)',
+            background: 'linear-gradient(135deg, #6f1414 0%, #8C1A1A 60%, #b3401f 100%)',
           }}
         >
           <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white">
             <div
               className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200"
-              style={{ borderTopColor: '#1a4a2e' }}
+              style={{ borderTopColor: '#8C1A1A' }}
             />
             <p className="text-sm text-gray-500">Chargement de la billetterie…</p>
           </div>

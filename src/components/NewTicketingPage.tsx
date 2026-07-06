@@ -372,7 +372,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         <div className="flex justify-center px-5 py-10">
           <a
             href="#tickets"
-            className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-[#1a0606] shadow-[0_10px_40px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_14px_50px_rgba(233,140,11,0.6)] animate-cta-glow"
+            className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-bold text-white shadow-[0_10px_40px_rgba(140,26,26,0.45)] transition hover:bg-[#a11f1f] hover:shadow-[0_14px_50px_rgba(140,26,26,0.6)] animate-cta-glow"
           >
             🎟️ Voir les billets
             <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
@@ -439,8 +439,8 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
               <div className="mt-14 flex flex-col items-center animate-hero-buttons">
                 <button
                   onClick={handleBuy}
-                  className="animate-cta-glow group/cta relative w-full max-w-md overflow-hidden rounded-2xl py-5 text-base font-extrabold text-[#1a0606] transition active:scale-[0.98]"
-                  style={{ background: 'linear-gradient(135deg, #E98C0B, #f0a530)' }}
+                  className="animate-cta-glow group/cta relative w-full max-w-md overflow-hidden rounded-2xl py-5 text-base font-extrabold text-white transition active:scale-[0.98]"
+                  style={{ background: 'linear-gradient(135deg, #6f1414, #8C1A1A)' }}
                 >
                   <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
                     🎟️ Acheter mon billet
