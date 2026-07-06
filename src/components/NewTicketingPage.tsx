@@ -224,33 +224,11 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-0.32em); }
         }
-        /* Background responsive : une image par taille d'écran */
-        .lu-ticketing-bg {
-          background-image: url('/hero/hero-1.png');
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-        }
-        @media (min-width: 640px) {
-          .lu-ticketing-bg { background-image: url('/hero/hero-3.png'); }
-        }
-        @media (min-width: 1024px) {
-          .lu-ticketing-bg { background-image: url('/hero/hero-2.png'); }
-        }
         @media (prefers-reduced-motion: reduce) {
           .lu-no-motion { animation: none !important; }
           .lu-letter { animation: none !important; }
         }
       `}</style>
-
-      {/* Background image responsive (hero-1 mobile · hero-3 tablette · hero-2 desktop) */}
-      <div aria-hidden className="lu-ticketing-bg pointer-events-none fixed inset-0" />
-      {/* Voile blanc pour garder le contenu lisible par-dessus l'image */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0"
-        style={{ background: 'rgba(255,255,255,0.86)' }}
-      />
 
       {/* Animated orbs */}
       <div
@@ -358,58 +336,27 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         }}
       />
 
-      {/* ── Hero (image en arrière-plan de la plateforme) ──────────────────── */}
-      <section className="relative z-10 flex min-h-[70vh] flex-col items-center justify-center px-5 py-20 text-center sm:px-8">
-        {/* Bannière animée "billetterie ouverte" */}
-        {isOpen && (
-          <div className="mb-8 flex justify-center animate-hero-tagline">
-            <div
-              className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-accent/40 bg-white/90 px-6 py-3 shadow-sm backdrop-blur"
-              style={{ boxShadow: '0 0 0 1px rgba(233,140,11,0.25) inset, 0 12px 40px rgba(233,140,11,0.18)' }}
-            >
-              <span className="relative flex h-2.5 w-2.5 shrink-0">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.5)]" />
-              </span>
-              <span
-                className="animate-text-shine bg-clip-text text-sm font-extrabold uppercase tracking-[0.22em] text-transparent sm:text-base"
-                style={{
-                  backgroundImage: 'linear-gradient(90deg, #8C1A1A 0%, #E98C0B 25%, #8C1A1A 50%, #8C1A1A 100%)',
-                  backgroundSize: '200% auto',
-                }}
-              >
-                {'La billetterie est ouverte'.split('').map((ch, i) => (
-                  <span
-                    key={i}
-                    className="lu-letter inline-block"
-                    style={{
-                      animation: `lu-letter-wave 2.4s ease-in-out ${i * 0.06}s infinite`,
-                      whiteSpace: ch === ' ' ? 'pre' : undefined,
-                    }}
-                  >
-                    {ch === ' ' ? '\u00a0' : ch}
-                  </span>
-                ))}
-              </span>
-              <span className="text-lg leading-none">🎉</span>
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-accent/20 to-transparent"
-              />
-            </div>
-          </div>
-        )}
+      {/* ── Hero image responsive (maquette en haut : mobile · tablette · desktop) ── */}
+      <section className="relative z-10">
+        <a href="#tickets" className="group block" aria-label="Voir les billets">
+          <picture>
+            {/* Ordinateur */}
+            <source media="(min-width: 1024px)" srcSet="/hero/billetterie-desktop.jpeg" />
+            {/* Tablette */}
+            <source media="(min-width: 640px)" srcSet="/hero/billetterie-tablette.jpeg" />
+            {/* Téléphone (portrait) */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero/billetterie-mobile.jpeg"
+              alt="Level Up in Germany — La billetterie est ouverte"
+              className="h-auto w-full"
+              fetchPriority="high"
+            />
+          </picture>
+        </a>
 
-        {/* Titre */}
-        <h1 className="mb-4 animate-hero-title font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
-          {config.pageTitle}
-        </h1>
-        <p className="mx-auto mb-9 max-w-2xl animate-hero-subtitle text-base leading-relaxed text-neutral-700 sm:text-lg">
-          {config.eventDate} · {config.eventLocation}
-        </p>
-
-        {/* CTA animé */}
-        <div className="animate-hero-buttons">
+        {/* CTA animé sous l'image */}
+        <div className="flex justify-center px-5 py-10">
           <a
             href="#tickets"
             className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-[#1a0606] shadow-[0_10px_40px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_14px_50px_rgba(233,140,11,0.6)] animate-cta-glow"
