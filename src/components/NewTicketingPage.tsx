@@ -346,8 +346,8 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       />
 
       {/* ── Hero image responsive (maquette en haut : mobile · tablette · desktop) ── */}
-      <section className="relative z-10">
-        <a href="#tickets" className="group block" aria-label="Voir les billets">
+      <section className="relative z-10 px-4 pt-6 sm:px-6 sm:pt-8">
+        <a href="#tickets" className="group mx-auto block max-w-5xl overflow-hidden rounded-2xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)]" aria-label="Voir les billets">
           <picture>
             {/* Ordinateur */}
             <source media="(min-width: 1024px)" srcSet="/hero/billetterie-desktop.jpeg" />
@@ -358,7 +358,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             <img
               src="/hero/billetterie-mobile.jpeg"
               alt="Level Up in Germany — La billetterie est ouverte"
-              className="h-auto w-full"
+              className="mx-auto block h-auto w-full"
               fetchPriority="high"
             />
           </picture>
