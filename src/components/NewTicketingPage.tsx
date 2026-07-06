@@ -435,7 +435,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
               <div className="mt-14 flex flex-col items-center animate-hero-buttons">
                 <button
                   onClick={handleBuy}
-                  className="animate-cta-glow group/cta relative w-full max-w-md overflow-hidden rounded-2xl py-5 text-base font-extrabold text-white transition active:scale-[0.98]"
+                  className="animate-cta-glow group/cta relative w-full max-w-md overflow-hidden rounded-full py-5 text-base font-extrabold text-white transition active:scale-[0.98]"
                   style={{ background: 'linear-gradient(135deg, #6f1414, #8C1A1A)' }}
                 >
                   <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
