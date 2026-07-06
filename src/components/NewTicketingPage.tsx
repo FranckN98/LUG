@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { TicketingModal } from './TicketingModal';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -228,6 +229,14 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           .lu-no-motion { animation: none !important; }
           .lu-letter { animation: none !important; }
         }
+        /* Grille des tickets : 1 col (mobile) · 2 col (tablette) · N col (desktop) */
+        .lu-tickets-grid { grid-template-columns: 1fr; }
+        @media (min-width: 640px) {
+          .lu-tickets-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (min-width: 1024px) {
+          .lu-tickets-grid { grid-template-columns: repeat(var(--lu-cols, 3), minmax(0, 1fr)); }
+        }
       `}</style>
 
       {/* Animated orbs */}
@@ -412,8 +421,8 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
               <p className="text-center text-neutral-400">Aucun ticket disponible pour le moment.</p>
             ) : (
               <div
-                className="grid gap-6"
-                style={{ gridTemplateColumns: `repeat(${config.passes.length}, minmax(0, 1fr))` }}
+                className="lu-tickets-grid grid gap-5 sm:gap-6"
+                style={{ ['--lu-cols' as string]: config.passes.length } as CSSProperties}
               >
                 {config.passes.map((pass) => (
                   <PassCard key={pass.id} pass={pass} />
@@ -455,7 +464,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         {/* ── Inclus dans tous les tickets ─────────────────────────────────────── */}
         <section className="relative z-10 px-5 pb-24 sm:px-8">
           <div
-            className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl px-8 py-9 sm:px-10"
+            className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl px-6 py-8 sm:px-10 sm:py-9"
             style={{
               background: 'linear-gradient(135deg, #fff 0%, rgba(233,140,11,0.08) 100%)',
               boxShadow: '0 0 0 1px rgba(233,140,11,0.15) inset, 0 20px 50px -25px rgba(0,0,0,0.3)',
