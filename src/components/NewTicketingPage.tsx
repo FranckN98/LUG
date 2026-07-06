@@ -48,15 +48,6 @@ function formatPrice(cents: number, currency: string): string {
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
-const WHAT_AWAITS = [
-  { icon: '🎤', text: 'Keynotes inspirantes' },
-  { icon: '💬', text: 'Panels interactifs' },
-  { icon: '🔬', text: 'Deep Dives en petits groupes' },
-  { icon: '❓', text: 'Questions-réponses' },
-  { icon: '🤝', text: 'Espace networking' },
-  { icon: '🏢', text: 'Stands interactifs' },
-];
-
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
 function PassCard({
@@ -345,129 +336,36 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         }}
       />
 
-      {/* ── Hero + concept (une seule section) ──────────────────────────────── */}
-      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-20 text-center sm:px-8">
-        <div className="relative mx-auto max-w-5xl">
-          {/* Animated "billetterie ouverte" banner */}
-          {isOpen && (
-            <div className="mb-9 flex justify-center animate-hero-tagline">
-              <div
-                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full border border-accent/40 bg-white px-6 py-3 shadow-sm"
-                style={{
-                  boxShadow: '0 0 0 1px rgba(233,140,11,0.25) inset, 0 12px 40px rgba(233,140,11,0.18)',
-                }}
-              >
-                {/* Live pulsing dot */}
-                <span className="relative flex h-2.5 w-2.5 shrink-0">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.5)]" />
-                </span>
-                {/* Shining animated text with per-letter wave */}
-                <span
-                  className="animate-text-shine bg-clip-text text-sm font-extrabold uppercase tracking-[0.22em] text-transparent sm:text-base"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(90deg, #8C1A1A 0%, #E98C0B 25%, #8C1A1A 50%, #8C1A1A 100%)',
-                    backgroundSize: '200% auto',
-                  }}
-                >
-                  {'La billetterie est ouverte'.split('').map((ch, i) => (
-                    <span
-                      key={i}
-                      className="lu-letter inline-block"
-                      style={{
-                        animation: `lu-letter-wave 2.4s ease-in-out ${i * 0.06}s infinite`,
-                        whiteSpace: ch === ' ' ? 'pre' : undefined,
-                      }}
-                    >
-                      {ch === ' ' ? '\u00a0' : ch}
-                    </span>
-                  ))}
-                </span>
-                <span className="text-lg leading-none">🎉</span>
-                {/* Shimmer sweep highlight */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-accent/20 to-transparent"
-                />
-              </div>
-            </div>
-          )}
+      {/* ── Hero image responsive (hero-1 mobile · hero-3 tablette · hero-2 desktop) ── */}
+      <section className="relative z-10">
+        <a href="#tickets" className="group block" aria-label="Voir les billets">
+          <picture>
+            {/* Ordinateur : paysage large */}
+            <source media="(min-width: 1024px)" srcSet="/hero/hero-2.png" />
+            {/* Tablette : paysage moyen */}
+            <source media="(min-width: 640px)" srcSet="/hero/hero-3.png" />
+            {/* Téléphone : portrait */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/hero/hero-1.png"
+              alt="Level Up in Germany — La billetterie est ouverte"
+              className="h-auto w-full transition-transform duration-700 group-hover:scale-[1.01]"
+              fetchPriority="high"
+            />
+          </picture>
+        </a>
 
-          {/* Title with gradient highlight */}
-          <h1 className="mb-5 animate-hero-title font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight text-neutral-900 sm:text-6xl lg:text-7xl">
-            {config.pageTitle}
-          </h1>
-
-          {/* Concept sub-headline */}
-          <h2 className="mx-auto mb-6 max-w-2xl animate-hero-title font-display text-2xl font-bold leading-tight text-neutral-800 sm:text-4xl">
-            Une journée,{' '}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: 'linear-gradient(90deg, #8C1A1A, #E98C0B)' }}
-            >
-              trois expériences
-            </span>
-          </h2>
-
-          {/* Structured event meta badges */}
-          <div className="mb-7 flex animate-hero-subtitle flex-wrap items-center justify-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm">
-              <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
-              {config.eventDate}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm">
-              <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" />
-              </svg>
-              {config.eventLocation}
-            </span>
-            {config.passes.length > 0 && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm">
-                <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9.5a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 9.5v1a2 2 0 0 0 0 4v1a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.5v-1a2 2 0 0 0 0-4v-1Z" /><path d="M9 8v8" strokeDasharray="2 2" />
-                </svg>
-                {config.passes.length} formules
-              </span>
-            )}
-            <span className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-4 py-2 text-sm font-semibold text-primary shadow-sm">
-              <svg className="h-4 w-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
-              </svg>
-              Deep Dive exclusif
-            </span>
-          </div>
-
-          {/* Intro / concept explainer */}
-          <p className="mx-auto mb-9 max-w-2xl animate-hero-subtitle text-base leading-relaxed text-neutral-600 sm:text-lg">
-            Après les conférences du matin, chaque participant rejoint un{' '}
-            <strong className="text-accent">Deep Dive exclusif</strong> selon le billet choisi.{' '}
-            <span className="font-semibold text-neutral-900">Tous les billets</span> donnent accès à l'ensemble de
-            l'événement — seule la session Deep Dive varie.
-          </p>
-
-          {/* Experience grid */}
-          <div className="relative mb-10">
-            <p className="mb-5 flex items-center justify-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">
-              <span className="h-px w-8 bg-accent/50" />
-              Ce qui vous attend
-              <span className="h-px w-8 bg-accent/50" />
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {WHAT_AWAITS.map((item, i) => (
-                <div
-                  key={i}
-                  className="group inline-flex items-center gap-2.5 rounded-full border border-black/[0.06] bg-white px-5 py-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_10px_28px_rgba(233,140,11,0.15)]"
-                >
-                  <span className="text-lg transition-transform group-hover:scale-110">{item.icon}</span>
-                  <p className="text-sm font-semibold text-neutral-700">{item.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
+        {/* CTA animé sous l'image */}
+        <div className="flex justify-center px-5 py-10">
+          <a
+            href="#tickets"
+            className="group inline-flex items-center gap-2 rounded-full bg-accent px-8 py-3.5 text-sm font-bold text-[#1a0606] shadow-[0_10px_40px_rgba(233,140,11,0.45)] transition hover:bg-accent-light hover:shadow-[0_14px_50px_rgba(233,140,11,0.6)] animate-cta-glow"
+          >
+            🎟️ Voir les billets
+            <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              <path d="M12 5v14M5 12l7 7 7-7" />
+            </svg>
+          </a>
         </div>
       </section>
 
