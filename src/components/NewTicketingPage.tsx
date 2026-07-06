@@ -229,10 +229,6 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           .lu-no-motion { animation: none !important; }
           .lu-letter { animation: none !important; }
         }
-        /* Hero : largeur conservee, hauteur reduite de 15% (recadrage centre) */
-        .lu-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; aspect-ratio: 828 / 765; }
-        @media (min-width: 640px) { .lu-hero-img { aspect-ratio: 1600 / 574; } }
-        @media (min-width: 1024px) { .lu-hero-img { aspect-ratio: 1280 / 510; } }
         /* Grille des tickets : 1 col (mobile) · 2 col (tablette) · N col (desktop) */
         .lu-tickets-grid { grid-template-columns: 1fr; }
         @media (min-width: 640px) {
@@ -362,7 +358,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             <img
               src="/hero/billetterie-mobile.jpeg"
               alt="Level Up in Germany — La billetterie est ouverte"
-              className="lu-hero-img"
+              className="mx-auto block h-auto w-full"
               fetchPriority="high"
             />
           </picture>
