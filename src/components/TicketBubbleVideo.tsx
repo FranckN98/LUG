@@ -1,62 +1,66 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
 
 export function TicketBubbleVideo() {
-  const pathname = usePathname();
-  const isBuyTicketPage = pathname?.endsWith('/buy-ticket') ?? false;
-  const [showBoost, setShowBoost] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const v = videoRef.current;
-    if (!v) return;
-    v.muted = true;
-    const play = () => {
-      v.play().catch(() => {
-        /* autoplay bloqué : la vidéo démarrera à la première interaction */
-      });
-    };
-    if (v.readyState >= 2) play();
-    else v.addEventListener('loadeddata', play, { once: true });
-    return () => v.removeEventListener('loadeddata', play);
-  }, []);
-
-  useEffect(() => {
-    if (!isBuyTicketPage) {
-      setShowBoost(false);
+    if (!v) {
+      setVisible(false);
       return;
     }
 
-    setShowBoost(true);
-    const t = window.setTimeout(() => setShowBoost(false), 5000);
-    return () => window.clearTimeout(t);
-  }, [isBuyTicketPage, pathname]);
+    v.muted = true;
+
+    const dismiss = () => {
+      setFadeOut(true);
+      window.setTimeout(() => setVisible(false), 500);
+    };
+
+    const play = () => {
+      v.play().catch(() => {
+        /* autoplay bloqué : on masque quand même l'écran de chargement */
+        dismiss();
+      });
+    };
+
+    if (v.readyState >= 2) play();
+    else v.addEventListener('loadeddata', play, { once: true });
+
+    // Se referme à la fin de l'animation, avec un filet de sécurité.
+    v.addEventListener('ended', dismiss, { once: true });
+    const safety = window.setTimeout(dismiss, 8000);
+
+    return () => {
+      v.removeEventListener('loadeddata', play);
+      v.removeEventListener('ended', dismiss);
+      window.clearTimeout(safety);
+    };
+  }, []);
+
+  if (!visible) return null;
 
   return (
-    <a
-      href="https://ticket.levelupigermany.com"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Ouvrir la billetterie"
-      className={`fixed block h-[4cm] w-[4cm] overflow-hidden rounded-full border-2 border-[#8C1A1A]/85 bg-black/10 shadow-[0_12px_36px_rgba(0,0,0,0.28)] transition-all duration-500 hover:scale-105 ${
-        showBoost
-          ? 'bottom-1/2 right-1/2 z-[80] translate-x-1/2 translate-y-1/2 ring-8 ring-[#8C1A1A]/30'
-          : 'bottom-24 right-4 z-40 sm:bottom-6 sm:right-6'
+    <div
+      aria-hidden="true"
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-white transition-opacity duration-500 ${
+        fadeOut ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}
     >
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         ref={videoRef}
-        className="h-full w-full object-cover"
+        className="h-[4cm] w-[4cm] object-contain"
         src="/media/level-up-animation.mp4"
         autoPlay
         muted
-        loop
         playsInline
         preload="auto"
       />
-    </a>
+    </div>
   );
 }
