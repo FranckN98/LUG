@@ -11,6 +11,7 @@ import { EventCommunicationPopupGate } from '@/components/EventCommunicationPopu
 import { ScrollToHash } from '@/components/ScrollToHash';
 import { JsonLdSite } from '@/components/JsonLdSite';
 import { DocumentLang } from '@/components/DocumentLang';
+import { TicketBubbleVideo } from '@/components/TicketBubbleVideo';
 import { buildLocaleLayoutMetadata } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 
@@ -72,6 +73,7 @@ export default async function LocaleLayout({
       <Header locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} siteConfig={siteConfig} />
       <main className="flex-1 w-full pt-16 sm:pt-20 md:pt-[5.5rem]">{children}</main>
       {!hideFooter && <Footer locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} />}
+      <TicketBubbleVideo />
       <EventCommunicationPopupGate locale={validLocale} />
       <CookieBanner locale={validLocale} />
       <AnalyticsProvider />
