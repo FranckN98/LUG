@@ -1,13 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export function TicketBubbleVideo() {
+  const pathname = usePathname();
+  const isBuyTicketPage = pathname?.endsWith('/buy-ticket') ?? false;
   const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    if (!isBuyTicketPage) return;
+
     const v = videoRef.current;
     if (!v) {
       setVisible(false);
@@ -15,6 +20,7 @@ export function TicketBubbleVideo() {
     }
 
     v.muted = true;
+    v.playbackRate = 1.35;
 
     const dismiss = () => {
       setFadeOut(true);
@@ -40,9 +46,9 @@ export function TicketBubbleVideo() {
       v.removeEventListener('ended', dismiss);
       window.clearTimeout(safety);
     };
-  }, []);
+  }, [isBuyTicketPage]);
 
-  if (!visible) return null;
+  if (!isBuyTicketPage || !visible) return null;
 
   return (
     <div
