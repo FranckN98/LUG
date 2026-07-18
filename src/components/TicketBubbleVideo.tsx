@@ -54,7 +54,7 @@ export function TicketBubbleVideo() {
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         ref={videoRef}
-        className="h-[4cm] w-[4cm] rounded-full object-cover shadow-[0_12px_36px_rgba(0,0,0,0.28)]"
+        className="h-[8cm] w-[8cm] rounded-full object-cover shadow-[0_12px_36px_rgba(0,0,0,0.28)]"
         src="/media/level-up-animation.mp4"
         autoPlay
         muted
