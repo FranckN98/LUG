@@ -47,14 +47,14 @@ export function TicketBubbleVideo() {
   return (
     <div
       aria-hidden="true"
-      className={`fixed inset-0 z-[100] flex items-center justify-center bg-white transition-opacity duration-500 ${
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-white/40 backdrop-blur-md transition-opacity duration-500 ${
         fadeOut ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}
     >
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         ref={videoRef}
-        className="h-[4cm] w-[4cm] object-contain"
+        className="h-[4cm] w-[4cm] rounded-full object-cover shadow-[0_12px_36px_rgba(0,0,0,0.28)]"
         src="/media/level-up-animation.mp4"
         autoPlay
         muted
