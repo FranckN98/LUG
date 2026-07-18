@@ -61,6 +61,17 @@ export default async function LocaleLayout({
     siteConfig = null;
   }
 
+  let isTicketingActive = false;
+  try {
+    const ticketingConfig = await prisma.ticketingConfig.findUnique({
+      where: { id: 'singleton' },
+      select: { isNewTicketingActive: true },
+    });
+    isTicketingActive = Boolean(ticketingConfig?.isNewTicketingActive);
+  } catch {
+    isTicketingActive = false;
+  }
+
   const h = await headers();
   const pathname = h.get('x-pathname') ?? '';
   const hideFooter = pathname.endsWith('/buy-ticket');
@@ -73,7 +84,7 @@ export default async function LocaleLayout({
       <Header locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} siteConfig={siteConfig} />
       <main className="flex-1 w-full pt-16 sm:pt-20 md:pt-[5.5rem]">{children}</main>
       {!hideFooter && <Footer locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} />}
-      <TicketBubbleVideo />
+      <TicketBubbleVideo ticketingActive={isTicketingActive} />
       <EventCommunicationPopupGate locale={validLocale} />
       <CookieBanner locale={validLocale} />
       <AnalyticsProvider />

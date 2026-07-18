@@ -3,15 +3,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
-export function TicketBubbleVideo() {
+export function TicketBubbleVideo({ ticketingActive }: { ticketingActive: boolean }) {
   const pathname = usePathname();
   const isBuyTicketPage = pathname?.endsWith('/buy-ticket') ?? false;
+  const shouldShow = isBuyTicketPage && ticketingActive;
   const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (!isBuyTicketPage) return;
+    if (!shouldShow) return;
 
     const v = videoRef.current;
     if (!v) {
@@ -46,9 +47,9 @@ export function TicketBubbleVideo() {
       v.removeEventListener('ended', dismiss);
       window.clearTimeout(safety);
     };
-  }, [isBuyTicketPage]);
+  }, [shouldShow]);
 
-  if (!isBuyTicketPage || !visible) return null;
+  if (!shouldShow || !visible) return null;
 
   return (
     <div
