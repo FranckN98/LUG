@@ -1,12 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 export function TicketBubbleVideo() {
   const pathname = usePathname();
   const isBuyTicketPage = pathname?.endsWith('/buy-ticket') ?? false;
   const [showBoost, setShowBoost] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    const play = () => {
+      v.play().catch(() => {
+        /* autoplay bloqué : la vidéo démarrera à la première interaction */
+      });
+    };
+    if (v.readyState >= 2) play();
+    else v.addEventListener('loadeddata', play, { once: true });
+    return () => v.removeEventListener('loadeddata', play);
+  }, []);
 
   useEffect(() => {
     if (!isBuyTicketPage) {
@@ -33,8 +48,9 @@ export function TicketBubbleVideo() {
     >
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
+        ref={videoRef}
         className="h-full w-full object-cover"
-        src="/media/Level%20Up%20animation.mp4"
+        src="/media/level-up-animation.mp4"
         autoPlay
         muted
         loop

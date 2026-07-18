@@ -41,8 +41,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/events/') ||
     pathname.startsWith('/downloads/') ||
     pathname.startsWith('/hero/') ||
+    pathname.startsWith('/media/') ||
     pathname.startsWith('/pdf/') ||
-    /\.(ico|png|jpe?g|gif|webp|svg|avif|pdf|woff2?)$/i.test(pathname);
+    /\.(ico|png|jpe?g|gif|webp|svg|avif|pdf|woff2?|mp4|webm|ogg|mov|m4v)$/i.test(pathname);
   if (isPublicStatic) return NextResponse.next();
 
   const pathnameNorm = pathname.replace(/\/$/, '') || '/';
