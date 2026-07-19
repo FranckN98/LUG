@@ -104,8 +104,17 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
           <iframe
             src={checkoutUrl}
             title={passName ? `Acheter ${passName}` : 'Billetterie Level Up in Germany'}
-            className="relative z-10 h-full w-full"
-            style={{ minHeight: 'min(78dvh, 720px)', border: 'none' }}
+            className="relative z-10 origin-top-left border-0"
+            style={{
+              // Dézoom léger : le contenu est réduit à 85 % pour afficher plus
+              // d'éléments d'un coup, tout en agrandissant l'iframe (100/0.85 ≈ 117.6 %)
+              // pour qu'il remplisse toujours la fenêtre après la mise à l'échelle.
+              transform: 'scale(0.85)',
+              transformOrigin: 'top left',
+              width: '117.65%',
+              height: '117.65%',
+              minHeight: 'calc(min(78dvh, 720px) / 0.85)',
+            }}
             allow="payment"
           />
         </div>
