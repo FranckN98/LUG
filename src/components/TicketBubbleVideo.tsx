@@ -21,7 +21,7 @@ export function TicketBubbleVideo({ ticketingActive }: { ticketingActive: boolea
     }
 
     v.muted = true;
-    v.playbackRate = 1.35;
+    v.playbackRate = 1.9;
 
     const dismiss = () => {
       setFadeOut(true);
@@ -38,9 +38,9 @@ export function TicketBubbleVideo({ ticketingActive }: { ticketingActive: boolea
     if (v.readyState >= 2) play();
     else v.addEventListener('loadeddata', play, { once: true });
 
-    // Se referme à la fin de l'animation, avec un filet de sécurité.
+    // Se referme à la fin de l'animation, avec un filet de sécurité (4 s max).
     v.addEventListener('ended', dismiss, { once: true });
-    const safety = window.setTimeout(dismiss, 8000);
+    const safety = window.setTimeout(dismiss, 4000);
 
     return () => {
       v.removeEventListener('loadeddata', play);
