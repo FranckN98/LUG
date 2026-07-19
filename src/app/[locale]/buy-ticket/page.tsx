@@ -81,6 +81,11 @@ export default async function BuyTicketPage({
   }
 
   if (ticketingConfig?.isNewTicketingActive) {
+    const resolvedCheckoutUrl =
+      ticketingConfig.ticketingProvider === 'weezevent'
+        ? ticketingConfig.weezeventUrl
+        : ticketingConfig.checkoutUrl;
+
     return (
       <NewTicketingPage
         config={{
@@ -90,7 +95,7 @@ export default async function BuyTicketPage({
           eventDate: ticketingConfig.eventDate,
           eventLocation: ticketingConfig.eventLocation,
           ctaButtonText: ticketingConfig.ctaButtonText,
-          checkoutUrl: ticketingConfig.checkoutUrl,
+          checkoutUrl: resolvedCheckoutUrl,
           passes: ticketingConfig.passes,
         }}
       />

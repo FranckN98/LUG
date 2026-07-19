@@ -804,6 +804,7 @@ model EventDocumentTranslation {
 model TicketingConfig {
   id                   String          @id @default("singleton")
   isNewTicketingActive Boolean         @default(false) @map("is_new_ticketing_active")
+  ticketingProvider    String          @default("tailor") @map("ticketing_provider")
   pageTitle            String          @default("Level Up in Germany 2026") @map("page_title")
   pageSubtitle         String          @default("Une journée pour accélérer votre avenir en Allemagne.") @map("page_subtitle")
   pageIntro            String          @default("") @map("page_intro")
@@ -811,6 +812,7 @@ model TicketingConfig {
   eventLocation        String          @default("Francfort") @map("event_location")
   ctaButtonText        String          @default("Choisir mon billet") @map("cta_button_text")
   checkoutUrl          String          @default("https://tickets.levelupingermany.com/checkout/view-event/id/8530693/chk/dedb8063676704001e57efe8d44b4302/?modal_widget=true&widget=true") @map("checkout_url")
+  weezeventUrl         String          @default("https://www.weezevent.com/widget_billeterie.php?id_evenement=2098465&widget_key=E2098465&locale=de_DE&color_primary=red&code=red") @map("weezevent_url")
   createdAt            DateTime        @default(now()) @map("created_at")
   updatedAt            DateTime        @updatedAt @map("updated_at")
   passes               TicketingPass[]

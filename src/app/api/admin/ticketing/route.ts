@@ -27,6 +27,7 @@ export async function PATCH(req: Request) {
 
   const data = {
     isNewTicketingActive: !!body.isNewTicketingActive,
+    ticketingProvider: body.ticketingProvider === 'weezevent' ? 'weezevent' : 'tailor',
     pageTitle: body.pageTitle ?? 'Level Up in Germany 2026',
     pageSubtitle: body.pageSubtitle ?? 'Une journée pour accélérer votre avenir en Allemagne.',
     pageIntro: body.pageIntro ?? '',
@@ -34,6 +35,7 @@ export async function PATCH(req: Request) {
     eventLocation: body.eventLocation ?? 'Francfort',
     ctaButtonText: body.ctaButtonText ?? 'Choisir mon billet',
     checkoutUrl: body.checkoutUrl ?? '',
+    weezeventUrl: body.weezeventUrl ?? '',
   };
 
   const saved = await prisma.ticketingConfig.upsert({

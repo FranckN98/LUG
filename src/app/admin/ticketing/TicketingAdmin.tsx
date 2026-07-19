@@ -28,6 +28,7 @@ interface TicketingPass {
 
 interface TicketingConfig {
   isNewTicketingActive: boolean;
+  ticketingProvider: string;
   pageTitle: string;
   pageSubtitle: string;
   pageIntro: string;
@@ -35,6 +36,7 @@ interface TicketingConfig {
   eventLocation: string;
   ctaButtonText: string;
   checkoutUrl: string;
+  weezeventUrl: string;
   passes: TicketingPass[];
 }
 
@@ -302,6 +304,7 @@ function PassForm({
 
 const DEFAULT_CONFIG: TicketingConfig = {
   isNewTicketingActive: false,
+  ticketingProvider: 'tailor',
   pageTitle: 'Level Up in Germany 2026',
   pageSubtitle: 'Une journée pour accélérer votre avenir en Allemagne.',
   pageIntro: '',
@@ -309,6 +312,7 @@ const DEFAULT_CONFIG: TicketingConfig = {
   eventLocation: 'Francfort',
   ctaButtonText: 'Choisir mon billet',
   checkoutUrl: 'https://tickets.levelupingermany.com/checkout/view-event/id/8530693/chk/dedb8063676704001e57efe8d44b4302/?modal_widget=true&widget=true',
+  weezeventUrl: 'https://www.weezevent.com/widget_billeterie.php?id_evenement=2098465&widget_key=E2098465&locale=de_DE&color_primary=red&code=red',
   passes: [],
 };
 
@@ -489,9 +493,54 @@ export default function TicketingAdmin() {
           </div>
 
           <div>
-            <label className={labelCls}>URL globale du widget billetterie</label>
+            <label className={labelCls}>Fournisseur de billetterie (pop-up)</label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { value: 'tailor', title: 'Tailor Ticket', desc: 'Widget Tailor Ticket actuel' },
+                { value: 'weezevent', title: 'Weezevent', desc: 'Widget Weezevent' },
+              ].map((opt) => {
+                const active = config.ticketingProvider === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setConfig((c) => ({ ...c, ticketingProvider: opt.value }))}
+                    className={`flex flex-col items-start gap-1 rounded-xl border px-4 py-3 text-left transition ${
+                      active
+                        ? 'border-accent bg-accent/10'
+                        : 'border-white/10 bg-white/[0.04] hover:border-white/25'
+                    }`}
+                    role="radio"
+                    aria-checked={active}
+                  >
+                    <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                      <span
+                        className={`h-3.5 w-3.5 rounded-full border-2 ${
+                          active ? 'border-accent bg-accent' : 'border-white/30'
+                        }`}
+                      />
+                      {opt.title}
+                    </span>
+                    <span className="text-[11px] text-white/40">{opt.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[11px] text-white/30">
+              Le pop-up « Acheter mon billet » ouvrira le widget du fournisseur sélectionné.
+            </p>
+          </div>
+
+          <div>
+            <label className={labelCls}>URL Tailor Ticket</label>
             <input className={inputCls} value={config.checkoutUrl} onChange={(e) => setConfig((c) => ({ ...c, checkoutUrl: e.target.value }))} placeholder="https://tickets.levelupingermany.com/…" />
-            <p className="mt-1 text-[11px] text-white/30">Utilisée pour tous les tickets qui n'ont pas leur propre URL de paiement.</p>
+            <p className="mt-1 text-[11px] text-white/30">Widget affiché dans le pop-up quand « Tailor Ticket » est sélectionné.</p>
+          </div>
+
+          <div>
+            <label className={labelCls}>URL Weezevent</label>
+            <input className={inputCls} value={config.weezeventUrl} onChange={(e) => setConfig((c) => ({ ...c, weezeventUrl: e.target.value }))} placeholder="https://www.weezevent.com/widget_billeterie.php?id_evenement=…" />
+            <p className="mt-1 text-[11px] text-white/30">Widget affiché dans le pop-up quand « Weezevent » est sélectionné.</p>
           </div>
         </div>
 
