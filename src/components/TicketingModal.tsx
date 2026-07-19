@@ -37,21 +37,21 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-50 flex items-stretch justify-center p-0 sm:items-center sm:p-6"
       style={{ background: 'rgba(8, 4, 4, 0.82)', backdropFilter: 'blur(6px)' }}
       role="dialog"
       aria-modal="true"
       aria-label={passName ? `Acheter — ${passName}` : 'Acheter mon billet'}
     >
       <div
-        className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl shadow-2xl"
+        className="relative flex h-full w-full max-w-4xl flex-col overflow-hidden rounded-none shadow-2xl sm:h-auto sm:rounded-2xl"
         style={{
           background: '#fff',
           border: '2.5px solid transparent',
           backgroundClip: 'padding-box',
           boxShadow:
             '0 0 0 2.5px #8C1A1A, 0 32px 80px rgba(0,0,0,0.55), 0 0 60px rgba(140,26,26,0.25)',
-          maxHeight: '90vh',
+          maxHeight: '100dvh',
         }}
       >
         {/* Header bar */}
@@ -88,7 +88,10 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
         </div>
 
         {/* iframe */}
-        <div className="relative flex-1 overflow-auto" style={{ minHeight: '500px' }}>
+        <div
+          className="relative flex-1 overflow-auto"
+          style={{ minHeight: 'min(78dvh, 720px)' }}
+        >
           {/* Loader shown behind iframe until it loads */}
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white">
             <div
@@ -102,7 +105,7 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
             src={checkoutUrl}
             title={passName ? `Acheter ${passName}` : 'Billetterie Level Up in Germany'}
             className="relative z-10 h-full w-full"
-            style={{ minHeight: '500px', border: 'none' }}
+            style={{ minHeight: 'min(78dvh, 720px)', border: 'none' }}
             allow="payment"
           />
         </div>
