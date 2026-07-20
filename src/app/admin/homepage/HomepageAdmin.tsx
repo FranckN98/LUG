@@ -9,20 +9,30 @@ import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 const SITE_ROUTES = [
   { label: 'Accueil', value: '/' },
+  { label: 'Billetterie (acheter un billet)', value: '/buy-ticket' },
   { label: 'Événements', value: '/events' },
   { label: 'Télécharger le livre (eBook)', value: '/events#ebook' },
   { label: 'Conférence annuelle', value: '/annual-conference' },
+  { label: 'Programme', value: '/programme' },
+  { label: 'Conférence (programme)', value: '/programme/conference' },
   { label: 'Workshops', value: '/programme/workshops' },
   { label: 'Mentoring', value: '/programme/mentoring' },
+  { label: 'Services', value: '/services' },
   { label: 'Partenaires', value: '/partners' },
+  { label: 'Réservation de stand', value: '/booth-reservation' },
   { label: 'Contact', value: '/contact' },
   { label: 'Newsletter', value: '/newsletter' },
   { label: 'Devenir membre', value: '/membership' },
   { label: 'Formulaire adhesion membre', value: '/membership#membership-form' },
+  { label: 'Rejoindre (join)', value: '/join' },
   { label: 'Blog & Impact', value: '/blog-impact' },
   { label: 'Sponsor & Dons', value: '/sponsor-donate' },
   { label: 'Qui sommes-nous', value: '/who-we-are' },
+  { label: 'À propos', value: '/about' },
   { label: 'Galerie communauté', value: '/community' },
+  { label: 'Liens (links)', value: '/links' },
+  { label: 'Mentions légales', value: '/imprint' },
+  { label: 'Confidentialité', value: '/privacy' },
 ];
 
 const COLOR_VARIANTS = [
