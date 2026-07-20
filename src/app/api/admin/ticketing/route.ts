@@ -36,6 +36,7 @@ export async function PATCH(req: Request) {
     ctaButtonText: body.ctaButtonText ?? 'Choisir mon billet',
     checkoutUrl: body.checkoutUrl ?? '',
     weezeventUrl: body.weezeventUrl ?? '',
+    videoUrl: body.videoUrl ?? '',
   };
 
   const saved = await prisma.ticketingConfig.upsert({

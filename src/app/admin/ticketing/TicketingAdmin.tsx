@@ -37,6 +37,7 @@ interface TicketingConfig {
   ctaButtonText: string;
   checkoutUrl: string;
   weezeventUrl: string;
+  videoUrl: string;
   passes: TicketingPass[];
 }
 
@@ -313,6 +314,7 @@ const DEFAULT_CONFIG: TicketingConfig = {
   ctaButtonText: 'Choisir mon billet',
   checkoutUrl: 'https://tickets.levelupingermany.com/checkout/view-event/id/8530693/chk/dedb8063676704001e57efe8d44b4302/?modal_widget=true&widget=true',
   weezeventUrl: 'https://www.weezevent.com/widget_billeterie.php?id_evenement=2098465&widget_key=E2098465&locale=de_DE&color_primary=red&code=red',
+  videoUrl: '',
   passes: [],
 };
 
@@ -541,6 +543,12 @@ export default function TicketingAdmin() {
             <label className={labelCls}>URL Weezevent</label>
             <input className={inputCls} value={config.weezeventUrl} onChange={(e) => setConfig((c) => ({ ...c, weezeventUrl: e.target.value }))} placeholder="https://www.weezevent.com/widget_billeterie.php?id_evenement=…" />
             <p className="mt-1 text-[11px] text-white/30">Widget affiché dans le pop-up quand « Weezevent » est sélectionné.</p>
+          </div>
+
+          <div>
+            <label className={labelCls}>Lien vidéo YouTube (bouton Play)</label>
+            <input className={inputCls} value={config.videoUrl} onChange={(e) => setConfig((c) => ({ ...c, videoUrl: e.target.value }))} placeholder="https://www.youtube.com/watch?v=…" />
+            <p className="mt-1 text-[11px] text-white/30">Vidéo ouverte par le bouton Play animé sous l'image de la billetterie. Laissez vide pour masquer le bouton.</p>
           </div>
         </div>
 

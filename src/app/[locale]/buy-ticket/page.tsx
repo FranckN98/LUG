@@ -96,6 +96,7 @@ export default async function BuyTicketPage({
           eventLocation: ticketingConfig.eventLocation,
           ctaButtonText: ticketingConfig.ctaButtonText,
           checkoutUrl: resolvedCheckoutUrl,
+          videoUrl: ticketingConfig.videoUrl,
           passes: ticketingConfig.passes,
         }}
       />

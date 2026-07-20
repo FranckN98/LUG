@@ -34,6 +34,7 @@ export interface TicketingConfig {
   eventLocation: string;
   ctaButtonText: string;
   checkoutUrl: string;
+  videoUrl?: string;
   passes: TicketingPass[];
 }
 
@@ -45,6 +46,22 @@ function parseJson(raw: string, fallback: string[] = []): string[] {
 
 function formatPrice(cents: number, currency: string): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(cents / 100);
+}
+
+/** Extrait l'ID vidéo YouTube depuis n'importe quel format d'URL (watch, youtu.be, embed, shorts). */
+function youtubeId(url: string): string | null {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?(?:.*&)?v=)([\w-]{11})/,
+    /(?:youtu\.be\/)([\w-]{11})/,
+    /(?:youtube\.com\/embed\/)([\w-]{11})/,
+    /(?:youtube\.com\/shorts\/)([\w-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -185,10 +202,12 @@ function PassCard({
 
 export function NewTicketingPage({ config }: { config: TicketingConfig }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [videoOpen, setVideoOpen] = useState(false);
 
   const hasCheckout = Boolean(config.checkoutUrl);
   const hasAvailablePass = config.passes.some((p) => p.status === 'available');
   const isOpen = hasCheckout && hasAvailablePass;
+  const ytId = youtubeId(config.videoUrl ?? '');
 
   function handleBuy() {
     if (!config.checkoutUrl) return;
@@ -236,6 +255,27 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         }
         @media (min-width: 1024px) {
           .lu-tickets-grid { grid-template-columns: repeat(var(--lu-cols, 3), minmax(0, 1fr)); }
+        }
+        /* ── Bouton Play animé ─────────────────────────────────────────────── */
+        @keyframes lu-play-pulse {
+          0%   { transform: scale(0.9); opacity: 0.6; }
+          70%  { transform: scale(1.8); opacity: 0; }
+          100% { transform: scale(1.8); opacity: 0; }
+        }
+        @keyframes lu-play-spin { to { transform: rotate(360deg); } }
+        @keyframes lu-play-bob {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-6px); }
+        }
+        .lu-play-btn { animation: lu-play-bob 3s ease-in-out infinite; }
+        .lu-play-ring {
+          background: radial-gradient(circle, rgba(140,26,26,0.55) 0%, rgba(233,140,11,0.35) 60%, transparent 70%);
+          animation: lu-play-pulse 2.4s ease-out infinite;
+        }
+        .lu-play-ring-2 { animation-delay: 1.2s; }
+        .lu-play-spin { animation: lu-play-spin 6s linear infinite; filter: blur(2px); }
+        @media (prefers-reduced-motion: reduce) {
+          .lu-play-btn, .lu-play-ring, .lu-play-spin { animation: none !important; }
         }
       `}</style>
 
@@ -364,18 +404,42 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           </picture>
         </a>
 
-        {/* CTA animé sous l'image */}
-        <div className="flex justify-center px-5 py-10">
-          <a
-            href="#tickets"
-            className="group inline-flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-bold text-white shadow-[0_10px_40px_rgba(140,26,26,0.45)] transition hover:bg-[#a11f1f] hover:shadow-[0_14px_50px_rgba(140,26,26,0.6)] animate-cta-glow"
-          >
-            🎟️ Voir les billets
-            <svg className="h-4 w-4 transition-transform group-hover:translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
-          </a>
-        </div>
+        {/* CTA animé sous l'image : bouton Play (vidéo YouTube) */}
+        {ytId && (
+          <div className="flex flex-col items-center px-5 py-10">
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              aria-label="Regarder la vidéo"
+              className="lu-play-btn group relative flex h-24 w-24 items-center justify-center rounded-full sm:h-28 sm:w-28"
+            >
+              {/* Ondes de pulsation */}
+              <span aria-hidden className="lu-play-ring absolute inset-0 rounded-full" />
+              <span aria-hidden className="lu-play-ring lu-play-ring-2 absolute inset-0 rounded-full" />
+              {/* Anneau rotatif dégradé */}
+              <span
+                aria-hidden
+                className="lu-play-spin absolute -inset-1 rounded-full opacity-80"
+                style={{
+                  background:
+                    'conic-gradient(from 0deg, #E98C0B, #8C1A1A, #f0a530, #8C1A1A, #E98C0B)',
+                }}
+              />
+              {/* Cœur du bouton */}
+              <span
+                className="relative z-10 flex h-full w-full items-center justify-center rounded-full text-white shadow-[0_12px_40px_rgba(140,26,26,0.5)] transition-transform duration-300 group-hover:scale-105 group-active:scale-95"
+                style={{ background: 'linear-gradient(135deg, #6f1414, #8C1A1A 60%, #b3401f)' }}
+              >
+                <svg className="ml-1 h-9 w-9 drop-shadow-lg transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.29-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z" />
+                </svg>
+              </span>
+            </button>
+            <p className="mt-5 text-sm font-semibold uppercase tracking-[0.25em] text-primary">
+              Regarder la vidéo
+            </p>
+          </div>
+        )}
       </section>
 
       {/* ══ Tickets, includes & footer ═════════════════════════════════════════ */}
@@ -510,6 +574,43 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           passName="Billetterie"
           onClose={() => setModalOpen(false)}
         />
+      )}
+
+      {/* ── Lightbox vidéo YouTube ───────────────────────────────────────────── */}
+      {videoOpen && ytId && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6"
+          style={{ background: 'rgba(8, 4, 4, 0.88)', backdropFilter: 'blur(6px)' }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Vidéo"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setVideoOpen(false);
+          }}
+        >
+          <div className="relative w-full max-w-4xl">
+            <button
+              type="button"
+              onClick={() => setVideoOpen(false)}
+              aria-label="Fermer"
+              className="absolute -top-11 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div className="relative overflow-hidden rounded-2xl shadow-2xl" style={{ aspectRatio: '16 / 9', boxShadow: '0 0 0 2.5px #8C1A1A, 0 32px 80px rgba(0,0,0,0.55)' }}>
+              <iframe
+                className="absolute inset-0 h-full w-full"
+                src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`}
+                title="Vidéo Level Up in Germany"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                style={{ border: 'none' }}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
