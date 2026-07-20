@@ -483,7 +483,8 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                 { emoji: '🍽️', text: 'Déjeuner inclus.' },
                 { emoji: '🥗', text: 'Repas et fingerfood inclus.' },
                 { emoji: '☕', text: 'Boissons à volonté toute la journée (eau, café, thé, jus et softs).' },
-                { emoji: '🏢', text: "Accès à l'espace exposants et aux partenaires." },
+                { emoji: '🏢', text: 'Accès à tous les exposants.' },
+                { emoji: '🎓', text: 'Accès à une masterclass gratuite de tous les intervenants.' },
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3 rounded-2xl border border-black/[0.04] bg-white p-4 shadow-sm">
                   <span className="text-2xl">{item.emoji}</span>
