@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { TicketingModal } from './TicketingModal';
+import { TicketingFAQ } from './TicketingFAQ';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -558,6 +559,9 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             </ul>
           </div>
         </section>
+
+        {/* ── FAQ ──────────────────────────────────────────────────────────────── */}
+        <TicketingFAQ />
 
         {/* ── Footer signature ─────────────────────────────────────────────────── */}
         <footer className="relative z-10 border-t border-black/5 px-5 pb-10 pt-6 text-center sm:px-8">
