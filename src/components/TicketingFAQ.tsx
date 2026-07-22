@@ -117,19 +117,6 @@ const FAQ_ITEMS: FaqItem[] = [
     ),
   },
   {
-    question: "L'événement est-il adapté si je viens seul(e) ?",
-    answer: (
-      <div className="space-y-3">
-        <p>Absolument.</p>
-        <p>
-          Level Up est conçu pour favoriser les rencontres. Les espaces networking, les échanges
-          avec les intervenants et les partenaires permettent de créer facilement de nouveaux
-          contacts, même si vous venez seul.
-        </p>
-      </div>
-    ),
-  },
-  {
     question: 'À quelle heure dois-je arriver ?',
     answer: (
       <p>
