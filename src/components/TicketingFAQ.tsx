@@ -76,22 +76,6 @@ const FAQ_ITEMS: FaqItem[] = [
     ),
   },
   {
-    question: 'Puis-je changer de parcours pendant les Deep Dives ?',
-    answer: (
-      <div className="space-y-3">
-        <p>
-          Les trois Deep Dives se déroulent simultanément dans trois salles différentes. Pour
-          garantir une expérience de qualité et respecter la capacité de chaque salle, chaque
-          participant suit le parcours correspondant à son billet.
-        </p>
-        <p>
-          Nous vous recommandons donc de choisir le parcours qui correspond le mieux à votre
-          objectif principal.
-        </p>
-      </div>
-    ),
-  },
-  {
     question: "Quel billet choisir si j'hésite ?",
     answer: (
       <div className="space-y-3">
@@ -100,6 +84,22 @@ const FAQ_ITEMS: FaqItem[] = [
           Quel est aujourd&apos;hui le domaine qui aura le plus d&apos;impact sur mon avenir ?
         </p>
         <p>Choisissez ensuite le parcours qui répond le mieux à votre objectif.</p>
+      </div>
+    ),
+  },
+  {
+    question: 'Puis-je changer de parcours pendant les Deep Dives ?',
+    answer: (
+      <div className="space-y-3">
+        <p>
+          Les trois Deep Dives se déroulent simultanément dans trois salles différentes et durent{' '}
+          <strong>2h30</strong>. Pour garantir une expérience de qualité et respecter la capacité de
+          chaque salle, chaque participant suit le parcours correspondant à son billet.
+        </p>
+        <p>
+          Nous vous recommandons donc de choisir le parcours qui correspond le mieux à votre
+          objectif principal.
+        </p>
       </div>
     ),
   },
@@ -114,6 +114,29 @@ const FAQ_ITEMS: FaqItem[] = [
           participants.
         </p>
       </div>
+    ),
+  },
+  {
+    question: "L'événement est-il adapté si je viens seul(e) ?",
+    answer: (
+      <div className="space-y-3">
+        <p>Absolument.</p>
+        <p>
+          Level Up est conçu pour favoriser les rencontres. Les espaces networking, les échanges
+          avec les intervenants et les partenaires permettent de créer facilement de nouveaux
+          contacts, même si vous venez seul.
+        </p>
+      </div>
+    ),
+  },
+  {
+    question: 'À quelle heure dois-je arriver ?',
+    answer: (
+      <p>
+        Nous vous recommandons d&apos;arriver <strong>30 à 45 minutes avant le début de
+        l&apos;événement</strong> afin de vous enregistrer sereinement, découvrir les espaces
+        partenaires et profiter pleinement du networking avant l&apos;ouverture officielle.
+      </p>
     ),
   },
   {
@@ -143,29 +166,6 @@ const FAQ_ITEMS: FaqItem[] = [
           ))}
         </ul>
       </div>
-    ),
-  },
-  {
-    question: "L'événement est-il adapté si je viens seul(e) ?",
-    answer: (
-      <div className="space-y-3">
-        <p>Absolument.</p>
-        <p>
-          Level Up est conçu pour favoriser les rencontres. Les espaces networking, les échanges
-          avec les intervenants et les partenaires permettent de créer facilement de nouveaux
-          contacts, même si vous venez seul.
-        </p>
-      </div>
-    ),
-  },
-  {
-    question: 'À quelle heure dois-je arriver ?',
-    answer: (
-      <p>
-        Nous vous recommandons d&apos;arriver <strong>30 à 45 minutes avant le début de
-        l&apos;événement</strong> afin de vous enregistrer sereinement, découvrir les espaces
-        partenaires et profiter pleinement du networking avant l&apos;ouverture officielle.
-      </p>
     ),
   },
 ];
