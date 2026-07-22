@@ -48,7 +48,8 @@ const FAQ_ITEMS: FaqItem[] = [
               <li>Employabilité</li>
               <li>Recrutement</li>
               <li>Soft Skills</li>
-              <li>Travailler autrement</li>
+              <li>Travailler et étudier autrement</li>
+              <li>Trouver un Werkstudent</li>
               <li>Évolution vers des postes à responsabilité</li>
             </ul>
           </div>
