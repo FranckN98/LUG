@@ -76,25 +76,6 @@ const FAQ_ITEMS: FaqItem[] = [
     ),
   },
   {
-    question: 'Quelles conférences sont communes à tous les participants ?',
-    answer: (
-      <div className="space-y-3">
-        <p>Tous les participants assistent ensemble :</p>
-        <ul className="list-disc space-y-1 pl-5">
-          <li>Cérémonie d&apos;ouverture</li>
-          <li>Keynotes</li>
-          <li>Grands panels</li>
-          <li>Grand Investment Battle</li>
-          <li>Networking</li>
-          <li>Clôture</li>
-        </ul>
-        <p>
-          Seule la session <strong>Deep Dive</strong> varie selon le billet choisi.
-        </p>
-      </div>
-    ),
-  },
-  {
     question: 'Puis-je changer de parcours pendant les Deep Dives ?',
     answer: (
       <div className="space-y-3">
@@ -119,19 +100,6 @@ const FAQ_ITEMS: FaqItem[] = [
           Quel est aujourd&apos;hui le domaine qui aura le plus d&apos;impact sur mon avenir ?
         </p>
         <p>Choisissez ensuite le parcours qui répond le mieux à votre objectif.</p>
-      </div>
-    ),
-  },
-  {
-    question: 'Pourquoi avoir créé trois parcours différents ?',
-    answer: (
-      <div className="space-y-3">
-        <p>Parce que chaque participant poursuit un objectif différent.</p>
-        <p>
-          Plutôt qu&apos;une journée généraliste, nous avons conçu trois parcours spécialisés afin
-          de proposer des contenus plus concrets, plus approfondis et directement adaptés à votre
-          projet. C&apos;est ce qui rend l&apos;expérience <strong>Level Up</strong> unique.
-        </p>
       </div>
     ),
   },
