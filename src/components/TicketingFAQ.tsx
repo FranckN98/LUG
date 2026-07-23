@@ -160,7 +160,7 @@ const FAQ_ITEMS: FaqItem[] = [
 // ── Composant ───────────────────────────────────────────────────────────────────
 
 export function TicketingFAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
     <section className="relative z-10 px-5 pb-20 pt-8 sm:px-8">
