@@ -1,6 +1,10 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_33jC159T_8G3wVU4QqJVzy4Jn4XPPnVcp');
+const apiKey = process.env.RESEND_API_KEY?.trim();
+if (!apiKey) {
+  throw new Error('RESEND_API_KEY is not set');
+}
+const resend = new Resend(apiKey);
 
 export async function sendContactMail({ name, email, message }: { name: string; email: string; message: string }) {
   return resend.emails.send({
