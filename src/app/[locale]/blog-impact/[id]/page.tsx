@@ -101,6 +101,8 @@ export default async function ArticlePage({
     return !inner.includes('**');
   };
 
+  const getMarkdownHeading = (p: string) => p.match(/^(#{1,3})\s+(.+)$/);
+
   return (
     <div className="overflow-hidden">
 
@@ -167,6 +169,17 @@ export default async function ArticlePage({
                     loading="lazy"
                   />
                 );
+              }
+              const heading = getMarkdownHeading(p);
+              if (heading) {
+                const [, markers, text] = heading;
+                if (markers.length === 1) {
+                  return <h2 key={i} className="text-2xl font-bold text-brand-dark mt-10 mb-4">{renderInline(text)}</h2>;
+                }
+                if (markers.length === 2) {
+                  return <h3 key={i} className="text-xl font-bold text-brand-dark mt-8 mb-3">{renderInline(text)}</h3>;
+                }
+                return <h4 key={i} className="text-lg font-bold text-brand-dark mt-7 mb-3">{renderInline(text)}</h4>;
               }
               if (isHeadingLine(p)) {
                 return <h3 key={i} className="text-lg font-bold text-brand-dark mt-8 mb-3">{p.slice(2, -2)}</h3>;

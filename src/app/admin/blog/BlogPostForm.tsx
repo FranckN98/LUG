@@ -166,7 +166,7 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
   };
 
   // ── Formatting helpers (operate on textarea selection in active locale) ──
-  const applyFormat = useCallback((kind: 'h3' | 'bold' | 'italic' | 'list' | 'paragraph') => {
+  const applyFormat = useCallback((kind: 'h1' | 'h2' | 'h3' | 'bold' | 'italic' | 'list' | 'paragraph') => {
     const ta = textareaRef.current;
     if (!ta) return;
     const start = ta.selectionStart;
@@ -177,9 +177,10 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
     let replacement = selected;
     let cursorOffset = 0;
 
-    if (kind === 'h3') {
-      const text = selected || 'Titre de section';
-      replacement = `\n**${text}**\n`;
+    if (kind === 'h1' || kind === 'h2' || kind === 'h3') {
+      const prefix = kind === 'h1' ? '# ' : kind === 'h2' ? '## ' : '### ';
+      const lines = (selected || 'Titre de section').split('\n');
+      replacement = lines.map((line) => line.replace(/^#{1,3}\s+/, prefix)).join('\n');
       cursorOffset = replacement.length;
     } else if (kind === 'bold') {
       const text = selected || 'texte';
@@ -638,7 +639,9 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
             {view === 'edit' ? (
               <>
                 <div className="flex flex-wrap items-center gap-1 rounded-t-xl border border-b-0 border-white/10 bg-white/[0.04] px-2 py-1.5">
-                  <ToolbarBtn label="H" title="Titre de section (**texte**)" onClick={() => applyFormat('h3')} />
+                  <ToolbarBtn label="H1" title="Titre de section (# texte)" onClick={() => applyFormat('h1')} />
+                  <ToolbarBtn label="H2" title="Sous-titre (## texte)" onClick={() => applyFormat('h2')} />
+                  <ToolbarBtn label="H3" title="Sous-sous-titre (### texte)" onClick={() => applyFormat('h3')} />
                   <ToolbarBtn label="B" title="Gras (**texte**)" bold onClick={() => applyFormat('bold')} />
                   <ToolbarBtn label="I" title="Italique (*texte*)" italic onClick={() => applyFormat('italic')} />
                   <ToolbarBtn label="• Liste" title="Liste à puces (- élément)" onClick={() => applyFormat('list')} />
@@ -657,11 +660,11 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
                   value={currentTr.body}
                   onChange={(e) => updateTr(activeLocale, 'body', e.target.value)}
                   rows={18}
-                  placeholder={`Écrivez votre article ici…\n\n**Titre de section**\nUn paragraphe de texte.\n\n- Premier point\n- Deuxième point`}
+                  placeholder={`Écrivez votre article ici…\n\n# Titre de section\nUn paragraphe de texte.\n\n## Sous-titre\n\n- Premier point\n- Deuxième point`}
                   className="w-full rounded-b-xl bg-white/[0.06] border border-white/10 text-white placeholder-white/25 px-4 py-3 text-sm leading-relaxed font-mono focus:outline-none focus:border-accent/40 focus:bg-white/[0.09] transition resize-y"
                 />
                 <p className="mt-1.5 text-[0.65rem] text-white/30">
-                  Mise en forme : <code className="text-white/50">**Titre**</code> = sous-titre · <code className="text-white/50">- élément</code> = liste · <code className="text-white/50">![alt](url)</code> = image · ligne vide = nouveau paragraphe
+                  Mise en forme : <code className="text-white/50"># Titre</code>, <code className="text-white/50">## Sous-titre</code>, <code className="text-white/50">### Niveau 3</code> · <code className="text-white/50">**gras**</code> · <code className="text-white/50">*italique*</code> · <code className="text-white/50">- élément</code> = liste · <code className="text-white/50">![alt](url)</code> = image
                 </p>
               </>
             ) : (
@@ -858,11 +861,22 @@ function BlogPreview({ body, title }: { body: string; title: string }) {
             // eslint-disable-next-line @next/next/no-img-element
             return <img key={i} src={img[2]} alt={img[1]} className="my-4 w-full rounded-lg border border-gray-200" />;
           }
-          if (p.startsWith('**') && p.endsWith('**')) {
+          const heading = p.match(/^(#{1,3})\s+(.+)$/);
+          if (heading) {
+            const [, markers, text] = heading;
+            if (markers.length === 1) {
+              return <h2 key={i} className="text-xl font-bold text-[#1a0a0a] mt-8 mb-3">{renderInline(text)}</h2>;
+            }
+            if (markers.length === 2) {
+              return <h3 key={i} className="text-lg font-bold text-[#1a0a0a] mt-7 mb-2.5">{renderInline(text)}</h3>;
+            }
+            return <h4 key={i} className="text-base font-bold text-[#1a0a0a] mt-6 mb-2">{renderInline(text)}</h4>;
+          }
+          if (p.startsWith('**') && p.endsWith('**') && !p.slice(2, -2).includes('**')) {
             return <h3 key={i} className="text-base font-bold text-[#1a0a0a] mt-6 mb-2">{p.replace(/\*\*/g, '')}</h3>;
           }
           if (p.startsWith('- ')) {
-            return <li key={i} className="text-gray-700 leading-relaxed ml-5 list-disc">{p.slice(2)}</li>;
+            return <li key={i} className="text-gray-700 leading-relaxed ml-5 list-disc">{renderInline(p.slice(2))}</li>;
           }
           return <p key={i} className="text-gray-700 leading-relaxed mb-3">{renderInline(p)}</p>;
         })}
