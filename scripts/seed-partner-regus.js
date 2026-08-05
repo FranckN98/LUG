@@ -16,7 +16,7 @@ const REGUS = {
 
 const CAMPUSDIREKT = {
   name: 'Campusdirekt',
-  logoUrl: '/partners/campusdirekt.avif',
+  logoUrl: '/partners/campusdirekt.webp',
   websiteUrl: 'https://campusdirekt.de/',
   category: 'sponsor',
 };
