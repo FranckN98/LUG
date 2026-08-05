@@ -48,20 +48,28 @@ async function main() {
   }
 
   const campusdirekt = await prisma.partner.findFirst({ where: { name: CAMPUSDIREKT.name } });
-  const max = await prisma.partner.aggregate({ _max: { sortOrder: true } });
-  const lastSortOrder = (max._max.sortOrder ?? 0) + 1;
+  const secondSortOrder = firstSortOrder + 1;
+
+  // Make room after Regus so Campusdirekt is always the second visible logo.
+  await prisma.partner.updateMany({
+    where: {
+      name: { notIn: [REGUS.name, CAMPUSDIREKT.name] },
+      sortOrder: secondSortOrder,
+    },
+    data: { sortOrder: { increment: 1 } },
+  });
 
   if (campusdirekt) {
     await prisma.partner.update({
       where: { id: campusdirekt.id },
-      data: { ...CAMPUSDIREKT, sortOrder: lastSortOrder, visible: true },
+      data: { ...CAMPUSDIREKT, sortOrder: secondSortOrder, visible: true },
     });
-    console.log('[seed-partner-regus] updated Campusdirekt');
+    console.log('[seed-partner-regus] updated Campusdirekt -> second');
   } else {
     await prisma.partner.create({
-      data: { ...CAMPUSDIREKT, sortOrder: lastSortOrder, visible: true },
+      data: { ...CAMPUSDIREKT, sortOrder: secondSortOrder, visible: true },
     });
-    console.log('[seed-partner-regus] created Campusdirekt');
+    console.log('[seed-partner-regus] created Campusdirekt -> second');
   }
 }
 
