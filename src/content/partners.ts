@@ -7,6 +7,7 @@ export interface Partner {
 export const partners2025: Partner[] = [
 
   { name: 'Regus', logo: '/partners/regus.png', website: 'https://www.regus.com/de' },
+  { name: 'Campusdirekt', logo: '/partners/campusdirekt.avif', website: 'https://campusdirekt.de/' },
   { name: 'AfroGeek', logo: '/partners/5.png' },
   { name: 'GrowInDE', logo: '/partners/4.png' },
   { name: 'SB Salon', logo: '/partners/10.png' },

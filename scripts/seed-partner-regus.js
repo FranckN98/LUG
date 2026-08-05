@@ -14,6 +14,13 @@ const REGUS = {
   category: 'partner',
 };
 
+const CAMPUSDIREKT = {
+  name: 'Campusdirekt',
+  logoUrl: '/partners/campusdirekt.avif',
+  websiteUrl: 'https://campusdirekt.de/',
+  category: 'sponsor',
+};
+
 async function main() {
   const existing = await prisma.partner.findFirst({ where: { name: REGUS.name } });
 
@@ -38,6 +45,23 @@ async function main() {
       data: { ...REGUS, sortOrder: firstSortOrder, visible: true },
     });
     console.log('[seed-partner-regus] created Regus -> first (sortOrder', firstSortOrder + ')');
+  }
+
+  const campusdirekt = await prisma.partner.findFirst({ where: { name: CAMPUSDIREKT.name } });
+  const max = await prisma.partner.aggregate({ _max: { sortOrder: true } });
+  const lastSortOrder = (max._max.sortOrder ?? 0) + 1;
+
+  if (campusdirekt) {
+    await prisma.partner.update({
+      where: { id: campusdirekt.id },
+      data: { ...CAMPUSDIREKT, sortOrder: lastSortOrder, visible: true },
+    });
+    console.log('[seed-partner-regus] updated Campusdirekt');
+  } else {
+    await prisma.partner.create({
+      data: { ...CAMPUSDIREKT, sortOrder: lastSortOrder, visible: true },
+    });
+    console.log('[seed-partner-regus] created Campusdirekt');
   }
 }
 
