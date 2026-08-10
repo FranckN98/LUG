@@ -4,6 +4,8 @@ import type { Locale } from '@/i18n/config';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { NewTicketingPage } from '@/components/NewTicketingPage';
+import { eventInclude, mapEventToEventData } from '@/lib/events-db';
+import { getPublicEventGallery } from '@/lib/eventGallery';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/buy-ticket');
@@ -66,21 +68,33 @@ export default async function BuyTicketPage({
 
   // Check if the new ticketing experience is enabled
   let ticketingConfig = null;
+  let event2026 = null;
   try {
-    ticketingConfig = await prisma.ticketingConfig.findUnique({
-      where: { id: 'singleton' },
-      include: {
-        passes: {
-          where: { isActive: true },
-          orderBy: { sortOrder: 'asc' },
+    [ticketingConfig, event2026] = await Promise.all([
+      prisma.ticketingConfig.findUnique({
+        where: { id: 'singleton' },
+        include: {
+          passes: {
+            where: { isActive: true },
+            orderBy: { sortOrder: 'asc' },
+          },
         },
-      },
-    });
+      }),
+      prisma.event.findFirst({
+        where: { year: 2026, deletedAt: null },
+        include: eventInclude,
+      }),
+    ]);
   } catch {
     // DB not yet migrated in dev — fall back to coming-soon page
   }
 
   if (ticketingConfig?.isNewTicketingActive) {
+    const eventData = event2026 ? mapEventToEventData(event2026, loc) : null;
+    const galleryImages = Array.from(new Set([
+      ...(eventData?.gallery ?? []),
+      ...getPublicEventGallery('2026'),
+    ]));
     const resolvedCheckoutUrl =
       ticketingConfig.ticketingProvider === 'weezevent'
         ? ticketingConfig.weezeventUrl
@@ -97,8 +111,8 @@ export default async function BuyTicketPage({
           ctaButtonText: ticketingConfig.ctaButtonText,
           checkoutUrl: resolvedCheckoutUrl,
           videoUrl: ticketingConfig.videoUrl,
-          galleryImages: ticketingConfig.galleryImages,
-          speakers: ticketingConfig.speakers,
+          galleryImages,
+          speakers: eventData?.speakers ?? [],
           parkingLocations: ticketingConfig.parkingLocations,
           passes: ticketingConfig.passes,
         }}

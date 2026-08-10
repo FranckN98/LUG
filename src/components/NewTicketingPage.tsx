@@ -36,16 +36,16 @@ export interface TicketingConfig {
   ctaButtonText: string;
   checkoutUrl: string;
   videoUrl?: string;
-  galleryImages: string;
-  speakers: string;
+  galleryImages: string[];
+  speakers: TicketingSpeaker[];
   parkingLocations: string;
   passes: TicketingPass[];
 }
 
-type TicketingSpeaker = {
+export type TicketingSpeaker = {
   name: string;
   role: string;
-  image: string;
+  image?: string;
 };
 
 type ParkingLocation = {
@@ -71,21 +71,6 @@ function parseConfigArray(raw: string): unknown[] {
   } catch {
     return [];
   }
-}
-
-function parseGalleryImages(raw: string): string[] {
-  return parseConfigArray(raw).filter((value): value is string => typeof value === 'string' && Boolean(value.trim()));
-}
-
-function parseSpeakers(raw: string): TicketingSpeaker[] {
-  return parseConfigArray(raw)
-    .filter((value): value is Record<string, unknown> => Boolean(value) && typeof value === 'object')
-    .map((value) => ({
-      name: typeof value.name === 'string' ? value.name.trim() : '',
-      role: typeof value.role === 'string' ? value.role.trim() : '',
-      image: typeof value.image === 'string' ? value.image.trim() : '',
-    }))
-    .filter((speaker) => Boolean(speaker.name));
 }
 
 function parseParkingLocations(raw: string): ParkingLocation[] {
@@ -259,8 +244,6 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
   const hasAvailablePass = config.passes.some((p) => p.status === 'available');
   const isOpen = hasCheckout && hasAvailablePass;
   const ytId = youtubeId(config.videoUrl ?? '');
-  const galleryImages = parseGalleryImages(config.galleryImages);
-  const speakers = parseSpeakers(config.speakers);
   const parkingLocations = parseParkingLocations(config.parkingLocations);
 
   function handleBuy() {
@@ -616,7 +599,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           </div>
         </section>
 
-        {galleryImages.length > 0 && (
+        {config.galleryImages.length > 0 && (
           <section className="relative z-10 overflow-hidden border-y border-black/5 bg-[#180b0a] py-10 text-white sm:py-12">
             <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:px-8">
               <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-[#f0a530]">Level Up 2026</p>
@@ -624,7 +607,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             </div>
             <div className="overflow-hidden" aria-label="Photos de l'événement 2026">
               <div className="lu-gallery-track flex w-max gap-4 px-4">
-                {[...galleryImages, ...galleryImages].map((image, index) => (
+                {[...config.galleryImages, ...config.galleryImages].map((image, index) => (
                   <div key={`${image}-${index}`} className="h-44 w-64 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5 sm:h-52 sm:w-80">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={image} alt="Level Up in Germany 2026" className="h-full w-full object-cover" loading="lazy" />
@@ -635,7 +618,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           </section>
         )}
 
-        {speakers.length > 0 && (
+        {config.speakers.length > 0 && (
           <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
             <div className="mx-auto max-w-6xl">
               <div className="mb-10 text-center">
@@ -643,7 +626,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                 <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">Nos intervenants</h2>
               </div>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {speakers.map((speaker) => (
+                {config.speakers.map((speaker) => (
                   <article key={`${speaker.name}-${speaker.role}`} className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.45)]">
                     <div className="aspect-[4/3] bg-[#f4ece6]">
                       {speaker.image ? (

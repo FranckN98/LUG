@@ -1124,6 +1124,7 @@ export function mapEventToEventData(event: EventWithRelations, locale: Locale): 
       name: item.name,
       role: item.translations[locale].profession || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].profession)),
       domain: item.translations[locale].description || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].description)),
+      image: event.eventSpeakers.find((link) => link.id === item.id)?.speaker.photoUrl || undefined,
     })),
     venue: {
       name: content.venueName,

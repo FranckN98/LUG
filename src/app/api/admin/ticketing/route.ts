@@ -37,8 +37,6 @@ export async function PATCH(req: Request) {
     checkoutUrl: body.checkoutUrl ?? '',
     weezeventUrl: body.weezeventUrl ?? '',
     videoUrl: body.videoUrl ?? '',
-    galleryImages: typeof body.galleryImages === 'string' ? body.galleryImages : '[]',
-    speakers: typeof body.speakers === 'string' ? body.speakers : '[]',
     parkingLocations: typeof body.parkingLocations === 'string' ? body.parkingLocations : '[]',
   };
 
