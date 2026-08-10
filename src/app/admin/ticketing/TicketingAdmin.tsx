@@ -38,6 +38,9 @@ interface TicketingConfig {
   checkoutUrl: string;
   weezeventUrl: string;
   videoUrl: string;
+  galleryImages: string;
+  speakers: string;
+  parkingLocations: string;
   passes: TicketingPass[];
 }
 
@@ -315,6 +318,9 @@ const DEFAULT_CONFIG: TicketingConfig = {
   checkoutUrl: 'https://tickets.levelupingermany.com/checkout/view-event/id/8530693/chk/dedb8063676704001e57efe8d44b4302/?modal_widget=true&widget=true',
   weezeventUrl: 'https://www.weezevent.com/widget_billeterie.php?id_evenement=2098465&widget_key=E2098465&locale=de_DE&color_primary=red&code=red',
   videoUrl: '',
+  galleryImages: '[]',
+  speakers: '[]',
+  parkingLocations: '[]',
   passes: [],
 };
 
@@ -549,6 +555,47 @@ export default function TicketingAdmin() {
             <label className={labelCls}>Lien vidéo YouTube (bouton Play)</label>
             <input className={inputCls} value={config.videoUrl} onChange={(e) => setConfig((c) => ({ ...c, videoUrl: e.target.value }))} placeholder="https://www.youtube.com/watch?v=…" />
             <p className="mt-1 text-[11px] text-white/30">Vidéo ouverte par le bouton Play animé sous l'image de la billetterie. Laissez vide pour masquer le bouton.</p>
+          </div>
+
+          <div className="border-t border-white/10 pt-5">
+            <h3 className="text-sm font-semibold text-white">Contenus en bas de la page</h3>
+            <p className="mt-1 text-xs text-white/40">Ces sections restent masquées tant que leur liste est vide.</p>
+          </div>
+
+          <div>
+            <label className={labelCls}>Photos 2026 (JSON)</label>
+            <textarea
+              className={textareaCls}
+              rows={5}
+              value={config.galleryImages}
+              onChange={(e) => setConfig((c) => ({ ...c, galleryImages: e.target.value }))}
+              placeholder={'[\n  "/events/2026/photo-1.jpg",\n  "/events/2026/photo-2.jpg"\n]'}
+            />
+            <p className="mt-1 text-[11px] text-white/30">Ajoutez les URL des photos depuis la médiathèque. Elles défilent en boucle sur la billetterie.</p>
+          </div>
+
+          <div>
+            <label className={labelCls}>Intervenants (JSON)</label>
+            <textarea
+              className={textareaCls}
+              rows={6}
+              value={config.speakers}
+              onChange={(e) => setConfig((c) => ({ ...c, speakers: e.target.value }))}
+              placeholder={'[\n  { "name": "Prénom Nom", "role": "Fonction", "image": "/media/speaker.jpg" }\n]'}
+            />
+            <p className="mt-1 text-[11px] text-white/30">Chaque intervenant peut avoir un nom, une fonction et une photo. Les cartes sont affichées sur la page de billetterie.</p>
+          </div>
+
+          <div>
+            <label className={labelCls}>Parkings (JSON)</label>
+            <textarea
+              className={textareaCls}
+              rows={6}
+              value={config.parkingLocations}
+              onChange={(e) => setConfig((c) => ({ ...c, parkingLocations: e.target.value }))}
+              placeholder={'[\n  { "name": "Parking principal", "address": "Adresse complète, Frankfurt", "note": "5 min à pied" }\n]'}
+            />
+            <p className="mt-1 text-[11px] text-white/30">Renseignez le nom, l'adresse complète et une note facultative. Une carte est créée pour chaque parking.</p>
           </div>
         </div>
 

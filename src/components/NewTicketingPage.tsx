@@ -36,8 +36,23 @@ export interface TicketingConfig {
   ctaButtonText: string;
   checkoutUrl: string;
   videoUrl?: string;
+  galleryImages: string;
+  speakers: string;
+  parkingLocations: string;
   passes: TicketingPass[];
 }
+
+type TicketingSpeaker = {
+  name: string;
+  role: string;
+  image: string;
+};
+
+type ParkingLocation = {
+  name: string;
+  address: string;
+  note: string;
+};
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -47,6 +62,41 @@ function parseJson(raw: string, fallback: string[] = []): string[] {
 
 function formatPrice(cents: number, currency: string): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(cents / 100);
+}
+
+function parseConfigArray(raw: string): unknown[] {
+  try {
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
+function parseGalleryImages(raw: string): string[] {
+  return parseConfigArray(raw).filter((value): value is string => typeof value === 'string' && Boolean(value.trim()));
+}
+
+function parseSpeakers(raw: string): TicketingSpeaker[] {
+  return parseConfigArray(raw)
+    .filter((value): value is Record<string, unknown> => Boolean(value) && typeof value === 'object')
+    .map((value) => ({
+      name: typeof value.name === 'string' ? value.name.trim() : '',
+      role: typeof value.role === 'string' ? value.role.trim() : '',
+      image: typeof value.image === 'string' ? value.image.trim() : '',
+    }))
+    .filter((speaker) => Boolean(speaker.name));
+}
+
+function parseParkingLocations(raw: string): ParkingLocation[] {
+  return parseConfigArray(raw)
+    .filter((value): value is Record<string, unknown> => Boolean(value) && typeof value === 'object')
+    .map((value) => ({
+      name: typeof value.name === 'string' ? value.name.trim() : '',
+      address: typeof value.address === 'string' ? value.address.trim() : '',
+      note: typeof value.note === 'string' ? value.note.trim() : '',
+    }))
+    .filter((parking) => Boolean(parking.name && parking.address));
 }
 
 /** Extrait l'ID vidéo YouTube depuis n'importe quel format d'URL (watch, youtu.be, embed, shorts). */
@@ -209,6 +259,9 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
   const hasAvailablePass = config.passes.some((p) => p.status === 'available');
   const isOpen = hasCheckout && hasAvailablePass;
   const ytId = youtubeId(config.videoUrl ?? '');
+  const galleryImages = parseGalleryImages(config.galleryImages);
+  const speakers = parseSpeakers(config.speakers);
+  const parkingLocations = parseParkingLocations(config.parkingLocations);
 
   function handleBuy() {
     if (!config.checkoutUrl) return;
@@ -275,8 +328,11 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         }
         .lu-play-ring-2 { animation-delay: 1.2s; }
         .lu-play-spin { animation: lu-play-spin 6s linear infinite; filter: blur(2px); }
+        @keyframes lu-gallery-scroll { to { transform: translateX(-50%); } }
+        .lu-gallery-track { animation: lu-gallery-scroll 42s linear infinite; }
+        .lu-gallery-track:hover { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) {
-          .lu-play-btn, .lu-play-ring, .lu-play-spin { animation: none !important; }
+          .lu-play-btn, .lu-play-ring, .lu-play-spin, .lu-gallery-track { animation: none !important; }
         }
       `}</style>
 
@@ -560,8 +616,96 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           </div>
         </section>
 
+        {galleryImages.length > 0 && (
+          <section className="relative z-10 overflow-hidden border-y border-black/5 bg-[#180b0a] py-10 text-white sm:py-12">
+            <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:px-8">
+              <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-[#f0a530]">Level Up 2026</p>
+              <h2 className="mt-2 font-display text-2xl font-bold uppercase sm:text-3xl">Les moments qui nous attendent</h2>
+            </div>
+            <div className="overflow-hidden" aria-label="Photos de l'événement 2026">
+              <div className="lu-gallery-track flex w-max gap-4 px-4">
+                {[...galleryImages, ...galleryImages].map((image, index) => (
+                  <div key={`${image}-${index}`} className="h-44 w-64 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5 sm:h-52 sm:w-80">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={image} alt="Level Up in Germany 2026" className="h-full w-full object-cover" loading="lazy" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {speakers.length > 0 && (
+          <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-10 text-center">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">Rencontres</p>
+                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">Nos intervenants</h2>
+              </div>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {speakers.map((speaker) => (
+                  <article key={`${speaker.name}-${speaker.role}`} className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.45)]">
+                    <div className="aspect-[4/3] bg-[#f4ece6]">
+                      {speaker.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={speaker.image} alt={speaker.name} className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="flex h-full items-center justify-center bg-[#8C1A1A] font-display text-5xl font-bold text-white/80">
+                          {speaker.name.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-5">
+                      <h3 className="font-display text-2xl font-bold text-neutral-900">{speaker.name}</h3>
+                      {speaker.role && <p className="mt-1 text-sm leading-relaxed text-neutral-500">{speaker.role}</p>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ── FAQ ──────────────────────────────────────────────────────────────── */}
         <TicketingFAQ />
+
+        {parkingLocations.length > 0 && (
+          <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-10 text-center">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">Accès</p>
+                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">Parkings</h2>
+              </div>
+              <div className="grid gap-6 lg:grid-cols-2">
+                {parkingLocations.map((parking) => {
+                  const mapQuery = encodeURIComponent(parking.address);
+                  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${mapQuery}`;
+                  return (
+                    <article key={`${parking.name}-${parking.address}`} className="overflow-hidden rounded-2xl border border-black/[0.07] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.4)]">
+                      <iframe
+                        className="h-64 w-full border-0"
+                        src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
+                        title={`Carte ${parking.name}`}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      />
+                      <div className="flex flex-wrap items-end justify-between gap-4 p-5">
+                        <div>
+                          <h3 className="font-display text-2xl font-bold text-neutral-900">{parking.name}</h3>
+                          <p className="mt-1 text-sm text-neutral-600">{parking.address}</p>
+                          {parking.note && <p className="mt-2 text-sm font-medium text-[#8C1A1A]">{parking.note}</p>}
+                        </div>
+                        <a href={directionsUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-[#8C1A1A] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#a82020]">
+                          Itinéraire
+                        </a>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── Footer signature ─────────────────────────────────────────────────── */}
         <footer className="relative z-10 border-t border-black/5 px-5 pb-10 pt-6 text-center sm:px-8">

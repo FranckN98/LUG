@@ -97,6 +97,9 @@ export default async function BuyTicketPage({
           ctaButtonText: ticketingConfig.ctaButtonText,
           checkoutUrl: resolvedCheckoutUrl,
           videoUrl: ticketingConfig.videoUrl,
+          galleryImages: ticketingConfig.galleryImages,
+          speakers: ticketingConfig.speakers,
+          parkingLocations: ticketingConfig.parkingLocations,
           passes: ticketingConfig.passes,
         }}
       />
