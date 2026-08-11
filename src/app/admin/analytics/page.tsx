@@ -154,7 +154,7 @@ export default function AdminAnalyticsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card title="Pages les plus consultées">
-              <RankList items={data.topPages.map((p) => ({ label: p.page, value: p.views }))} />
+              <RankList items={data.topPages.map((p) => ({ label: p.page, value: p.views, href: p.page }))} />
             </Card>
             <Card title="Sources de trafic">
               <RankList items={data.topSources.map((s) => ({ label: s.source, value: s.count }))} />
@@ -210,7 +210,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   );
 }
 
-function RankList({ items }: { items: Array<{ label: string; value: number }> }) {
+function RankList({ items }: { items: Array<{ label: string; value: number; href?: string }> }) {
   if (items.length === 0) return <p className="text-sm text-white/40">Aucune donnée.</p>;
   const max = Math.max(...items.map((i) => i.value), 1);
   return (
@@ -218,7 +218,19 @@ function RankList({ items }: { items: Array<{ label: string; value: number }> })
       {items.map((item, i) => (
         <li key={`${item.label}-${i}`} className="text-sm">
           <div className="flex items-baseline justify-between gap-3">
-            <span className="truncate text-white/80" title={item.label}>{item.label}</span>
+            {item.href ? (
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="truncate text-accent hover:text-accent-light hover:underline"
+                title={`Ouvrir ${item.label}`}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <span className="truncate text-white/80" title={item.label}>{item.label}</span>
+            )}
             <span className="shrink-0 tabular-nums font-semibold text-white">{item.value.toLocaleString('fr-FR')}</span>
           </div>
           <div className="mt-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
