@@ -83,7 +83,6 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
     });
   } catch { /* DB unavailable — fall back to static */ }
 
-  const useStatic = dbPartners.length === 0;
   const staticPartners = partners2025.map((p, i) => ({
     id: p.name,
     name: p.name,
@@ -91,7 +90,25 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
     websiteUrl: p.website ?? null,
     sortOrder: i,
   }));
-  const displayPartners: PartnerRow[] = useStatic ? staticPartners : dbPartners;
+
+  const normalizedDb = dbPartners.map((p) => ({
+    ...p,
+    name: p.name.trim(),
+    logoUrl: p.logoUrl.trim(),
+    websiteUrl: p.websiteUrl?.trim() || null,
+  }));
+
+  const staticByName = new Map(staticPartners.map((p) => [p.name.toLowerCase(), p]));
+
+  const displayPartners: PartnerRow[] = [
+    ...staticPartners.map((staticPartner) => {
+      const dbMatch = normalizedDb.find((dbPartner) => dbPartner.name.toLowerCase() === staticPartner.name.toLowerCase());
+      return dbMatch
+        ? { ...dbMatch, id: dbMatch.id || staticPartner.id, name: staticPartner.name, logoUrl: dbMatch.logoUrl || staticPartner.logoUrl, websiteUrl: dbMatch.websiteUrl || staticPartner.websiteUrl, sortOrder: staticPartner.sortOrder }
+        : { ...staticPartner };
+    }),
+    ...normalizedDb.filter((dbPartner) => !staticByName.has(dbPartner.name.toLowerCase())),
+  ];
 
   return (
     <div className="overflow-hidden">

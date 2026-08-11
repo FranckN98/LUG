@@ -21,17 +21,25 @@ export async function GET() {
   if (unauthorized) return unauthorized;
 
   const count = await prisma.partner.count();
-  if (count === 0 && partners2025.length > 0) {
-    await prisma.partner.createMany({
-      data: partners2025.map((p, i) => ({
-        name: p.name,
-        logoUrl: p.logo,
-        websiteUrl: p.website ?? null,
-        category: 'partner',
-        sortOrder: i,
-        visible: true,
-      })),
-    });
+  const existingPartners = await prisma.partner.findMany({
+    select: { name: true },
+  });
+  const existingNames = new Set(existingPartners.map((p) => p.name.toLowerCase()));
+
+  if (partners2025.length > 0) {
+    const missingPartners = partners2025.filter((p) => !existingNames.has(p.name.toLowerCase()));
+    if (missingPartners.length > 0) {
+      await prisma.partner.createMany({
+        data: missingPartners.map((p, i) => ({
+          name: p.name,
+          logoUrl: p.logo,
+          websiteUrl: p.website ?? null,
+          category: 'partner',
+          sortOrder: count + i,
+          visible: true,
+        })),
+      });
+    }
   }
 
   const partners = await prisma.partner.findMany({
