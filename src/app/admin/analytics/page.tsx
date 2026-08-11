@@ -29,6 +29,8 @@ const RANGES: Array<{ key: string; label: string }> = [
   { key: '90d', label: '90 jours' },
 ];
 
+const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
+
 const EVENT_LABELS: Record<string, string> = {
   newsletter_signup: 'Newsletter',
   contact_form_submit: 'Contact',
@@ -73,9 +75,8 @@ export default function AdminAnalyticsPage() {
     };
   }, [range, source]);
 
-  const trackingUrl = typeof window === 'undefined'
-    ? ''
-    : `${window.location.origin}${utmPath.startsWith('/') ? utmPath : `/${utmPath}`}?${new URLSearchParams({ utm_source: utmSource, utm_medium: 'social', utm_campaign: utmCampaign.trim() || 'organic' }).toString()}`;
+  const siteUrl = PUBLIC_SITE_URL || (typeof window === 'undefined' ? '' : window.location.origin);
+  const trackingUrl = `${siteUrl}${utmPath.startsWith('/') ? utmPath : `/${utmPath}`}?${new URLSearchParams({ utm_source: utmSource, utm_medium: 'social', utm_campaign: utmCampaign.trim() || 'organic' }).toString()}`;
 
   async function copyTrackingUrl() {
     if (!trackingUrl) return;
@@ -147,7 +148,7 @@ export default function AdminAnalyticsPage() {
           </Card>
 
           <Card title="Lien de suivi social">
-            <p className="mb-4 text-sm text-white/45">Créez un lien à placer dans une bio, un post, une story ou une publicité. Son trafic sera attribué au réseau et à la campagne choisis.</p>
+            <p className="mb-4 text-sm text-white/45">Créez un lien public complet à placer dans une bio, un post, une story ou une publicité. Son trafic sera attribué au réseau et à la campagne choisis.</p>
             <div className="grid gap-3 md:grid-cols-3">
               <label className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
                 Réseau
