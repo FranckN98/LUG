@@ -246,27 +246,47 @@ function RankList({ items }: { items: Array<{ label: string; value: number; href
 }
 
 function DailyChart({ data }: { data: Array<{ day: string; views: number; visitors: number }> }) {
-  if (data.length === 0) return <p className="text-sm text-white/40">Aucune visite sur la période.</p>;
-  const max = Math.max(...data.map((d) => d.views), 1);
+  const hasTraffic = data.some((item) => item.views > 0 || item.visitors > 0);
+  if (!hasTraffic) {
+    return <p className="py-12 text-center text-sm text-white/40">Aucune visite enregistrée sur cette période.</p>;
+  }
+
+  const width = 700;
+  const height = 220;
+  const padding = { top: 20, right: 16, bottom: 34, left: 42 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const max = Math.max(...data.flatMap((item) => [item.views, item.visitors]), 1);
+  const x = (index: number) => padding.left + (data.length === 1 ? chartWidth / 2 : (index / (data.length - 1)) * chartWidth);
+  const y = (value: number) => padding.top + chartHeight - (value / max) * chartHeight;
+  const points = (key: 'views' | 'visitors') => data.map((item, index) => `${x(index)},${y(item[key])}`).join(' ');
+  const gridValues = [0, Math.ceil(max / 2), max];
+
   return (
-    <div className="flex items-end gap-1 h-36">
-      {data.map((d) => {
-        const h = Math.round((d.views / max) * 100);
-        return (
-          <div key={d.day} className="flex-1 flex flex-col items-center gap-1 group">
-            <div className="relative flex-1 w-full flex items-end">
-              <div
-                className="w-full rounded-t bg-gradient-to-t from-primary to-accent transition group-hover:opacity-80"
-                style={{ height: `${Math.max(4, h)}%` }}
-                title={`${d.day} · ${d.views} vues · ${d.visitors} visiteurs`}
-              />
-            </div>
-            <span className="text-[0.55rem] text-white/35 tabular-nums">
-              {d.day.slice(5)}
-            </span>
-          </div>
-        );
-      })}
+    <div>
+      <div className="mb-4 flex flex-wrap gap-4 text-xs text-white/65">
+        <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-accent" /> Pages vues</span>
+        <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-sky-400" /> Visiteurs uniques</span>
+      </div>
+      <div className="overflow-x-auto">
+        <svg viewBox={`0 0 ${width} ${height}`} className="h-56 min-w-[620px] w-full" role="img" aria-label="Évolution du trafic">
+          {gridValues.map((value) => (
+            <g key={value}>
+              <line x1={padding.left} x2={width - padding.right} y1={y(value)} y2={y(value)} stroke="rgba(255,255,255,0.12)" strokeDasharray="4 4" />
+              <text x={padding.left - 8} y={y(value) + 4} textAnchor="end" fill="rgba(255,255,255,0.45)" fontSize="11">{value}</text>
+            </g>
+          ))}
+          <polyline points={points('visitors')} fill="none" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points={points('views')} fill="none" stroke="#e98c0b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          {data.map((item, index) => (
+            <g key={item.day}>
+              <circle cx={x(index)} cy={y(item.visitors)} r="3" fill="#38bdf8"><title>{`${item.day} · ${item.visitors} visiteurs`}</title></circle>
+              <circle cx={x(index)} cy={y(item.views)} r="3" fill="#e98c0b"><title>{`${item.day} · ${item.views} vues`}</title></circle>
+              <text x={x(index)} y={height - 10} textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="10">{item.day.slice(5)}</text>
+            </g>
+          ))}
+        </svg>
+      </div>
     </div>
   );
 }
