@@ -46,6 +46,10 @@ const EVENT_LABELS: Record<string, string> = {
 export default function AdminAnalyticsPage() {
   const [range, setRange] = useState('7d');
   const [source, setSource] = useState<string | null>(null);
+  const [utmSource, setUtmSource] = useState('instagram');
+  const [utmPath, setUtmPath] = useState('/fr');
+  const [utmCampaign, setUtmCampaign] = useState('');
+  const [copied, setCopied] = useState(false);
   const [data, setData] = useState<AnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -68,6 +72,17 @@ export default function AdminAnalyticsPage() {
       cancelled = true;
     };
   }, [range, source]);
+
+  const trackingUrl = typeof window === 'undefined'
+    ? ''
+    : `${window.location.origin}${utmPath.startsWith('/') ? utmPath : `/${utmPath}`}?${new URLSearchParams({ utm_source: utmSource, utm_medium: 'social', utm_campaign: utmCampaign.trim() || 'organic' }).toString()}`;
+
+  async function copyTrackingUrl() {
+    if (!trackingUrl) return;
+    await navigator.clipboard.writeText(trackingUrl);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div className="px-4 py-8 md:px-10 md:py-10 max-w-6xl">
@@ -128,6 +143,30 @@ export default function AdminAnalyticsPage() {
                 </button>
               ))}
               {source && <button onClick={() => setSource(null)} className="px-3 py-2 text-sm text-accent hover:text-accent-light">Tout le trafic</button>}
+            </div>
+          </Card>
+
+          <Card title="Lien de suivi social">
+            <p className="mb-4 text-sm text-white/45">Créez un lien à placer dans une bio, un post, une story ou une publicité. Son trafic sera attribué au réseau et à la campagne choisis.</p>
+            <div className="grid gap-3 md:grid-cols-3">
+              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
+                Réseau
+                <select value={utmSource} onChange={(event) => setUtmSource(event.target.value)} className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none focus:border-accent">
+                  {data.socialSources.map((item) => <option key={item.source} value={item.source}>{item.source}</option>)}
+                </select>
+              </label>
+              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
+                Page de destination
+                <input value={utmPath} onChange={(event) => setUtmPath(event.target.value)} placeholder="/fr/events" className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/25 focus:border-accent" />
+              </label>
+              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
+                Campagne
+                <input value={utmCampaign} onChange={(event) => setUtmCampaign(event.target.value)} placeholder="event-2026" className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/25 focus:border-accent" />
+              </label>
+            </div>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <code className="min-w-0 flex-1 break-all rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/65">{trackingUrl}</code>
+              <button onClick={copyTrackingUrl} className="shrink-0 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-brand-dark hover:bg-accent-light">{copied ? 'Copié' : 'Copier le lien'}</button>
             </div>
           </Card>
 
