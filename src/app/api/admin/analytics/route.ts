@@ -11,6 +11,68 @@ const RANGES: Record<string, number> = {
   '90d': 90,
 };
 
+const SOCIAL_SOURCES = ['tiktok', 'instagram', 'linkedin', 'facebook', 'twitter', 'youtube', 'whatsapp'];
+
+type AnalyticsRow = {
+  name: string;
+  page: string | null;
+  source: string | null;
+  utmSource: string | null;
+  utmCampaign: string | null;
+  visitorHash: string | null;
+  sessionId: string | null;
+  country: string | null;
+  device: string | null;
+  locale: string | null;
+  createdAt: Date;
+};
+
+function dailySeries(rows: AnalyticsRow[], days: number) {
+  const dayMap = new Map<string, { views: number; visitors: Set<string> }>();
+  for (const row of rows) {
+    if (row.name !== 'page_view') continue;
+    const day = row.createdAt.toISOString().slice(0, 10);
+    const entry = dayMap.get(day) ?? { views: 0, visitors: new Set<string>() };
+    entry.views += 1;
+    if (row.visitorHash) entry.visitors.add(row.visitorHash);
+    dayMap.set(day, entry);
+  }
+
+  const firstDay = new Date();
+  firstDay.setUTCHours(0, 0, 0, 0);
+  firstDay.setUTCDate(firstDay.getUTCDate() - (days - 1));
+  const daily: Array<{ day: string; views: number; visitors: number }> = [];
+  for (let day = new Date(firstDay); day <= new Date(); day.setUTCDate(day.getUTCDate() + 1)) {
+    const key = day.toISOString().slice(0, 10);
+    const entry = dayMap.get(key);
+    daily.push({ day: key, views: entry?.views ?? 0, visitors: entry?.visitors.size ?? 0 });
+  }
+  return daily;
+}
+
+function monthlySeries(rows: AnalyticsRow[]) {
+  const monthMap = new Map<string, { views: number; visitors: Set<string> }>();
+  for (const row of rows) {
+    if (row.name !== 'page_view') continue;
+    const month = row.createdAt.toISOString().slice(0, 7);
+    const entry = monthMap.get(month) ?? { views: 0, visitors: new Set<string>() };
+    entry.views += 1;
+    if (row.visitorHash) entry.visitors.add(row.visitorHash);
+    monthMap.set(month, entry);
+  }
+
+  const currentMonth = new Date();
+  currentMonth.setUTCDate(1);
+  currentMonth.setUTCHours(0, 0, 0, 0);
+  return Array.from({ length: 3 }, (_, index) => {
+    const date = new Date(currentMonth);
+    date.setUTCMonth(date.getUTCMonth() - (2 - index));
+    const month = date.toISOString().slice(0, 7);
+    const entry = monthMap.get(month);
+    return { month, views: entry?.views ?? 0, visitors: entry?.visitors.size ?? 0 };
+  });
+}
+
 export async function GET(req: NextRequest) {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
@@ -19,12 +81,14 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const rangeKey = searchParams.get('range') || '7d';
     const days = RANGES[rangeKey] ?? 7;
+    const sourceFilter = searchParams.get('source')?.trim().toLowerCase() || null;
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
     // Pull all rows in window — for analytics scale this is fine. We aggregate in JS to
     // avoid SQLite/Postgres dialect differences and Date binding issues.
-    const rows = await prisma.analyticsEvent.findMany({
-      where: { createdAt: { gte: since } },
+    const allRows = await prisma.analyticsEvent.findMany({
+      where: { createdAt: { gte: ninetyDaysAgo } },
       select: {
         name: true,
         page: true,
@@ -32,9 +96,14 @@ export async function GET(req: NextRequest) {
         utmSource: true,
         utmCampaign: true,
         visitorHash: true,
+        sessionId: true,
+        country: true,
+        device: true,
+        locale: true,
         createdAt: true,
       },
     });
+    const rows = allRows.filter((row) => row.createdAt >= since && (!sourceFilter || row.source?.toLowerCase() === sourceFilter));
 
     const totalEvents = rows.length;
     const pageViews = rows.filter((r) => r.name === 'page_view').length;
@@ -85,29 +154,19 @@ export async function GET(req: NextRequest) {
       rows.filter((r) => r.name !== 'page_view').map((r) => r.name),
     ).map(([name, count]) => ({ name, count }));
 
-    // Daily series — fill every day in window so the chart isn't sparse.
-    const dayMap = new Map<string, { views: number; visitors: Set<string> }>();
-    for (const r of rows) {
-      if (r.name !== 'page_view') continue;
-      const day = r.createdAt.toISOString().slice(0, 10);
-      let entry = dayMap.get(day);
-      if (!entry) {
-        entry = { views: 0, visitors: new Set() };
-        dayMap.set(day, entry);
-      }
-      entry.views += 1;
-      if (r.visitorHash) entry.visitors.add(r.visitorHash);
-    }
-    const daily: Array<{ day: string; views: number; visitors: number }> = [];
-    const startDay = new Date(since);
-    startDay.setUTCHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    for (let d = new Date(startDay); d <= today; d.setUTCDate(d.getUTCDate() + 1)) {
-      const key = d.toISOString().slice(0, 10);
-      const entry = dayMap.get(key);
-      daily.push({ day: key, views: entry?.views ?? 0, visitors: entry?.visitors.size ?? 0 });
-    }
+    const filteredNinetyDayRows = sourceFilter
+      ? allRows.filter((row) => row.source?.toLowerCase() === sourceFilter)
+      : allRows;
+    const audience = {
+      sessions: new Set(rows.map((row) => row.sessionId).filter((value): value is string => Boolean(value))).size,
+      devices: tally(rows.filter((row) => row.name === 'page_view').map((row) => row.device ?? 'unknown')).map(([label, value]) => ({ label, value })),
+      countries: tally(rows.filter((row) => row.name === 'page_view').map((row) => row.country ?? 'unknown')).map(([label, value]) => ({ label, value })),
+      languages: tally(rows.filter((row) => row.name === 'page_view').map((row) => row.locale ?? 'unknown')).map(([label, value]) => ({ label, value })),
+    };
+    const socialSources = SOCIAL_SOURCES.map((source) => ({
+      source,
+      count: allRows.filter((row) => row.name === 'page_view' && row.source?.toLowerCase() === source).length,
+    }));
 
     return NextResponse.json({
       ok: true,
@@ -117,7 +176,11 @@ export async function GET(req: NextRequest) {
       topSources,
       topCampaigns,
       eventBreakdown,
-      daily,
+      daily: dailySeries(rows, days),
+      last7Days: dailySeries(filteredNinetyDayRows, 7),
+      last3Months: monthlySeries(filteredNinetyDayRows),
+      socialSources,
+      audience,
     });
   } catch (e) {
     // eslint-disable-next-line no-console

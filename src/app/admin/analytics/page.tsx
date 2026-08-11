@@ -11,6 +11,15 @@ type AnalyticsResponse = {
   topCampaigns: Array<{ utm_source: string | null; utm_campaign: string | null; count: number }>;
   eventBreakdown: Array<{ name: string; count: number }>;
   daily: Array<{ day: string; views: number; visitors: number }>;
+  last7Days: Array<{ day: string; views: number; visitors: number }>;
+  last3Months: Array<{ month: string; views: number; visitors: number }>;
+  socialSources: Array<{ source: string; count: number }>;
+  audience: {
+    sessions: number;
+    devices: Array<{ label: string; value: number }>;
+    countries: Array<{ label: string; value: number }>;
+    languages: Array<{ label: string; value: number }>;
+  };
 };
 
 const RANGES: Array<{ key: string; label: string }> = [
@@ -36,6 +45,7 @@ const EVENT_LABELS: Record<string, string> = {
 
 export default function AdminAnalyticsPage() {
   const [range, setRange] = useState('7d');
+  const [source, setSource] = useState<string | null>(null);
   const [data, setData] = useState<AnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +54,9 @@ export default function AdminAnalyticsPage() {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/admin/analytics?range=${range}`, { cache: 'no-store' });
+        const params = new URLSearchParams({ range });
+        if (source) params.set('source', source);
+        const res = await fetch(`/api/admin/analytics?${params}`, { cache: 'no-store' });
         const json = (await res.json()) as AnalyticsResponse;
         if (!cancelled && json.ok) setData(json);
       } finally {
@@ -55,7 +67,7 @@ export default function AdminAnalyticsPage() {
     return () => {
       cancelled = true;
     };
-  }, [range]);
+  }, [range, source]);
 
   return (
     <div className="px-4 py-8 md:px-10 md:py-10 max-w-6xl">
@@ -64,7 +76,7 @@ export default function AdminAnalyticsPage() {
           <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-accent/70">Analytics</p>
           <h1 className="text-2xl md:text-3xl font-bold text-white">Suivi de trafic</h1>
           <p className="mt-1 text-sm text-white/55 max-w-2xl">
-            Visiteurs uniques, sources, campagnes UTM et événements clés. Données hébergées localement, sans cookies tiers.
+            Sources, campagnes UTM et audience agrégée. Données hébergées localement, sans cookies tiers ni informations personnelles.
           </p>
         </div>
         <div className="inline-flex rounded-xl border border-white/10 bg-white/5 p-1">
@@ -95,8 +107,48 @@ export default function AdminAnalyticsPage() {
             <Kpi label="Événements" value={data.totals.events} />
           </div>
 
+          <Card title="Les 7 derniers jours">
+            <DailyChart data={data.last7Days} />
+          </Card>
+
+          <Card title="Trois derniers mois">
+            <MonthlyChart data={data.last3Months} />
+          </Card>
+
+          <Card title="Réseaux sociaux">
+            <p className="mb-4 text-sm text-white/45">Cliquez sur un canal pour isoler son trafic sur l’ensemble du tableau.</p>
+            <div className="flex flex-wrap gap-2">
+              {data.socialSources.map((item) => (
+                <button
+                  key={item.source}
+                  onClick={() => setSource(source === item.source ? null : item.source)}
+                  className={`rounded-lg border px-3 py-2 text-sm transition ${source === item.source ? 'border-accent bg-accent/15 text-white' : 'border-white/10 bg-white/5 text-white/70 hover:border-white/30'}`}
+                >
+                  {item.source} <span className="ml-1 tabular-nums text-white">{item.count.toLocaleString('fr-FR')}</span>
+                </button>
+              ))}
+              {source && <button onClick={() => setSource(null)} className="px-3 py-2 text-sm text-accent hover:text-accent-light">Tout le trafic</button>}
+            </div>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card title="Audience anonymisée">
+              <div className="mb-4 rounded-lg border border-white/10 bg-black/10 p-3">
+                <span className="text-xs uppercase tracking-[0.2em] text-white/40">Sessions</span>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-white">{data.audience.sessions.toLocaleString('fr-FR')}</p>
+              </div>
+              <RankList items={data.audience.devices} />
+            </Card>
+            <Card title="Pays et langues">
+              <p className="mb-2 text-xs uppercase tracking-[0.2em] text-white/40">Pays</p>
+              <RankList items={data.audience.countries} />
+              <p className="mb-2 mt-5 text-xs uppercase tracking-[0.2em] text-white/40">Langues</p>
+              <RankList items={data.audience.languages} />
+            </Card>
+          </div>
+
           {/* Daily chart */}
-          <Card title="Trafic par jour">
+          <Card title={`Trafic par jour${source ? ` · ${source}` : ''}`}>
             <DailyChart data={data.daily} />
           </Card>
 
@@ -203,6 +255,22 @@ function DailyChart({ data }: { data: Array<{ day: string; views: number; visito
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function MonthlyChart({ data }: { data: Array<{ month: string; views: number; visitors: number }> }) {
+  const max = Math.max(...data.map((item) => item.views), 1);
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      {data.map((item) => (
+        <div key={item.month} className="rounded-lg border border-white/10 bg-black/10 p-3">
+          <p className="text-xs font-semibold uppercase text-white/45">{new Intl.DateTimeFormat('fr-FR', { month: 'short', year: 'numeric' }).format(new Date(`${item.month}-01T00:00:00Z`))}</p>
+          <p className="mt-2 text-2xl font-bold tabular-nums text-white">{item.views.toLocaleString('fr-FR')}</p>
+          <p className="text-xs text-white/45">{item.visitors.toLocaleString('fr-FR')} visiteurs</p>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full bg-accent" style={{ width: `${Math.max(4, (item.views / max) * 100)}%` }} /></div>
+        </div>
+      ))}
     </div>
   );
 }
