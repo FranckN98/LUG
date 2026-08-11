@@ -154,7 +154,8 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
                       alt={partner.name}
                       width={180}
                       height={90}
-                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : ''}`}
+                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : ''} ${partner.name === 'Cave des Montagnes' ? 'brightness-0 saturate-100' : ''}`}
+                      style={partner.name === 'Cave des Montagnes' ? { filter: 'invert(68%) sepia(79%) saturate(682%) hue-rotate(23deg) brightness(104%) contrast(102%)' } : undefined}
                       priority={i < 3}
                     />
                   </a>
@@ -167,7 +168,8 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
                       alt={partner.name}
                       width={180}
                       height={90}
-                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : ''}`}
+                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : ''} ${partner.name === 'Cave des Montagnes' ? 'brightness-0 saturate-100' : ''}`}
+                      style={partner.name === 'Cave des Montagnes' ? { filter: 'invert(68%) sepia(79%) saturate(682%) hue-rotate(23deg) brightness(104%) contrast(102%)' } : undefined}
                       priority={i < 3}
                     />
                   </div>
