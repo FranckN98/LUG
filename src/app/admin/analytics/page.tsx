@@ -52,6 +52,9 @@ export default function AdminAnalyticsPage() {
   const [utmPath, setUtmPath] = useState('/fr');
   const [utmCampaign, setUtmCampaign] = useState('');
   const [copied, setCopied] = useState(false);
+  const [ticketSource, setTicketSource] = useState('instagram');
+  const [ticketCampaign, setTicketCampaign] = useState('billetterie-2026');
+  const [ticketCopied, setTicketCopied] = useState(false);
   const [data, setData] = useState<AnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -77,12 +80,19 @@ export default function AdminAnalyticsPage() {
 
   const siteUrl = PUBLIC_SITE_URL || (typeof window === 'undefined' ? '' : window.location.origin);
   const trackingUrl = `${siteUrl}${utmPath.startsWith('/') ? utmPath : `/${utmPath}`}?${new URLSearchParams({ utm_source: utmSource, utm_medium: 'social', utm_campaign: utmCampaign.trim() || 'organic' }).toString()}`;
+  const ticketTrackingUrl = `${siteUrl}/fr/buy-ticket?${new URLSearchParams({ utm_source: ticketSource.trim().toLowerCase() || 'direct', utm_medium: 'ticketing', utm_campaign: ticketCampaign.trim() || 'billetterie-2026' }).toString()}`;
 
   async function copyTrackingUrl() {
     if (!trackingUrl) return;
     await navigator.clipboard.writeText(trackingUrl);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function copyTicketTrackingUrl() {
+    await navigator.clipboard.writeText(ticketTrackingUrl);
+    setTicketCopied(true);
+    window.setTimeout(() => setTicketCopied(false), 2000);
   }
 
   return (
@@ -168,6 +178,24 @@ export default function AdminAnalyticsPage() {
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <code className="min-w-0 flex-1 break-all rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/65">{trackingUrl}</code>
               <button onClick={copyTrackingUrl} className="shrink-0 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-brand-dark hover:bg-accent-light">{copied ? 'Copié' : 'Copier le lien'}</button>
+            </div>
+          </Card>
+
+          <Card title="Lien de suivi billetterie">
+            <p className="mb-4 text-sm text-white/45">Ce lien ouvre directement la billetterie et attribue les clics et visites à la source indiquée. Utilisez une source différente pour chaque partenaire, réseau ou publicité.</p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
+                Source
+                <input value={ticketSource} onChange={(event) => setTicketSource(event.target.value)} placeholder="instagram, partenaire-x, newsletter" className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/25 focus:border-accent" />
+              </label>
+              <label className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
+                Campagne
+                <input value={ticketCampaign} onChange={(event) => setTicketCampaign(event.target.value)} placeholder="billetterie-2026" className="mt-1.5 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/25 focus:border-accent" />
+              </label>
+            </div>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <code className="min-w-0 flex-1 break-all rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/65">{ticketTrackingUrl}</code>
+              <button onClick={copyTicketTrackingUrl} className="shrink-0 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-brand-dark hover:bg-accent-light">{ticketCopied ? 'Copié' : 'Copier le lien'}</button>
             </div>
           </Card>
 
