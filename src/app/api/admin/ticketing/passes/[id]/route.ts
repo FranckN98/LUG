@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-
-function isAdmin() {
-  const cookieStore = cookies();
-  return cookieStore.get('admin_session')?.value === 'authenticated';
-}
+import { requireAdmin } from '@/lib/adminAuth';
 
 function parseJsonList(val: unknown): string[] {
   if (Array.isArray(val)) return val as string[];
@@ -38,7 +33,8 @@ function parsePassBody(body: Record<string, unknown>) {
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   const { id } = await params;
   const body = await req.json();
@@ -52,7 +48,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   const { id } = await params;
   await prisma.ticketingPass.delete({ where: { id } });

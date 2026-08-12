@@ -49,6 +49,7 @@ cp .env.example .env.local
 |----------|--------|
 | `DATABASE_URL` | SQLite local : `file:./dev.db` (voir ci-dessous) |
 | `NEXT_PUBLIC_SITE_URL` | URL publique du site (liens dans les e-mails) |
+| `ADMIN_SESSION_SECRET` | Clé longue et aléatoire qui signe les sessions d’administration |
 | `RESEND_API_KEY`, `FORMS_TO_EMAIL`, `FORMS_FROM_EMAIL` | Envoi des formulaires (Resend) |
 | `NEWSLETTER_FROM_EMAIL` | Expéditeur des e-mails « mini-livre » PDF (événements) |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile (formulaires) |

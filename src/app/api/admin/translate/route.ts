@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { translateRecord, type TranslatableLocale } from '@/lib/translateText';
+import { requireAdmin } from '@/lib/adminAuth';
 
 const ALLOWED: TranslatableLocale[] = ['fr', 'en', 'de'];
-const isAdmin = () => cookies().get('admin_session')?.value === 'authenticated';
-
 /**
  * Generic admin translator endpoint. POST { source, target, fields }
  * where `fields` is any flat Record<string,string>. Returns the same keys
@@ -14,7 +12,8 @@ const isAdmin = () => cookies().get('admin_session')?.value === 'authenticated';
  *   OPENAI_API_KEY → DEEPL_API_KEY → MyMemory (free fallback).
  */
 export async function POST(req: NextRequest) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   const body = await req.json().catch(() => null) as
     | { source?: string; target?: string; fields?: Record<string, string | null> }

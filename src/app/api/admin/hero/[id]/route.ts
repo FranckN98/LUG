@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-
-function isAdmin() {
-  const cookieStore = cookies();
-  return cookieStore.get('admin_session')?.value === 'authenticated';
-}
+import { requireAdmin } from '@/lib/adminAuth';
 
 // PATCH /api/admin/hero/[id]
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   const body = await req.json();
 
@@ -27,7 +23,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 // DELETE /api/admin/hero/[id]
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   await prisma.heroSlide.delete({ where: { id: params.id } });
   return NextResponse.json({ success: true });

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // Per-file cap. Resend allows up to ~40 MB per email *total*; base64 encoding
 // inflates payloads by ~33%, so we cap each file at 15 MB and rely on the
@@ -29,10 +29,6 @@ const ALLOWED_TYPES = new Set([
 
 const useBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
-function isAdmin(): boolean {
-  return cookies().get('admin_session')?.value === 'authenticated';
-}
-
 function safeFilename(name: string): string {
   // Strip path separators, keep extension, allow unicode-ish chars but trim.
   const cleaned = name.replace(/[\\/]/g, '_').replace(/\s+/g, '_');
@@ -55,9 +51,8 @@ async function saveFile(buffer: Buffer, savedFilename: string): Promise<string> 
 }
 
 export async function POST(request: Request) {
-  if (!isAdmin()) {
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
-  }
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   let formData: FormData;
   try {

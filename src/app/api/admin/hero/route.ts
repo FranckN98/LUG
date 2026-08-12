@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-
-function isAdmin() {
-  const cookieStore = cookies();
-  return cookieStore.get('admin_session')?.value === 'authenticated';
-}
+import { requireAdmin } from '@/lib/adminAuth';
 
 // GET /api/admin/hero — list all slides
 export async function GET() {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   const slides = await prisma.heroSlide.findMany({
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
@@ -19,7 +15,8 @@ export async function GET() {
 
 // POST /api/admin/hero — create a slide
 export async function POST(req: Request) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   const body = await req.json();
   const {

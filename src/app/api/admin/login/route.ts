@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { createAdminSession } from '@/lib/adminAuth';
 
 /**
  * Constant-time string comparison to avoid timing side-channels on the
@@ -59,14 +60,14 @@ export async function POST(req: NextRequest) {
   }
 
   const res = NextResponse.json({ success: true });
-  res.cookies.set('admin_session', 'authenticated', {
+  res.cookies.set('admin_session', createAdminSession(), {
     httpOnly: true,
     // Always secure — admin must only be used over HTTPS.
     secure: true,
     // Strict prevents the cookie from being sent on cross-site requests,
     // which neutralises CSRF on every admin-only mutation.
     sameSite: 'strict',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 60 * 8,
     path: '/',
   });
   return res;

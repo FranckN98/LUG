@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { translateBlogFields, type TranslatableLocale } from '@/lib/translateText';
+import { requireAdmin } from '@/lib/adminAuth';
 
 const ALLOWED: TranslatableLocale[] = ['fr', 'en', 'de'];
 
-const isAdmin = () => cookies().get('admin_session')?.value === 'authenticated';
-
 export async function POST(req: NextRequest) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   const body = await req.json().catch(() => null) as
     | { source?: string; target?: string; fields?: Record<string, string | null> }

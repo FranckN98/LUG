@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-
-function isAdmin() {
-  const cookieStore = cookies();
-  return cookieStore.get('admin_session')?.value === 'authenticated';
-}
+import { requireAdmin } from '@/lib/adminAuth';
 
 function parseJsonList(val: unknown): string[] {
   if (Array.isArray(val)) return val as string[];
@@ -39,7 +34,8 @@ function parsePassBody(body: Record<string, unknown>) {
 }
 
 export async function GET() {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   const passes = await prisma.ticketingPass.findMany({
     orderBy: { sortOrder: 'asc' },
@@ -49,7 +45,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  if (!isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const unauthorized = requireAdmin();
+  if (unauthorized) return unauthorized;
 
   // Ensure singleton config exists first
   await prisma.ticketingConfig.upsert({
