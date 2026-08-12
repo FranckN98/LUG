@@ -57,17 +57,29 @@ export default function AdminAnalyticsPage() {
   const [ticketCopied, setTicketCopied] = useState(false);
   const [data, setData] = useState<AnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
+      setLoadError(null);
       try {
         const params = new URLSearchParams({ range });
         if (source) params.set('source', source);
         const res = await fetch(`/api/admin/analytics?${params}`, { cache: 'no-store' });
+        if (res.status === 401) {
+          window.location.assign('/admin/login?from=/admin/analytics');
+          return;
+        }
         const json = (await res.json()) as AnalyticsResponse;
-        if (!cancelled && json.ok) setData(json);
+        if (!cancelled && json.ok) {
+          setData(json);
+        } else if (!cancelled) {
+          setLoadError('Les données Analytics ne sont pas disponibles pour le moment.');
+        }
+      } catch {
+        if (!cancelled) setLoadError('Impossible de contacter le service Analytics.');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -123,7 +135,7 @@ export default function AdminAnalyticsPage() {
       {loading && !data ? (
         <p className="text-sm text-white/50">Chargement…</p>
       ) : !data ? (
-        <p className="text-sm text-rose-400">Erreur de chargement.</p>
+        <p className="text-sm text-rose-400">{loadError ?? 'Erreur de chargement.'}</p>
       ) : (
         <div className="space-y-8">
           {/* KPIs */}
