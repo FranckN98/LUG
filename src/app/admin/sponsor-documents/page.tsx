@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { SponsorDocumentsAdmin } from './SponsorDocumentsAdmin';
+import { isAdmin } from '@/lib/adminAuth';
 
 export const metadata: Metadata = {
   title: 'PDFs Sponsors — Admin',
@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default function SponsorDocumentsPage() {
-  const isAdmin = cookies().get('admin_session')?.value === 'authenticated';
-  if (!isAdmin) redirect('/admin/login');
+  if (!isAdmin()) redirect('/admin/login');
   return <SponsorDocumentsAdmin />;
 }
