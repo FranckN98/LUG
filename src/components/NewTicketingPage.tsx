@@ -625,10 +625,10 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">Rencontres</p>
                 <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">Nos intervenants</h2>
               </div>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
                 {config.speakers.map((speaker) => (
                   <article key={`${speaker.name}-${speaker.role}`} className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.45)]">
-                    <div className="aspect-[4/3] bg-[#f4ece6]">
+                    <div className="aspect-square bg-[#f4ece6] sm:aspect-[4/3]">
                       {speaker.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={speaker.image} alt={speaker.name} className="h-full w-full object-cover" loading="lazy" />
@@ -638,9 +638,9 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                         </div>
                       )}
                     </div>
-                    <div className="p-5">
-                      <h3 className="font-display text-2xl font-bold text-neutral-900">{speaker.name}</h3>
-                      {speaker.role && <p className="mt-1 text-sm leading-relaxed text-neutral-500">{speaker.role}</p>}
+                    <div className="p-3 sm:p-5">
+                      <h3 className="font-display text-lg font-bold leading-tight text-neutral-900 sm:text-2xl">{speaker.name}</h3>
+                      {speaker.role && <p className="mt-1 text-xs leading-relaxed text-neutral-500 sm:text-sm">{speaker.role}</p>}
                     </div>
                   </article>
                 ))}
