@@ -185,7 +185,18 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0b0606] text-white">
       {/* Hide the global site header on this landing-style page only */}
-      <style>{`header.fixed{display:none!important}main{padding-top:0!important}`}</style>
+      <style>{`
+        header.fixed{display:none!important}
+        main{padding-top:0!important}
+        @keyframes lu-logo-glow {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 0.85; transform: scale(1.06); }
+        }
+        .lu-logo-glow { animation: lu-logo-glow 4.5s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .lu-logo-glow { animation: none !important; }
+        }
+      `}</style>
 
       {/* Home button (top-right) */}
       <Link
@@ -220,15 +231,11 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
       <section className="relative z-10 mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Hero / welcome */}
         <header className="relative mb-12 flex flex-col items-center text-center">
-          {/* Avatar with glow halo */}
+          {/* Avatar with soft ambient glow */}
           <div className="relative mb-6">
             <div
               aria-hidden
-              className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(233,140,11,0.45),transparent_70%)] blur-2xl"
-            />
-            <div
-              aria-hidden
-              className="absolute -inset-1 rounded-full bg-gradient-to-tr from-accent via-[#C0392B] to-[#8C1A1A] opacity-90 blur-[2px]"
+              className="lu-logo-glow absolute -inset-4 rounded-full bg-[radial-gradient(circle_at_center,rgba(233,140,11,0.4),transparent_72%)] blur-xl"
             />
             <div className="relative grid h-[7.69rem] w-[7.69rem] place-items-center overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-[8.96rem] sm:w-[8.96rem]">
               <img
