@@ -227,7 +227,7 @@ export function SocialLinksAdmin() {
       return;
     }
     adminNotify.success('Lien supprimé.');
-    refresh();
+    await refresh();
   }
 
   async function toggleActive(link: SocialLink) {
@@ -243,7 +243,7 @@ export function SocialLinksAdmin() {
     }
 
     adminNotify.success(link.isActive ? 'Lien désactivé.' : 'Lien activé.');
-    refresh();
+    await refresh();
   }
 
   async function move(link: SocialLink, direction: 'up' | 'down') {
