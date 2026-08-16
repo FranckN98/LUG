@@ -189,8 +189,8 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
         header.fixed{display:none!important}
         main{padding-top:0!important}
         @keyframes lu-logo-glow {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 0.9; transform: scale(1.08); }
+          0%, 100% { opacity: 0.65; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.12); }
         }
         .lu-logo-glow { animation: lu-logo-glow 4.8s ease-in-out infinite; }
         @media (prefers-reduced-motion: reduce) {
@@ -235,11 +235,11 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
           <div className="relative mb-6">
             <div
               aria-hidden
-              className="lu-logo-glow absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,214,122,0.45)_0%,rgba(233,140,11,0.24)_28%,rgba(233,140,11,0.12)_44%,rgba(233,140,11,0.03)_62%,transparent_75%)] blur-2xl"
+              className="lu-logo-glow absolute -inset-8 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,235,163,0.9)_0%,rgba(255,195,82,0.54)_18%,rgba(233,140,11,0.28)_34%,rgba(233,140,11,0.12)_52%,rgba(233,140,11,0.04)_68%,transparent_82%)] blur-3xl"
             />
             <div
               aria-hidden
-              className="absolute left-1/2 top-1/2 h-[130%] w-[130%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_55%)] blur-md"
+              className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.14),transparent_60%)] blur-lg"
             />
             <div className="relative grid h-[7.69rem] w-[7.69rem] place-items-center overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-[8.96rem] sm:w-[8.96rem]">
               <img
