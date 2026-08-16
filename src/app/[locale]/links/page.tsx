@@ -53,8 +53,8 @@ function BrandIcon({ name }: { name: string }) {
     case 'LinkedIn':
       return (
         <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <rect x="6" y="6" width="52" height="52" rx="12" fill="#0a66c2" />
-          <path d="M22 27h6v19h-6V27Zm3-8.3a3.4 3.4 0 1 1 0 6.8 3.4 3.4 0 0 1 0-6.8ZM29 27h5.7v2.6h.1c.8-1.5 2.8-3.1 5.7-3.1 6 0 7.1 4 7.1 9.2V46h-6v-42.2c0-2.5-.1-5.8-3.5-5.8s-4 2.8-4 5.6V46h-6V27Z" fill="#ffffff" />
+          <rect x="6" y="6" width="52" height="52" rx="12" fill="#0A66C2" />
+          <path d="M17 24.5h7.1v19.5H17V24.5Zm3.5-10.2a4.1 4.1 0 1 1 0 8.2 4.1 4.1 0 0 1 0-8.2ZM27.8 24.5h6.8v2.6h.1c1-1.8 3.2-3.7 6.7-3.7 7.1 0 8.4 4.6 8.4 10.7v10H43v-9.4c0-2.3-.1-5.2-3.3-5.2-3.3 0-3.8 2.6-3.8 5.2v9.4h-6.9V24.5Z" fill="#ffffff" />
         </svg>
       );
     case 'Facebook':
