@@ -14,12 +14,67 @@ type SocialLink = {
 };
 
 const FEATURED_SOCIALS = [
-  { name: 'TikTok', emoji: '🎵', tone: 'from-cyan-400/25 to-fuchsia-500/25' },
-  { name: 'Instagram', emoji: '📸', tone: 'from-rose-500/25 to-amber-400/25' },
-  { name: 'LinkedIn', emoji: '💼', tone: 'from-sky-500/25 to-blue-600/25' },
-  { name: 'Facebook', emoji: '👍', tone: 'from-blue-500/25 to-indigo-600/25' },
-  { name: 'YouTube', emoji: '▶️', tone: 'from-red-500/25 to-orange-500/25' },
+  { name: 'TikTok', tone: 'from-[#00f2ea]/18 via-[#00b7ff]/10 to-[#ff3cac]/18' },
+  { name: 'Instagram', tone: 'from-[#f58529]/20 via-[#dd2a7b]/18 to-[#8134af]/18' },
+  { name: 'LinkedIn', tone: 'from-[#0a66c2]/25 via-[#004182]/10 to-[#1d9bf0]/18' },
+  { name: 'Facebook', tone: 'from-[#1877f2]/25 via-[#1d4ed8]/12 to-[#2563eb]/18' },
+  { name: 'YouTube', tone: 'from-[#ff0000]/22 via-[#ff4d4d]/12 to-[#f59e0b]/18' },
 ] as const;
+
+function BrandIcon({ name }: { name: string }) {
+  const commonClassName = 'h-7 w-7 md:h-9 md:w-9';
+
+  switch (name) {
+    case 'TikTok':
+      return (
+        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
+          <rect x="6" y="6" width="52" height="52" rx="16" fill="#000000" />
+          <path d="M38 17c2.8 2.8 6.3 4.7 10.5 5.4v7c-3.8-.4-7.3-1.8-10.1-4.3v15.7c0 7.2-5.8 13-13 13s-13-5.8-13-13 5.8-13 13-13c1.1 0 2.2.2 3.3.5v7.1c-1-.3-2.1-.5-3.3-.5-3.5 0-6.3 2.8-6.3 6.3 0 3.5 2.8 6.3 6.3 6.3 3.5 0 6.3-2.8 6.3-6.3V17h6.6Z" fill="#ffffff" />
+          <path d="M39.5 17c1.4 2 3.7 3.2 6.3 3.8v6.2c-1.7-.3-3.3-.9-4.7-1.8v15.8c0 5.5-4.5 10-10 10s-10-4.5-10-10 4.5-10 10-10c1.4 0 2.7.3 3.9.9v6.9c-1-.5-2.1-.8-3.3-.8-3 0-5.4 2.4-5.4 5.4 0 3 2.4 5.4 5.4 5.4 3 0 5.4-2.4 5.4-5.4V17h6.1Z" fill="#00f2ea" opacity=".9" />
+        </svg>
+      );
+    case 'Instagram':
+      return (
+        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
+          <rect x="7" y="7" width="50" height="50" rx="14" fill="url(#instaGradient)" />
+          <rect x="18" y="18" width="28" height="28" rx="8" fill="none" stroke="#ffffff" strokeWidth="3.2" />
+          <circle cx="32" cy="32" r="7.5" fill="none" stroke="#ffffff" strokeWidth="3.2" />
+          <circle cx="41.5" cy="22.5" r="2.3" fill="#ffffff" />
+          <defs>
+            <linearGradient id="instaGradient" x1="8" y1="10" x2="56" y2="54" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#f9ce34" />
+              <stop offset="0.35" stopColor="#ee2a7b" />
+              <stop offset="0.7" stopColor="#6228d7" />
+              <stop offset="1" stopColor="#1f8fff" />
+            </linearGradient>
+          </defs>
+        </svg>
+      );
+    case 'LinkedIn':
+      return (
+        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
+          <rect x="6" y="6" width="52" height="52" rx="12" fill="#0a66c2" />
+          <path d="M22 27h6v19h-6V27Zm3-8.3a3.4 3.4 0 1 1 0 6.8 3.4 3.4 0 0 1 0-6.8ZM29 27h5.7v2.6h.1c.8-1.5 2.8-3.1 5.7-3.1 6 0 7.1 4 7.1 9.2V46h-6v-42.2c0-2.5-.1-5.8-3.5-5.8s-4 2.8-4 5.6V46h-6V27Z" fill="#ffffff" />
+        </svg>
+      );
+    case 'Facebook':
+      return (
+        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
+          <rect x="6" y="6" width="52" height="52" rx="12" fill="#1877f2" />
+          <path d="M35.6 22.3h5.2V13h-6.2c-7.7 0-9.1 4.9-9.1 9.4v4H20v9.3h5.5V52h9.9V35.7h7.1l1.2-9.3h-8.3v-4c0-1.6.8-3.1 3.1-3.1Z" fill="#ffffff" />
+        </svg>
+      );
+    case 'YouTube':
+      return (
+        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
+          <rect x="6" y="12" width="52" height="40" rx="12" fill="#ff0000" />
+          <path d="m27 24 16 8-16 8V24Z" fill="#ffffff" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
 
 function isFeaturedSocial(link: SocialLink, name: string): boolean {
   const key = `${link.title} ${link.url}`.toLowerCase();
@@ -187,21 +242,27 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
         </header>
 
         {featuredLinks.length > 0 && (
-          <nav aria-label="Réseaux sociaux" className="mb-8 grid grid-cols-5 gap-2 sm:gap-3">
-            {featuredLinks.map(({ name, emoji, tone, link }) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={name}
-                title={name}
-                className={`group relative flex aspect-square min-w-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br ${tone} text-xl shadow-[0_12px_28px_-18px_rgba(0,0,0,0.95)] transition duration-300 hover:-translate-y-1 hover:border-accent/70 hover:shadow-[0_16px_32px_-16px_rgba(233,140,11,0.65)] sm:rounded-2xl sm:text-2xl`}
-              >
-                <span className="relative transition-transform duration-300 group-hover:scale-110">{emoji}</span>
-                <span className="sr-only">{name}</span>
-              </a>
-            ))}
+          <nav aria-label="Réseaux sociaux" className="mb-8">
+            <div className="grid grid-cols-5 gap-2 sm:gap-3">
+              {featuredLinks.map(({ name, tone, link }) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={name}
+                  title={name}
+                  className={`group relative flex aspect-square min-w-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${tone} shadow-[0_18px_35px_-20px_rgba(0,0,0,0.9)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:shadow-[0_22px_40px_-18px_rgba(233,140,11,0.8)]`}
+                >
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.24),transparent_35%)]" aria-hidden />
+                  <div className="absolute inset-[1px] rounded-[calc(1rem-1px)] bg-black/10" aria-hidden />
+                  <span className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                    <BrandIcon name={name} />
+                  </span>
+                  <span className="sr-only">{name}</span>
+                </a>
+              ))}
+            </div>
           </nav>
         )}
 
