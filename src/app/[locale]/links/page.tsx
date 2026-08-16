@@ -13,6 +13,20 @@ type SocialLink = {
   isNew: boolean;
 };
 
+const FEATURED_SOCIALS = [
+  { name: 'TikTok', emoji: '🎵', tone: 'from-cyan-400/25 to-fuchsia-500/25' },
+  { name: 'Instagram', emoji: '📸', tone: 'from-rose-500/25 to-amber-400/25' },
+  { name: 'LinkedIn', emoji: '💼', tone: 'from-sky-500/25 to-blue-600/25' },
+  { name: 'Facebook', emoji: '👍', tone: 'from-blue-500/25 to-indigo-600/25' },
+  { name: 'YouTube', emoji: '▶️', tone: 'from-red-500/25 to-orange-500/25' },
+] as const;
+
+function isFeaturedSocial(link: SocialLink, name: string): boolean {
+  const key = `${link.title} ${link.url}`.toLowerCase();
+  if (name === 'Facebook') return key.includes('facebook') || key.includes('fb.com');
+  return key.includes(name.toLowerCase());
+}
+
 const copy: Record<Locale, { eyebrow: string; title: string; subtitle: string; empty: string; cta: string; newBadge: string }> = {
   de: {
     eyebrow: 'Willkommen',
@@ -70,6 +84,13 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   } catch {
     links = [];
   }
+
+  const featuredLinks = FEATURED_SOCIALS.flatMap((social) => {
+    const link = links.find((item) => isFeaturedSocial(item, social.name));
+    return link ? [{ ...social, link }] : [];
+  });
+  const featuredIds = new Set(featuredLinks.map((social) => social.link.id));
+  const contentLinks = links.filter((link) => !featuredIds.has(link.id));
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0b0606] text-white">
@@ -165,13 +186,32 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
           </div>
         </header>
 
+        {featuredLinks.length > 0 && (
+          <nav aria-label="Réseaux sociaux" className="mb-8 grid grid-cols-5 gap-2 sm:gap-3">
+            {featuredLinks.map(({ name, emoji, tone, link }) => (
+              <a
+                key={link.id}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={name}
+                title={name}
+                className={`group relative flex aspect-square min-w-0 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br ${tone} text-xl shadow-[0_12px_28px_-18px_rgba(0,0,0,0.95)] transition duration-300 hover:-translate-y-1 hover:border-accent/70 hover:shadow-[0_16px_32px_-16px_rgba(233,140,11,0.65)] sm:rounded-2xl sm:text-2xl`}
+              >
+                <span className="relative transition-transform duration-300 group-hover:scale-110">{emoji}</span>
+                <span className="sr-only">{name}</span>
+              </a>
+            ))}
+          </nav>
+        )}
+
         {links.length === 0 ? (
           <p className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-sm text-white/60">
             {t.empty}
           </p>
-        ) : (
+        ) : contentLinks.length > 0 ? (
           <ul className="space-y-3">
-            {links.map((link) => {
+            {contentLinks.map((link) => {
               const cover = link.coverImageUrl?.trim() || resolveSocialLinkCoverImage(link.title, link.url);
               const isHighlighted = link.isNew;
               return (
@@ -225,7 +265,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
               );
             })}
           </ul>
-        )}
+        ) : null}
       </section>
     </div>
   );
