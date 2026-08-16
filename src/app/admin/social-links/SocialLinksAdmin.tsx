@@ -26,6 +26,22 @@ const FEATURED_SOCIALS = [
   { name: 'YouTube', emoji: '▶️' },
 ] as const;
 
+const TIKTOK_NOTE_PATH =
+  'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z';
+
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} aria-hidden>
+      <rect x="6" y="6" width="52" height="52" rx="16" fill="#000000" />
+      <g transform="translate(6,6) scale(2.1667)">
+        <path transform="translate(-1.1,-0.9)" fill="#25F4EE" d={TIKTOK_NOTE_PATH} />
+        <path transform="translate(1.1,0.9)" fill="#FE2C55" d={TIKTOK_NOTE_PATH} />
+        <path fill="#ffffff" d={TIKTOK_NOTE_PATH} />
+      </g>
+    </svg>
+  );
+}
+
 function normalizeSocialKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
@@ -350,9 +366,13 @@ export function SocialLinksAdmin() {
                 const isSaving = savingFeaturedId === link.id;
                 return (
                   <div key={link.id} className="flex flex-col rounded-xl border border-white/10 bg-black/30 p-4 backdrop-blur-sm">
-                    {/* Platform name and emoji */}
+                    {/* Platform name and icon */}
                     <div className="mb-4 flex items-center gap-3">
-                      <span className="text-3xl" aria-hidden>{social.emoji}</span>
+                      {social.name === 'TikTok' ? (
+                        <TikTokIcon className="h-9 w-9" />
+                      ) : (
+                        <span className="text-3xl" aria-hidden>{social.emoji}</span>
+                      )}
                       <h3 className="text-sm font-semibold text-white">{social.name}</h3>
                     </div>
 
