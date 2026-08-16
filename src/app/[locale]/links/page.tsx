@@ -16,11 +16,11 @@ type SocialLink = {
 };
 
 const FEATURED_SOCIALS = [
-  { name: 'TikTok', tone: 'from-[#00f2ea]/18 via-[#00b7ff]/10 to-[#ff3cac]/18' },
-  { name: 'Instagram', tone: 'from-[#f58529]/20 via-[#dd2a7b]/18 to-[#8134af]/18' },
-  { name: 'LinkedIn', tone: 'from-[#0a66c2]/25 via-[#004182]/10 to-[#1d9bf0]/18' },
-  { name: 'Facebook', tone: 'from-[#1877f2]/25 via-[#1d4ed8]/12 to-[#2563eb]/18' },
-  { name: 'YouTube', tone: 'from-[#ff0000]/22 via-[#ff4d4d]/12 to-[#f59e0b]/18' },
+  { name: 'TikTok' },
+  { name: 'Instagram' },
+  { name: 'LinkedIn' },
+  { name: 'Facebook' },
+  { name: 'YouTube' },
 ] as const;
 
 function BrandIcon({ name }: { name: string }) {
@@ -30,7 +30,7 @@ function BrandIcon({ name }: { name: string }) {
     case 'TikTok':
       return (
         <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <rect x="6" y="6" width="52" height="52" rx="16" fill="#000000" />
+          <circle cx="32" cy="32" r="26" fill="#000000" />
           <g transform="translate(6,6) scale(2.1667)">
             <path
               transform="translate(-1.1,-0.9)"
@@ -52,7 +52,7 @@ function BrandIcon({ name }: { name: string }) {
     case 'Instagram':
       return (
         <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <rect x="7" y="7" width="50" height="50" rx="14" fill="url(#instaGradient)" />
+          <circle cx="32" cy="32" r="25" fill="url(#instaGradient)" />
           <rect x="18" y="18" width="28" height="28" rx="8" fill="none" stroke="#ffffff" strokeWidth="3.2" />
           <circle cx="32" cy="32" r="7.5" fill="none" stroke="#ffffff" strokeWidth="3.2" />
           <circle cx="41.5" cy="22.5" r="2.3" fill="#ffffff" />
@@ -69,21 +69,21 @@ function BrandIcon({ name }: { name: string }) {
     case 'LinkedIn':
       return (
         <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <rect x="6" y="6" width="52" height="52" rx="12" fill="#0A66C2" />
+          <circle cx="32" cy="32" r="26" fill="#0A66C2" />
           <path d="M17 24.5h7.1v19.5H17V24.5Zm3.5-10.2a4.1 4.1 0 1 1 0 8.2 4.1 4.1 0 0 1 0-8.2ZM27.8 24.5h6.8v2.6h.1c1-1.8 3.2-3.7 6.7-3.7 7.1 0 8.4 4.6 8.4 10.7v10H43v-9.4c0-2.3-.1-5.2-3.3-5.2-3.3 0-3.8 2.6-3.8 5.2v9.4h-6.9V24.5Z" fill="#ffffff" />
         </svg>
       );
     case 'Facebook':
       return (
         <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <rect x="6" y="6" width="52" height="52" rx="12" fill="#1877f2" />
+          <circle cx="32" cy="32" r="26" fill="#1877f2" />
           <path d="M35.6 22.3h5.2V13h-6.2c-7.7 0-9.1 4.9-9.1 9.4v4H20v9.3h5.5V52h9.9V35.7h7.1l1.2-9.3h-8.3v-4c0-1.6.8-3.1 3.1-3.1Z" fill="#ffffff" />
         </svg>
       );
     case 'YouTube':
       return (
         <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <rect x="6" y="12" width="52" height="40" rx="12" fill="#ff0000" />
+          <circle cx="32" cy="32" r="26" fill="#ff0000" />
           <path d="m27 24 16 8-16 8V24Z" fill="#ffffff" />
         </svg>
       );
@@ -227,7 +227,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
               aria-hidden
               className="absolute -inset-1 rounded-full bg-gradient-to-tr from-accent via-[#C0392B] to-[#8C1A1A] opacity-90 blur-[2px]"
             />
-            <div className="relative grid h-[6.41rem] w-[6.41rem] place-items-center overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-[7.47rem] sm:w-[7.47rem]">
+            <div className="relative grid h-[7.69rem] w-[7.69rem] place-items-center overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-[8.96rem] sm:w-[8.96rem]">
               <img
                 src="/logo.png"
                 alt="Level Up in Germany"
@@ -251,22 +251,12 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
 
           {/* Eyebrow */}
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
-
-          {/* Hairline divider */}
-          <div
-            aria-hidden
-            className="mt-8 flex w-full max-w-xs items-center gap-3"
-          >
-            <span className="h-px flex-1 bg-gradient-to-r from-transparent to-white/15" />
-            <span className="h-1 w-1 rounded-full bg-accent/70" />
-            <span className="h-px flex-1 bg-gradient-to-l from-transparent to-white/15" />
-          </div>
         </header>
 
         {featuredLinks.length > 0 && (
           <nav aria-label="Réseaux sociaux" className="mb-8">
             <div className="grid grid-cols-5 gap-2 sm:gap-3">
-              {featuredLinks.map(({ name, tone, link }) => (
+              {featuredLinks.map(({ name, link }) => (
                 <a
                   key={link.id}
                   href={link.url}
@@ -274,10 +264,8 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
                   rel="noopener noreferrer"
                   aria-label={name}
                   title={name}
-                  className={`group relative flex aspect-square min-w-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${tone} shadow-[0_18px_35px_-20px_rgba(0,0,0,0.9)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:shadow-[0_22px_40px_-18px_rgba(233,140,11,0.8)]`}
+                  className="group relative flex aspect-square min-w-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] shadow-[0_18px_35px_-20px_rgba(0,0,0,0.9)] transition-all duration-300 hover:-translate-y-1 hover:border-white/30 hover:shadow-[0_22px_40px_-18px_rgba(233,140,11,0.8)]"
                 >
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.24),transparent_35%)]" aria-hidden />
-                  <div className="absolute inset-[1px] rounded-[calc(1rem-1px)] bg-black/10" aria-hidden />
                   <span className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                     <BrandIcon name={name} />
                   </span>
