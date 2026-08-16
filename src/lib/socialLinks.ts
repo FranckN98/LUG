@@ -23,9 +23,53 @@ const FEATURED_SOCIAL_LINKS = [
   { title: 'YouTube', url: 'https://www.youtube.com/@levelupingermany' },
 ] as const;
 
-function isFeaturedSocialLink(title: string, url: string, platform: string): boolean {
-  const key = `${title} ${url}`.toLowerCase();
-  return key.includes(platform.toLowerCase());
+function normalizeSocialKey(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function matchesFeaturedPlatform(title: string, url: string, platform: string): boolean {
+  const haystack = normalizeSocialKey(`${title} ${url}`);
+  const key = normalizeSocialKey(platform);
+
+  if (key === 'instagram') return haystack.includes('instagram') || haystack.includes('insta');
+  if (key === 'linkedin') return haystack.includes('linkedin') || haystack.includes('linkedin');
+  if (key === 'tiktok') return haystack.includes('tiktok');
+  if (key === 'facebook') return haystack.includes('facebook') || haystack.includes('fb');
+  if (key === 'youtube') return haystack.includes('youtube') || haystack.includes('youtu');
+  return haystack.includes(key);
+}
+
+export async function ensureFeaturedSocialLinks(): Promise<void> {
+  const existingLinks = await prisma.socialLink.findMany({
+    select: { id: true, title: true, url: true, isActive: true },
+  });
+
+  const missingFeaturedLinks = FEATURED_SOCIAL_LINKS.filter(
+    (featured) =>
+      !existingLinks.some(
+        (link) =>
+          matchesFeaturedPlatform(link.title, link.url, featured.title) &&
+          link.isActive &&
+          link.url.trim(),
+      ),
+  );
+
+  if (missingFeaturedLinks.length === 0) return;
+
+  const highestOrder = await prisma.socialLink.aggregate({ _max: { sortOrder: true } });
+  const firstOrder = (highestOrder._max.sortOrder ?? -1) + 1;
+
+  await prisma.socialLink.createMany({
+    data: missingFeaturedLinks.map((link, index) => ({
+      title: link.title,
+      url: link.url,
+      description: '',
+      coverImageUrl: resolveSocialLinkCoverImage(link.title, link.url),
+      sortOrder: firstOrder + index,
+      isActive: true,
+      isNew: false,
+    })),
+  });
 }
 
 export async function seedSocialLinksIfEmpty(): Promise<void> {
@@ -45,24 +89,7 @@ export async function seedSocialLinksIfEmpty(): Promise<void> {
       });
     }
 
-    const existingLinks = await prisma.socialLink.findMany({ select: { title: true, url: true } });
-    const missingFeaturedLinks = FEATURED_SOCIAL_LINKS.filter(
-      (featured) =>
-        !existingLinks.some((link) => isFeaturedSocialLink(link.title, link.url, featured.title)),
-    );
-    if (missingFeaturedLinks.length > 0) {
-      const highestOrder = await prisma.socialLink.aggregate({ _max: { sortOrder: true } });
-      const firstOrder = (highestOrder._max.sortOrder ?? -1) + 1;
-      await prisma.socialLink.createMany({
-        data: missingFeaturedLinks.map((link, index) => ({
-          ...link,
-          description: '',
-          coverImageUrl: resolveSocialLinkCoverImage(link.title, link.url),
-          sortOrder: firstOrder + index,
-          isActive: true,
-        })),
-      });
-    }
+    await ensureFeaturedSocialLinks();
     return;
   }
 

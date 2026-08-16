@@ -76,10 +76,20 @@ function BrandIcon({ name }: { name: string }) {
   }
 }
 
+function normalizeSocialKey(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
 function isFeaturedSocial(link: SocialLink, name: string): boolean {
-  const key = `${link.title} ${link.url}`.toLowerCase();
-  if (name === 'Facebook') return key.includes('facebook') || key.includes('fb.com');
-  return key.includes(name.toLowerCase());
+  const key = normalizeSocialKey(`${link.title} ${link.url}`);
+  const platform = normalizeSocialKey(name);
+
+  if (platform === 'facebook') return key.includes('facebook') || key.includes('fb');
+  if (platform === 'instagram') return key.includes('instagram') || key.includes('insta');
+  if (platform === 'linkedin') return key.includes('linkedin');
+  if (platform === 'youtube') return key.includes('youtube') || key.includes('youtu');
+  if (platform === 'tiktok') return key.includes('tiktok');
+  return key.includes(platform);
 }
 
 const copy: Record<Locale, { eyebrow: string; title: string; subtitle: string; empty: string; cta: string; newBadge: string }> = {
@@ -125,7 +135,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   try {
     await seedSocialLinksIfEmpty();
     links = await prisma.socialLink.findMany({
-      where: { isActive: true },
+      where: { isActive: true, url: { not: '' } },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
       select: {
         id: true,
