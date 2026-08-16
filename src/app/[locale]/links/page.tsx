@@ -287,30 +287,21 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
             {t.empty}
           </p>
         ) : contentLinks.length > 0 ? (
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {contentLinks.map((link) => {
               const cover = link.coverImageUrl?.trim() || resolveSocialLinkCoverImage(link.title, link.url);
               const isHighlighted = link.isNew;
               return (
                 <li key={link.id} className="relative">
-                  {/* Subtle glow halo for NEW links */}
-                  {isHighlighted && (
-                    <div
-                      aria-hidden
-                      className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-r from-accent/30 via-accent/10 to-accent/30 opacity-70 blur-md transition-opacity"
-                    />
-                  )}
                   <a
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border bg-white/[0.04] p-2.5 backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.07] hover:shadow-[0_0_30px_-10px_rgba(233,140,11,0.4)] sm:gap-3.5 sm:p-3 ${
-                      isHighlighted
-                        ? 'border-accent/40 shadow-[0_0_24px_-12px_rgba(233,140,11,0.55)] hover:border-accent/60'
-                        : 'border-white/10 hover:border-accent/40'
+                    className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border bg-white/[0.06] p-2 backdrop-blur-xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/[0.09] hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)] sm:gap-3.5 sm:p-2.5 ${
+                      isHighlighted ? 'border-accent/25 hover:border-accent/40' : 'border-white/10 hover:border-white/20'
                     }`}
                   >
-                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#0a0505] sm:h-16 sm:w-16">
+                    <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#0a0505] sm:h-12 sm:w-12">
                       <img
                         src={cover}
                         alt={link.title}
@@ -322,16 +313,15 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
                     <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="truncate text-base font-semibold text-white sm:text-lg">{link.title}</h2>
+                          <h2 className="truncate text-sm font-semibold text-white sm:text-base">{link.title}</h2>
                           {isHighlighted && (
-                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#25D366]/50 bg-[#25D366]/15 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#25D366] shadow-[0_0_12px_-2px_rgba(37,211,102,0.55)]">
-                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#25D366]" />
+                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-[#25D366]">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#25D366]" />
                               {t.newBadge}
                             </span>
                           )}
                         </div>
-                        {link.description && <p className="mt-0.5 line-clamp-1 text-xs text-white/65 sm:text-sm">{link.description}</p>}
-                        <p className="mt-0.5 truncate text-[0.7rem] text-white/40 sm:text-xs">{link.url.replace(/^mailto:/, '')}</p>
+                        {link.description && <p className="mt-0.5 line-clamp-1 text-xs text-white/60 sm:text-sm">{link.description}</p>}
                       </div>
                       <span className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent transition-colors group-hover:border-accent group-hover:bg-accent group-hover:text-[#0b0606]">
                         {t.cta}
