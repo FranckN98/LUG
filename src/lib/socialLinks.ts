@@ -27,7 +27,7 @@ function normalizeSocialKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
 
-function matchesFeaturedPlatform(title: string, url: string, platform: string): boolean {
+export function matchesFeaturedPlatform(title: string, url: string, platform: string): boolean {
   const haystack = normalizeSocialKey(`${title} ${url}`);
   const key = normalizeSocialKey(platform);
 
@@ -41,16 +41,48 @@ function matchesFeaturedPlatform(title: string, url: string, platform: string): 
 
 export async function ensureFeaturedSocialLinks(): Promise<void> {
   const existingLinks = await prisma.socialLink.findMany({
-    select: { id: true, title: true, url: true, isActive: true },
+    select: { id: true, title: true, url: true, isActive: true, isFeatured: true },
+    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
   });
+
+  // Backfill: promote the best existing match for each platform to isFeatured=true.
+  // This only runs once per link (idempotent) and never touches already-flagged links,
+  // so manual links that merely contain a platform keyword are never swept in here.
+  for (const featured of FEATURED_SOCIAL_LINKS) {
+    const alreadyFeatured = existingLinks.some(
+      (link) => link.isFeatured && matchesFeaturedPlatform(link.title, link.url, featured.title),
+    );
+    if (alreadyFeatured) continue;
+
+    // Prefer an exact platform-name match (e.g. title === "YouTube") over a
+    // loose keyword match, so a manual link that happens to mention the
+    // platform never gets picked ahead of the real channel link.
+    const exactMatch = existingLinks.find(
+      (link) =>
+        !link.isFeatured &&
+        normalizeSocialKey(link.title) === normalizeSocialKey(featured.title) &&
+        link.isActive &&
+        link.url.trim(),
+    );
+    const candidate =
+      exactMatch ??
+      existingLinks.find(
+        (link) =>
+          !link.isFeatured &&
+          matchesFeaturedPlatform(link.title, link.url, featured.title) &&
+          link.isActive &&
+          link.url.trim(),
+      );
+    if (candidate) {
+      await prisma.socialLink.update({ where: { id: candidate.id }, data: { isFeatured: true } });
+      candidate.isFeatured = true;
+    }
+  }
 
   const missingFeaturedLinks = FEATURED_SOCIAL_LINKS.filter(
     (featured) =>
       !existingLinks.some(
-        (link) =>
-          matchesFeaturedPlatform(link.title, link.url, featured.title) &&
-          link.isActive &&
-          link.url.trim(),
+        (link) => link.isFeatured && matchesFeaturedPlatform(link.title, link.url, featured.title),
       ),
   );
 
@@ -68,8 +100,30 @@ export async function ensureFeaturedSocialLinks(): Promise<void> {
       sortOrder: firstOrder + index,
       isActive: true,
       isNew: false,
+      isFeatured: true,
     })),
   });
+}
+
+export async function resetFeaturedSocialLinksToDefaults(): Promise<void> {
+  await ensureFeaturedSocialLinks();
+
+  const featuredLinks = await prisma.socialLink.findMany({ where: { isFeatured: true } });
+
+  for (const defaults of FEATURED_SOCIAL_LINKS) {
+    const link = featuredLinks.find((item) => matchesFeaturedPlatform(item.title, item.url, defaults.title));
+    if (!link) continue;
+
+    await prisma.socialLink.update({
+      where: { id: link.id },
+      data: {
+        title: defaults.title,
+        url: defaults.url,
+        isActive: true,
+        coverImageUrl: resolveSocialLinkCoverImage(defaults.title, defaults.url),
+      },
+    });
+  }
 }
 
 export async function seedSocialLinksIfEmpty(): Promise<void> {
@@ -96,18 +150,19 @@ export async function seedSocialLinksIfEmpty(): Promise<void> {
   const social = await getEmailSocialLinks();
 
   const seeds = [
-    { title: 'Website', url: social.website, description: 'Site officiel', sortOrder: 0 },
-    { title: 'LinkedIn', url: social.linkedin, description: 'Actualités & réseau pro', sortOrder: 1 },
-    { title: 'Instagram', url: social.instagram, description: 'Contenu visuel & coulisses', sortOrder: 2 },
-    { title: 'TikTok', url: social.tiktok, description: 'Vidéos courtes', sortOrder: 3 },
-    { title: 'YouTube', url: social.youtube, description: 'Vidéos & replays', sortOrder: 4 },
-    { title: 'Facebook', url: 'https://www.facebook.com/levelupingermany', description: 'Actualités de la communauté', sortOrder: 5 },
-    { title: 'WhatsApp', url: social.whatsapp, description: 'Canal communauté', sortOrder: 6 },
+    { title: 'Website', url: social.website, description: 'Site officiel', sortOrder: 0, isFeatured: false },
+    { title: 'LinkedIn', url: social.linkedin, description: 'Actualités & réseau pro', sortOrder: 1, isFeatured: true },
+    { title: 'Instagram', url: social.instagram, description: 'Contenu visuel & coulisses', sortOrder: 2, isFeatured: true },
+    { title: 'TikTok', url: social.tiktok, description: 'Vidéos courtes', sortOrder: 3, isFeatured: true },
+    { title: 'YouTube', url: social.youtube, description: 'Vidéos & replays', sortOrder: 4, isFeatured: true },
+    { title: 'Facebook', url: 'https://www.facebook.com/levelupingermany', description: 'Actualités de la communauté', sortOrder: 5, isFeatured: true },
+    { title: 'WhatsApp', url: social.whatsapp, description: 'Canal communauté', sortOrder: 6, isFeatured: false },
     {
       title: 'Contact Email',
       url: social.email ? `mailto:${social.email}` : '',
       description: 'Nous contacter directement',
       sortOrder: 7,
+      isFeatured: false,
     },
   ].filter((item) => item.url.trim());
 
@@ -129,6 +184,9 @@ export async function seedSocialLinksIfEmpty(): Promise<void> {
       coverImageUrl: resolveSocialLinkCoverImage(item.title, item.url),
       sortOrder: item.sortOrder,
       isActive: true,
+      isFeatured: item.isFeatured,
     })),
   });
+
+  await ensureFeaturedSocialLinks();
 }

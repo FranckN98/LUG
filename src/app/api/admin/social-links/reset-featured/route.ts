@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/adminAuth';
-import { ensureFeaturedSocialLinks } from '@/lib/socialLinks';
+import { resetFeaturedSocialLinksToDefaults } from '@/lib/socialLinks';
 
 export async function POST() {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
   try {
-    await ensureFeaturedSocialLinks();
+    await resetFeaturedSocialLinksToDefaults();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('Reset featured links error:', error);

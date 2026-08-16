@@ -11,6 +11,7 @@ type SocialLink = {
   description: string | null;
   coverImageUrl: string | null;
   isNew: boolean;
+  isFeatured: boolean;
 };
 
 const FEATURED_SOCIALS = [
@@ -80,7 +81,9 @@ function normalizeSocialKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
 
-function isFeaturedSocial(link: SocialLink, name: string): boolean {
+// Only ever called on links already flagged isFeatured=true, to pick which of
+// the 5 platform slots a given featured record belongs to.
+function matchesPlatformSlot(link: SocialLink, name: string): boolean {
   const key = normalizeSocialKey(`${link.title} ${link.url}`);
   const platform = normalizeSocialKey(name);
 
@@ -144,6 +147,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
         description: true,
         coverImageUrl: true,
         isNew: true,
+        isFeatured: true,
       },
     });
   } catch {
@@ -151,7 +155,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   }
 
   const featuredLinks = FEATURED_SOCIALS.flatMap((social) => {
-    const link = links.find((item) => isFeaturedSocial(item, social.name));
+    const link = links.find((item) => item.isFeatured && matchesPlatformSlot(item, social.name));
     return link ? [{ ...social, link }] : [];
   });
   const featuredIds = new Set(featuredLinks.map((social) => social.link.id));

@@ -13,6 +13,7 @@ type SocialLink = {
   sortOrder: number;
   isActive: boolean;
   isNew: boolean;
+  isFeatured: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -29,7 +30,10 @@ function normalizeSocialKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
 
-function isFeaturedSocial(link: SocialLink, name: string): boolean {
+// Only ever called on links already flagged isFeatured=true, to pick which of
+// the 5 platform slots a given featured record belongs to. Never used to
+// decide whether a link is featured — that's the isFeatured DB field.
+function matchesPlatformSlot(link: SocialLink, name: string): boolean {
   const key = normalizeSocialKey(`${link.title} ${link.url}`);
   const platform = normalizeSocialKey(name);
 
@@ -149,7 +153,7 @@ export function SocialLinksAdmin() {
 
   function startAdd() {
     setEditingId(null);
-    const nonFeaturedLinks = links.filter((l) => !FEATURED_SOCIALS.some((s) => isFeaturedSocial(l, s.name)));
+    const nonFeaturedLinks = links.filter((l) => !l.isFeatured);
     const nextOrder = nonFeaturedLinks.length === 0 ? 0 : Math.max(...nonFeaturedLinks.map((l) => l.sortOrder)) + 1;
     setForm({
       title: '',
@@ -276,7 +280,7 @@ export function SocialLinksAdmin() {
 
   async function moveLink(link: SocialLink, direction: 'up' | 'down') {
     const nonFeaturedLinks = links
-      .filter((l) => !FEATURED_SOCIALS.some((s) => isFeaturedSocial(l, s.name)))
+      .filter((l) => !l.isFeatured)
       .sort((a, b) => a.sortOrder - b.sortOrder || a.createdAt.localeCompare(b.createdAt));
 
     const index = nonFeaturedLinks.findIndex((x) => x.id === link.id);
@@ -341,7 +345,7 @@ export function SocialLinksAdmin() {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {FEATURED_SOCIALS.map((social) => {
-                const link = links.find((item) => isFeaturedSocial(item, social.name));
+                const link = links.find((item) => item.isFeatured && matchesPlatformSlot(item, social.name));
                 if (!link) return null;
                 const isSaving = savingFeaturedId === link.id;
                 return (
@@ -412,7 +416,7 @@ export function SocialLinksAdmin() {
             {loading ? (
               <p className="text-sm text-white/50">Chargement…</p>
             ) : (() => {
-              const manualLinks = links.filter((l) => !FEATURED_SOCIALS.some((s) => isFeaturedSocial(l, s.name)));
+              const manualLinks = links.filter((l) => !l.isFeatured);
               return manualLinks.length === 0 ? (
                 <p className="text-sm text-white/50">Aucun lien pour le moment.</p>
               ) : (
