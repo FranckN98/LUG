@@ -149,6 +149,24 @@ export function SocialLinksAdmin() {
     }
   }
 
+  async function resetFeaturedLinks() {
+    if (!confirm('Réinitialiser tous les liens sociaux par défaut ?')) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/social-links/reset-featured', { method: 'POST' });
+      if (!res.ok) {
+        adminNotify.error('Impossible de réinitialiser.');
+        return;
+      }
+      adminNotify.success('Liens sociaux réinitialisés.');
+      await refresh();
+    } catch {
+      adminNotify.error('Erreur réseau.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
 
@@ -273,7 +291,14 @@ export function SocialLinksAdmin() {
               <p className="text-[0.62rem] font-bold uppercase tracking-[0.25em] text-accent">Raccourcis en haut</p>
               <h2 className="mt-1 text-lg font-semibold text-white">Réseaux sociaux</h2>
             </div>
-            <p className="text-xs text-white/55">Ces liens apparaissent en premier sur la page publique.</p>
+            <button
+              type="button"
+              onClick={resetFeaturedLinks}
+              disabled={saving}
+              className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50"
+            >
+              Réinitialiser
+            </button>
           </div>
 
           {loading ? (

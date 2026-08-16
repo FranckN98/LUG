@@ -135,7 +135,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   try {
     await seedSocialLinksIfEmpty();
     links = await prisma.socialLink.findMany({
-      where: { isActive: true, url: { not: '' } },
+      where: { isActive: true },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
       select: {
         id: true,
