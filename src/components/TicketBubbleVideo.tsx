@@ -3,13 +3,26 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
+// N'affiche l'animation qu'une fois par session (pas à chaque actualisation de la page).
+const SESSION_KEY = 'lug-ticket-bubble-video-seen';
+
 export function TicketBubbleVideo({ ticketingActive }: { ticketingActive: boolean }) {
   const pathname = usePathname();
   const isBuyTicketPage = pathname?.endsWith('/buy-ticket') ?? false;
-  const shouldShow = isBuyTicketPage && ticketingActive;
+  // Décidé côté client uniquement (après montage) pour éviter un mismatch d'hydratation
+  // entre le rendu serveur (sessionStorage indisponible) et le client (déjà vu ou non).
+  const [shouldShow, setShouldShow] = useState(false);
   const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!isBuyTicketPage || !ticketingActive) return;
+    const alreadySeen = window.sessionStorage.getItem(SESSION_KEY) === '1';
+    if (alreadySeen) return;
+    window.sessionStorage.setItem(SESSION_KEY, '1');
+    setShouldShow(true);
+  }, [isBuyTicketPage, ticketingActive]);
 
   useEffect(() => {
     if (!shouldShow) return;
