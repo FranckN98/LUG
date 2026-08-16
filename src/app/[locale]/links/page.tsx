@@ -110,9 +110,10 @@ function matchesPlatformSlot(link: SocialLink, name: string): boolean {
   return key.includes(platform);
 }
 
-const copy: Record<Locale, { eyebrow: string; title: string; subtitle: string; empty: string; cta: string; newBadge: string }> = {
+const copy: Record<Locale, { eyebrow: string; tagline: string; title: string; subtitle: string; empty: string; cta: string; newBadge: string }> = {
   de: {
     eyebrow: 'Willkommen',
+    tagline: 'Unser ganzes Universum, an einem Ort ✨',
     title: 'Schön, dich hier zu sehen 👋',
     subtitle:
       'Hier findest du alle Wege, mit unserer Community in Verbindung zu bleiben — Socials, Ressourcen und Projekte. Folge uns, schreib uns oder klick rein, wo es dich neugierig macht.',
@@ -122,6 +123,7 @@ const copy: Record<Locale, { eyebrow: string; title: string; subtitle: string; e
   },
   en: {
     eyebrow: 'Welcome',
+    tagline: 'Our whole universe, in one place ✨',
     title: 'So glad you stopped by 👋',
     subtitle:
       'All the ways to stay connected with our community in one place — socials, resources and projects. Follow along, reach out, or just explore whatever sparks your curiosity.',
@@ -131,6 +133,7 @@ const copy: Record<Locale, { eyebrow: string; title: string; subtitle: string; e
   },
   fr: {
     eyebrow: 'Bienvenue',
+    tagline: 'Tout notre univers, en un seul endroit ✨',
     title: 'Heureux de te voir ici 👋',
     subtitle:
       'Tous les moyens de rester connecté à notre communauté en un seul endroit — réseaux, ressources et projets. Suis-nous, écris-nous, ou explore simplement ce qui éveille ta curiosité.',
@@ -251,6 +254,9 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
 
           {/* Eyebrow */}
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
+
+          {/* Tagline */}
+          <p className="mt-2 font-display text-xl italic tracking-tight text-white sm:text-2xl">{t.tagline}</p>
         </header>
 
         {featuredLinks.length > 0 && (
