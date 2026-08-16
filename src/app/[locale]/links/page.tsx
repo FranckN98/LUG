@@ -230,7 +230,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
 
       <section className="relative z-10 mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Hero / welcome */}
-        <header className="relative mb-12 flex flex-col items-center text-center">
+        <header className="relative mb-8 flex flex-col items-center text-center">
           {/* Avatar with soft ambient glow */}
           <div className="relative mb-6">
             <div
@@ -267,7 +267,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
 
           {/* Tagline */}
-          <p className="mt-2 font-display text-xl italic tracking-tight text-white sm:text-2xl">{t.tagline}</p>
+          <p className="mt-1 font-display text-xl italic tracking-tight text-white sm:text-2xl">{t.tagline}</p>
         </header>
 
         {featuredLinks.length > 0 && (
