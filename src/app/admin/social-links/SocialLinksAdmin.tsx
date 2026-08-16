@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { MediaPicker } from '@/app/admin/components/MediaPicker';
 import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 type SocialLink = {
@@ -520,16 +521,13 @@ export function SocialLinksAdmin() {
                 />
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-white/60">Image couverture</label>
-                <input
-                  type="text"
-                  value={form.coverImageUrl}
-                  onChange={(e) => setForm((prev) => ({ ...prev, coverImageUrl: e.target.value }))}
-                  className="w-full rounded-lg border border-white/10 bg-[#0f0606] px-3 py-2 text-sm text-white placeholder-white/30"
-                  placeholder="/media/… ou URL"
-                />
-              </div>
+              <MediaPicker
+                value={form.coverImageUrl}
+                onChange={(url) => setForm((prev) => ({ ...prev, coverImageUrl: url }))}
+                label="Image couverture"
+                defaultCategory="general"
+                placeholder="/media/… ou URL externe"
+              />
 
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-white/60">Description</label>
