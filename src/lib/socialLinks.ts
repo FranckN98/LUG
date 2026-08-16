@@ -1,5 +1,49 @@
 import { prisma } from '@/lib/prisma';
 import { getEmailSocialLinks } from '@/lib/emailSocialLinks';
+import { translateRecord, type TranslatableLocale } from '@/lib/translateText';
+
+const SOURCE_LOCALE: TranslatableLocale = 'fr';
+const TARGET_LOCALES: TranslatableLocale[] = ['en', 'de'];
+
+/**
+ * Translate a manual link's title/description into the other two site
+ * locales and upsert them into SocialLinkTranslation. Assumes admins type
+ * content in French (the site's primary editing language). Best-effort: a
+ * translation provider failure never blocks the save.
+ */
+export async function translateSocialLinkFields(
+  socialLinkId: string,
+  title: string,
+  description: string,
+): Promise<void> {
+  await Promise.all(
+    TARGET_LOCALES.map(async (target) => {
+      try {
+        const { values } = await translateRecord({ title, description }, { source: SOURCE_LOCALE, target });
+        await prisma.socialLinkTranslation.upsert({
+          where: { socialLinkId_locale: { socialLinkId, locale: target } },
+          create: { socialLinkId, locale: target, title: values.title || title, description: values.description ?? '' },
+          update: { title: values.title || title, description: values.description ?? '' },
+        });
+      } catch (error) {
+        console.error(`Social link translation (${target}) failed:`, error);
+      }
+    }),
+  );
+}
+
+/** Pick the localized title/description for a link, falling back to the source fields. */
+export function localizeSocialLink<T extends { title: string; description: string | null }>(
+  link: T,
+  translations: Array<{ locale: string; title: string; description: string | null }>,
+  locale: string,
+): { title: string; description: string | null } {
+  if (locale === SOURCE_LOCALE) return { title: link.title, description: link.description };
+  const match = translations.find((t) => t.locale === locale);
+  if (!match || !match.title.trim()) return { title: link.title, description: link.description };
+  return { title: match.title, description: match.description };
+}
+
 
 export function resolveSocialLinkCoverImage(title: string, url: string): string {
   const key = `${title} ${url}`.toLowerCase();

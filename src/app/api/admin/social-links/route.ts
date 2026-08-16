@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
-import { resolveSocialLinkCoverImage, seedSocialLinksIfEmpty } from '@/lib/socialLinks';
+import { resolveSocialLinkCoverImage, seedSocialLinksIfEmpty, translateSocialLinkFields } from '@/lib/socialLinks';
 
 function parseUrl(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
@@ -33,6 +33,7 @@ export async function GET() {
 
   const links = await prisma.socialLink.findMany({
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+    include: { translations: true },
   });
 
   return NextResponse.json(links);
@@ -56,11 +57,13 @@ export async function POST(request: Request) {
   if (!title) return NextResponse.json({ error: 'Le titre est requis.' }, { status: 400 });
   if (!url) return NextResponse.json({ error: 'URL invalide.' }, { status: 400 });
 
+  const description = typeof data.description === 'string' ? data.description.trim() : '';
+
   const created = await prisma.socialLink.create({
     data: {
       title,
       url,
-      description: typeof data.description === 'string' ? data.description.trim() : '',
+      description,
       coverImageUrl:
         typeof data.coverImageUrl === 'string' && data.coverImageUrl.trim()
           ? data.coverImageUrl.trim()
@@ -70,6 +73,9 @@ export async function POST(request: Request) {
       isNew: typeof data.isNew === 'boolean' ? data.isNew : false,
     },
   });
+
+  // Best-effort: translate title/description to EN & DE for the public /links page.
+  translateSocialLinkFields(created.id, title, description).catch(() => {});
 
   return NextResponse.json(created, { status: 201 });
 }

@@ -501,6 +501,9 @@ export function SocialLinksAdmin() {
           {/* Right: Form */}
           <section className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:p-6">
             <h2 className="text-lg font-semibold text-white">{editingId ? 'Modifier le lien' : 'Ajouter un lien'}</h2>
+            <p className="text-xs text-white/50">
+              Écris le titre et la description en français : la traduction en anglais et allemand se fait automatiquement pour la page publique (/en, /de).
+            </p>
 
             <form onSubmit={handleSave} className="space-y-4">
               <div>

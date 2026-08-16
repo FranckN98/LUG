@@ -2,7 +2,7 @@ import type { Locale } from '@/i18n/config';
 import Link from 'next/link';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
-import { resolveSocialLinkCoverImage, seedSocialLinksIfEmpty } from '@/lib/socialLinks';
+import { resolveSocialLinkCoverImage, seedSocialLinksIfEmpty, localizeSocialLink } from '@/lib/socialLinks';
 
 type SocialLink = {
   id: string;
@@ -12,6 +12,7 @@ type SocialLink = {
   coverImageUrl: string | null;
   isNew: boolean;
   isFeatured: boolean;
+  translations: Array<{ locale: string; title: string; description: string | null }>;
 };
 
 const FEATURED_SOCIALS = [
@@ -148,6 +149,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
         coverImageUrl: true,
         isNew: true,
         isFeatured: true,
+        translations: { select: { locale: true, title: true, description: true } },
       },
     });
   } catch {
@@ -159,7 +161,9 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
     return link ? [{ ...social, link }] : [];
   });
   const featuredIds = new Set(featuredLinks.map((social) => social.link.id));
-  const contentLinks = links.filter((link) => !featuredIds.has(link.id));
+  const contentLinks = links
+    .filter((link) => !featuredIds.has(link.id))
+    .map((link) => ({ ...link, ...localizeSocialLink(link, link.translations, loc) }));
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0b0606] text-white">

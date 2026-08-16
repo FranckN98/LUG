@@ -402,10 +402,26 @@ model SocialLink {
   isFeatured   Boolean  @default(false) @map("is_featured")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+  translations SocialLinkTranslation[]
 
   @@index([isActive, sortOrder])
   @@index([isFeatured])
   @@map("social_links")
+}
+
+model SocialLinkTranslation {
+  id           String     @id @default(uuid())
+  socialLinkId String     @map("social_link_id")
+  locale       String
+  title        String
+  description  String?    @default("")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  socialLink   SocialLink @relation(fields: [socialLinkId], references: [id], onDelete: Cascade)
+
+  @@unique([socialLinkId, locale])
+  @@index([locale])
+  @@map("social_link_translations")
 }
 
 model Venue {

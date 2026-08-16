@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
-import { resolveSocialLinkCoverImage } from '@/lib/socialLinks';
+import { resolveSocialLinkCoverImage, translateSocialLinkFields } from '@/lib/socialLinks';
 
 function parseUrl(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
@@ -85,6 +85,12 @@ export async function PATCH(
 
   try {
     const updated = await prisma.socialLink.update({ where: { id }, data });
+
+    // Best-effort: re-translate to EN & DE when the source text changed on a manual link.
+    if (!updated.isFeatured && (typeof data.title === 'string' || typeof data.description === 'string')) {
+      translateSocialLinkFields(updated.id, updated.title, updated.description ?? '').catch(() => {});
+    }
+
     return NextResponse.json(updated);
   } catch {
     return NextResponse.json({ error: 'Lien introuvable.' }, { status: 404 });
