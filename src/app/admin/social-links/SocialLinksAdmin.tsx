@@ -24,10 +24,20 @@ const FEATURED_SOCIALS = [
   { name: 'YouTube', emoji: '▶️' },
 ] as const;
 
+function normalizeSocialKey(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
 function isFeaturedSocial(link: SocialLink, name: string): boolean {
-  const key = `${link.title} ${link.url}`.toLowerCase();
-  if (name === 'Facebook') return key.includes('facebook') || key.includes('fb.com');
-  return key.includes(name.toLowerCase());
+  const key = normalizeSocialKey(`${link.title} ${link.url}`);
+  const platform = normalizeSocialKey(name);
+
+  if (platform === 'facebook') return key.includes('facebook') || key.includes('fb');
+  if (platform === 'instagram') return key.includes('instagram') || key.includes('insta');
+  if (platform === 'linkedin') return key.includes('linkedin');
+  if (platform === 'youtube') return key.includes('youtube') || key.includes('youtu');
+  if (platform === 'tiktok') return key.includes('tiktok');
+  return key.includes(platform);
 }
 
 export function SocialLinksAdmin() {
