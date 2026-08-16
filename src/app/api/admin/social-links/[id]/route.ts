@@ -9,9 +9,16 @@ function parseUrl(raw: unknown): string | null {
   if (!value) return null;
   if (value.startsWith('/')) return value;
   if (value.startsWith('mailto:') || value.startsWith('tel:')) return value;
+
+  let candidate = value;
+  if (!/^https?:\/\//i.test(candidate)) {
+    const looksLikeHostname = /^(?:www\.)?[a-z0-9.-]+\.[a-z]{2,}(?:\/.*)?$/i.test(candidate) || candidate.includes('instagram.com') || candidate.includes('linkedin.com') || candidate.includes('facebook.com') || candidate.includes('youtube.com') || candidate.includes('tiktok.com') || candidate.includes('x.com');
+    if (looksLikeHostname) candidate = `https://${candidate}`;
+  }
+
   try {
-    const parsed = new URL(value);
-    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return value;
+    const parsed = new URL(candidate);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return parsed.toString();
     return null;
   } catch {
     return null;
