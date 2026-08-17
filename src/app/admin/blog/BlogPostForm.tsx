@@ -151,6 +151,33 @@ export default function BlogPostForm({ mode, postId, initial }: Props) {
     return out;
   }, [form.translations]);
 
+  const getPreferredSourceLocale = useCallback((target: Locale) => {
+    const ordered = LOCALES.filter((locale) => locale !== target);
+    for (const locale of ordered) {
+      const translation = form.translations[locale];
+      if (translation.title.trim() || translation.body.trim()) {
+        return locale;
+      }
+    }
+    return null;
+  }, [form.translations]);
+
+  useEffect(() => {
+    const target = form.translations[activeLocale];
+    if (target.title.trim() || target.body.trim()) return;
+
+    const source = getPreferredSourceLocale(activeLocale);
+    if (!source) return;
+
+    setForm((f) => ({
+      ...f,
+      translations: {
+        ...f.translations,
+        [activeLocale]: { ...f.translations[source] },
+      },
+    }));
+  }, [activeLocale, form.translations, getPreferredSourceLocale]);
+
   const updateShared = <K extends Exclude<keyof BlogPostFormValues, 'translations'>>(field: K, value: BlogPostFormValues[K]) => {
     setForm((f) => ({ ...f, [field]: value }));
   };
