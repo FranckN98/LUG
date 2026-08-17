@@ -284,8 +284,9 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
                   rel="noopener noreferrer"
                   aria-label={name}
                   title={name}
-                  className="group relative flex aspect-square min-w-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] shadow-[0_18px_35px_-20px_rgba(0,0,0,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_16px_30px_-18px_rgba(0,0,0,0.8)]"
+                  className="group relative flex aspect-square min-w-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] shadow-[0_18px_35px_-20px_rgba(0,0,0,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_16px_30px_-18px_rgba(0,0,0,0.8)]"
                 >
+                  <span className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,220,140,0.22),rgba(255,180,52,0.08)_30%,transparent_68%)]" />
                   <span className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.03]">
                     <BrandIcon name={name} />
                   </span>
