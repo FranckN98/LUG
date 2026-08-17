@@ -128,7 +128,7 @@ export function EmailTemplateWorkbench(props: Props) {
   }
 
   function handleCategoryChange(cat: ContactCategory) {
-    if (!isExisting && !userEditedRef.current) {
+    if (!userEditedRef.current) {
       applyCategoryFully(cat, draft.language);
     } else {
       onDraftChange({ ...draft, category: cat });
@@ -136,7 +136,7 @@ export function EmailTemplateWorkbench(props: Props) {
   }
 
   function handleLanguageChange(lang: Language) {
-    if (!isExisting && !userEditedRef.current) {
+    if (!userEditedRef.current) {
       applyCategoryFully(draft.category, lang);
     } else {
       onDraftChange({ ...draft, language: lang });
