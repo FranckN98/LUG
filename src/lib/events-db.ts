@@ -148,6 +148,9 @@ export type EventFormPayload = {
   speakers: Array<
     EventFormRelationItem & {
       name: string;
+      photoUrl: string;
+      photoPositionX?: number;
+      photoPositionY?: number;
       translations: LocaleRecord<EventSpeakerTranslation>;
     }
   >;
@@ -482,6 +485,9 @@ export function normalizeEventPayload(input: unknown): EventFormPayload {
       id: text(item.id) || undefined,
       sortOrder: integer(item.sortOrder, index),
       name: text(item.name),
+      photoUrl: text(item.photoUrl),
+      photoPositionX: integer(item.photoPositionX, 50),
+      photoPositionY: integer(item.photoPositionY, 50),
       translations: normalizeSpeakerTranslations(item.translations, item),
     })).filter((item) => item.name),
     organizations: normalizeRelationArray(record.organizations, (item, index) => ({
@@ -761,6 +767,7 @@ async function syncSpeakers(tx: Prisma.TransactionClient, eventId: string, paylo
       data: {
         slug: `${payload.slug}-speaker-${index + 1}-${normalizeSlugFragment(speaker.name)}-${crypto.randomUUID().slice(0, 6)}`,
         displayName: speaker.name,
+        photoUrl: speaker.photoUrl || null,
         sortOrder: speaker.sortOrder,
         translations: {
           create: LOCALE_LIST.map((locale) => ({
@@ -1031,6 +1038,9 @@ export function serializeEventForForm(event: EventWithRelations): EventFormPaylo
       id: link.id,
       sortOrder: link.sortOrder,
       name: link.speaker.displayName,
+      photoUrl: link.speaker.photoUrl || '',
+      photoPositionX: 50,
+      photoPositionY: 50,
       translations: createLocaleRecord((locale) => localizedSpeaker(link, locale)),
     })),
     organizations: event.eventOrganizations.map((link) => ({

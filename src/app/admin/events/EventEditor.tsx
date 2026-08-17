@@ -91,6 +91,9 @@ function createEmptySpeaker(sortOrder: number): SpeakerItem {
   return {
     sortOrder,
     name: '',
+    photoUrl: '',
+    photoPositionX: 50,
+    photoPositionY: 50,
     translations: createLocaleRecord(emptySpeakerTranslation),
   };
 }
@@ -715,7 +718,7 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
           <SectionCard id="event-people" eyebrow="People" title="Speakers, partenaires, galerie et documents">
             <Repeater
               title={`Speakers (${LOCALE_LABELS[activeLocale]})`}
-              description="Nom partagé, profession et description traduits."
+              description="Nom partagé, photo, profession et description traduits."
               items={formData.speakers}
               onAdd={() => addListItem('speakers', createEmptySpeaker)}
               onRemove={(index) => removeListItem('speakers', index, () => createEmptySpeaker(0))}
@@ -732,6 +735,62 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
                   <div>
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">Ordre</label>
                     <input type="number" className={inputCls} value={item.sortOrder} onChange={(e) => updateListItem('speakers', index, { sortOrder: Number(e.target.value) })} />
+                  </div>
+                  <div className="md:col-span-4">
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+                      <div>
+                        <MediaPicker
+                          label="Photo du speaker"
+                          value={item.photoUrl}
+                          onChange={(url) => updateListItem('speakers', index, { photoUrl: url })}
+                          defaultCategory="event"
+                          placeholder="/media/... ou URL externe"
+                          helperText="Sélectionnez une photo à partir de la médiathèque pour illustrer le speaker."
+                        />
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-black/10 p-3">
+                        <div className="mb-2 flex items-center justify-between gap-2">
+                          <span className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-white/50">Aperçu</span>
+                          <span className="text-[0.65rem] text-white/45">Focus</span>
+                        </div>
+                        <div className="relative h-28 overflow-hidden rounded-xl border border-white/10 bg-[#1a0d0d]">
+                          {item.photoUrl ? (
+                            <img
+                              src={item.photoUrl}
+                              alt={item.name || 'Photo speaker'}
+                              className="h-full w-full object-cover"
+                              style={{ objectPosition: `${item.photoPositionX ?? 50}% ${item.photoPositionY ?? 50}%` }}
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center bg-[#8C1A1A] font-display text-4xl font-bold text-white/80">{(item.name || 'S').slice(0, 1).toUpperCase()}</div>
+                          )}
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          <label className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/50">
+                            X
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={item.photoPositionX ?? 50}
+                              onChange={(e) => updateListItem('speakers', index, { photoPositionX: Number(e.target.value) })}
+                              className="mt-2 w-full accent-primary"
+                            />
+                          </label>
+                          <label className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/50">
+                            Y
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={item.photoPositionY ?? 50}
+                              onChange={(e) => updateListItem('speakers', index, { photoPositionY: Number(e.target.value) })}
+                              className="mt-2 w-full accent-primary"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div className="md:col-span-4">
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">Description</label>
