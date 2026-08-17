@@ -189,10 +189,13 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
         header.fixed{display:none!important}
         main{padding-top:0!important}
         @keyframes lu-logo-glow {
-          0%, 100% { opacity: 0.65; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.12); }
+          0%, 100% { opacity: 0.8; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.16); }
         }
-        .lu-logo-glow { animation: lu-logo-glow 4.8s ease-in-out infinite; }
+        .lu-logo-glow {
+          animation: lu-logo-glow 4.8s ease-in-out infinite;
+          filter: saturate(1.2);
+        }
         @media (prefers-reduced-motion: reduce) {
           .lu-logo-glow { animation: none !important; }
         }
@@ -235,13 +238,13 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
           <div className="relative mb-6">
             <div
               aria-hidden
-              className="lu-logo-glow absolute -inset-8 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,235,163,0.9)_0%,rgba(255,195,82,0.54)_18%,rgba(233,140,11,0.28)_34%,rgba(233,140,11,0.12)_52%,rgba(233,140,11,0.04)_68%,transparent_82%)] blur-3xl"
+              className="lu-logo-glow absolute -inset-12 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,250,212,1)_0%,rgba(255,228,140,0.96)_13%,rgba(255,191,64,0.86)_26%,rgba(255,157,0,0.72)_40%,rgba(233,140,11,0.45)_58%,rgba(233,140,11,0.16)_72%,transparent_82%)] blur-4xl"
             />
             <div
               aria-hidden
-              className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.14),transparent_60%)] blur-lg"
+              className="absolute left-1/2 top-1/2 h-[170%] w-[170%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.2),transparent_62%)] blur-xl"
             />
-            <div className="relative grid h-[7.69rem] w-[7.69rem] place-items-center overflow-hidden rounded-full border border-white/20 bg-white shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] sm:h-[8.96rem] sm:w-[8.96rem]">
+            <div className="relative grid h-[7.69rem] w-[7.69rem] place-items-center overflow-hidden rounded-full border border-[#ffd98a]/40 bg-white shadow-[0_0_32px_rgba(255,190,76,0.42),0_16px_56px_-18px_rgba(0,0,0,0.85)] sm:h-[8.96rem] sm:w-[8.96rem]">
               <img
                 src="/logo.png"
                 alt="Level Up in Germany"
