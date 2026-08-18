@@ -768,6 +768,8 @@ async function syncSpeakers(tx: Prisma.TransactionClient, eventId: string, paylo
         slug: `${payload.slug}-speaker-${index + 1}-${normalizeSlugFragment(speaker.name)}-${crypto.randomUUID().slice(0, 6)}`,
         displayName: speaker.name,
         photoUrl: speaker.photoUrl || null,
+        photoPositionX: speaker.photoPositionX ?? 50,
+        photoPositionY: speaker.photoPositionY ?? 50,
         sortOrder: speaker.sortOrder,
         translations: {
           create: LOCALE_LIST.map((locale) => ({
@@ -1039,8 +1041,8 @@ export function serializeEventForForm(event: EventWithRelations): EventFormPaylo
       sortOrder: link.sortOrder,
       name: link.speaker.displayName,
       photoUrl: link.speaker.photoUrl || '',
-      photoPositionX: 50,
-      photoPositionY: 50,
+      photoPositionX: link.speaker.photoPositionX ?? 50,
+      photoPositionY: link.speaker.photoPositionY ?? 50,
       translations: createLocaleRecord((locale) => localizedSpeaker(link, locale)),
     })),
     organizations: event.eventOrganizations.map((link) => ({
