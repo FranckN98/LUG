@@ -767,7 +767,7 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
                 <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.speakersEyebrow}</p>
                 <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">{t.speakersTitle}</h2>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
                 {config.speakers.map((speaker) => (
                   <article key={`${speaker.name}-${speaker.role}`} className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.45)]">
                     <div className="aspect-square bg-[#f4ece6] sm:aspect-[4/3]">
