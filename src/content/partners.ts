@@ -10,6 +10,7 @@ export const partners2025: Partner[] = [
   { name: 'Campusdirekt', logo: '/partners/campusdirekt.webp', website: 'https://campusdirekt.de/' },
   { name: 'Cave des Montagnes', logo: '/partners/cave-des-montagnes.png', website: 'https://cave-des-montagnes.com/de/' },
   { name: 'AfroGeek', logo: '/partners/5.png' },
+  { name: 'African Power', logo: '/partners/african-power.png', website: 'https://african-power.com/' },
   { name: 'GrowInDE', logo: '/partners/4.png' },
   { name: 'SB Salon', logo: '/partners/10.png' },
   { name: 'Delycious', logo: '/partners/3.png' },
