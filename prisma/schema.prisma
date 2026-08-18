@@ -379,6 +379,7 @@ model Partner {
   id         String   @id @default(uuid())
   name       String
   logoUrl    String   @default("") @map("logo_url")
+  logoZoom   Float    @default(1) @map("logo_zoom") // display scale factor for the logo image
   websiteUrl String?  @map("website_url")
   category   String   @default("partner") // partner | sponsor
   sortOrder  Int      @default(0) @map("sort_order")

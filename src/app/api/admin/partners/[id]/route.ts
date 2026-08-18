@@ -35,6 +35,7 @@ export async function PATCH(
   const data: Record<string, unknown> = {};
   if (typeof record.name === 'string') data.name = record.name.trim();
   if (typeof record.logoUrl === 'string') data.logoUrl = record.logoUrl.trim();
+  if (typeof record.logoZoom === 'number' && Number.isFinite(record.logoZoom)) data.logoZoom = record.logoZoom;
   if ('websiteUrl' in record) {
     data.websiteUrl = typeof record.websiteUrl === 'string' && record.websiteUrl.trim() ? record.websiteUrl.trim() : null;
   }

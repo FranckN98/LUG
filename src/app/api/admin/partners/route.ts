@@ -30,6 +30,7 @@ export async function GET() {
       data: partners2025.map((p, i) => ({
         name: p.name,
         logoUrl: p.logo,
+        logoZoom: 1,
         websiteUrl: p.website ?? null,
         category: 'partner',
         sortOrder: i,
@@ -64,6 +65,7 @@ export async function POST(request: Request) {
     data: {
       name,
       logoUrl: typeof record.logoUrl === 'string' ? record.logoUrl.trim() : '',
+      logoZoom: typeof record.logoZoom === 'number' && Number.isFinite(record.logoZoom) ? record.logoZoom : 1,
       websiteUrl: typeof record.websiteUrl === 'string' && record.websiteUrl.trim() ? record.websiteUrl.trim() : null,
       category: typeof record.category === 'string' && ALLOWED_CATEGORIES.has(record.category) ? record.category : 'partner',
       sortOrder: typeof record.sortOrder === 'number' ? record.sortOrder : 0,

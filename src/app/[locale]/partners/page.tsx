@@ -7,7 +7,7 @@ import { generateMetadataForPath } from '@/lib/seo';
 import { partners2025 } from '@/content/partners';
 import { prisma } from '@/lib/prisma';
 
-type PartnerRow = { id: string; name: string; logoUrl: string; websiteUrl: string | null; sortOrder: number };
+type PartnerRow = { id: string; name: string; logoUrl: string; logoZoom: number; websiteUrl: string | null; category: string; sortOrder: number };
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/partners');
@@ -16,6 +16,7 @@ export async function generateMetadata(props: { params: Promise<{ locale: string
 const content: Record<Locale, {
   eyebrow: string; title: string; intro: string;
   sectionCurrent: string; sectionBecome: string;
+  sponsorsTitle: string; partnersTitle: string; noSponsors: string; noPartners: string;
   becomeTitle: string; becomeBody: string; cta: string;
   perks: { title: string; body: string }[];
 }> = {
@@ -25,6 +26,10 @@ const content: Record<Locale, {
     intro: 'Organisationen, Unternehmen und Institutionen, die an eine vernetzte Diaspora glauben und unsere Mission aktiv mittragen.',
     sectionCurrent: 'Sie vertrauen uns',
     sectionBecome: 'Partner werden',
+    sponsorsTitle: 'Sponsoren',
+    partnersTitle: 'Partner',
+    noSponsors: 'Noch keine Sponsoren gelistet.',
+    noPartners: 'Noch keine Partner gelistet.',
     becomeTitle: 'Gemeinsam weiterkommen.',
     becomeBody: 'Als Partner von Level Up in Germany erreichen Sie eine Community, die qualifiziert ist und wirklich zuhört. Sie gewinnen an Sichtbarkeit, zeigen klar, wofür Sie stehen, und knüpfen ehrliche Verbindungen.',
     cta: 'Sponsoring-Anfrage stellen',
@@ -40,6 +45,10 @@ const content: Record<Locale, {
     intro: 'Organisations, companies and institutions that believe in a connected diaspora and back our mission for real.',
     sectionCurrent: 'They trust us',
     sectionBecome: 'Become a partner',
+    sponsorsTitle: 'Sponsors',
+    partnersTitle: 'Partners',
+    noSponsors: 'No sponsors listed yet.',
+    noPartners: 'No partners listed yet.',
     becomeTitle: 'Go further, together.',
     becomeBody: 'As a Level Up in Germany partner, you reach a community that is qualified and genuinely engaged. You gain visibility, show clearly what you stand for, and create real connections.',
     cta: 'Send a sponsorship request',
@@ -55,6 +64,10 @@ const content: Record<Locale, {
     intro: 'Des organisations, des entreprises et des institutions qui croient à une diaspora connectée et qui soutiennent notre mission pour de vrai.',
     sectionCurrent: 'Ils nous font confiance',
     sectionBecome: 'Devenir partenaire',
+    sponsorsTitle: 'Sponsors',
+    partnersTitle: 'Partenaires',
+    noSponsors: 'Aucun sponsor pour le moment.',
+    noPartners: 'Aucun partenaire pour le moment.',
     becomeTitle: 'Avancer ensemble.',
     becomeBody: 'En devenant partenaire de Level Up in Germany, vous parlez à une communauté qualifiée et vraiment engagée. Vous gagnez en visibilité, vous montrez clairement ce que vous défendez et vous créez de vrais liens.',
     cta: 'Envoyer une demande de sponsoring',
@@ -68,6 +81,33 @@ const content: Record<Locale, {
 
 
 
+function PartnerLogo({ partner, priority }: { partner: PartnerRow; priority: boolean }) {
+  const img = (
+    <Image
+      src={partner.logoUrl}
+      alt={partner.name}
+      width={180}
+      height={90}
+      className="max-h-24 w-auto object-contain"
+      style={{ transform: `scale(${partner.logoZoom ?? 1})` }}
+      priority={priority}
+    />
+  );
+  const cardClass = 'group h-20 sm:h-24 rounded-2xl border border-gray-100 bg-white shadow-sm flex items-center justify-center px-4 transition-all duration-300 hover:border-accent/40 hover:shadow-md card-hover-lift overflow-hidden';
+
+  return (
+    <RevealOnScroll>
+      {partner.websiteUrl ? (
+        <a href={partner.websiteUrl} target="_blank" rel="noopener noreferrer" aria-label={partner.name} className={cardClass}>
+          {img}
+        </a>
+      ) : (
+        <div className={cardClass}>{img}</div>
+      )}
+    </RevealOnScroll>
+  );
+}
+
 export default async function PartnersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
@@ -78,15 +118,18 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
   try {
     dbPartners = await prisma.partner.findMany({
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-      select: { id: true, name: true, logoUrl: true, websiteUrl: true, sortOrder: true, visible: true },
+      select: { id: true, name: true, logoUrl: true, logoZoom: true, websiteUrl: true, category: true, sortOrder: true, visible: true },
     });
   } catch { /* DB unavailable — fall back to static */ }
 
+  const STATIC_ZOOM_OVERRIDES: Record<string, number> = { Regus: 0.6, 'African Power': 2 };
   const staticPartners = partners2025.map((p, i) => ({
     id: p.name,
     name: p.name,
     logoUrl: p.logo,
+    logoZoom: STATIC_ZOOM_OVERRIDES[p.name] ?? 1,
     websiteUrl: p.website ?? null,
+    category: 'partner',
     sortOrder: i,
   }));
 
@@ -108,7 +151,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
         if (dbMatch) {
           // The DB row is authoritative once it exists — respect admin edits, hiding and deletion.
           if (!dbMatch.visible) return null;
-          return { ...dbMatch, id: dbMatch.id, name: staticPartner.name, logoUrl: dbMatch.logoUrl || staticPartner.logoUrl, websiteUrl: dbMatch.websiteUrl || staticPartner.websiteUrl, sortOrder: staticPartner.sortOrder };
+          return { ...dbMatch, id: dbMatch.id, name: staticPartner.name, logoUrl: dbMatch.logoUrl || staticPartner.logoUrl, logoZoom: dbMatch.logoZoom ?? staticPartner.logoZoom, websiteUrl: dbMatch.websiteUrl || staticPartner.websiteUrl, category: dbMatch.category || staticPartner.category, sortOrder: staticPartner.sortOrder };
         }
         // No DB row for this partner: only fall back to the static default when the table
         // has never been seeded at all; otherwise it means an admin deleted it on purpose.
@@ -117,6 +160,9 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
       .filter((p): p is PartnerRow => p !== null),
     ...normalizedDb.filter((dbPartner) => dbPartner.visible && !staticByName.has(dbPartner.name.toLowerCase())),
   ];
+
+  const sponsorPartners = displayPartners.filter((p) => p.category.includes('sponsor'));
+  const regularPartners = displayPartners.filter((p) => !p.category.includes('sponsor'));
 
   return (
     <div className="overflow-hidden">
@@ -146,42 +192,33 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">{t.sectionCurrent}</p>
             </div>
           </RevealOnScroll>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-            {displayPartners.map((partner, i) => (
-              <RevealOnScroll key={partner.id} delayMs={i * 40}>
-                {partner.websiteUrl ? (
-                  <a
-                    href={partner.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={partner.name}
-                    className={`group h-20 sm:h-24 rounded-2xl border border-gray-100 bg-white shadow-sm flex items-center justify-center px-4 transition-all duration-300 hover:border-accent/40 hover:shadow-md card-hover-lift overflow-hidden ${i === 0 ? 'border-2 border-accent/60' : ''}`}
-                  >
-                    <Image
-                      src={partner.logoUrl}
-                      alt={partner.name}
-                      width={180}
-                      height={90}
-                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : partner.name === 'African Power' ? 'scale-[2]' : ''}`}
-                      priority={i < 3}
-                    />
-                  </a>
-                ) : (
-                  <div
-                    className={`group h-20 sm:h-24 rounded-2xl border border-gray-100 bg-white shadow-sm flex items-center justify-center px-4 transition-all duration-300 hover:border-accent/40 hover:shadow-md card-hover-lift overflow-hidden ${i === 0 ? 'border-2 border-accent/60' : ''}`}
-                  >
-                    <Image
-                      src={partner.logoUrl}
-                      alt={partner.name}
-                      width={180}
-                      height={90}
-                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : partner.name === 'African Power' ? 'scale-[2]' : ''}`}
-                      priority={i < 3}
-                    />
-                  </div>
-                )}
-              </RevealOnScroll>
-            ))}
+
+          <div className="grid gap-14 lg:grid-cols-2 lg:gap-10 xl:gap-16">
+            <div>
+              <h2 className="mb-6 text-lg font-bold uppercase tracking-wide text-brand-dark sm:text-xl">{t.sponsorsTitle}</h2>
+              {sponsorPartners.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                  {sponsorPartners.map((partner, i) => (
+                    <PartnerLogo key={partner.id} partner={partner} priority={i < 3} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm italic text-gray-400">{t.noSponsors}</p>
+              )}
+            </div>
+
+            <div className="lg:border-l lg:border-gray-100 lg:pl-10 xl:pl-16">
+              <h2 className="mb-6 text-lg font-bold uppercase tracking-wide text-brand-dark sm:text-xl">{t.partnersTitle}</h2>
+              {regularPartners.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+                  {regularPartners.map((partner, i) => (
+                    <PartnerLogo key={partner.id} partner={partner} priority={i < 3} />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm italic text-gray-400">{t.noPartners}</p>
+              )}
+            </div>
           </div>
         </div>
       </section>

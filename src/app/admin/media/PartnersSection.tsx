@@ -25,6 +25,7 @@ type Partner = {
   id: string;
   name: string;
   logoUrl: string;
+  logoZoom: number;
   websiteUrl: string | null;
   category: string;
   sortOrder: number;
@@ -32,7 +33,11 @@ type Partner = {
   createdAt: string;
 };
 
-const EMPTY = { name: '', logoUrl: '', websiteUrl: '', category: 'partner', sortOrder: 0, visible: true };
+const ZOOM_MIN = 0.4;
+const ZOOM_MAX = 3;
+const ZOOM_STEP = 0.1;
+
+const EMPTY = { name: '', logoUrl: '', logoZoom: 1, websiteUrl: '', category: 'partner', sortOrder: 0, visible: true };
 
 export function PartnersSection() {
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -63,7 +68,7 @@ export function PartnersSection() {
 
   function startEdit(p: Partner) {
     setEditingId(p.id);
-    setForm({ name: p.name, logoUrl: p.logoUrl, websiteUrl: p.websiteUrl ?? '', category: p.category, sortOrder: p.sortOrder, visible: p.visible });
+    setForm({ name: p.name, logoUrl: p.logoUrl, logoZoom: p.logoZoom ?? 1, websiteUrl: p.websiteUrl ?? '', category: p.category, sortOrder: p.sortOrder, visible: p.visible });
     setError('');
   }
 
@@ -74,7 +79,7 @@ export function PartnersSection() {
     if (!form.name.trim()) { setError('Le nom est requis.'); adminNotify.error('Le nom est requis.'); return; }
     setSaving(true); setError('');
     try {
-      const payload = { name: form.name.trim(), logoUrl: form.logoUrl.trim(), websiteUrl: form.websiteUrl.trim() || null, category: form.category, sortOrder: form.sortOrder, visible: form.visible };
+      const payload = { name: form.name.trim(), logoUrl: form.logoUrl.trim(), logoZoom: form.logoZoom, websiteUrl: form.websiteUrl.trim() || null, category: form.category, sortOrder: form.sortOrder, visible: form.visible };
       const res = editingId
         ? await fetch(`/api/admin/partners/${editingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         : await fetch('/api/admin/partners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -108,6 +113,17 @@ export function PartnersSection() {
       adminNotify.success(p.visible ? 'Partenaire masqué.' : 'Partenaire visible.');
     } else {
       adminNotify.error('Mise à jour impossible.');
+    }
+  }
+
+  async function adjustZoom(p: Partner, delta: number) {
+    const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(((p.logoZoom ?? 1) + delta) * 100) / 100));
+    if (next === p.logoZoom) return;
+    setPartners(prev => prev.map(x => x.id === p.id ? { ...x, logoZoom: next } : x));
+    const res = await fetch(`/api/admin/partners/${p.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ logoZoom: next }) });
+    if (!res.ok) {
+      setPartners(prev => prev.map(x => x.id === p.id ? { ...x, logoZoom: p.logoZoom ?? 1 } : x));
+      adminNotify.error('Zoom non enregistré.');
     }
   }
 
@@ -196,7 +212,12 @@ export function PartnersSection() {
                     {/* Logo on white bg */}
                     <div className="relative bg-white aspect-[16/9] flex items-center justify-center p-3 overflow-hidden">
                       {p.logoUrl ? (
-                        <img src={p.logoUrl} alt={p.name} className="max-h-full max-w-full object-contain" />
+                        <img
+                          src={p.logoUrl}
+                          alt={p.name}
+                          className="max-h-full max-w-full object-contain transition-transform"
+                          style={{ transform: `scale(${p.logoZoom ?? 1})` }}
+                        />
                       ) : (
                         <div className="flex flex-col items-center text-gray-300">
                           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,6 +228,27 @@ export function PartnersSection() {
                       )}
                       {!p.visible && (
                         <span className="absolute top-1 right-1 bg-black/50 text-white/60 text-[8px] font-bold px-1.5 py-0.5 rounded">MASQUÉ</span>
+                      )}
+                      {p.logoUrl && (
+                        <div className="absolute bottom-1 right-1 flex items-center gap-0.5 rounded-lg bg-black/60 px-1 py-1 backdrop-blur-sm">
+                          <button
+                            type="button"
+                            title="Dézoomer"
+                            onClick={() => adjustZoom(p, -ZOOM_STEP)}
+                            className="flex h-5 w-5 items-center justify-center rounded text-white/70 transition hover:bg-white/20 hover:text-white"
+                          >
+                            −
+                          </button>
+                          <span className="px-1 text-[9px] font-mono text-white/60">{Math.round((p.logoZoom ?? 1) * 100)}%</span>
+                          <button
+                            type="button"
+                            title="Zoomer"
+                            onClick={() => adjustZoom(p, ZOOM_STEP)}
+                            className="flex h-5 w-5 items-center justify-center rounded text-white/70 transition hover:bg-white/20 hover:text-white"
+                          >
+                            +
+                          </button>
+                        </div>
                       )}
                     </div>
 
@@ -291,6 +333,44 @@ export function PartnersSection() {
                 placeholder="/partners/logo.png ou URL externe…"
                 helperText="Fond blanc recommandé — PNG ou WebP."
               />
+
+              {/* Zoom */}
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-white/50 uppercase tracking-wider">Zoom du logo</label>
+                  <span className="text-[10px] font-mono text-white/40">{Math.round(form.logoZoom * 100)}%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, logoZoom: Math.max(ZOOM_MIN, Math.round((f.logoZoom - ZOOM_STEP) * 100) / 100) }))}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/60 transition hover:bg-white/10 hover:text-white"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="range"
+                    min={ZOOM_MIN}
+                    max={ZOOM_MAX}
+                    step={ZOOM_STEP}
+                    value={form.logoZoom}
+                    onChange={(e) => setForm(f => ({ ...f, logoZoom: parseFloat(e.target.value) }))}
+                    className="flex-1 accent-accent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, logoZoom: Math.min(ZOOM_MAX, Math.round((f.logoZoom + ZOOM_STEP) * 100) / 100) }))}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/60 transition hover:bg-white/10 hover:text-white"
+                  >
+                    +
+                  </button>
+                </div>
+                {form.logoUrl && (
+                  <div className="mt-2 flex h-16 items-center justify-center overflow-hidden rounded-lg bg-white">
+                    <img src={form.logoUrl} alt="Aperçu" className="max-h-full max-w-full object-contain" style={{ transform: `scale(${form.logoZoom})` }} />
+                  </div>
+                )}
+              </div>
 
               {/* Name */}
               <div>
