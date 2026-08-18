@@ -73,13 +73,12 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
   const t = content[loc];
 
-  // Load partners from DB; fall back to static data if none yet
-  let dbPartners: PartnerRow[] = [];
+  // Load partners from DB; fall back to static data only if the table has never been seeded
+  let dbPartners: (PartnerRow & { visible: boolean })[] = [];
   try {
     dbPartners = await prisma.partner.findMany({
-      where: { visible: true },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-      select: { id: true, name: true, logoUrl: true, websiteUrl: true, sortOrder: true },
+      select: { id: true, name: true, logoUrl: true, websiteUrl: true, sortOrder: true, visible: true },
     });
   } catch { /* DB unavailable — fall back to static */ }
 
@@ -99,15 +98,24 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
   }));
 
   const staticByName = new Map(staticPartners.map((p) => [p.name.toLowerCase(), p]));
+  const dbByName = new Map(normalizedDb.map((p) => [p.name.toLowerCase(), p]));
+  const hasDbData = normalizedDb.length > 0;
 
   const displayPartners: PartnerRow[] = [
-    ...staticPartners.map((staticPartner) => {
-      const dbMatch = normalizedDb.find((dbPartner) => dbPartner.name.toLowerCase() === staticPartner.name.toLowerCase());
-      return dbMatch
-        ? { ...dbMatch, id: dbMatch.id || staticPartner.id, name: staticPartner.name, logoUrl: dbMatch.logoUrl || staticPartner.logoUrl, websiteUrl: dbMatch.websiteUrl || staticPartner.websiteUrl, sortOrder: staticPartner.sortOrder }
-        : { ...staticPartner };
-    }),
-    ...normalizedDb.filter((dbPartner) => !staticByName.has(dbPartner.name.toLowerCase())),
+    ...staticPartners
+      .map((staticPartner) => {
+        const dbMatch = dbByName.get(staticPartner.name.toLowerCase());
+        if (dbMatch) {
+          // The DB row is authoritative once it exists — respect admin edits, hiding and deletion.
+          if (!dbMatch.visible) return null;
+          return { ...dbMatch, id: dbMatch.id, name: staticPartner.name, logoUrl: dbMatch.logoUrl || staticPartner.logoUrl, websiteUrl: dbMatch.websiteUrl || staticPartner.websiteUrl, sortOrder: staticPartner.sortOrder };
+        }
+        // No DB row for this partner: only fall back to the static default when the table
+        // has never been seeded at all; otherwise it means an admin deleted it on purpose.
+        return hasDbData ? null : { ...staticPartner };
+      })
+      .filter((p): p is PartnerRow => p !== null),
+    ...normalizedDb.filter((dbPartner) => dbPartner.visible && !staticByName.has(dbPartner.name.toLowerCase())),
   ];
 
   return (
