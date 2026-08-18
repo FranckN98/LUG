@@ -35,6 +35,9 @@ export async function PATCH(req: Request) {
     weezeventUrl: body.weezeventUrl ?? '',
     videoUrl: body.videoUrl ?? '',
     parkingLocations: typeof body.parkingLocations === 'string' ? body.parkingLocations : '[]',
+    translations: typeof body.translations === 'string'
+      ? body.translations
+      : JSON.stringify(body.translations ?? {}),
   };
 
   const saved = await prisma.ticketingConfig.upsert({

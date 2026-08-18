@@ -1,14 +1,51 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import type { Locale } from '@/i18n/config';
 
 interface TicketingModalProps {
   checkoutUrl: string;
   onClose: () => void;
   passName?: string;
+  locale?: Locale;
 }
 
-export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModalProps) {
+const MODAL_TEXT: Record<Locale, {
+  defaultTitle: string;
+  close: string;
+  buyLabel: (name?: string) => string;
+  loading: string;
+  iframeFallbackTitle: string;
+  openInNewTab: string;
+}> = {
+  fr: {
+    defaultTitle: 'Level Up in Germany 2026',
+    close: 'Fermer',
+    buyLabel: (name) => (name ? `Acheter — ${name}` : 'Acheter mon billet'),
+    loading: 'Chargement de la billetterie…',
+    iframeFallbackTitle: 'Billetterie Level Up in Germany',
+    openInNewTab: 'Ouvrir dans un nouvel onglet si la fenêtre ne charge pas',
+  },
+  en: {
+    defaultTitle: 'Level Up in Germany 2026',
+    close: 'Close',
+    buyLabel: (name) => (name ? `Buy — ${name}` : 'Buy my ticket'),
+    loading: 'Loading the ticket shop…',
+    iframeFallbackTitle: 'Level Up in Germany ticket shop',
+    openInNewTab: "Open in a new tab if the window doesn't load",
+  },
+  de: {
+    defaultTitle: 'Level Up in Germany 2026',
+    close: 'Schließen',
+    buyLabel: (name) => (name ? `Kaufen — ${name}` : 'Mein Ticket kaufen'),
+    loading: 'Ticketshop wird geladen…',
+    iframeFallbackTitle: 'Level Up in Germany Ticketshop',
+    openInNewTab: 'In neuem Tab öffnen, falls das Fenster nicht lädt',
+  },
+};
+
+export function TicketingModal({ checkoutUrl, onClose, passName, locale = 'fr' }: TicketingModalProps) {
+  const t = MODAL_TEXT[locale];
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll while open
@@ -41,7 +78,7 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
       style={{ background: 'rgba(8, 4, 4, 0.82)', backdropFilter: 'blur(6px)' }}
       role="dialog"
       aria-modal="true"
-      aria-label={passName ? `Acheter — ${passName}` : 'Acheter mon billet'}
+      aria-label={t.buyLabel(passName)}
     >
       <div
         className="relative flex h-full w-full max-w-4xl flex-col overflow-hidden rounded-none shadow-2xl sm:h-auto sm:rounded-2xl"
@@ -73,13 +110,13 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
               <path d="M9 8v8" strokeDasharray="2 2" />
             </svg>
             <span className="text-sm font-semibold text-white">
-              {passName ? passName : 'Level Up in Germany 2026'}
+              {passName ? passName : t.defaultTitle}
             </span>
           </div>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30"
-            aria-label="Fermer"
+            aria-label={t.close}
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
               <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
@@ -98,12 +135,12 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
               className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200"
               style={{ borderTopColor: '#8C1A1A' }}
             />
-            <p className="text-sm text-gray-500">Chargement de la billetterie…</p>
+            <p className="text-sm text-gray-500">{t.loading}</p>
           </div>
 
           <iframe
             src={checkoutUrl}
-            title={passName ? `Acheter ${passName}` : 'Billetterie Level Up in Germany'}
+            title={passName ? t.buyLabel(passName) : t.iframeFallbackTitle}
             className="relative z-10 origin-top-left border-0"
             style={{
               // Dézoom léger : le contenu est réduit à 85 % pour afficher plus
@@ -127,7 +164,7 @@ export function TicketingModal({ checkoutUrl, onClose, passName }: TicketingModa
             rel="noopener noreferrer"
             className="text-xs text-gray-400 underline hover:text-gray-600"
           >
-            Ouvrir dans un nouvel onglet si la fenêtre ne charge pas
+            {t.openInNewTab}
           </a>
         </div>
       </div>

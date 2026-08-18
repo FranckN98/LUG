@@ -835,6 +835,7 @@ model TicketingConfig {
   weezeventUrl         String          @default("https://www.weezevent.com/widget_billeterie.php?id_evenement=2098465&widget_key=E2098465&locale=de_DE&color_primary=red&code=red") @map("weezevent_url")
   videoUrl             String          @default("") @map("video_url")
   parkingLocations     String          @default("[]") @map("parking_locations")
+  translations         String          @default("{}") @map("translations") // JSON: Partial<Record<'en'|'de', {pageTitle,pageSubtitle,pageIntro,eventDate,eventLocation,ctaButtonText}>>
   createdAt            DateTime        @default(now()) @map("created_at")
   updatedAt            DateTime        @updatedAt @map("updated_at")
   passes               TicketingPass[]
@@ -862,6 +863,7 @@ model TicketingPass {
   colorSecondary   String          @default("#2d7a4f") @map("color_secondary")
   sortOrder        Int             @default(0) @map("sort_order")
   availabilityNote String?         @map("availability_note")
+  translations     String          @default("{}") // JSON: Partial<Record<'en'|'de', {name,label,targetAudience,description,highlights:string[],includes:string[],decisionPhrase,availabilityNote}>>
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
   config           TicketingConfig @relation(fields: [configId], references: [id], onDelete: Cascade)

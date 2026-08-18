@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { NewTicketingPage } from '@/components/NewTicketingPage';
 import { eventInclude, mapEventToEventData } from '@/lib/events-db';
 import { getPublicEventGallery } from '@/lib/eventGallery';
+import { resolveConfigLocale, resolvePassLocale } from '@/lib/ticketingI18n';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/buy-ticket');
@@ -100,21 +101,58 @@ export default async function BuyTicketPage({
         ? ticketingConfig.weezeventUrl
         : ticketingConfig.checkoutUrl;
 
+    const localizedConfig = resolveConfigLocale(
+      {
+        pageTitle: ticketingConfig.pageTitle,
+        pageSubtitle: ticketingConfig.pageSubtitle,
+        pageIntro: ticketingConfig.pageIntro,
+        eventDate: ticketingConfig.eventDate,
+        eventLocation: ticketingConfig.eventLocation,
+        ctaButtonText: ticketingConfig.ctaButtonText,
+      },
+      ticketingConfig.translations,
+      loc,
+    );
+
+    const localizedPasses = ticketingConfig.passes.map((pass) => {
+      const localized = resolvePassLocale(
+        {
+          name: pass.name,
+          label: pass.label,
+          targetAudience: pass.targetAudience,
+          description: pass.description,
+          highlights: JSON.parse(pass.highlights || '[]'),
+          includes: JSON.parse(pass.includes || '[]'),
+          decisionPhrase: pass.decisionPhrase,
+          availabilityNote: pass.availabilityNote ?? '',
+        },
+        pass.translations,
+        loc,
+      );
+      return {
+        ...pass,
+        name: localized.name,
+        label: localized.label,
+        targetAudience: localized.targetAudience,
+        description: localized.description,
+        highlights: JSON.stringify(localized.highlights),
+        includes: JSON.stringify(localized.includes),
+        decisionPhrase: localized.decisionPhrase,
+        availabilityNote: localized.availabilityNote || null,
+      };
+    });
+
     return (
       <NewTicketingPage
+        locale={loc}
         config={{
-          pageTitle: ticketingConfig.pageTitle,
-          pageSubtitle: ticketingConfig.pageSubtitle,
-          pageIntro: ticketingConfig.pageIntro,
-          eventDate: ticketingConfig.eventDate,
-          eventLocation: ticketingConfig.eventLocation,
-          ctaButtonText: ticketingConfig.ctaButtonText,
+          ...localizedConfig,
           checkoutUrl: resolvedCheckoutUrl,
           videoUrl: ticketingConfig.videoUrl,
           galleryImages,
           speakers: eventData?.speakers ?? [],
           parkingLocations: ticketingConfig.parkingLocations,
-          passes: ticketingConfig.passes,
+          passes: localizedPasses,
         }}
       />
     );

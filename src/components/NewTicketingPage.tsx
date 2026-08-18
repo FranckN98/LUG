@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
+import type { Locale } from '@/i18n/config';
 import { TicketingModal } from './TicketingModal';
 import { TicketingFAQ } from './TicketingFAQ';
 
@@ -56,15 +57,156 @@ type ParkingLocation = {
   note: string;
 };
 
+// ── i18n ───────────────────────────────────────────────────────────────────────
+
+const INTL_LOCALE: Record<Locale, string> = { fr: 'fr-FR', en: 'en-GB', de: 'de-DE' };
+
+const PAGE_TEXT: Record<Locale, {
+  heroAlt: string;
+  heroLinkLabel: string;
+  watchVideo: string;
+  ticketsEyebrow: string;
+  ticketsTitle: string;
+  ticketsSubtitle: string;
+  noTickets: string;
+  secureNote: string;
+  perksEyebrow: string;
+  perksTitle: string;
+  perksItems: { emoji: string; text: string }[];
+  galleryEyebrow: string;
+  galleryTitle: string;
+  galleryAriaLabel: string;
+  galleryImgAlt: string;
+  speakersEyebrow: string;
+  speakersTitle: string;
+  parkingEyebrow: string;
+  parkingTitle: string;
+  directions: string;
+  mapTitle: (name: string) => string;
+  videoAriaLabel: string;
+  videoTitle: string;
+  close: string;
+  soldOutOverlay: string;
+  comingSoonFooter: string;
+  soldOutFooter: string;
+}> = {
+  fr: {
+    heroAlt: 'Level Up in Germany — La billetterie est ouverte',
+    heroLinkLabel: 'Voir les billets',
+    watchVideo: 'Regarder la vidéo',
+    ticketsEyebrow: 'La billetterie',
+    ticketsTitle: 'Choisissez votre formule',
+    ticketsSubtitle: 'Sélectionnez la formule qui vous correspond.',
+    noTickets: 'Aucun ticket disponible pour le moment.',
+    secureNote: 'Paiement 100 % sécurisé · Confirmation immédiate',
+    perksEyebrow: 'Avantages communs',
+    perksTitle: 'Inclus dans tous les tickets',
+    perksItems: [
+      { emoji: '🍽️', text: 'Déjeuner inclus.' },
+      { emoji: '🥗', text: 'Repas et fingerfood inclus.' },
+      { emoji: '☕', text: 'Boissons à volonté toute la journée (eau, café, thé, jus et softs).' },
+      { emoji: '🏢', text: 'Accès à tous les exposants.' },
+      { emoji: '🎓', text: 'Accès à une masterclass gratuite de tous les intervenants.' },
+    ],
+    galleryEyebrow: 'Level Up 2026',
+    galleryTitle: 'Les moments qui nous attendent',
+    galleryAriaLabel: "Photos de l'événement 2026",
+    galleryImgAlt: 'Level Up in Germany 2026',
+    speakersEyebrow: 'Rencontres',
+    speakersTitle: 'Nos intervenants',
+    parkingEyebrow: 'Accès',
+    parkingTitle: 'Parkings',
+    directions: 'Itinéraire',
+    mapTitle: (name) => `Carte ${name}`,
+    videoAriaLabel: 'Vidéo',
+    videoTitle: 'Vidéo Level Up in Germany',
+    close: 'Fermer',
+    soldOutOverlay: 'Sold Out',
+    comingSoonFooter: '⏳ Bientôt disponible',
+    soldOutFooter: 'Sold out',
+  },
+  en: {
+    heroAlt: 'Level Up in Germany — Ticket sales are open',
+    heroLinkLabel: 'See the tickets',
+    watchVideo: 'Watch the video',
+    ticketsEyebrow: 'Tickets',
+    ticketsTitle: 'Choose your pass',
+    ticketsSubtitle: 'Pick the pass that suits you best.',
+    noTickets: 'No ticket available at the moment.',
+    secureNote: '100% secure payment · Instant confirmation',
+    perksEyebrow: 'Shared perks',
+    perksTitle: 'Included with every ticket',
+    perksItems: [
+      { emoji: '🍽️', text: 'Lunch included.' },
+      { emoji: '🥗', text: 'Meals and fingerfood included.' },
+      { emoji: '☕', text: 'Unlimited drinks all day (water, coffee, tea, juices and soft drinks).' },
+      { emoji: '🏢', text: 'Access to all exhibitors.' },
+      { emoji: '🎓', text: 'Access to a free masterclass with all speakers.' },
+    ],
+    galleryEyebrow: 'Level Up 2026',
+    galleryTitle: 'The moments awaiting us',
+    galleryAriaLabel: 'Photos from the 2026 event',
+    galleryImgAlt: 'Level Up in Germany 2026',
+    speakersEyebrow: 'Meet them',
+    speakersTitle: 'Our speakers',
+    parkingEyebrow: 'Access',
+    parkingTitle: 'Parking',
+    directions: 'Directions',
+    mapTitle: (name) => `Map of ${name}`,
+    videoAriaLabel: 'Video',
+    videoTitle: 'Level Up in Germany video',
+    close: 'Close',
+    soldOutOverlay: 'Sold Out',
+    comingSoonFooter: '⏳ Coming soon',
+    soldOutFooter: 'Sold out',
+  },
+  de: {
+    heroAlt: 'Level Up in Germany — Der Ticketverkauf ist eröffnet',
+    heroLinkLabel: 'Tickets ansehen',
+    watchVideo: 'Video ansehen',
+    ticketsEyebrow: 'Ticketing',
+    ticketsTitle: 'Wähle dein Ticket',
+    ticketsSubtitle: 'Wähle das Ticket, das am besten zu dir passt.',
+    noTickets: 'Derzeit ist kein Ticket verfügbar.',
+    secureNote: '100 % sichere Zahlung · Sofortige Bestätigung',
+    perksEyebrow: 'Gemeinsame Vorteile',
+    perksTitle: 'In jedem Ticket enthalten',
+    perksItems: [
+      { emoji: '🍽️', text: 'Mittagessen inklusive.' },
+      { emoji: '🥗', text: 'Speisen und Fingerfood inklusive.' },
+      { emoji: '☕', text: 'Getränke den ganzen Tag inklusive (Wasser, Kaffee, Tee, Säfte und Softdrinks).' },
+      { emoji: '🏢', text: 'Zugang zu allen Ausstellern.' },
+      { emoji: '🎓', text: 'Zugang zu einer kostenlosen Masterclass mit allen Sprecher:innen.' },
+    ],
+    galleryEyebrow: 'Level Up 2026',
+    galleryTitle: 'Die Momente, die uns erwarten',
+    galleryAriaLabel: 'Fotos der Veranstaltung 2026',
+    galleryImgAlt: 'Level Up in Germany 2026',
+    speakersEyebrow: 'Begegnungen',
+    speakersTitle: 'Unsere Sprecher:innen',
+    parkingEyebrow: 'Anfahrt',
+    parkingTitle: 'Parkplätze',
+    directions: 'Route',
+    mapTitle: (name) => `Karte ${name}`,
+    videoAriaLabel: 'Video',
+    videoTitle: 'Level Up in Germany Video',
+    close: 'Schließen',
+    soldOutOverlay: 'Ausverkauft',
+    comingSoonFooter: '⏳ Bald verfügbar',
+    soldOutFooter: 'Ausverkauft',
+  },
+};
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function parseJson(raw: string, fallback: string[] = []): string[] {
   try { return JSON.parse(raw); } catch { return fallback; }
 }
 
-function formatPrice(cents: number, currency: string): string {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(cents / 100);
+function formatPrice(cents: number, currency: string, locale: Locale): string {
+  return new Intl.NumberFormat(INTL_LOCALE[locale], { style: 'currency', currency }).format(cents / 100);
 }
+
 
 function parseConfigArray(raw: string): unknown[] {
   try {
@@ -108,9 +250,12 @@ function youtubeId(url: string): string | null {
 
 function PassCard({
   pass,
+  locale,
 }: {
   pass: TicketingPass;
+  locale: Locale;
 }) {
+  const t = PAGE_TEXT[locale];
   const highlights = parseJson(pass.highlights);
   const includes = parseJson(pass.includes);
   const isSoldOut = pass.status === 'sold_out';
@@ -127,7 +272,7 @@ function PassCard({
       {/* Sold out overlay */}
       {isSoldOut && (
         <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/60 backdrop-blur-[2px]">
-          <span className="rounded-full border border-black/10 bg-white px-5 py-2 text-sm font-bold uppercase tracking-widest text-neutral-500 shadow">Sold Out</span>
+          <span className="rounded-full border border-black/10 bg-white px-5 py-2 text-sm font-bold uppercase tracking-widest text-neutral-500 shadow">{t.soldOutOverlay}</span>
         </div>
       )}
 
@@ -157,14 +302,14 @@ function PassCard({
             <div className="shrink-0 text-right">
               {pass.oldPriceCents && (
                 <div className="mb-1 text-xs text-neutral-400 line-through">
-                  {formatPrice(pass.oldPriceCents, pass.currency)}
+                  {formatPrice(pass.oldPriceCents, pass.currency, locale)}
                 </div>
               )}
               <span
                 className="inline-block rounded-xl px-3.5 py-1.5 font-display text-xl font-bold leading-none text-white shadow-lg sm:text-2xl"
                 style={{ background: `linear-gradient(135deg, ${pass.colorPrimary}, ${pass.colorSecondary})` }}
               >
-                {formatPrice(pass.priceCents, pass.currency)}
+                {formatPrice(pass.priceCents, pass.currency, locale)}
               </span>
             </div>
           )}
@@ -221,12 +366,12 @@ function PassCard({
           <div className="mt-auto pt-1">
             {isComingSoon && (
               <div className="w-full rounded-xl border border-neutral-200 bg-neutral-50 py-2.5 text-center text-sm font-bold text-neutral-400">
-                ⏳ Bientôt disponible
+                {t.comingSoonFooter}
               </div>
             )}
             {isSoldOut && (
               <div className="w-full rounded-xl bg-neutral-100 py-2.5 text-center text-sm font-bold text-neutral-400">
-                Sold out
+                {t.soldOutFooter}
               </div>
             )}
           </div>
@@ -238,9 +383,10 @@ function PassCard({
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export function NewTicketingPage({ config }: { config: TicketingConfig }) {
+export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingConfig; locale?: Locale }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
+  const t = PAGE_TEXT[locale];
 
   const hasCheckout = Boolean(config.checkoutUrl);
   const hasAvailablePass = config.passes.some((p) => p.status === 'available');
@@ -429,7 +575,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
 
       {/* ── Hero image responsive (maquette en haut : mobile · tablette · desktop) ── */}
       <section className="relative z-10 px-4 pt-6 sm:px-6 sm:pt-8">
-        <a href="#tickets" className="group mx-auto block max-w-5xl overflow-hidden rounded-2xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)]" aria-label="Voir les billets">
+        <a href="#tickets" className="group mx-auto block max-w-5xl overflow-hidden rounded-2xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)]" aria-label={t.heroLinkLabel}>
           <picture>
             {/* Ordinateur */}
             <source media="(min-width: 1024px)" srcSet="/hero/billetterie-desktop.jpeg" />
@@ -439,7 +585,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/hero/billetterie-mobile.jpeg"
-              alt="Level Up in Germany — La billetterie est ouverte"
+              alt={t.heroAlt}
               className="mx-auto block h-auto w-full"
               fetchPriority="high"
             />
@@ -452,7 +598,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             <button
               type="button"
               onClick={() => setVideoOpen(true)}
-              aria-label="Regarder la vidéo"
+              aria-label={t.watchVideo}
               className="lu-play-btn group relative flex h-24 w-24 items-center justify-center rounded-full sm:h-28 sm:w-28"
             >
               {/* Ondes de pulsation */}
@@ -478,7 +624,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
               </span>
             </button>
             <p className="mt-5 text-sm font-semibold uppercase tracking-[0.25em] text-primary">
-              Regarder la vidéo
+              {t.watchVideo}
             </p>
           </div>
         )}
@@ -518,20 +664,20 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         <section id="tickets" className="relative z-10 scroll-mt-12 px-5 pb-16 pt-16 sm:px-8 sm:pt-20">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
-              <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">La billetterie</p>
-              <h2 className="font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">Choisissez votre formule</h2>
-              <p className="mt-3 text-base text-neutral-500">Sélectionnez la formule qui vous correspond.</p>
+              <p className="mb-2 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.ticketsEyebrow}</p>
+              <h2 className="font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">{t.ticketsTitle}</h2>
+              <p className="mt-3 text-base text-neutral-500">{t.ticketsSubtitle}</p>
             </div>
 
             {config.passes.length === 0 ? (
-              <p className="text-center text-neutral-400">Aucun ticket disponible pour le moment.</p>
+              <p className="text-center text-neutral-400">{t.noTickets}</p>
             ) : (
               <div
                 className="lu-tickets-grid grid gap-5 sm:gap-6"
                 style={{ ['--lu-cols' as string]: config.passes.length } as CSSProperties}
               >
                 {config.passes.map((pass) => (
-                  <PassCard key={pass.id} pass={pass} />
+                  <PassCard key={pass.id} pass={pass} locale={locale} />
                 ))}
               </div>
             )}
@@ -545,7 +691,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                   style={{ background: 'linear-gradient(135deg, #6f1414, #8C1A1A)' }}
                 >
                   <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
-                    🎟️ Acheter mon billet
+                    🎟️ {config.ctaButtonText}
                     <svg className="h-5 w-5 transition-transform group-hover/cta:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
                       <path d="M5 12h14M13 6l6 6-6 6" />
                     </svg>
@@ -560,7 +706,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                   <svg className="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
-                  Paiement 100 % sécurisé · Confirmation immédiate
+                  {t.secureNote}
                 </p>
               </div>
             )}
@@ -579,19 +725,13 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             {/* corner gradient */}
             <div aria-hidden className="absolute -top-12 -left-12 h-40 w-40 rounded-full bg-accent/10 blur-3xl" />
             <div className="relative mb-6 text-center">
-              <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">Avantages communs</p>
+              <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.perksEyebrow}</p>
               <h3 className="font-display text-2xl font-bold text-neutral-900 sm:text-3xl">
-                Inclus dans tous les tickets
+                {t.perksTitle}
               </h3>
             </div>
             <ul className="relative grid gap-4 sm:grid-cols-2">
-              {[
-                { emoji: '🍽️', text: 'Déjeuner inclus.' },
-                { emoji: '🥗', text: 'Repas et fingerfood inclus.' },
-                { emoji: '☕', text: 'Boissons à volonté toute la journée (eau, café, thé, jus et softs).' },
-                { emoji: '🏢', text: 'Accès à tous les exposants.' },
-                { emoji: '🎓', text: 'Accès à une masterclass gratuite de tous les intervenants.' },
-              ].map((item, i) => (
+              {t.perksItems.map((item, i) => (
                 <li key={i} className="flex items-start gap-3 rounded-2xl border border-black/[0.04] bg-white p-4 shadow-sm">
                   <span className="text-2xl">{item.emoji}</span>
                   <span className="pt-0.5 text-sm leading-relaxed text-neutral-700">{item.text}</span>
@@ -604,15 +744,15 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
         {config.galleryImages.length > 0 && (
           <section className="relative z-10 overflow-hidden border-y border-black/5 bg-[#180b0a] py-10 text-white sm:py-12">
             <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:px-8">
-              <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-[#f0a530]">Level Up 2026</p>
-              <h2 className="mt-2 font-display text-2xl font-bold uppercase sm:text-3xl">Les moments qui nous attendent</h2>
+              <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-[#f0a530]">{t.galleryEyebrow}</p>
+              <h2 className="mt-2 font-display text-2xl font-bold uppercase sm:text-3xl">{t.galleryTitle}</h2>
             </div>
-            <div className="overflow-hidden" aria-label="Photos de l'événement 2026">
+            <div className="overflow-hidden" aria-label={t.galleryAriaLabel}>
               <div className="lu-gallery-track flex w-max gap-4 px-4">
                 {[...config.galleryImages, ...config.galleryImages].map((image, index) => (
                   <div key={`${image}-${index}`} className="h-44 w-64 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5 sm:h-52 sm:w-80">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={image} alt="Level Up in Germany 2026" className="h-full w-full object-cover" loading="lazy" />
+                    <img src={image} alt={t.galleryImgAlt} className="h-full w-full object-cover" loading="lazy" />
                   </div>
                 ))}
               </div>
@@ -624,8 +764,8 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
             <div className="mx-auto max-w-6xl">
               <div className="mb-10 text-center">
-                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">Rencontres</p>
-                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">Nos intervenants</h2>
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.speakersEyebrow}</p>
+                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">{t.speakersTitle}</h2>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
                 {config.speakers.map((speaker) => (
@@ -664,8 +804,8 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
             <div className="mx-auto max-w-6xl">
               <div className="mb-10 text-center">
-                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">Accès</p>
-                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">Parkings</h2>
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.parkingEyebrow}</p>
+                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">{t.parkingTitle}</h2>
               </div>
               <div className="grid gap-6 lg:grid-cols-2">
                 {parkingLocations.map((parking) => {
@@ -676,7 +816,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                       <iframe
                         className="h-64 w-full border-0"
                         src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
-                        title={`Carte ${parking.name}`}
+                        title={t.mapTitle(parking.name)}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                       />
@@ -687,7 +827,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                           {parking.note && <p className="mt-2 text-sm font-medium text-[#8C1A1A]">{parking.note}</p>}
                         </div>
                         <a href={directionsUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-[#8C1A1A] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#a82020]">
-                          Itinéraire
+                          {t.directions}
                         </a>
                       </div>
                     </article>
@@ -710,7 +850,8 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
       {modalOpen && (
         <TicketingModal
           checkoutUrl={config.checkoutUrl}
-          passName="Billetterie"
+          passName={config.pageTitle}
+          locale={locale}
           onClose={() => setModalOpen(false)}
         />
       )}
@@ -722,7 +863,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
           style={{ background: 'rgba(8, 4, 4, 0.88)', backdropFilter: 'blur(6px)' }}
           role="dialog"
           aria-modal="true"
-          aria-label="Vidéo"
+          aria-label={t.videoAriaLabel}
           onClick={(e) => {
             if (e.target === e.currentTarget) setVideoOpen(false);
           }}
@@ -731,7 +872,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
             <button
               type="button"
               onClick={() => setVideoOpen(false)}
-              aria-label="Fermer"
+              aria-label={t.close}
               className="absolute -top-11 right-0 flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -742,7 +883,7 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
               <iframe
                 className="absolute inset-0 h-full w-full"
                 src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`}
-                title="Vidéo Level Up in Germany"
+                title={t.videoTitle}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
                 style={{ border: 'none' }}

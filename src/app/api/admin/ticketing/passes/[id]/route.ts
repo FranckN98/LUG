@@ -29,6 +29,9 @@ function parsePassBody(body: Record<string, unknown>) {
     colorSecondary: String(body.colorSecondary ?? '#2d7a4f'),
     sortOrder: Number(body.sortOrder ?? 0),
     availabilityNote: body.availabilityNote ? String(body.availabilityNote) : null,
+    translations: typeof body.translations === 'string'
+      ? body.translations
+      : JSON.stringify(body.translations ?? {}),
   };
 }
 

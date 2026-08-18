@@ -125,6 +125,89 @@ function firstTitle(event?: EditorEvent) {
   return locales.map((locale) => event.content?.[locale]?.title ?? '').find(Boolean) ?? event.slug;
 }
 
+// ── Auto-translate helpers (flatten the whole event into a single field map) ──
+
+function buildTranslatableFields(data: EventFormPayload, source: Locale): Record<string, string> {
+  const fields: Record<string, string> = {};
+  const c = data.content[source];
+  (Object.keys(c) as LocalizedField[]).forEach((key) => {
+    fields[`content.${key}`] = c[key] ?? '';
+  });
+  data.speakers.forEach((speaker, index) => {
+    fields[`speaker.${index}.profession`] = speaker.translations[source]?.profession ?? '';
+    fields[`speaker.${index}.description`] = speaker.translations[source]?.description ?? '';
+  });
+  data.scheduleItems.forEach((item, index) => {
+    fields[`schedule.${index}.title`] = item.translations[source]?.title ?? '';
+    fields[`schedule.${index}.subtitle`] = item.translations[source]?.subtitle ?? '';
+  });
+  data.gallery.forEach((item, index) => {
+    fields[`gallery.${index}.altText`] = item.translations[source]?.altText ?? '';
+  });
+  data.documents.forEach((doc, index) => {
+    fields[`document.${index}.title`] = doc.translations[source]?.title ?? '';
+    fields[`document.${index}.description`] = doc.translations[source]?.description ?? '';
+  });
+  return Object.fromEntries(Object.entries(fields).filter(([, value]) => value.trim() !== ''));
+}
+
+function applyTranslatedFields(data: EventFormPayload, target: Locale, values: Record<string, string>): EventFormPayload {
+  const next: EventFormPayload = {
+    ...data,
+    content: { ...data.content, [target]: { ...data.content[target] } },
+    speakers: data.speakers.map((s) => ({ ...s, translations: { ...s.translations, [target]: { ...s.translations[target] } } })),
+    scheduleItems: data.scheduleItems.map((s) => ({ ...s, translations: { ...s.translations, [target]: { ...s.translations[target] } } })),
+    gallery: data.gallery.map((g) => ({ ...g, translations: { ...g.translations, [target]: { ...g.translations[target] } } })),
+    documents: data.documents.map((d) => ({ ...d, translations: { ...d.translations, [target]: { ...d.translations[target] } } })),
+  };
+
+  for (const [key, value] of Object.entries(values)) {
+    if (!value) continue;
+    const parts = key.split('.');
+    if (parts[0] === 'content') {
+      const field = parts[1] as LocalizedField;
+      next.content[target] = { ...next.content[target], [field]: value };
+    } else if (parts[0] === 'speaker') {
+      const index = Number(parts[1]);
+      const field = parts[2] as keyof EventSpeakerTranslation;
+      if (next.speakers[index]) {
+        next.speakers[index] = {
+          ...next.speakers[index],
+          translations: { ...next.speakers[index].translations, [target]: { ...next.speakers[index].translations[target], [field]: value } },
+        };
+      }
+    } else if (parts[0] === 'schedule') {
+      const index = Number(parts[1]);
+      const field = parts[2] as keyof EventScheduleItemTranslation;
+      if (next.scheduleItems[index]) {
+        next.scheduleItems[index] = {
+          ...next.scheduleItems[index],
+          translations: { ...next.scheduleItems[index].translations, [target]: { ...next.scheduleItems[index].translations[target], [field]: value } },
+        };
+      }
+    } else if (parts[0] === 'gallery') {
+      const index = Number(parts[1]);
+      if (next.gallery[index]) {
+        next.gallery[index] = {
+          ...next.gallery[index],
+          translations: { ...next.gallery[index].translations, [target]: { ...next.gallery[index].translations[target], altText: value } },
+        };
+      }
+    } else if (parts[0] === 'document') {
+      const index = Number(parts[1]);
+      const field = parts[2] as keyof EventDocumentTranslation;
+      if (next.documents[index]) {
+        next.documents[index] = {
+          ...next.documents[index],
+          translations: { ...next.documents[index].translations, [target]: { ...next.documents[index].translations[target], [field]: value } },
+        };
+      }
+    }
+  }
+
+  return next;
+}
+
 function createInitialForm(event?: EditorEvent): EventFormPayload {
   return {
     slug: event?.slug ?? '',
@@ -276,6 +359,9 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [translating, setTranslating] = useState<Locale | null>(null);
+  const [translateError, setTranslateError] = useState('');
+  const [translateProvider, setTranslateProvider] = useState<string | null>(null);
 
   const formId = event?.id ? 'event-editor-form-edit' : 'event-editor-form-new';
   const saveLabel = event?.id ? 'Enregistrer les modifications' : 'Créer l’édition';
@@ -304,6 +390,39 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
         },
       },
     }));
+  }
+
+  async function translateEventFromLocale(source: Locale) {
+    const target = activeLocale;
+    if (source === target) return;
+    const fields = buildTranslatableFields(formData, source);
+    if (Object.keys(fields).length === 0) {
+      setTranslateError(`La langue source (${LOCALE_LABELS[source]}) est vide.`);
+      return;
+    }
+    setTranslateError('');
+    setTranslateProvider(null);
+    setTranslating(source);
+    try {
+      const res = await fetch('/api/admin/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source, target, fields }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j?.error || `HTTP ${res.status}`);
+      }
+      const j = (await res.json()) as { provider?: string; values?: Record<string, string> };
+      if (j.values) {
+        setFormData((prev) => applyTranslatedFields(prev, target, j.values!));
+      }
+      setTranslateProvider(j.provider ?? null);
+    } catch (err) {
+      setTranslateError(err instanceof Error ? err.message : 'Échec de la traduction');
+    } finally {
+      setTranslating(null);
+    }
   }
 
   function updateListItem<K extends 'scheduleItems' | 'speakers' | 'organizations' | 'gallery' | 'documents'>(
@@ -581,6 +700,37 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
                 </button>
               ))}
             </div>
+
+            {locales.filter((l) => l !== activeLocale && formData.content[l].title.trim()).length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 rounded-xl border border-accent/20 bg-accent/[0.05] px-3 py-2.5">
+                <svg className="h-4 w-4 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-white/70">
+                  Traduire tout l&apos;événement vers {LOCALE_LABELS[activeLocale]} depuis :
+                </span>
+                {locales.filter((l) => l !== activeLocale && formData.content[l].title.trim()).map((l) => {
+                  const isLoading = translating === l;
+                  return (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => translateEventFromLocale(l)}
+                      disabled={!!translating}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/15 px-2.5 py-1 text-[0.7rem] font-semibold text-accent transition hover:bg-accent/25 disabled:cursor-wait disabled:opacity-50"
+                      title={`Traduire automatiquement le contenu, les speakers, le programme, la galerie et les documents de ${LOCALE_LABELS[l]} vers ${LOCALE_LABELS[activeLocale]} (remplit uniquement les champs vides)`}
+                    >
+                      {isLoading ? (
+                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-accent/40 border-t-accent" />
+                      ) : null}
+                      {LOCALE_LABELS[l]}
+                    </button>
+                  );
+                })}
+                {translateProvider && <span className="ml-auto text-[0.65rem] text-white/40">✓ via {translateProvider}</span>}
+                {translateError && <span className="ml-auto text-[0.65rem] text-red-300">⚠ {translateError}</span>}
+              </div>
+            )}
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>

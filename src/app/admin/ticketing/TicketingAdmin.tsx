@@ -5,6 +5,40 @@ import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
+type AdminLocale = 'fr' | 'en' | 'de';
+const ADMIN_LOCALES: AdminLocale[] = ['fr', 'en', 'de'];
+const ADMIN_LOCALE_LABELS: Record<AdminLocale, string> = { fr: 'FR', en: 'EN', de: 'DE' };
+
+interface ConfigTranslationFields {
+  pageTitle: string;
+  pageSubtitle: string;
+  pageIntro: string;
+  eventDate: string;
+  eventLocation: string;
+  ctaButtonText: string;
+}
+
+interface PassTranslationFields {
+  name: string;
+  label: string;
+  targetAudience: string;
+  description: string;
+  highlights: string[];
+  includes: string[];
+  decisionPhrase: string;
+  availabilityNote: string;
+}
+
+function parseTranslations<T>(raw: string | undefined): Partial<Record<'en' | 'de', Partial<T>>> {
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 interface TicketingPass {
   id: string;
   name: string;
@@ -24,6 +58,7 @@ interface TicketingPass {
   colorSecondary: string;
   sortOrder: number;
   availabilityNote: string | null;
+  translations: string; // JSON: Partial<Record<'en'|'de', Partial<PassTranslationFields>>>
 }
 
 interface TicketingConfig {
@@ -39,6 +74,7 @@ interface TicketingConfig {
   weezeventUrl: string;
   videoUrl: string;
   parkingLocations: string;
+  translations: string; // JSON: Partial<Record<'en'|'de', Partial<ConfigTranslationFields>>>
   passes: TicketingPass[];
 }
 
@@ -50,6 +86,92 @@ const labelCls = 'block text-[11px] font-bold uppercase tracking-wider text-whit
 const sectionCls = 'rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6';
 const textareaCls =
   'w-full rounded-lg bg-white/[0.08] border border-white/10 text-white placeholder-white/25 px-3 py-2 text-sm focus:outline-none focus:border-accent/50 transition resize-none';
+
+// ── Locale tabs + auto-translate row (reused for global settings + pass form) ──
+
+function LocaleTranslateBar({
+  activeLocale,
+  onChangeLocale,
+  hasSourceContent,
+  translating,
+  translateError,
+  translateProvider,
+  onTranslate,
+}: {
+  activeLocale: AdminLocale;
+  onChangeLocale: (locale: AdminLocale) => void;
+  hasSourceContent: (locale: AdminLocale) => boolean;
+  translating: AdminLocale | null;
+  translateError: string;
+  translateProvider: string | null;
+  onTranslate: (source: AdminLocale) => void;
+}) {
+  const sources = ADMIN_LOCALES.filter((l) => l !== activeLocale && hasSourceContent(l));
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {ADMIN_LOCALES.map((locale) => (
+          <button
+            key={locale}
+            type="button"
+            onClick={() => onChangeLocale(locale)}
+            className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
+              activeLocale === locale
+                ? 'bg-accent text-[#1a0606] shadow-lg shadow-accent/20'
+                : 'border border-white/10 bg-white/[0.03] text-white/60 hover:border-accent/30 hover:text-white'
+            }`}
+          >
+            {ADMIN_LOCALE_LABELS[locale]}
+          </button>
+        ))}
+      </div>
+      {activeLocale !== 'fr' && sources.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-accent/20 bg-accent/[0.05] px-3 py-2.5">
+          <svg className="h-4 w-4 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+          </svg>
+          <span className="text-[0.7rem] font-semibold uppercase tracking-wider text-white/70">
+            Traduire vers {ADMIN_LOCALE_LABELS[activeLocale]} depuis :
+          </span>
+          {sources.map((l) => {
+            const isLoading = translating === l;
+            return (
+              <button
+                key={l}
+                type="button"
+                onClick={() => onTranslate(l)}
+                disabled={!!translating}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/15 px-2.5 py-1 text-[0.7rem] font-semibold text-accent transition hover:bg-accent/25 disabled:cursor-wait disabled:opacity-50"
+              >
+                {isLoading ? <span className="h-3 w-3 animate-spin rounded-full border-2 border-accent/40 border-t-accent" /> : null}
+                {ADMIN_LOCALE_LABELS[l]}
+              </button>
+            );
+          })}
+          {translateProvider && <span className="ml-auto text-[0.65rem] text-white/40">✓ via {translateProvider}</span>}
+          {translateError && <span className="ml-auto text-[0.65rem] text-red-300">⚠ {translateError}</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+async function callTranslateApi(source: AdminLocale, target: AdminLocale, fields: Record<string, string>) {
+  const cleaned = Object.fromEntries(Object.entries(fields).filter(([, v]) => v.trim() !== ''));
+  if (Object.keys(cleaned).length === 0) {
+    throw new Error(`La langue source (${ADMIN_LOCALE_LABELS[source]}) est vide.`);
+  }
+  const res = await fetch('/api/admin/translate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source, target, fields: cleaned }),
+  });
+  if (!res.ok) {
+    const j = await res.json().catch(() => ({}));
+    throw new Error(j?.error || `HTTP ${res.status}`);
+  }
+  return (await res.json()) as { provider?: string; values?: Record<string, string> };
+}
 
 // ── Default pass template ──────────────────────────────────────────────────────
 
@@ -125,13 +247,25 @@ function PassForm({
     includes: initial.includes ?? '[]',
   });
 
-  // Edit lists as plain text (one item per line)
-  const [highlightsText, setHighlightsText] = useState(
-    parseJsonList(form.highlights).join('\n')
+  const [activeLocale, setActiveLocale] = useState<AdminLocale>('fr');
+  const [translationsState, setTranslationsState] = useState<Partial<Record<'en' | 'de', Partial<PassTranslationFields>>>>(
+    () => parseTranslations<PassTranslationFields>(initial.translations)
   );
-  const [includesText, setIncludesText] = useState(
-    parseJsonList(form.includes).join('\n')
-  );
+  const [translating, setTranslating] = useState<AdminLocale | null>(null);
+  const [translateError, setTranslateError] = useState('');
+  const [translateProvider, setTranslateProvider] = useState<string | null>(null);
+
+  // Edit lists as plain text (one item per line), per locale
+  const [highlightsTextByLocale, setHighlightsTextByLocale] = useState<Record<AdminLocale, string>>({
+    fr: parseJsonList(form.highlights).join('\n'),
+    en: (translationsState.en?.highlights ?? []).join('\n'),
+    de: (translationsState.de?.highlights ?? []).join('\n'),
+  });
+  const [includesTextByLocale, setIncludesTextByLocale] = useState<Record<AdminLocale, string>>({
+    fr: parseJsonList(form.includes).join('\n'),
+    en: (translationsState.en?.includes ?? []).join('\n'),
+    de: (translationsState.de?.includes ?? []).join('\n'),
+  });
   const [priceEuros, setPriceEuros] = useState(centsToEuros(form.priceCents));
   const [oldPriceEuros, setOldPriceEuros] = useState(
     form.oldPriceCents != null ? centsToEuros(form.oldPriceCents) : ''
@@ -141,39 +275,144 @@ function PassForm({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  type SimpleField = 'name' | 'label' | 'targetAudience' | 'description' | 'decisionPhrase' | 'availabilityNote';
+
+  function getSimple(field: SimpleField): string {
+    if (activeLocale === 'fr') return (form[field] as string | null) ?? '';
+    return (translationsState[activeLocale]?.[field] as string | undefined) ?? '';
+  }
+
+  function setSimple(field: SimpleField, value: string) {
+    if (activeLocale === 'fr') {
+      set(field, value);
+      return;
+    }
+    const locale = activeLocale;
+    setTranslationsState((prev) => ({
+      ...prev,
+      [locale]: { ...prev[locale], [field]: value },
+    }));
+  }
+
+  const highlightsText = highlightsTextByLocale[activeLocale];
+  const includesText = includesTextByLocale[activeLocale];
+  function setHighlightsText(value: string) {
+    setHighlightsTextByLocale((prev) => ({ ...prev, [activeLocale]: value }));
+  }
+  function setIncludesText(value: string) {
+    setIncludesTextByLocale((prev) => ({ ...prev, [activeLocale]: value }));
+  }
+
+  async function translatePassFromLocale(source: AdminLocale) {
+    const target = activeLocale;
+    if (source === target || target === 'fr') return;
+    setTranslateError('');
+    setTranslateProvider(null);
+    setTranslating(source);
+    try {
+      const fields: Record<string, string> =
+        source === 'fr'
+          ? {
+              name: form.name,
+              label: form.label,
+              targetAudience: form.targetAudience,
+              description: form.description,
+              decisionPhrase: form.decisionPhrase,
+              availabilityNote: form.availabilityNote ?? '',
+              highlights: highlightsTextByLocale.fr,
+              includes: includesTextByLocale.fr,
+            }
+          : {
+              name: translationsState[source]?.name ?? '',
+              label: translationsState[source]?.label ?? '',
+              targetAudience: translationsState[source]?.targetAudience ?? '',
+              description: translationsState[source]?.description ?? '',
+              decisionPhrase: translationsState[source]?.decisionPhrase ?? '',
+              availabilityNote: translationsState[source]?.availabilityNote ?? '',
+              highlights: highlightsTextByLocale[source],
+              includes: includesTextByLocale[source],
+            };
+      const result = await callTranslateApi(source, target, fields);
+      const values = result.values ?? {};
+      setTranslationsState((prev) => ({
+        ...prev,
+        [target]: {
+          ...prev[target],
+          name: values.name ?? prev[target]?.name ?? '',
+          label: values.label ?? prev[target]?.label ?? '',
+          targetAudience: values.targetAudience ?? prev[target]?.targetAudience ?? '',
+          description: values.description ?? prev[target]?.description ?? '',
+          decisionPhrase: values.decisionPhrase ?? prev[target]?.decisionPhrase ?? '',
+          availabilityNote: values.availabilityNote ?? prev[target]?.availabilityNote ?? '',
+        },
+      }));
+      if (values.highlights) setHighlightsTextByLocale((prev) => ({ ...prev, [target]: values.highlights }));
+      if (values.includes) setIncludesTextByLocale((prev) => ({ ...prev, [target]: values.includes }));
+      setTranslateProvider(result.provider ?? null);
+    } catch (err) {
+      setTranslateError(err instanceof Error ? err.message : 'Échec de la traduction');
+    } finally {
+      setTranslating(null);
+    }
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const translations: Partial<Record<'en' | 'de', PassTranslationFields>> = {};
+    (['en', 'de'] as const).forEach((locale) => {
+      translations[locale] = {
+        name: translationsState[locale]?.name ?? '',
+        label: translationsState[locale]?.label ?? '',
+        targetAudience: translationsState[locale]?.targetAudience ?? '',
+        description: translationsState[locale]?.description ?? '',
+        decisionPhrase: translationsState[locale]?.decisionPhrase ?? '',
+        availabilityNote: translationsState[locale]?.availabilityNote ?? '',
+        highlights: highlightsTextByLocale[locale].split('\n').map((s) => s.trim()).filter(Boolean),
+        includes: includesTextByLocale[locale].split('\n').map((s) => s.trim()).filter(Boolean),
+      };
+    });
     onSave({
       ...form,
       priceCents: eurosToCents(priceEuros),
       oldPriceCents: oldPriceEuros ? eurosToCents(oldPriceEuros) : null,
-      highlights: listToJson(highlightsText.split('\n')),
-      includes: listToJson(includesText.split('\n')),
+      highlights: listToJson(highlightsTextByLocale.fr.split('\n')),
+      includes: listToJson(includesTextByLocale.fr.split('\n')),
       availabilityNote: form.availabilityNote || null,
+      translations: JSON.stringify(translations),
     });
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <LocaleTranslateBar
+        activeLocale={activeLocale}
+        onChangeLocale={setActiveLocale}
+        hasSourceContent={(locale) => (locale === 'fr' ? form.name.trim() !== '' : (translationsState[locale]?.name ?? '').trim() !== '')}
+        translating={translating}
+        translateError={translateError}
+        translateProvider={translateProvider}
+        onTranslate={translatePassFromLocale}
+      />
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelCls}>Nom du ticket *</label>
-          <input className={inputCls} value={form.name} onChange={(e) => set('name', e.target.value)} required placeholder="Career Launch Pass" />
+          <label className={labelCls}>Nom du ticket {activeLocale === 'fr' ? '*' : `(${ADMIN_LOCALE_LABELS[activeLocale]})`}</label>
+          <input className={inputCls} value={getSimple('name')} onChange={(e) => setSimple('name', e.target.value)} required={activeLocale === 'fr'} placeholder="Career Launch Pass" />
         </div>
         <div>
-          <label className={labelCls}>Label / Parcours *</label>
-          <input className={inputCls} value={form.label} onChange={(e) => set('label', e.target.value)} required placeholder="Carrière & Employabilité" />
+          <label className={labelCls}>Label / Parcours {activeLocale === 'fr' ? '*' : `(${ADMIN_LOCALE_LABELS[activeLocale]})`}</label>
+          <input className={inputCls} value={getSimple('label')} onChange={(e) => setSimple('label', e.target.value)} required={activeLocale === 'fr'} placeholder="Carrière & Employabilité" />
         </div>
       </div>
 
       <div>
         <label className={labelCls}>Cible / Pour qui</label>
-        <input className={inputCls} value={form.targetAudience} onChange={(e) => set('targetAudience', e.target.value)} placeholder="Pour les étudiants, Azubis et jeunes diplômés." />
+        <input className={inputCls} value={getSimple('targetAudience')} onChange={(e) => setSimple('targetAudience', e.target.value)} placeholder="Pour les étudiants, Azubis et jeunes diplômés." />
       </div>
 
       <div>
         <label className={labelCls}>Description courte</label>
-        <textarea className={textareaCls} rows={3} value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Courte description du parcours…" />
+        <textarea className={textareaCls} rows={3} value={getSimple('description')} onChange={(e) => setSimple('description', e.target.value)} placeholder="Courte description du parcours…" />
       </div>
 
       <div>
@@ -188,7 +427,7 @@ function PassForm({
 
       <div>
         <label className={labelCls}>Phrase de décision</label>
-        <textarea className={textareaCls} rows={2} value={form.decisionPhrase} onChange={(e) => set('decisionPhrase', e.target.value)} placeholder="Choisissez ce billet si…" />
+        <textarea className={textareaCls} rows={2} value={getSimple('decisionPhrase')} onChange={(e) => setSimple('decisionPhrase', e.target.value)} placeholder="Choisissez ce billet si…" />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -221,7 +460,7 @@ function PassForm({
         </div>
         <div>
           <label className={labelCls}>Note de disponibilité (optionnel)</label>
-          <input className={inputCls} value={form.availabilityNote ?? ''} onChange={(e) => set('availabilityNote', e.target.value)} placeholder="Places limitées !" />
+          <input className={inputCls} value={getSimple('availabilityNote')} onChange={(e) => setSimple('availabilityNote', e.target.value)} placeholder="Places limitées !" />
         </div>
       </div>
 
@@ -317,6 +556,7 @@ const DEFAULT_CONFIG: TicketingConfig = {
   weezeventUrl: 'https://www.weezevent.com/widget_billeterie.php?id_evenement=2098465&widget_key=E2098465&locale=de_DE&color_primary=red&code=red',
   videoUrl: '',
   parkingLocations: '[]',
+  translations: '{}',
   passes: [],
 };
 
@@ -326,9 +566,86 @@ export default function TicketingAdmin() {
   const [saving, setSaving] = useState(false);
   const [passSaving, setPassSaving] = useState(false);
 
+  const [activeConfigLocale, setActiveConfigLocale] = useState<AdminLocale>('fr');
+  const [configTranslating, setConfigTranslating] = useState<AdminLocale | null>(null);
+  const [configTranslateError, setConfigTranslateError] = useState('');
+  const [configTranslateProvider, setConfigTranslateProvider] = useState<string | null>(null);
+
   // Which pass is being edited (id) or 'new' or null
   const [editing, setEditing] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  const configTranslationsParsed = parseTranslations<ConfigTranslationFields>(config.translations);
+
+  function getConfigField(field: keyof ConfigTranslationFields): string {
+    if (activeConfigLocale === 'fr') return config[field];
+    return configTranslationsParsed[activeConfigLocale]?.[field] ?? '';
+  }
+
+  function setConfigField(field: keyof ConfigTranslationFields, value: string) {
+    if (activeConfigLocale === 'fr') {
+      setConfig((c) => ({ ...c, [field]: value }));
+      return;
+    }
+    const locale = activeConfigLocale;
+    setConfig((c) => {
+      const parsed = parseTranslations<ConfigTranslationFields>(c.translations);
+      const next = { ...parsed, [locale]: { ...parsed[locale], [field]: value } };
+      return { ...c, translations: JSON.stringify(next) };
+    });
+  }
+
+  async function translateConfigFromLocale(source: AdminLocale) {
+    const target = activeConfigLocale;
+    if (source === target || target === 'fr') return;
+    setConfigTranslateError('');
+    setConfigTranslateProvider(null);
+    setConfigTranslating(source);
+    try {
+      const parsed = parseTranslations<ConfigTranslationFields>(config.translations);
+      const fields: Record<string, string> =
+        source === 'fr'
+          ? {
+              pageTitle: config.pageTitle,
+              pageSubtitle: config.pageSubtitle,
+              pageIntro: config.pageIntro,
+              eventDate: config.eventDate,
+              eventLocation: config.eventLocation,
+              ctaButtonText: config.ctaButtonText,
+            }
+          : {
+              pageTitle: parsed[source]?.pageTitle ?? '',
+              pageSubtitle: parsed[source]?.pageSubtitle ?? '',
+              pageIntro: parsed[source]?.pageIntro ?? '',
+              eventDate: parsed[source]?.eventDate ?? '',
+              eventLocation: parsed[source]?.eventLocation ?? '',
+              ctaButtonText: parsed[source]?.ctaButtonText ?? '',
+            };
+      const result = await callTranslateApi(source, target, fields);
+      const values = result.values ?? {};
+      setConfig((c) => {
+        const p = parseTranslations<ConfigTranslationFields>(c.translations);
+        const next = {
+          ...p,
+          [target]: {
+            ...p[target],
+            pageTitle: values.pageTitle ?? p[target]?.pageTitle ?? '',
+            pageSubtitle: values.pageSubtitle ?? p[target]?.pageSubtitle ?? '',
+            pageIntro: values.pageIntro ?? p[target]?.pageIntro ?? '',
+            eventDate: values.eventDate ?? p[target]?.eventDate ?? '',
+            eventLocation: values.eventLocation ?? p[target]?.eventLocation ?? '',
+            ctaButtonText: values.ctaButtonText ?? p[target]?.ctaButtonText ?? '',
+          },
+        };
+        return { ...c, translations: JSON.stringify(next) };
+      });
+      setConfigTranslateProvider(result.provider ?? null);
+    } catch (err) {
+      setConfigTranslateError(err instanceof Error ? err.message : 'Échec de la traduction');
+    } finally {
+      setConfigTranslating(null);
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -455,44 +772,55 @@ export default function TicketingAdmin() {
       {/* ── Global settings ──────────────────────────────────────────────────── */}
       <div className={sectionCls}>
         <h2 className="mb-5 text-base font-semibold text-white">Paramètres globaux de la page</h2>
+        <div className="mb-5">
+          <LocaleTranslateBar
+            activeLocale={activeConfigLocale}
+            onChangeLocale={setActiveConfigLocale}
+            hasSourceContent={(locale) => (locale === 'fr' ? config.pageTitle.trim() !== '' : (configTranslationsParsed[locale]?.pageTitle ?? '').trim() !== '')}
+            translating={configTranslating}
+            translateError={configTranslateError}
+            translateProvider={configTranslateProvider}
+            onTranslate={translateConfigFromLocale}
+          />
+        </div>
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className={labelCls}>Titre principal</label>
-              <input className={inputCls} value={config.pageTitle} onChange={(e) => setConfig((c) => ({ ...c, pageTitle: e.target.value }))} />
+              <label className={labelCls}>Titre principal {activeConfigLocale !== 'fr' && `(${ADMIN_LOCALE_LABELS[activeConfigLocale]})`}</label>
+              <input className={inputCls} value={getConfigField('pageTitle')} onChange={(e) => setConfigField('pageTitle', e.target.value)} />
             </div>
             <div>
-              <label className={labelCls}>Sous-titre</label>
-              <input className={inputCls} value={config.pageSubtitle} onChange={(e) => setConfig((c) => ({ ...c, pageSubtitle: e.target.value }))} />
+              <label className={labelCls}>Sous-titre {activeConfigLocale !== 'fr' && `(${ADMIN_LOCALE_LABELS[activeConfigLocale]})`}</label>
+              <input className={inputCls} value={getConfigField('pageSubtitle')} onChange={(e) => setConfigField('pageSubtitle', e.target.value)} />
             </div>
           </div>
 
           <div>
-            <label className={labelCls}>Texte d'introduction</label>
+            <label className={labelCls}>Texte d'introduction {activeConfigLocale !== 'fr' && `(${ADMIN_LOCALE_LABELS[activeConfigLocale]})`}</label>
             <textarea
               className={textareaCls}
               rows={4}
-              value={config.pageIntro}
-              onChange={(e) => setConfig((c) => ({ ...c, pageIntro: e.target.value }))}
+              value={getConfigField('pageIntro')}
+              onChange={(e) => setConfigField('pageIntro', e.target.value)}
               placeholder="Que vous soyez étudiant, jeune professionnel…"
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className={labelCls}>Date de l'événement</label>
-              <input className={inputCls} value={config.eventDate} onChange={(e) => setConfig((c) => ({ ...c, eventDate: e.target.value }))} placeholder="17 octobre 2026" />
+              <label className={labelCls}>Date de l'événement {activeConfigLocale !== 'fr' && `(${ADMIN_LOCALE_LABELS[activeConfigLocale]})`}</label>
+              <input className={inputCls} value={getConfigField('eventDate')} onChange={(e) => setConfigField('eventDate', e.target.value)} placeholder="17 octobre 2026" />
             </div>
             <div>
-              <label className={labelCls}>Lieu</label>
-              <input className={inputCls} value={config.eventLocation} onChange={(e) => setConfig((c) => ({ ...c, eventLocation: e.target.value }))} placeholder="Francfort" />
+              <label className={labelCls}>Lieu {activeConfigLocale !== 'fr' && `(${ADMIN_LOCALE_LABELS[activeConfigLocale]})`}</label>
+              <input className={inputCls} value={getConfigField('eventLocation')} onChange={(e) => setConfigField('eventLocation', e.target.value)} placeholder="Francfort" />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className={labelCls}>Texte du bouton principal</label>
-              <input className={inputCls} value={config.ctaButtonText} onChange={(e) => setConfig((c) => ({ ...c, ctaButtonText: e.target.value }))} placeholder="Choisir mon billet" />
+              <label className={labelCls}>Texte du bouton principal {activeConfigLocale !== 'fr' && `(${ADMIN_LOCALE_LABELS[activeConfigLocale]})`}</label>
+              <input className={inputCls} value={getConfigField('ctaButtonText')} onChange={(e) => setConfigField('ctaButtonText', e.target.value)} placeholder="Choisir mon billet" />
             </div>
           </div>
 
