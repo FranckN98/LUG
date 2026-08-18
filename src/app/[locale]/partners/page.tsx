@@ -154,7 +154,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
                       alt={partner.name}
                       width={180}
                       height={90}
-                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : partner.name === 'African Power' ? 'scale-[1.4]' : ''}`}
+                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : partner.name === 'African Power' ? 'scale-[2]' : ''}`}
                       priority={i < 3}
                     />
                   </a>
@@ -167,7 +167,7 @@ export default async function PartnersPage({ params }: { params: Promise<{ local
                       alt={partner.name}
                       width={180}
                       height={90}
-                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : partner.name === 'African Power' ? 'scale-[1.4]' : ''}`}
+                      className={`max-h-24 w-auto object-contain ${partner.name === 'Regus' ? 'scale-[0.6]' : partner.name === 'African Power' ? 'scale-[2]' : ''}`}
                       priority={i < 3}
                     />
                   </div>
