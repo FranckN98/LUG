@@ -1130,12 +1130,17 @@ export function mapEventToEventData(event: EventWithRelations, locale: Locale): 
     audience: content.audience || undefined,
     programme: publicProgramme,
     programmeBlocks: programmeBlocks.length > 0 ? programmeBlocks : undefined,
-    speakers: form.speakers.map((item) => ({
-      name: item.name,
-      role: item.translations[locale].profession || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].profession)),
-      domain: item.translations[locale].description || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].description)),
-      image: event.eventSpeakers.find((link) => link.id === item.id)?.speaker.photoUrl || undefined,
-    })),
+    speakers: form.speakers.map((item) => {
+      const match = event.eventSpeakers.find((link) => link.id === item.id);
+      return {
+        name: item.name,
+        role: item.translations[locale].profession || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].profession)),
+        domain: item.translations[locale].description || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].description)),
+        image: match?.speaker.photoUrl || undefined,
+        photoPositionX: match?.speaker.photoPositionX ?? 50,
+        photoPositionY: match?.speaker.photoPositionY ?? 50,
+      };
+    }),
     venue: {
       name: content.venueName,
       address: content.venueAddress,

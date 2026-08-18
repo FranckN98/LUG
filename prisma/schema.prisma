@@ -651,6 +651,8 @@ model Speaker {
   lastName      String?               @map("last_name")
   displayName   String                @map("display_name")
   photoUrl      String?               @map("photo_url")
+  photoPositionX Int                  @default(50) @map("photo_position_x")
+  photoPositionY Int                  @default(50) @map("photo_position_y")
   linkedInUrl   String?               @map("linkedin_url")
   instagramUrl  String?               @map("instagram_url")
   websiteUrl    String?               @map("website_url")

@@ -46,6 +46,8 @@ export type TicketingSpeaker = {
   name: string;
   role: string;
   image?: string;
+  photoPositionX?: number;
+  photoPositionY?: number;
 };
 
 type ParkingLocation = {
@@ -631,7 +633,13 @@ export function NewTicketingPage({ config }: { config: TicketingConfig }) {
                     <div className="aspect-square bg-[#f4ece6] sm:aspect-[4/3]">
                       {speaker.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={speaker.image} alt={speaker.name} className="h-full w-full object-cover" loading="lazy" />
+                        <img 
+                          src={speaker.image} 
+                          alt={speaker.name} 
+                          className="h-full w-full object-cover" 
+                          style={{ objectPosition: `${speaker.photoPositionX ?? 50}% ${speaker.photoPositionY ?? 50}%` }}
+                          loading="lazy" 
+                        />
                       ) : (
                         <div className="flex h-full items-center justify-center bg-[#8C1A1A] font-display text-5xl font-bold text-white/80">
                           {speaker.name.slice(0, 1).toUpperCase()}

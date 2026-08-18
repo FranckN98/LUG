@@ -15,6 +15,8 @@ export type Speaker = {
   role: string;
   domain: string;
   image?: string;
+  photoPositionX?: number;
+  photoPositionY?: number;
 };
 
 export type ProgrammeItem = {
