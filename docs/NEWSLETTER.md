@@ -17,9 +17,11 @@ Voir `.env.example` :
 
 - `DATABASE_URL` — SQLite local (`file:./dev.db`) ou **PostgreSQL** en production (Neon, Supabase, etc.).
 - `RESEND_API_KEY` — obligatoire en production pour l’envoi des e-mails.
-- `NEWSLETTER_FROM_EMAIL` — expéditeur autorisé dans Resend (ex. `Level Up in Germany <info@levelupingermany.de>`).
-- `NEXT_PUBLIC_SITE_URL` — URL publique du site pour les liens dans l’e-mail (ex. `https://www.levelupingermany.de`).
+- `NEWSLETTER_FROM_EMAIL` — expéditeur autorisé dans Resend (ex. `Level Up in Germany <info@levelupingermany.com>`). **Le domaine doit être `.com`** : c'est le seul domaine avec SPF/DKIM configurés (voir l'audit deliverabilité). N'utilisez jamais `.de`.
+- `NEXT_PUBLIC_SITE_URL` — URL publique du site pour les liens dans l'e-mail (ex. `https://www.levelupingermany.com`).
 - Turnstile : `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` (recommandé en production).
+- `RESEND_WEBHOOK_SECRET` — signing secret du webhook Resend (`/api/webhooks/resend`) qui gère les bounces/plaintes/ouvertures/clics des campagnes.
+- `EMAIL_BATCH_SIZE` / `EMAIL_BATCH_DELAY_MS` / `EMAIL_MAX_RETRIES` — throttling de l'envoi de campagne (voir `src/lib/emailSendQueue.ts`).
 
 ## Base de données
 

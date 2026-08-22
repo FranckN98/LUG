@@ -492,6 +492,26 @@ export interface SendCampaignParams {
    * render but with a remote-loaded logo (which some clients block).
    */
   inlineLogo?: { filename: string; content: string; content_id: string; content_type: string };
+  /**
+   * Optional campaign id, forwarded to Resend as a `campaign_id` tag so the
+   * `/api/webhooks/resend` handler can attribute delivery/bounce/open/click
+   * events back to this campaign for observability.
+   */
+  campaignId?: string;
+}
+
+/**
+ * Build the RFC 8058 one-click unsubscribe headers. `List-Unsubscribe` must be
+ * a single absolute HTTPS URL wrapped in angle brackets; `List-Unsubscribe-Post`
+ * tells compliant mail clients (Gmail, Yahoo, Outlook) they may POST
+ * `List-Unsubscribe=One-Click` to that URL without any user interaction.
+ * See `POST /api/unsubscribe` for the corresponding handler.
+ */
+function buildListUnsubscribeHeaders(unsubscribeUrl: string): Record<string, string> {
+  return {
+    'List-Unsubscribe': `<${unsubscribeUrl}>`,
+    'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+  };
 }
 
 /**
@@ -607,6 +627,8 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
       html,
       text,
       attachments: await buildResendAttachments(params.attachments, params.inlineLogo),
+      headers: buildListUnsubscribeHeaders(unsubscribeUrl),
+      ...(params.campaignId ? { tags: [{ name: 'campaign_id', value: params.campaignId }] } : {}),
     }),
   });
 
@@ -641,6 +663,12 @@ export interface SendMultilingualCampaignParams {
   whatsappUrl?: string;
   attachments?: ReadonlyArray<{ filename: string; content: string }>;
   inlineLogo?: { filename: string; content: string; content_id: string; content_type: string };
+  /**
+   * Optional campaign id, forwarded to Resend as a `campaign_id` tag so the
+   * `/api/webhooks/resend` handler can attribute delivery/bounce/open/click
+   * events back to this campaign for observability.
+   */
+  campaignId?: string;
 }
 
 /**
@@ -692,6 +720,8 @@ export async function sendMultilingualCampaignEmail(
       html,
       text,
       attachments: await buildResendAttachments(params.attachments, params.inlineLogo),
+      headers: buildListUnsubscribeHeaders(unsubscribeUrl),
+      ...(params.campaignId ? { tags: [{ name: 'campaign_id', value: params.campaignId }] } : {}),
     }),
   });
 

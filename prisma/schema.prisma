@@ -11,6 +11,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// `status` values: active | unsubscribed | hard_bounced | soft_bounced | complained | invalid
+// Subscribers with any status other than "active" are excluded from campaign sends
+// (see the `where: { status: 'active' }` query in the campaign send route).
 model NewsletterSubscriber {
   id                      String                   @id @default(uuid())
   email                   String                   @unique
@@ -26,6 +29,15 @@ model NewsletterSubscriber {
   status                  String                   @default("active")
   locale                  String?                  @default("fr")
   unsubscribeToken        String?                  @unique @map("unsubscribe_token")
+  // Bounce / complaint tracking (populated by the Resend webhook, /api/webhooks/resend)
+  bounceCount             Int                      @default(0) @map("bounce_count")
+  lastBounceAt            DateTime?                @map("last_bounce_at")
+  lastBounceType          String?                  @map("last_bounce_type")
+  complainedAt            DateTime?                @map("complained_at")
+  // Engagement tracking (best-effort, populated by the Resend webhook)
+  lastSentAt              DateTime?                @map("last_sent_at")
+  lastOpenAt              DateTime?                @map("last_open_at")
+  lastClickAt             DateTime?                @map("last_click_at")
   eventCommunicationLeads EventCommunicationLead[]
 
   @@map("newsletter_subscribers")
@@ -77,6 +89,15 @@ model NewsletterCampaign {
   status           String                          @default("draft")
   sentAt           DateTime?                       @map("sent_at")
   sentCount        Int                             @default(0) @map("sent_count")
+  // Per-campaign observability counters, updated by the Resend webhook
+  // (/api/webhooks/resend) using the `campaign_id` tag set on each send.
+  failedCount      Int                             @default(0) @map("failed_count")
+  deliveredCount   Int                             @default(0) @map("delivered_count")
+  hardBounceCount  Int                             @default(0) @map("hard_bounce_count")
+  softBounceCount  Int                             @default(0) @map("soft_bounce_count")
+  complaintCount   Int                             @default(0) @map("complaint_count")
+  openCount        Int                             @default(0) @map("open_count")
+  clickCount       Int                             @default(0) @map("click_count")
   createdAt        DateTime                        @default(now()) @map("created_at")
   updatedAt        DateTime                        @updatedAt @map("updated_at")
   translations     NewsletterCampaignTranslation[]
@@ -117,6 +138,18 @@ model NewsletterCampaignTranslation {
   @@unique([campaignId, locale])
   @@index([locale])
   @@map("newsletter_campaign_translations")
+}
+
+// Idempotency log for /api/webhooks/resend — Resend guarantees "at-least-once"
+// delivery, so the same event can arrive more than once. We record each
+// processed `svix-id` and skip duplicates.
+model NewsletterWebhookEvent {
+  id          String   @id @default(uuid())
+  svixId      String   @unique @map("svix_id")
+  type        String
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@map("newsletter_webhook_events")
 }
 
 model ContactMessage {

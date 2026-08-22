@@ -51,6 +51,14 @@ interface Campaign {
   status: string;
   sentAt: string | null;
   sentCount: number;
+  // Observability counters, populated asynchronously by the Resend webhook
+  // (/api/webhooks/resend) — may lag a few seconds/minutes behind the send.
+  deliveredCount?: number;
+  hardBounceCount?: number;
+  softBounceCount?: number;
+  complaintCount?: number;
+  openCount?: number;
+  clickCount?: number;
   createdAt: string;
   translations?: CampaignTranslation[];
   attachments?: CampaignAttachment[];
@@ -1747,6 +1755,22 @@ export default function NewsletterAdmin() {
                             <span className="text-blue-400/70">
                               Envoyée à {c.sentCount} abonn{c.sentCount !== 1 ? 'és' : 'é'}
                               {c.sentAt && ` · ${fmtDate(c.sentAt)}`}
+                            </span>
+                          )}
+                          {c.status === 'sent' && (
+                            <span className="flex items-center gap-2 text-white/25">
+                              {typeof c.deliveredCount === 'number' && <span title="Délivrés">📬 {c.deliveredCount}</span>}
+                              {typeof c.openCount === 'number' && c.openCount > 0 && <span title="Ouvertures">👁 {c.openCount}</span>}
+                              {typeof c.clickCount === 'number' && c.clickCount > 0 && <span title="Clics">🔗 {c.clickCount}</span>}
+                              {typeof c.hardBounceCount === 'number' && c.hardBounceCount > 0 && (
+                                <span className="text-red-400/70" title="Bounces définitifs">⛔ {c.hardBounceCount}</span>
+                              )}
+                              {typeof c.softBounceCount === 'number' && c.softBounceCount > 0 && (
+                                <span className="text-amber-400/70" title="Bounces temporaires">⚠️ {c.softBounceCount}</span>
+                              )}
+                              {typeof c.complaintCount === 'number' && c.complaintCount > 0 && (
+                                <span className="text-red-400/70" title="Plaintes (marqué comme spam)">🚩 {c.complaintCount}</span>
+                              )}
                             </span>
                           )}
                         </div>

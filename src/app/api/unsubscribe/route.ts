@@ -1,6 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+/**
+ * RFC 8058 "one-click" unsubscribe. Gmail/Yahoo/Outlook honor the
+ * `List-Unsubscribe-Post: List-Unsubscribe=One-Click` header (see
+ * `buildListUnsubscribeHeaders` in `src/lib/sendCampaignEmail.ts`) by POSTing
+ * to the exact URL from the `List-Unsubscribe` header — no user interaction,
+ * no confirmation page. Must respond quickly with 2xx and must NOT require
+ * any additional step, per spec.
+ */
+export async function POST(req: NextRequest) {
+  const token = new URL(req.url).searchParams.get('token');
+  if (!token || token === 'preview-only') {
+    return new NextResponse(null, { status: 400 });
+  }
+
+  const subscriber = await prisma.newsletterSubscriber.findFirst({
+    where: { unsubscribeToken: token },
+  });
+  if (subscriber && subscriber.status !== 'unsubscribed') {
+    await prisma.newsletterSubscriber.update({
+      where: { id: subscriber.id },
+      data: { status: 'unsubscribed' },
+    });
+  }
+
+  // 200 with no body — one-click unsubscribe must not render a confirmation page.
+  return new NextResponse(null, { status: 200 });
+}
+
 export async function GET(req: NextRequest) {
   const token = new URL(req.url).searchParams.get('token');
 

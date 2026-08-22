@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { sendMultilingualCampaignEmail, type MultilingualSection } from '@/lib/sendCampaignEmail';
+import { sendInBatches } from '@/lib/emailSendQueue';
 import { getLinktreeWhatsAppUrl } from '@/lib/linktreeWhatsApp';
 import { parseNameFromEmail } from '@/lib/emailName';
 import { CAMPAIGN_LOCALES, type CampaignLocale, pickCampaignTranslation } from '@/lib/newsletterCampaignI18n';
@@ -154,6 +155,7 @@ export async function POST(
         attachments: resolvedAttachments,
         inlineLogo,
         whatsappUrl,
+        campaignId: campaign.id,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -173,6 +175,11 @@ export async function POST(
   }
 
   // ── Real send ──
+  // Batched + throttled (see src/lib/emailSendQueue.ts): sends
+  // EMAIL_BATCH_SIZE emails concurrently, pauses EMAIL_BATCH_DELAY_MS between
+  // batches, and retries transient errors (Resend 429/5xx) up to
+  // EMAIL_MAX_RETRIES times with exponential backoff. Permanent errors
+  // (invalid recipient, 4xx other than 429) are not retried.
   const subscribers = await prisma.newsletterSubscriber.findMany({
     where: { status: 'active' },
     select: { id: true, email: true, unsubscribeToken: true, firstName: true, name: true, locale: true },
@@ -180,9 +187,12 @@ export async function POST(
 
   let sentCount = 0;
   const errors: string[] = [];
+  const sentAt = new Date();
+  const sentSubscriberIds: string[] = [];
 
-  for (const sub of subscribers) {
-    try {
+  await sendInBatches(
+    subscribers,
+    async (sub) => {
       const subLocale = sub.locale ?? 'fr';
       // Backfill an unsubscribe token for legacy rows that don't have one
       // so the secure (token-only) /api/unsubscribe flow still works.
@@ -203,16 +213,30 @@ export async function POST(
         attachments: resolvedAttachments,
         inlineLogo,
         whatsappUrl,
+        campaignId: campaign.id,
       });
-      sentCount++;
-    } catch (err) {
-      errors.push(`${sub.email}: ${String(err)}`);
-    }
+    },
+    (sub, error) => {
+      if (error) {
+        errors.push(`${sub.email}: ${String(error)}`);
+      } else {
+        sentCount++;
+        sentSubscriberIds.push(sub.id);
+      }
+    },
+  );
+
+  // Best-effort: record last-sent timestamp for engagement tracking. Not
+  // critical to the send itself, so failures here don't affect the response.
+  if (sentSubscriberIds.length > 0) {
+    await prisma.newsletterSubscriber
+      .updateMany({ where: { id: { in: sentSubscriberIds } }, data: { lastSentAt: sentAt } })
+      .catch((err) => console.error('[newsletter] Failed to update lastSentAt', err));
   }
 
   await prisma.newsletterCampaign.update({
     where: { id: params.id },
-    data: { status: 'sent', sentAt: new Date(), sentCount },
+    data: { status: 'sent', sentAt, sentCount },
   });
 
   return NextResponse.json({
