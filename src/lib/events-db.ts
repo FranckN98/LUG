@@ -151,6 +151,7 @@ export type EventFormPayload = {
       photoUrl: string;
       photoPositionX?: number;
       photoPositionY?: number;
+      isVisible: boolean;
       translations: LocaleRecord<EventSpeakerTranslation>;
     }
   >;
@@ -488,6 +489,7 @@ export function normalizeEventPayload(input: unknown): EventFormPayload {
       photoUrl: text(item.photoUrl),
       photoPositionX: integer(item.photoPositionX, 50),
       photoPositionY: integer(item.photoPositionY, 50),
+      isVisible: bool(item.isVisible, true),
       translations: normalizeSpeakerTranslations(item.translations, item),
     })).filter((item) => item.name),
     organizations: normalizeRelationArray(record.organizations, (item, index) => ({
@@ -787,6 +789,7 @@ async function syncSpeakers(tx: Prisma.TransactionClient, eventId: string, paylo
         eventId,
         speakerId: createdSpeaker.id,
         sortOrder: speaker.sortOrder,
+        isVisible: speaker.isVisible ?? true,
       },
     });
   }
@@ -1043,6 +1046,7 @@ export function serializeEventForForm(event: EventWithRelations): EventFormPaylo
       photoUrl: link.speaker.photoUrl || '',
       photoPositionX: link.speaker.photoPositionX ?? 50,
       photoPositionY: link.speaker.photoPositionY ?? 50,
+      isVisible: link.isVisible,
       translations: createLocaleRecord((locale) => localizedSpeaker(link, locale)),
     })),
     organizations: event.eventOrganizations.map((link) => ({
@@ -1132,17 +1136,19 @@ export function mapEventToEventData(event: EventWithRelations, locale: Locale): 
     audience: content.audience || undefined,
     programme: publicProgramme,
     programmeBlocks: programmeBlocks.length > 0 ? programmeBlocks : undefined,
-    speakers: form.speakers.map((item) => {
-      const match = event.eventSpeakers.find((link) => link.id === item.id);
-      return {
-        name: item.name,
-        role: item.translations[locale].profession || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].profession)),
-        domain: item.translations[locale].description || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].description)),
-        image: match?.speaker.photoUrl || undefined,
-        photoPositionX: match?.speaker.photoPositionX ?? 50,
-        photoPositionY: match?.speaker.photoPositionY ?? 50,
-      };
-    }),
+    speakers: form.speakers
+      .filter((item) => item.isVisible !== false)
+      .map((item) => {
+        const match = event.eventSpeakers.find((link) => link.id === item.id);
+        return {
+          name: item.name,
+          role: item.translations[locale].profession || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].profession)),
+          domain: item.translations[locale].description || firstNonEmpty(LOCALE_LIST.map((key) => item.translations[key].description)),
+          image: match?.speaker.photoUrl || undefined,
+          photoPositionX: match?.speaker.photoPositionX ?? 50,
+          photoPositionY: match?.speaker.photoPositionY ?? 50,
+        };
+      }),
     venue: {
       name: content.venueName,
       address: content.venueAddress,

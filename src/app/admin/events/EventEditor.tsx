@@ -94,6 +94,7 @@ function createEmptySpeaker(sortOrder: number): SpeakerItem {
     photoUrl: '',
     photoPositionX: 50,
     photoPositionY: 50,
+    isVisible: true,
     translations: createLocaleRecord(emptySpeakerTranslation),
   };
 }
@@ -885,6 +886,12 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
                   <div>
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/50">Ordre</label>
                     <input type="number" className={inputCls} value={item.sortOrder} onChange={(e) => updateListItem('speakers', index, { sortOrder: Number(e.target.value) })} />
+                  </div>
+                  <div className="md:col-span-4">
+                    <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white/80 cursor-pointer">
+                      <input type="checkbox" checked={item.isVisible ?? true} onChange={(e) => updateListItem('speakers', index, { isVisible: e.target.checked })} />
+                      <span>Afficher cet intervenant sur la page publique</span>
+                    </label>
                   </div>
                   <div className="md:col-span-4">
                     <div className="grid gap-4 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
