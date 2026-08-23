@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractCampaignId } from './route';
+import { extractCampaignId } from '@/lib/resendWebhookHelpers';
 
 describe('extractCampaignId', () => {
   it('reads campaign_id from an array-shaped tags payload', () => {

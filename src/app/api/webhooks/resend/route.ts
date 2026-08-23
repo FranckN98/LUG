@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
+import { extractCampaignId, type ResendWebhookEvent } from '@/lib/resendWebhookHelpers';
 
 /**
  * Resend webhook receiver.
@@ -17,26 +18,6 @@ import { prisma } from '@/lib/prisma';
  * things for sender reputation (repeatedly emailing dead/complaining
  * addresses). See the newsletter deliverability audit report.
  */
-
-type ResendWebhookEvent = {
-  type: string;
-  created_at?: string;
-  data?: {
-    email_id?: string;
-    to?: string[];
-    tags?: Record<string, string> | Array<{ name: string; value: string }>;
-    bounce?: { type?: string; subType?: string; message?: string };
-  };
-};
-
-export function extractCampaignId(data: ResendWebhookEvent['data']): string | undefined {
-  const tags = data?.tags;
-  if (!tags) return undefined;
-  if (Array.isArray(tags)) {
-    return tags.find((t) => t.name === 'campaign_id')?.value;
-  }
-  return tags.campaign_id;
-}
 
 async function bumpCampaignCounter(campaignId: string | undefined, field: string) {
   if (!campaignId) return;
