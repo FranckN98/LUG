@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { MediaPicker } from '@/app/admin/components/MediaPicker';
+import { ImageLightbox } from '@/components/ImageLightbox';
 import type { Locale } from '@/i18n/config';
 import { locales } from '@/i18n/config';
 import type {
@@ -363,6 +364,7 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
   const [translating, setTranslating] = useState<Locale | null>(null);
   const [translateError, setTranslateError] = useState('');
   const [translateProvider, setTranslateProvider] = useState<string | null>(null);
+  const [zoomedSpeakerPhoto, setZoomedSpeakerPhoto] = useState<string | null>(null);
 
   const formId = event?.id ? 'event-editor-form-edit' : 'event-editor-form-new';
   const saveLabel = event?.id ? 'Enregistrer les modifications' : 'Créer l’édition';
@@ -912,12 +914,19 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
                         </div>
                         <div className="relative h-28 overflow-hidden rounded-xl border border-white/10 bg-[#1a0d0d]">
                           {item.photoUrl ? (
-                            <img
-                              src={item.photoUrl}
-                              alt={item.name || 'Photo speaker'}
-                              className="h-full w-full object-cover"
-                              style={{ objectPosition: `${item.photoPositionX ?? 50}% ${item.photoPositionY ?? 50}%` }}
-                            />
+                            <button
+                              type="button"
+                              onClick={() => setZoomedSpeakerPhoto(item.photoUrl!)}
+                              className="group block h-full w-full cursor-zoom-in"
+                              aria-label="Agrandir la photo"
+                            >
+                              <img
+                                src={item.photoUrl}
+                                alt={item.name || 'Photo speaker'}
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                style={{ objectPosition: `${item.photoPositionX ?? 50}% ${item.photoPositionY ?? 50}%` }}
+                              />
+                            </button>
                           ) : (
                             <div className="flex h-full items-center justify-center bg-[#8C1A1A] font-display text-4xl font-bold text-white/80">{(item.name || 'S').slice(0, 1).toUpperCase()}</div>
                           )}
@@ -1078,6 +1087,7 @@ export default function AdminEventEditor({ event }: { event?: EditorEvent }) {
           {saving ? 'Sauvegarde…' : 'Enregistrer'}
         </button>
       </div>
+      <ImageLightbox src={zoomedSpeakerPhoto} onClose={() => setZoomedSpeakerPhoto(null)} />
     </div>
   );
 }
