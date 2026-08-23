@@ -507,7 +507,7 @@ export interface SendCampaignParams {
  * `List-Unsubscribe=One-Click` to that URL without any user interaction.
  * See `POST /api/unsubscribe` for the corresponding handler.
  */
-function buildListUnsubscribeHeaders(unsubscribeUrl: string): Record<string, string> {
+export function buildListUnsubscribeHeaders(unsubscribeUrl: string): Record<string, string> {
   return {
     'List-Unsubscribe': `<${unsubscribeUrl}>`,
     'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',

@@ -29,7 +29,7 @@ type ResendWebhookEvent = {
   };
 };
 
-function extractCampaignId(data: ResendWebhookEvent['data']): string | undefined {
+export function extractCampaignId(data: ResendWebhookEvent['data']): string | undefined {
   const tags = data?.tags;
   if (!tags) return undefined;
   if (Array.isArray(tags)) {
