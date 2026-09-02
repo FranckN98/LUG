@@ -90,6 +90,14 @@ const PAGE_TEXT: Record<Locale, {
   soldOutOverlay: string;
   comingSoonFooter: string;
   soldOutFooter: string;
+  dbEyebrow: string;
+  dbTitle: string;
+  dbIntro: string;
+  dbBenefits: string[];
+  dbOutro: string;
+  dbCta: string;
+  dbCtaNote: string;
+  dbFaqLink: string;
 }> = {
   fr: {
     heroAlt: 'Level Up in Germany — La billetterie est ouverte',
@@ -125,6 +133,18 @@ const PAGE_TEXT: Record<Locale, {
     soldOutOverlay: 'Sold Out',
     comingSoonFooter: '⏳ Bientôt disponible',
     soldOutFooter: 'Sold out',
+    dbEyebrow: 'Offre de voyage Deutsche Bahn',
+    dbTitle: 'Un bon plan pour votre voyage à Level Up',
+    dbIntro: 'Les participants à Level Up in Germany 2026 bénéficient d’offres DB Event exclusives pour leurs voyages en train longue distance partout en Allemagne avec les ICE, IC et EC.',
+    dbBenefits: [
+      'Jusqu’à 10 % d’avantage tarifaire par rapport aux tarifs réduits et flexibles habituels',
+      'Réduction supplémentaire avec une BahnCard 25 ou 50',
+      'Un voyage confortable et plus respectueux du climat avec les trains grandes lignes de Deutsche Bahn',
+    ],
+    dbOutro: 'Consultez les offres disponibles pour votre trajet et réservez dès maintenant votre billet DB Event.',
+    dbCta: 'Réserver mon billet DB Event',
+    dbCtaNote: 'Réservation sur la plateforme officielle de Deutsche Bahn.',
+    dbFaqLink: 'Des questions sur l’offre DB ? Consulter la FAQ',
   },
   en: {
     heroAlt: 'Level Up in Germany — Ticket sales are open',
@@ -160,6 +180,18 @@ const PAGE_TEXT: Record<Locale, {
     soldOutOverlay: 'Sold Out',
     comingSoonFooter: '⏳ Coming soon',
     soldOutFooter: 'Sold out',
+    dbEyebrow: 'Deutsche Bahn travel offer',
+    dbTitle: 'A great deal for your trip to Level Up',
+    dbIntro: 'Attendees of Level Up in Germany 2026 benefit from exclusive DB Event offers for long-distance train travel across Germany with ICE, IC and EC trains.',
+    dbBenefits: [
+      'Up to 10% price advantage over standard saver and flexible fares',
+      'Extra discount with a BahnCard 25 or 50',
+      "A comfortable and more climate-friendly journey with Deutsche Bahn's long-distance trains",
+    ],
+    dbOutro: 'Check the available offers for your route and book your DB Event ticket now.',
+    dbCta: 'Book my DB Event ticket',
+    dbCtaNote: 'Booking on the official Deutsche Bahn platform.',
+    dbFaqLink: 'Questions about the DB offer? See the FAQ',
   },
   de: {
     heroAlt: 'Level Up in Germany — Der Ticketverkauf ist eröffnet',
@@ -195,8 +227,32 @@ const PAGE_TEXT: Record<Locale, {
     soldOutOverlay: 'Ausverkauft',
     comingSoonFooter: '⏳ Bald verfügbar',
     soldOutFooter: 'Ausverkauft',
+    dbEyebrow: 'Deutsche Bahn Reiseangebot',
+    dbTitle: 'Ein Reisevorteil für deine Fahrt zu Level Up',
+    dbIntro: 'Teilnehmende von Level Up in Germany 2026 profitieren von exklusiven DB Event-Angeboten für ihre Bahnreise mit ICE, IC und EC in ganz Deutschland.',
+    dbBenefits: [
+      'Bis zu 10 % Preisvorteil gegenüber den üblichen Sparpreisen und Flexpreisen',
+      'Zusätzlicher Rabatt mit BahnCard 25 oder 50',
+      'Eine komfortable und klimafreundlichere Anreise mit den Fernzügen der Deutschen Bahn',
+    ],
+    dbOutro: 'Entdecke die verfügbaren Angebote für deine Strecke und buche jetzt dein DB Event-Ticket.',
+    dbCta: 'Mein DB Event-Ticket buchen',
+    dbCtaNote: 'Buchung auf der offiziellen Plattform der Deutschen Bahn.',
+    dbFaqLink: 'Fragen zum DB-Angebot? Zur FAQ',
   },
 };
+
+// ── DB Event (Deutsche Bahn) travel offer ───────────────────────────────────────
+
+/** ID officiel de l'événement DB (confirmé) — ne pas confondre avec d'anciens IDs de test. */
+const DB_EVENT_ID = '58072';
+const DB_EVENT_FAQ_URL = 'https://www.bahn.de/bahnbusiness/faq/gk/angebot/eventangebote/reisende';
+
+/** FR n'a pas encore de guichet DB officiel confirmé : on retombe sur la version DE tant que ce n'est pas confirmé. */
+function dbBookingUrl(locale: Locale): string {
+  const dbLanguage = locale === 'en' ? 'en' : 'de';
+  return `https://www.eventanreise-bahn.de/?event=${DB_EVENT_ID}&language=${dbLanguage}`;
+}
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -247,7 +303,32 @@ function youtubeId(url: string): string | null {
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
+function IconCheck() {
+  return (
+    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
 // ── Sub-components ─────────────────────────────────────────────────────────────
+
+/** Emplacement réservé au logo officiel Deutsche Bahn (fichier à fournir, ex. /partners/deutsche-bahn-logo.svg). */
+function DbLogo({ className }: { className?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return <span className={`font-display font-bold tracking-tight text-[#282d37] ${className ?? ''}`}>Deutsche Bahn</span>;
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/partners/deutsche-bahn-logo.svg"
+      alt="Deutsche Bahn"
+      className={`object-contain ${className ?? ''}`}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 function PassCard({
   pass,
@@ -812,6 +893,60 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
             </div>
           </section>
         )}
+
+        {/* ── DB Event (Deutsche Bahn) — offre de voyage exclusive ────────────── */}
+        <section className="relative z-10 px-5 py-10 sm:px-8 sm:py-14">
+          <div className="mx-auto max-w-6xl">
+            <div className="overflow-hidden rounded-2xl border border-black/[0.06] border-t-4 border-t-[#EC0016] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.3)]">
+              <div className="flex flex-col gap-8 p-6 sm:p-8 lg:flex-row lg:items-center lg:gap-10 lg:p-10">
+                {/* Texte */}
+                <div className="flex-1">
+                  <div className="mb-3 flex items-center gap-3">
+                    <DbLogo className="h-6 w-auto lg:hidden" />
+                    <span className="inline-flex items-center rounded-full bg-[#EC0016]/10 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#EC0016]">
+                      {t.dbEyebrow}
+                    </span>
+                  </div>
+                  <h2 className="font-display text-2xl font-bold text-neutral-900 sm:text-3xl">{t.dbTitle}</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-neutral-600 sm:text-base">{t.dbIntro}</p>
+                  <ul className="mt-5 space-y-3">
+                    {t.dbBenefits.map((benefit, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EC0016]/10 text-[#EC0016]">
+                          <IconCheck />
+                        </span>
+                        <span className="text-sm leading-relaxed text-neutral-700 sm:text-[0.95rem]">{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-5 text-sm leading-relaxed text-neutral-600">{t.dbOutro}</p>
+                </div>
+
+                {/* Logo + CTA */}
+                <div className="flex w-full flex-col items-stretch gap-3 border-t border-black/[0.06] pt-6 lg:w-auto lg:min-w-[280px] lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0 lg:text-center">
+                  <DbLogo className="mx-auto hidden h-9 w-auto lg:block" />
+                  <a
+                    href={dbBookingUrl(locale)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-[#EC0016] px-6 text-center text-sm font-semibold text-white shadow-[0_10px_25px_-10px_rgba(236,0,22,0.6)] transition hover:bg-[#c40012] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EC0016] focus-visible:ring-offset-2 sm:text-base"
+                  >
+                    {t.dbCta}
+                  </a>
+                  <p className="text-xs text-neutral-500">{t.dbCtaNote}</p>
+                  <a
+                    href={DB_EVENT_FAQ_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-medium text-[#EC0016] underline-offset-2 hover:underline"
+                  >
+                    {t.dbFaqLink}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* ── FAQ ──────────────────────────────────────────────────────────────── */}
         <TicketingFAQ />
