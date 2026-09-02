@@ -313,7 +313,7 @@ function IconCheck() {
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
-/** Emplacement réservé au logo officiel Deutsche Bahn (fichier à fournir, ex. /partners/deutsche-bahn-logo.svg). */
+/** Logo officiel Deutsche Bahn (public/partners/deutsche-bahn-logo.png). */
 function DbLogo({ className }: { className?: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) {
@@ -322,7 +322,7 @@ function DbLogo({ className }: { className?: string }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/partners/deutsche-bahn-logo.svg"
+      src="/partners/deutsche-bahn-logo.png"
       alt="Deutsche Bahn"
       className={`object-contain ${className ?? ''}`}
       onError={() => setFailed(true)}
