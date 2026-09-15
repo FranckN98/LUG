@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { randomUUID } from 'crypto';
 import { parseNameFromEmail } from '@/lib/emailName';
 import { requireAdmin } from '@/lib/adminAuth';
+import { normalizeTagsInput, parseTags, serializeTags } from '@/lib/newsletterTags';
 
 export async function GET(req: NextRequest) {
   const unauthorized = requireAdmin();
@@ -11,9 +12,11 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get('search')?.trim() || '';
   const statusFilter = searchParams.get('status') || '';
+  const tagFilter = searchParams.get('tag')?.trim() || '';
 
   const where: Record<string, unknown> = {};
   if (statusFilter) where.status = statusFilter;
+  if (tagFilter) where.tags = { contains: tagFilter };
   if (search) {
     where.OR = [
       { email: { contains: search } },
@@ -37,11 +40,14 @@ export async function GET(req: NextRequest) {
       city: true,
       status: true,
       source: true,
+      tags: true,
       createdAt: true,
     },
   });
 
-  return NextResponse.json(subscribers);
+  return NextResponse.json(
+    subscribers.map((s) => ({ ...s, tags: parseTags(s.tags) })),
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -49,7 +55,7 @@ export async function POST(req: NextRequest) {
   if (unauthorized) return unauthorized;
 
   const body = await req.json();
-  const { email, firstName, lastName, address, city, source = 'admin' } = body;
+  const { email, firstName, lastName, address, city, source = 'admin', tags } = body;
 
   if (!email || typeof email !== 'string') {
     return NextResponse.json({ error: 'Email requis' }, { status: 400 });
@@ -84,8 +90,9 @@ export async function POST(req: NextRequest) {
       consent: true,
       status: 'active',
       unsubscribeToken: randomUUID(),
+      tags: serializeTags(normalizeTagsInput(tags)) ?? 'levelup_event',
     },
   });
 
-  return NextResponse.json(subscriber, { status: 201 });
+  return NextResponse.json({ ...subscriber, tags: parseTags(subscriber.tags) }, { status: 201 });
 }

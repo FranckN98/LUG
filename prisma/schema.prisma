@@ -98,11 +98,26 @@ model NewsletterCampaign {
   complaintCount   Int                             @default(0) @map("complaint_count")
   openCount        Int                             @default(0) @map("open_count")
   clickCount       Int                             @default(0) @map("click_count")
+  // ── Template library (reusable starting points for new campaigns) ──
+  // A row with isTemplate=true never gets sent directly; admins "use" it via
+  // POST /api/admin/newsletter/campaigns/[id]/duplicate which copies it into a
+  // fresh isTemplate=false draft campaign (see src/app/admin/newsletter).
+  isTemplate          Boolean   @default(false) @map("is_template")
+  templateKey         String?   @unique @map("template_key")
+  campaignNumber      Int?      @map("campaign_number")
+  recommendedSendAt   DateTime? @map("recommended_send_at")
+  recommendedAudience String?   @map("recommended_audience")
+  // Which template a campaign was duplicated from (for history/traceability only)
+  sourceTemplateId    String?   @map("source_template_id")
+  // Whether the mandatory "Organiser son trajet" (Deutsche Bahn + covoiturage)
+  // block is rendered automatically before the footer. Defaults to on.
+  showTravelBlock     Boolean   @default(true) @map("show_travel_block")
   createdAt        DateTime                        @default(now()) @map("created_at")
   updatedAt        DateTime                        @updatedAt @map("updated_at")
   translations     NewsletterCampaignTranslation[]
   attachments      NewsletterCampaignAttachment[]
 
+  @@index([isTemplate])
   @@map("newsletter_campaigns")
 }
 

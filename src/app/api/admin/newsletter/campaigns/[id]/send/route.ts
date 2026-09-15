@@ -35,6 +35,14 @@ export async function POST(
   const testEmail = searchParams.get('testEmail')?.trim();
   const testLocale = searchParams.get('testLocale')?.trim() || 'fr';
 
+  // Optional explicit recipient selection (see the campaign editor's
+  // "Destinataires" panel). When omitted, falls back to every active
+  // subscriber (previous default behavior — backwards compatible).
+  const body = await req.json().catch(() => ({}));
+  const requestedSubscriberIds: string[] | undefined = Array.isArray(body?.subscriberIds)
+    ? Array.from(new Set(body.subscriberIds.filter((v: unknown): v is string => typeof v === 'string' && v.length > 0)))
+    : undefined;
+
   const campaign = await prisma.newsletterCampaign.findUnique({
     where: { id: params.id },
     include: {
@@ -156,6 +164,7 @@ export async function POST(
         inlineLogo,
         whatsappUrl,
         campaignId: campaign.id,
+        showTravelBlock: campaign.showTravelBlock,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -181,7 +190,10 @@ export async function POST(
   // EMAIL_MAX_RETRIES times with exponential backoff. Permanent errors
   // (invalid recipient, 4xx other than 429) are not retried.
   const subscribers = await prisma.newsletterSubscriber.findMany({
-    where: { status: 'active' },
+    where: {
+      status: 'active',
+      ...(requestedSubscriberIds ? { id: { in: requestedSubscriberIds } } : {}),
+    },
     select: { id: true, email: true, unsubscribeToken: true, firstName: true, name: true, locale: true },
   });
 
@@ -214,6 +226,7 @@ export async function POST(
         inlineLogo,
         whatsappUrl,
         campaignId: campaign.id,
+        showTravelBlock: campaign.showTravelBlock,
       });
     },
     (sub, error) => {

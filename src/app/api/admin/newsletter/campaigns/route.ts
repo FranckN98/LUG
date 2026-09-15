@@ -8,12 +8,17 @@ import {
 import { normalizeAttachmentsInput } from '@/lib/newsletterAttachments';
 import { requireAdmin } from '@/lib/adminAuth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
+  const scope = new URL(req.url).searchParams.get('scope'); // 'templates' | 'campaigns' | null (= all)
+  const where =
+    scope === 'templates' ? { isTemplate: true } : scope === 'campaigns' ? { isTemplate: false } : {};
+
   const campaigns = await prisma.newsletterCampaign.findMany({
-    orderBy: { createdAt: 'desc' },
+    where,
+    orderBy: scope === 'templates' ? [{ campaignNumber: 'asc' }, { createdAt: 'asc' }] : { createdAt: 'desc' },
     include: {
       translations: true,
       attachments: { orderBy: { position: 'asc' } },

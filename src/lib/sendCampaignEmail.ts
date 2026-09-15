@@ -8,6 +8,7 @@ function esc(s: string): string {
 
 import { emailLinksFooterEnglishHtml, emailLinksFooterEnglishText } from '@/lib/emailFooter';
 import { looksLikeHtml, renderRichBodyHtml, htmlToPlainText } from '@/lib/emailHtmlSanitizer';
+import { buildTravelBlockHtml, buildTravelBlockText } from '@/lib/emailTravelBlock';
 
 /** CID used to reference the inline logo in email HTML (`<img src="cid:lug-logo" />`). */
 const INLINE_LOGO_CID = 'lug-logo';
@@ -38,6 +39,8 @@ export function buildCampaignHtml(
   unsubscribeUrl: string,
   siteBaseUrl: string,
   whatsappUrl?: string,
+  showTravelBlock: boolean = true,
+  locale: string = 'fr',
 ): string {
   const { subject, previewText, titleText, bodyContent, headerImageUrl, campaignImageUrl, ctaLabel, ctaUrl, footerNote } = content;
   const normalizedHeaderImageUrl = absoluteUrl(headerImageUrl, siteBaseUrl);
@@ -131,6 +134,7 @@ export function buildCampaignHtml(
             ${campaignImageBlock}
             ${paragraphs}
             ${ctaBlock}
+            ${showTravelBlock ? buildTravelBlockHtml(locale) : ''}
           </td>
         </tr>
 
@@ -178,7 +182,13 @@ export function buildCampaignHtml(
 </html>`;
 }
 
-export function buildCampaignText(content: CampaignContent, unsubscribeUrl: string, whatsappUrl?: string): string {
+export function buildCampaignText(
+  content: CampaignContent,
+  unsubscribeUrl: string,
+  whatsappUrl?: string,
+  showTravelBlock: boolean = true,
+  locale: string = 'fr',
+): string {
   const lines: string[] = [];
   if (content.titleText) {
     lines.push(content.titleText, '='.repeat(content.titleText.length), '');
@@ -190,6 +200,9 @@ export function buildCampaignText(content: CampaignContent, unsubscribeUrl: stri
   lines.push(bodyText, '');
   if (content.ctaLabel && content.ctaUrl) {
     lines.push(`→ ${content.ctaLabel}: ${content.ctaUrl}`, '');
+  }
+  if (showTravelBlock) {
+    lines.push(buildTravelBlockText(locale), '');
   }
   lines.push(emailLinksFooterEnglishText(whatsappUrl));
   lines.push('--', 'The Level Up in Germany Team', 'Germany', '');
@@ -232,6 +245,7 @@ export function buildMultilingualCampaignHtml(
   siteBaseUrl: string,
   sharedSubject?: string,
   whatsappUrl?: string,
+  showTravelBlock: boolean = true,
 ): string {
   if (sections.length === 0) {
     throw new Error('buildMultilingualCampaignHtml: at least one section required');
@@ -257,6 +271,8 @@ export function buildMultilingualCampaignHtml(
   const campaignImageBlock = normalizedCampaignImageUrl
     ? `<div style="margin:0 0 28px;text-align:center"><img src="${esc(normalizedCampaignImageUrl)}" alt="" style="display:inline-block;max-width:100%;height:auto;border:0;border-radius:14px" /></div>`
     : '';
+
+  const travelBlockHtml = showTravelBlock ? buildTravelBlockHtml(primary.locale) : '';
 
   // Language nav (only if more than one section)
   const langNav =
@@ -388,6 +404,7 @@ export function buildMultilingualCampaignHtml(
             ${campaignImageBlock}
             ${langNav}
             ${sectionsHtml}
+            ${travelBlockHtml}
           </td>
         </tr>
 
@@ -437,6 +454,7 @@ export function buildMultilingualCampaignText(
   sections: ReadonlyArray<MultilingualSection>,
   unsubscribeUrl: string,
   whatsappUrl?: string,
+  showTravelBlock: boolean = true,
 ): string {
   const lines: string[] = [];
   for (const s of sections) {
@@ -455,6 +473,9 @@ export function buildMultilingualCampaignText(
       lines.push(s.content.footerNote, '');
     }
     lines.push('');
+  }
+  if (showTravelBlock) {
+    lines.push(buildTravelBlockText(sections[0]?.locale), '');
   }
   lines.push(emailLinksFooterEnglishText(whatsappUrl));
   lines.push('--', 'The Level Up in Germany Team', 'Germany', '');
@@ -498,6 +519,8 @@ export interface SendCampaignParams {
    * events back to this campaign for observability.
    */
   campaignId?: string;
+  /** Whether to render the mandatory travel (Deutsche Bahn + carpool) block. Defaults to true. */
+  showTravelBlock?: boolean;
 }
 
 /**
@@ -606,8 +629,9 @@ export async function sendCampaignEmail(params: SendCampaignParams): Promise<voi
 
   const personalized = personalizeContent(params.content, params.recipientFirstName);
   const unsubscribeUrl = `${params.siteBaseUrl}/api/unsubscribe?token=${encodeURIComponent(params.unsubscribeToken)}`;
-  const html = buildCampaignHtml(personalized, unsubscribeUrl, params.siteBaseUrl, params.whatsappUrl);
-  const text = buildCampaignText(personalized, unsubscribeUrl, params.whatsappUrl);
+  const showTravelBlock = params.showTravelBlock ?? true;
+  const html = buildCampaignHtml(personalized, unsubscribeUrl, params.siteBaseUrl, params.whatsappUrl, showTravelBlock);
+  const text = buildCampaignText(personalized, unsubscribeUrl, params.whatsappUrl, showTravelBlock);
 
   if (!apiKey) {
     console.warn('[newsletter] RESEND_API_KEY manquant — email non envoyé à', params.toEmail);
@@ -669,6 +693,8 @@ export interface SendMultilingualCampaignParams {
    * events back to this campaign for observability.
    */
   campaignId?: string;
+  /** Whether to render the mandatory travel (Deutsche Bahn + carpool) block. Defaults to true. */
+  showTravelBlock?: boolean;
 }
 
 /**
@@ -699,8 +725,9 @@ export async function sendMultilingualCampaignEmail(
 
   const subject = personalizedSections[0].content.subject;
   const unsubscribeUrl = `${params.siteBaseUrl}/api/unsubscribe?token=${encodeURIComponent(params.unsubscribeToken)}`;
-  const html = buildMultilingualCampaignHtml(personalizedSections, unsubscribeUrl, params.siteBaseUrl, subject, params.whatsappUrl);
-  const text = buildMultilingualCampaignText(personalizedSections, unsubscribeUrl, params.whatsappUrl);
+  const showTravelBlock = params.showTravelBlock ?? true;
+  const html = buildMultilingualCampaignHtml(personalizedSections, unsubscribeUrl, params.siteBaseUrl, subject, params.whatsappUrl, showTravelBlock);
+  const text = buildMultilingualCampaignText(personalizedSections, unsubscribeUrl, params.whatsappUrl, showTravelBlock);
 
   if (!apiKey) {
     console.warn('[newsletter] RESEND_API_KEY manquant — email non envoyé à', params.toEmail);
