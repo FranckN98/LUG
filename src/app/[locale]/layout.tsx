@@ -12,6 +12,7 @@ import { ScrollToHash } from '@/components/ScrollToHash';
 import { JsonLdSite } from '@/components/JsonLdSite';
 import { DocumentLang } from '@/components/DocumentLang';
 import { TicketBubbleVideo } from '@/components/TicketBubbleVideo';
+import { LevelUpBot } from '@/components/LevelUpBot';
 import { buildLocaleLayoutMetadata } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 
@@ -86,6 +87,7 @@ export default async function LocaleLayout({
       {!hideFooter && <Footer locale={validLocale} joinWhatsAppUrl={joinWhatsAppUrl} />}
       <TicketBubbleVideo ticketingActive={isTicketingActive} />
       <EventCommunicationPopupGate locale={validLocale} />
+      <LevelUpBot locale={validLocale} />
       <CookieBanner locale={validLocale} />
       <AnalyticsProvider />
     </div>

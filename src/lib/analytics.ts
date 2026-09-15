@@ -24,7 +24,9 @@ export type AnalyticsEventName =
   | 'speaker_apply_click'
   | 'blog_like'
   | 'blog_share'
-  | 'cta_click';
+  | 'cta_click'
+  | 'bot_chat_open'
+  | 'bot_chat_message';
 
 export type AnalyticsProperties = {
   page?: string;

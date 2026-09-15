@@ -16,6 +16,8 @@ const ALLOWED = new Set([
   'blog_like',
   'blog_share',
   'cta_click',
+  'bot_chat_open',
+  'bot_chat_message',
 ]);
 
 function hashIp(ip: string, salt: string): string {

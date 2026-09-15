@@ -43,6 +43,8 @@ const EVENT_LABELS: Record<string, string> = {
   blog_like: 'Blog likes',
   blog_share: 'Blog partages',
   cta_click: 'CTA',
+  bot_chat_open: 'Bot ouvert',
+  bot_chat_message: 'Bot messages',
 };
 
 export default function AdminAnalyticsPage() {
