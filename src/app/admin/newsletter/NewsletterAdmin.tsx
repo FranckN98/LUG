@@ -352,6 +352,7 @@ export default function NewsletterAdmin() {
   const [bulkText, setBulkText] = useState('');
   const [bulkTags, setBulkTags] = useState<string[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [extractingNames, setExtractingNames] = useState(false);
   const [bulkResult, setBulkResult] = useState<{
     created: Array<{ id: string; email: string }>;
     alreadyPresent: string[];
@@ -553,6 +554,23 @@ export default function NewsletterAdmin() {
       await fetchAll();
     } finally {
       setBulkLoading(false);
+    }
+  }
+
+  async function handleExtractNames() {
+    setExtractingNames(true);
+    try {
+      const res = await fetch('/api/admin/newsletter/subscribers/extract-names', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || 'Erreur', 'error'); return; }
+      showToast(
+        data.updated > 0
+          ? `${data.updated} prénom(s) extrait(s) (${data.unresolved} non résolu(s))`
+          : 'Aucun prénom manquant à extraire',
+      );
+      await fetchAll();
+    } finally {
+      setExtractingNames(false);
     }
   }
 
@@ -1120,6 +1138,14 @@ export default function NewsletterAdmin() {
               className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-white/60 hover:text-white hover:border-white/25 transition-colors"
             >
               📋 Import en masse
+            </button>
+            <button
+              onClick={handleExtractNames}
+              disabled={extractingNames}
+              title="Déduire le prénom des abonnés sans prénom à partir de leur nom ou de leur email"
+              className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-white/60 hover:text-white hover:border-white/25 transition-colors disabled:opacity-50"
+            >
+              {extractingNames ? 'Extraction…' : '✨ Extraire les prénoms'}
             </button>
             <button
               onClick={() => setShowAddForm(true)}
