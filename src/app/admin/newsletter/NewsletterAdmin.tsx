@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { buildCampaignHtml, buildMultilingualCampaignHtml, type MultilingualSection } from '@/lib/sendCampaignEmail';
 import { NewsletterRichEditor } from '@/components/admin/NewsletterRichEditor';
 import { adminNotify } from '@/app/admin/components/AdminToaster';
+import { NEWSLETTER_TAG_OPTIONS } from '@/lib/newsletterTags';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Subscriber {
@@ -321,11 +322,23 @@ export default function NewsletterAdmin() {
   // Subscriber UI
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'unsubscribed'>('all');
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
   const [addLoading, setAddLoading] = useState(false);
   const [quickEmail, setQuickEmail] = useState('');
   const [quickLoading, setQuickLoading] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [bulkTags, setBulkTags] = useState<string[]>([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [bulkResult, setBulkResult] = useState<{
+    created: Array<{ id: string; email: string }>;
+    alreadyPresent: string[];
+    duplicatesInPayload: string[];
+    invalid: string[];
+  } | null>(null);
+  const [editingTagsFor, setEditingTagsFor] = useState<string | null>(null);
 
   // Campaign UI
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
@@ -397,7 +410,8 @@ export default function NewsletterAdmin() {
       displayName(s).toLowerCase().includes(q) ||
       (s.city ?? '').toLowerCase().includes(q);
     const matchStatus = statusFilter === 'all' || s.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchTag = !tagFilter || (s.tags ?? []).includes(tagFilter);
+    return matchSearch && matchStatus && matchTag;
   });
 
   // ── Recipient selection helpers (campaign send section) ────────────────────
@@ -484,6 +498,41 @@ export default function NewsletterAdmin() {
       await fetchAll();
     } else {
       showToast('Erreur suppression', 'error');
+    }
+  }
+
+  async function handleUpdateTags(sub: Subscriber, tags: string[]) {
+    const res = await fetch(`/api/admin/newsletter/subscribers/${sub.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tags }),
+    });
+    if (res.ok) {
+      await fetchAll();
+    } else {
+      showToast('Erreur lors de la mise à jour des tags', 'error');
+    }
+  }
+
+  async function handleBulkImport(e: React.FormEvent) {
+    e.preventDefault();
+    if (!bulkText.trim()) return;
+    setBulkLoading(true);
+    setBulkResult(null);
+    try {
+      const res = await fetch('/api/admin/newsletter/subscribers/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: bulkText, tags: bulkTags }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || 'Erreur', 'error'); return; }
+      setBulkResult(data);
+      showToast(`${data.created.length} abonné(s) importé(s)`);
+      setBulkText('');
+      await fetchAll();
+    } finally {
+      setBulkLoading(false);
     }
   }
 
@@ -1030,6 +1079,12 @@ export default function NewsletterAdmin() {
               <option value="unsubscribed">Désabonnés</option>
             </select>
             <button
+              onClick={() => setShowBulkImport((v) => !v)}
+              className="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-white/60 hover:text-white hover:border-white/25 transition-colors"
+            >
+              📋 Import en masse
+            </button>
+            <button
               onClick={() => setShowAddForm(true)}
               className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/80 transition-colors"
             >
@@ -1039,6 +1094,82 @@ export default function NewsletterAdmin() {
               Ajouter un abonné
             </button>
           </div>
+
+          {/* Tag filter pills */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white/30 mr-1">Tags :</span>
+            <button
+              onClick={() => setTagFilter(null)}
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${!tagFilter ? 'bg-accent/20 text-white border border-accent/40' : 'text-white/40 border border-white/10 hover:text-white'}`}
+            >
+              Tous
+            </button>
+            {NEWSLETTER_TAG_OPTIONS.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setTagFilter(tagFilter === tag ? null : tag)}
+                className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${tagFilter === tag ? 'bg-accent/20 text-white border border-accent/40' : 'text-white/40 border border-white/10 hover:text-white'}`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+
+          {/* Bulk import panel */}
+          {showBulkImport && (
+            <form
+              onSubmit={handleBulkImport}
+              className="rounded-2xl border border-white/10 bg-white/4 p-5 space-y-3"
+            >
+              <p className="text-sm font-bold text-white/80">Import en masse</p>
+              <p className="text-[11px] text-white/40">
+                Une entrée par ligne : email seul, &quot;Nom &lt;email&gt;&quot;, ou colonnes séparées par virgule/point-virgule.
+              </p>
+              <textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                placeholder={'jean@exemple.com\nMarie Dupont <marie@exemple.com>\nPaul,Martin,paul@exemple.com'}
+                rows={6}
+                className="input-field font-mono text-xs"
+              />
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/30 mr-1">Tags à appliquer :</span>
+                {NEWSLETTER_TAG_OPTIONS.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setBulkTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag])}
+                    className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${bulkTags.includes(tag) ? 'bg-accent/20 text-white border border-accent/40' : 'text-white/40 border border-white/10 hover:text-white'}`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={bulkLoading || !bulkText.trim()}
+                  className="rounded-xl bg-primary px-5 py-2 text-sm font-bold text-white hover:bg-primary/80 disabled:opacity-50 transition-colors"
+                >
+                  {bulkLoading ? 'Import…' : 'Importer'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowBulkImport(false); setBulkText(''); setBulkResult(null); }}
+                  className="rounded-xl border border-white/10 px-5 py-2 text-sm text-white/50 hover:text-white transition-colors"
+                >
+                  Fermer
+                </button>
+              </div>
+              {bulkResult && (
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-[12px] text-emerald-300 space-y-0.5">
+                  <p>✅ {bulkResult.created.length} créé(s) · {bulkResult.alreadyPresent.length} déjà présent(s)</p>
+                  {bulkResult.duplicatesInPayload.length > 0 && <p className="text-white/40">{bulkResult.duplicatesInPayload.length} doublon(s) dans le texte collé</p>}
+                  {bulkResult.invalid.length > 0 && <p className="text-amber-300">⚠ {bulkResult.invalid.length} ligne(s) invalide(s) : {bulkResult.invalid.join(', ')}</p>}
+                </div>
+              )}
+            </form>
+          )}
 
           {/* Quick-add row */}
           <form
@@ -1153,6 +1284,7 @@ export default function NewsletterAdmin() {
                     <th className="px-4 py-3">Nom</th>
                     <th className="px-4 py-3">Email</th>
                     <th className="hidden md:table-cell px-4 py-3">Ville</th>
+                    <th className="hidden lg:table-cell px-4 py-3">Tags</th>
                     <th className="px-4 py-3">Statut</th>
                     <th className="hidden sm:table-cell px-4 py-3">Inscription</th>
                     <th className="px-4 py-3 text-right">Actions</th>
@@ -1172,6 +1304,51 @@ export default function NewsletterAdmin() {
                       <td className="px-4 py-3 text-white/60 max-w-xs truncate">{s.email}</td>
                       <td className="hidden md:table-cell px-4 py-3 text-white/40">
                         {s.city || '—'}
+                      </td>
+                      <td className="hidden lg:table-cell px-4 py-3 relative">
+                        <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
+                          {(s.tags ?? []).map((t) => (
+                            <span key={t} className="rounded-full bg-accent/15 border border-accent/30 px-2 py-0.5 text-[10px] text-accent/90">{t}</span>
+                          ))}
+                          <button
+                            onClick={() => setEditingTagsFor(editingTagsFor === s.id ? null : s.id)}
+                            className="text-[10px] text-white/30 hover:text-white transition-colors"
+                            title="Modifier les tags"
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                        {editingTagsFor === s.id && (
+                          <div className="absolute z-10 mt-2 w-56 rounded-xl border border-white/10 bg-[#1a0d0d] p-3 shadow-xl space-y-2">
+                            <div className="flex flex-wrap gap-1.5">
+                              {NEWSLETTER_TAG_OPTIONS.map((tag) => {
+                                const active = (s.tags ?? []).includes(tag);
+                                return (
+                                  <button
+                                    key={tag}
+                                    type="button"
+                                    onClick={() => {
+                                      const next = active
+                                        ? (s.tags ?? []).filter((t) => t !== tag)
+                                        : [...(s.tags ?? []), tag];
+                                      handleUpdateTags(s, next);
+                                    }}
+                                    className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${active ? 'bg-accent/20 text-white border border-accent/40' : 'text-white/40 border border-white/10 hover:text-white'}`}
+                                  >
+                                    {tag}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setEditingTagsFor(null)}
+                              className="text-[10px] text-white/40 hover:text-white transition-colors"
+                            >
+                              Fermer
+                            </button>
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <Badge status={s.status} />
@@ -1205,7 +1382,7 @@ export default function NewsletterAdmin() {
               </table>
               <p className="px-4 py-2.5 text-[11px] text-white/25">
                 {filtered.length} résultat{filtered.length !== 1 ? 's' : ''}
-                {search || statusFilter !== 'all' ? ' (filtrés)' : ''}
+                {search || statusFilter !== 'all' || tagFilter ? ' (filtrés)' : ''}
               </p>
             </div>
           )}
