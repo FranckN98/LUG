@@ -45,6 +45,13 @@ export async function POST(req: NextRequest) {
     bodyContent,
     ctaLabel,
     footerNote,
+    // template-library metadata (see NewsletterCampaign.isTemplate in schema)
+    isTemplate,
+    templateKey,
+    campaignNumber,
+    recommendedSendAt,
+    recommendedAudience,
+    showTravelBlock,
   } = body ?? {};
 
   // Prefer explicit `translations` object; otherwise map legacy single-locale payload onto FR.
@@ -70,6 +77,14 @@ export async function POST(req: NextRequest) {
 
   const normalizedAttachments = normalizeAttachmentsInput(attachmentsInput);
 
+  const trimmedTemplateKey = typeof templateKey === 'string' ? templateKey.trim() || null : null;
+  if (trimmedTemplateKey) {
+    const existing = await prisma.newsletterCampaign.findUnique({ where: { templateKey: trimmedTemplateKey } });
+    if (existing) {
+      return NextResponse.json({ error: `La clé de template "${trimmedTemplateKey}" est déjà utilisée` }, { status: 400 });
+    }
+  }
+
   const campaign = await prisma.newsletterCampaign.create({
     data: {
       subject: mirror.subject,
@@ -82,6 +97,13 @@ export async function POST(req: NextRequest) {
       campaignImageUrl: typeof campaignImageUrl === 'string' ? campaignImageUrl.trim() || null : null,
       ctaUrl: typeof ctaUrl === 'string' ? ctaUrl.trim() || null : null,
       status: 'draft',
+      isTemplate: Boolean(isTemplate),
+      templateKey: trimmedTemplateKey,
+      campaignNumber: typeof campaignNumber === 'number' ? campaignNumber : null,
+      recommendedSendAt: recommendedSendAt ? new Date(recommendedSendAt) : null,
+      recommendedAudience:
+        typeof recommendedAudience === 'string' ? recommendedAudience.trim() || null : null,
+      showTravelBlock: showTravelBlock === undefined ? true : Boolean(showTravelBlock),
       translations: {
         create: translations.map((t) => ({
           locale: t.locale,

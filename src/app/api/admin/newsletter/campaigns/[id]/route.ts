@@ -48,7 +48,21 @@ export async function PATCH(
     bodyContent,
     ctaLabel,
     footerNote,
+    // template-library metadata (see NewsletterCampaign.isTemplate in schema)
+    isTemplate,
+    templateKey,
+    campaignNumber,
+    recommendedSendAt,
+    recommendedAudience,
+    showTravelBlock,
   } = body ?? {};
+
+  if (templateKey !== undefined && typeof templateKey === 'string' && templateKey.trim()) {
+    const existing = await prisma.newsletterCampaign.findUnique({ where: { templateKey: templateKey.trim() } });
+    if (existing && existing.id !== params.id) {
+      return NextResponse.json({ error: `La clé de template "${templateKey.trim()}" est déjà utilisée` }, { status: 400 });
+    }
+  }
 
   // Build translations payload
   const translationsObject =
@@ -71,6 +85,12 @@ export async function PATCH(
     if (headerImageUrl !== undefined) scalarData.headerImageUrl = typeof headerImageUrl === 'string' ? (headerImageUrl.trim() || null) : null;
     if (campaignImageUrl !== undefined) scalarData.campaignImageUrl = typeof campaignImageUrl === 'string' ? (campaignImageUrl.trim() || null) : null;
     if (ctaUrl !== undefined) scalarData.ctaUrl = typeof ctaUrl === 'string' ? (ctaUrl.trim() || null) : null;
+    if (isTemplate !== undefined) scalarData.isTemplate = Boolean(isTemplate);
+    if (templateKey !== undefined) scalarData.templateKey = typeof templateKey === 'string' ? (templateKey.trim() || null) : null;
+    if (campaignNumber !== undefined) scalarData.campaignNumber = typeof campaignNumber === 'number' ? campaignNumber : null;
+    if (recommendedSendAt !== undefined) scalarData.recommendedSendAt = recommendedSendAt ? new Date(recommendedSendAt) : null;
+    if (recommendedAudience !== undefined) scalarData.recommendedAudience = typeof recommendedAudience === 'string' ? (recommendedAudience.trim() || null) : null;
+    if (showTravelBlock !== undefined) scalarData.showTravelBlock = Boolean(showTravelBlock);
 
     // If translations were provided, upsert each locale and refresh legacy mirror
     if (translations) {

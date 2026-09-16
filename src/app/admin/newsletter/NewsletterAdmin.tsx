@@ -58,6 +58,7 @@ interface Campaign {
   campaignNumber?: number | null;
   recommendedSendAt?: string | null;
   recommendedAudience?: string | null;
+  showTravelBlock?: boolean;
   // Observability counters, populated asynchronously by the Resend webhook
   // (/api/webhooks/resend) — may lag a few seconds/minutes behind the send.
   deliveredCount?: number;
@@ -101,6 +102,13 @@ type CampaignFormShape = {
   ctaUrl: string;
   translations: Record<CampaignLocale, CampaignTrFields>;
   attachments: CampaignAttachment[];
+  // ── Template library metadata (only relevant when isTemplate is true) ──
+  isTemplate: boolean;
+  templateKey: string;
+  campaignNumber: string;
+  recommendedSendAt: string;
+  recommendedAudience: string;
+  showTravelBlock: boolean;
 };
 
 const EMPTY_CAMPAIGN_FORM: CampaignFormShape = {
@@ -113,6 +121,12 @@ const EMPTY_CAMPAIGN_FORM: CampaignFormShape = {
     de: { ...EMPTY_TR },
   },
   attachments: [],
+  isTemplate: false,
+  templateKey: '',
+  campaignNumber: '',
+  recommendedSendAt: '',
+  recommendedAudience: '',
+  showTravelBlock: true,
 };
 
 const READY_EBOOK_CAMPAIGN_FORM: CampaignFormShape = {
@@ -150,6 +164,12 @@ const READY_EBOOK_CAMPAIGN_FORM: CampaignFormShape = {
     },
   },
   attachments: [],
+  isTemplate: false,
+  templateKey: '',
+  campaignNumber: '',
+  recommendedSendAt: '',
+  recommendedAudience: '',
+  showTravelBlock: true,
 };
 
 const EMPTY_ADD_FORM = {
@@ -537,9 +557,10 @@ export default function NewsletterAdmin() {
   }
 
   // ── Campaign actions ───────────────────────────────────────────────────────
-  function openNewCampaign(mode: 'blank' | 'ebook' = 'blank') {
+  function openNewCampaign(mode: 'blank' | 'ebook' = 'blank', opts?: { asTemplate?: boolean }) {
     setEditingCampaign(null);
-    setCampaignForm(mode === 'ebook' ? READY_EBOOK_CAMPAIGN_FORM : EMPTY_CAMPAIGN_FORM);
+    const base = mode === 'ebook' ? READY_EBOOK_CAMPAIGN_FORM : EMPTY_CAMPAIGN_FORM;
+    setCampaignForm(opts?.asTemplate ? { ...base, isTemplate: true, showTravelBlock: true } : base);
     setActiveLocale('fr');
     setTranslateError('');
     setTranslateProvider(null);
@@ -587,6 +608,12 @@ export default function NewsletterAdmin() {
       campaignImageUrl: c.campaignImageUrl ?? '',
       ctaUrl: c.ctaUrl ?? '',
       translations: trMap,
+      isTemplate: c.isTemplate ?? false,
+      templateKey: c.templateKey ?? '',
+      campaignNumber: typeof c.campaignNumber === 'number' ? String(c.campaignNumber) : '',
+      recommendedSendAt: c.recommendedSendAt ? c.recommendedSendAt.slice(0, 10) : '',
+      recommendedAudience: c.recommendedAudience ?? '',
+      showTravelBlock: c.showTravelBlock ?? true,
       attachments: (c.attachments ?? []).map((a) => ({
         id: a.id,
         filename: a.filename,
@@ -728,6 +755,10 @@ export default function NewsletterAdmin() {
       showToast("Au moins une langue doit avoir un objet et un corps", 'error');
       return;
     }
+    if (campaignForm.isTemplate && !campaignForm.templateKey.trim()) {
+      showToast('Une clé de template est requise (ex : LU2026-11)', 'error');
+      return;
+    }
 
     const translationsPayload: Partial<Record<CampaignLocale, CampaignTrFields>> = {};
     for (const l of filledLocales) {
@@ -745,6 +776,12 @@ export default function NewsletterAdmin() {
         contentType: a.contentType,
         size: a.size,
       })),
+      isTemplate: campaignForm.isTemplate,
+      templateKey: campaignForm.templateKey.trim() || null,
+      campaignNumber: campaignForm.campaignNumber.trim() ? Number(campaignForm.campaignNumber) : null,
+      recommendedSendAt: campaignForm.recommendedSendAt || null,
+      recommendedAudience: campaignForm.recommendedAudience.trim() || null,
+      showTravelBlock: campaignForm.showTravelBlock,
     };
 
     setSavingCampaign(true);
@@ -1693,6 +1730,72 @@ export default function NewsletterAdmin() {
                     </div>
                   </div>
 
+                  {/* Section: Template library metadata */}
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60 pt-2">Bibliothèque de templates</p>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 space-y-3">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={campaignForm.isTemplate}
+                        onChange={(e) => setCampaignForm((f) => ({ ...f, isTemplate: e.target.checked }))}
+                        className="rounded border-white/20"
+                      />
+                      Ceci est un template réutilisable (n&apos;est jamais envoyé directement)
+                    </label>
+                    {campaignForm.isTemplate && (
+                      <div className="grid grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <label className="field-label">Clé du template *</label>
+                          <input
+                            type="text"
+                            value={campaignForm.templateKey}
+                            onChange={(e) => setCampaignForm((f) => ({ ...f, templateKey: e.target.value }))}
+                            placeholder="ex : LU2026-11"
+                            className="input-field"
+                          />
+                        </div>
+                        <div>
+                          <label className="field-label">Numéro de campagne</label>
+                          <input
+                            type="number"
+                            value={campaignForm.campaignNumber}
+                            onChange={(e) => setCampaignForm((f) => ({ ...f, campaignNumber: e.target.value }))}
+                            placeholder="ex : 11"
+                            className="input-field"
+                          />
+                        </div>
+                        <div>
+                          <label className="field-label">Date d&apos;envoi recommandée</label>
+                          <input
+                            type="date"
+                            value={campaignForm.recommendedSendAt}
+                            onChange={(e) => setCampaignForm((f) => ({ ...f, recommendedSendAt: e.target.value }))}
+                            className="input-field"
+                          />
+                        </div>
+                        <div>
+                          <label className="field-label">Audience recommandée</label>
+                          <input
+                            type="text"
+                            value={campaignForm.recommendedAudience}
+                            onChange={(e) => setCampaignForm((f) => ({ ...f, recommendedAudience: e.target.value }))}
+                            placeholder="ex : Tous les abonnés"
+                            className="input-field"
+                          />
+                        </div>
+                        <label className="col-span-2 flex items-center gap-2 text-sm text-white/70 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={campaignForm.showTravelBlock}
+                            onChange={(e) => setCampaignForm((f) => ({ ...f, showTravelBlock: e.target.checked }))}
+                            className="rounded border-white/20"
+                          />
+                          Afficher le bloc trajet (Deutsche Bahn + covoiturage)
+                        </label>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Section: Attachments (shared across locales) */}
                   <p className="text-[10px] font-bold uppercase tracking-widest text-accent/60 pt-2">
                     Pièces jointes <span className="text-white/30 normal-case font-normal">(PDF, Word, Excel, images… — communes à toutes les langues)</span>
@@ -2094,13 +2197,32 @@ export default function NewsletterAdmin() {
       ════════════════════════════════════════════════════════════════════ */}
       {tab === 'templates' && (
         <div className="space-y-5">
-          <p className="text-sm text-white/40">
-            {templates.length} template{templates.length !== 1 ? 's' : ''} — choisissez-en un pour créer un brouillon éditable.
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-white/40">
+              {templates.length} template{templates.length !== 1 ? 's' : ''} — choisissez-en un pour créer un brouillon éditable.
+            </p>
+            <button
+              onClick={() => openNewCampaign('blank', { asTemplate: true })}
+              className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/80 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Nouveau template
+            </button>
+          </div>
           {loading ? (
             <p className="text-sm text-white/40 py-8 text-center">Chargement…</p>
           ) : templates.length === 0 ? (
-            <p className="text-sm text-white/30 py-8 text-center">Aucun template disponible.</p>
+            <div className="rounded-2xl border border-dashed border-white/10 py-16 text-center">
+              <p className="text-white/30 text-sm mb-4">Aucun template disponible.</p>
+              <button
+                onClick={() => openNewCampaign('blank', { asTemplate: true })}
+                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/80 transition-colors"
+              >
+                Créer mon premier template
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {templates.map((t) => (
@@ -2116,13 +2238,22 @@ export default function NewsletterAdmin() {
                     {t.recommendedSendAt && <p>📅 {fmtDate(t.recommendedSendAt)}</p>}
                     {t.recommendedAudience && <p>🎯 {t.recommendedAudience}</p>}
                   </div>
-                  <button
-                    onClick={() => handleUseTemplate(t.id)}
-                    disabled={duplicatingId === t.id}
-                    className="mt-auto rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/80 disabled:opacity-50 transition-colors"
-                  >
-                    {duplicatingId === t.id ? 'Création…' : 'Utiliser ce template'}
-                  </button>
+                  <div className="mt-auto flex gap-2">
+                    <button
+                      onClick={() => openEditCampaign(t)}
+                      className="rounded-xl border border-white/10 px-3 py-2.5 text-sm font-semibold text-white/60 hover:text-white hover:bg-white/[0.06] transition-colors"
+                      title="Modifier ce template"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => handleUseTemplate(t.id)}
+                      disabled={duplicatingId === t.id}
+                      className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/80 disabled:opacity-50 transition-colors"
+                    >
+                      {duplicatingId === t.id ? 'Création…' : 'Utiliser ce template'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
