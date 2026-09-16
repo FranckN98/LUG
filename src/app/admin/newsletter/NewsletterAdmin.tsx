@@ -16,6 +16,7 @@ interface Subscriber {
   city: string | null;
   status: string;
   source: string;
+  tags?: string[];
   createdAt: string;
 }
 
@@ -51,6 +52,11 @@ interface Campaign {
   status: string;
   sentAt: string | null;
   sentCount: number;
+  isTemplate?: boolean;
+  templateKey?: string | null;
+  campaignNumber?: number | null;
+  recommendedSendAt?: string | null;
+  recommendedAudience?: string | null;
   // Observability counters, populated asynchronously by the Resend webhook
   // (/api/webhooks/resend) — may lag a few seconds/minutes behind the send.
   deliveredCount?: number;
@@ -303,11 +309,13 @@ function Toast({
 // MAIN COMPONENT
 // ══════════════════════════════════════════════════════════════════════════════
 export default function NewsletterAdmin() {
-  const [tab, setTab] = useState<'subscribers' | 'campaigns'>('subscribers');
+  const [tab, setTab] = useState<'subscribers' | 'campaigns' | 'templates'>('subscribers');
 
   // Data
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [templates, setTemplates] = useState<Campaign[]>([]);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Subscriber UI
@@ -340,6 +348,12 @@ export default function NewsletterAdmin() {
   const [sendingAll, setSendingAll] = useState(false);
   const [sendResult, setSendResult] = useState<{ sentCount: number; errors?: string[] } | null>(null);
 
+  // Recipient selection (send section)
+  const [recipientMode, setRecipientMode] = useState<'all' | 'custom'>('all');
+  const [selectedRecipientIds, setSelectedRecipientIds] = useState<Set<string>>(new Set());
+  const [recipientSearch, setRecipientSearch] = useState('');
+  const [showSendConfirm, setShowSendConfirm] = useState(false);
+
   // Toast
   const [toast, setToast] = useState<{ msg: string; kind: 'success' | 'error' } | null>(null);
   const showToast = useCallback((msg: string, kind: 'success' | 'error' = 'success') => {
@@ -351,12 +365,14 @@ export default function NewsletterAdmin() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [sRes, cRes] = await Promise.all([
+      const [sRes, cRes, tRes] = await Promise.all([
         fetch('/api/admin/newsletter/subscribers'),
-        fetch('/api/admin/newsletter/campaigns'),
+        fetch('/api/admin/newsletter/campaigns?scope=campaigns'),
+        fetch('/api/admin/newsletter/campaigns?scope=templates'),
       ]);
       if (sRes.ok) setSubscribers(await sRes.json());
       if (cRes.ok) setCampaigns(await cRes.json());
+      if (tRes.ok) setTemplates(await tRes.json());
     } finally {
       setLoading(false);
     }
@@ -383,6 +399,25 @@ export default function NewsletterAdmin() {
     const matchStatus = statusFilter === 'all' || s.status === statusFilter;
     return matchSearch && matchStatus;
   });
+
+  // ── Recipient selection helpers (campaign send section) ────────────────────
+  const activeSubscribers = subscribers.filter((s) => s.status === 'active');
+  const recipientSearchLower = recipientSearch.trim().toLowerCase();
+  const recipientCandidates = activeSubscribers.filter((s) => {
+    if (!recipientSearchLower) return true;
+    return (
+      s.email.toLowerCase().includes(recipientSearchLower) ||
+      displayName(s).toLowerCase().includes(recipientSearchLower)
+    );
+  });
+  const recipientCount = recipientMode === 'all' ? activeSubscribers.length : selectedRecipientIds.size;
+  const toggleRecipient = (id: string) => {
+    setSelectedRecipientIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   // ── Subscriber actions ─────────────────────────────────────────────────────
   async function handleAddSubscriber(e: React.FormEvent) {
@@ -462,6 +497,8 @@ export default function NewsletterAdmin() {
     setIsNew(true);
     setShowPreview(false);
     setSendResult(null);
+    setRecipientMode('all');
+    setSelectedRecipientIds(new Set());
   }
 
   function openEditCampaign(c: Campaign) {
@@ -515,6 +552,8 @@ export default function NewsletterAdmin() {
     setIsNew(false);
     setShowPreview(false);
     setSendResult(null);
+    setRecipientMode('all');
+    setSelectedRecipientIds(new Set());
   }
 
   function closeCampaignEditor() {
@@ -523,6 +562,21 @@ export default function NewsletterAdmin() {
     setSendResult(null);
     setLogoUploadError('');
     setCampaignImageUploadError('');
+  }
+
+  async function handleUseTemplate(templateId: string) {
+    setDuplicatingId(templateId);
+    try {
+      const res = await fetch(`/api/admin/newsletter/campaigns/${templateId}/duplicate`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || 'Erreur', 'error'); return; }
+      showToast('Brouillon créé à partir du template');
+      await fetchAll();
+      setTab('campaigns');
+      openEditCampaign(data);
+    } finally {
+      setDuplicatingId(null);
+    }
   }
 
   async function handleLogoUpload(files: FileList | null) {
@@ -699,16 +753,17 @@ export default function NewsletterAdmin() {
   async function handleSendAll() {
     const id = editingCampaign?.id;
     if (!id) { showToast('Sauvegardez d\'abord la campagne', 'error'); return; }
-    if (
-      !confirm(
-        `Envoyer cette campagne à ${stats.active} abonné(s) actif(s) ?\n\nCette action est irréversible.`,
-      )
-    )
-      return;
+    setShowSendConfirm(false);
+    const subscriberIds =
+      recipientMode === 'custom' ? Array.from(selectedRecipientIds) : undefined;
     setSendingAll(true);
     setSendResult(null);
     try {
-      const res = await fetch(`/api/admin/newsletter/campaigns/${id}/send`, { method: 'POST' });
+      const res = await fetch(`/api/admin/newsletter/campaigns/${id}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subscriberIds ? { subscriberIds } : {}),
+      });
       const data = await res.json();
       if (res.ok) {
         setSendResult({ sentCount: data.sentCount, errors: data.errors });
@@ -927,7 +982,7 @@ export default function NewsletterAdmin() {
 
       {/* ── Tab nav ───────────────────────────────────────────────────────── */}
       <div className="mb-6 flex gap-1 rounded-xl border border-white/8 bg-white/3 p-1 w-fit">
-        {(['subscribers', 'campaigns'] as const).map((t) => (
+        {(['subscribers', 'campaigns', 'templates'] as const).map((t) => (
           <button
             key={t}
             onClick={() => { setTab(t); closeCampaignEditor(); }}
@@ -937,7 +992,11 @@ export default function NewsletterAdmin() {
                 : 'text-white/40 hover:text-white/70'
             }`}
           >
-            {t === 'subscribers' ? `Abonnés (${stats.total})` : `Campagnes (${campaigns.length})`}
+            {t === 'subscribers'
+              ? `Abonnés (${stats.total})`
+              : t === 'campaigns'
+              ? `Campagnes (${campaigns.length})`
+              : `Templates (${templates.length})`}
           </button>
         ))}
       </div>
@@ -1612,15 +1671,66 @@ export default function NewsletterAdmin() {
 
                       {/* Send all */}
                       {editingCampaign.status !== 'sent' ? (
-                        <div>
+                        <div className="space-y-3">
+                          {/* Recipient selector */}
+                          <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setRecipientMode('all')}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${recipientMode === 'all' ? 'bg-accent/20 text-white border border-accent/40' : 'text-white/50 border border-white/10 hover:text-white'}`}
+                              >
+                                Tous les actifs ({activeSubscribers.length})
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setRecipientMode('custom')}
+                                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${recipientMode === 'custom' ? 'bg-accent/20 text-white border border-accent/40' : 'text-white/50 border border-white/10 hover:text-white'}`}
+                              >
+                                Sélection personnalisée ({selectedRecipientIds.size})
+                              </button>
+                            </div>
+                            {recipientMode === 'custom' && (
+                              <div className="space-y-2">
+                                <input
+                                  type="text"
+                                  value={recipientSearch}
+                                  onChange={(e) => setRecipientSearch(e.target.value)}
+                                  placeholder="Rechercher un abonné…"
+                                  className="input-field"
+                                />
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <button type="button" onClick={() => setSelectedRecipientIds(new Set(recipientCandidates.map((s) => s.id)))} className="text-accent hover:underline">Tout sélectionner</button>
+                                  <span className="text-white/20">·</span>
+                                  <button type="button" onClick={() => setSelectedRecipientIds(new Set())} className="text-white/40 hover:underline">Tout désélectionner</button>
+                                </div>
+                                <div className="max-h-48 overflow-y-auto rounded-lg border border-white/10 divide-y divide-white/5">
+                                  {recipientCandidates.length === 0 ? (
+                                    <p className="px-3 py-2 text-[12px] text-white/30">Aucun abonné actif trouvé.</p>
+                                  ) : recipientCandidates.map((s) => (
+                                    <label key={s.id} className="flex items-center gap-2 px-3 py-1.5 text-[12px] text-white/70 hover:bg-white/[0.04] cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedRecipientIds.has(s.id)}
+                                        onChange={() => toggleRecipient(s.id)}
+                                        className="accent-accent"
+                                      />
+                                      <span className="truncate">{displayName(s)} — {s.email}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
                           <button
-                            onClick={handleSendAll}
-                            disabled={sendingAll || stats.active === 0}
+                            onClick={() => setShowSendConfirm(true)}
+                            disabled={sendingAll || recipientCount === 0}
                             className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary/80 disabled:opacity-50 transition-colors"
                           >
                             {sendingAll
                               ? 'Envoi en cours…'
-                              : `🚀 Envoyer à ${stats.active} abonné${stats.active !== 1 ? 's' : ''} actif${stats.active !== 1 ? 's' : ''}`}
+                              : `🚀 Envoyer à ${recipientCount} abonné${recipientCount !== 1 ? 's' : ''}`}
                           </button>
                           <p className="mt-2 text-[11px] text-white/30 text-center">
                             Cette action est irréversible. Les désabonnés sont automatiquement exclus.
@@ -1802,9 +1912,82 @@ export default function NewsletterAdmin() {
         </>
       )}
 
+      {/* ════════════════════════════════════════════════════════════════════
+          TAB: TEMPLATES
+      ════════════════════════════════════════════════════════════════════ */}
+      {tab === 'templates' && (
+        <div className="space-y-5">
+          <p className="text-sm text-white/40">
+            {templates.length} template{templates.length !== 1 ? 's' : ''} — choisissez-en un pour créer un brouillon éditable.
+          </p>
+          {loading ? (
+            <p className="text-sm text-white/40 py-8 text-center">Chargement…</p>
+          ) : templates.length === 0 ? (
+            <p className="text-sm text-white/30 py-8 text-center">Aucun template disponible.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {templates.map((t) => (
+                <div key={t.id} className="rounded-2xl border border-white/8 bg-white/3 p-5 flex flex-col gap-3">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-accent/60">
+                      {t.templateKey}{typeof t.campaignNumber === 'number' ? ` · #${t.campaignNumber}` : ''}
+                    </p>
+                    <p className="text-sm font-bold text-white mt-1">{t.subject}</p>
+                    {t.previewText && <p className="text-xs text-white/40 mt-1 line-clamp-2">{t.previewText}</p>}
+                  </div>
+                  <div className="text-[11px] text-white/40 space-y-0.5">
+                    {t.recommendedSendAt && <p>📅 {fmtDate(t.recommendedSendAt)}</p>}
+                    {t.recommendedAudience && <p>🎯 {t.recommendedAudience}</p>}
+                  </div>
+                  <button
+                    onClick={() => handleUseTemplate(t.id)}
+                    disabled={duplicatingId === t.id}
+                    className="mt-auto rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/80 disabled:opacity-50 transition-colors"
+                  >
+                    {duplicatingId === t.id ? 'Création…' : 'Utiliser ce template'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Toast ─────────────────────────────────────────────────────────── */}
       {toast && (
         <Toast msg={toast.msg} kind={toast.kind} onClose={() => setToast(null)} />
+      )}
+
+      {/* ── Send confirmation modal ──────────────────────────────────────── */}
+      {showSendConfirm && editingCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#1a0d0d] p-6 space-y-4">
+            <h3 className="text-lg font-bold text-white">Confirmer l&apos;envoi</h3>
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 space-y-1 text-sm">
+              <p className="text-white/80"><span className="text-white/40">Campagne :</span> {editingCampaign.subject}</p>
+              <p className="text-white/80">
+                <span className="text-white/40">Destinataires :</span> {recipientCount} abonné{recipientCount !== 1 ? 's' : ''}
+                {recipientMode === 'all' ? ' (tous les actifs)' : ' (sélection personnalisée)'}
+              </p>
+            </div>
+            <p className="text-[11px] text-white/40">Cette action est irréversible. Les désabonnés sont automatiquement exclus.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleSendAll}
+                disabled={sendingAll}
+                className="flex-1 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary/80 disabled:opacity-50 transition-colors"
+              >
+                {sendingAll ? 'Envoi…' : "Confirmer l'envoi"}
+              </button>
+              <button
+                onClick={() => setShowSendConfirm(false)}
+                className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-white/60 hover:text-white transition-colors"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* ── Tailwind utility classes via style tag ─────────────────────── */}
