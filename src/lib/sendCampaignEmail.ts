@@ -540,9 +540,9 @@ export function buildListUnsubscribeHeaders(unsubscribeUrl: string): Record<stri
 /**
  * Personalize campaign text using placeholders.
  *
- * Supported tokens:
- *   - `{{firstName}}`           → first name, or empty if unknown
- *   - `{{firstName|fallback}}`  → first name, or the literal fallback if unknown
+ * Supported tokens (both `firstName` and `first_name` spellings accepted):
+ *   - `{{firstName}}` / `{{first_name}}`             → first name, or empty if unknown
+ *   - `{{firstName|fallback}}` / `{{first_name|fallback}}` → first name, or the literal fallback if unknown
  *   - `{{greeting}}`            → "Bonjour Marie," / "Hallo Marie," / "Hi Marie,"
  *                                 or "Bonjour," / "Hallo," / "Hi," when unknown.
  *                                 Language is inferred from existing words in the
@@ -566,8 +566,8 @@ export function personalizeCampaignText(text: string, firstName: string | null |
 
   let out = text
     .replace(/\{\{\s*greeting\s*\}\}/gi, greeting)
-    .replace(/\{\{\s*firstName\s*\|\s*([^}]*?)\s*\}\}/gi, (_m, fb) => name || fb)
-    .replace(/\{\{\s*firstName\s*\}\}/gi, name);
+    .replace(/\{\{\s*first_?name\s*\|\s*([^}]*?)\s*\}\}/gi, (_m, fb) => name || fb)
+    .replace(/\{\{\s*first_?name\s*\}\}/gi, name);
 
   if (!name) {
     // Clean residue when first name was empty:
