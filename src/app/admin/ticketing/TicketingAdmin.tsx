@@ -985,6 +985,7 @@ export default function TicketingAdmin() {
                             objectPosition: `${moderator.photoPositionX}% ${moderator.photoPositionY}%`,
                             transform: `scale(${moderator.photoZoom / 100})`,
                             transformOrigin: `${moderator.photoPositionX}% ${moderator.photoPositionY}%`,
+                            willChange: 'transform',
                           }}
                         />
                       </div>

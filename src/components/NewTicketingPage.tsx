@@ -836,12 +836,12 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
                 {config.moderators.map((moderator, index) => (
                   <article key={`${moderator.name}-${index}`} className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.45)]">
-                    <div className="aspect-[4/3] bg-[#f4ece6]">
+                    <div className="aspect-[4/3] overflow-hidden bg-[#f4ece6]">
                       {moderator.image ? (
                         <button
                           type="button"
                           onClick={() => setZoomedSpeaker(moderator.image!)}
-                          className="group relative block h-full w-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                          className="group relative block h-full w-full overflow-hidden cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                           aria-label={moderator.name}
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -853,6 +853,7 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
                               objectPosition: `${moderator.photoPositionX ?? 50}% ${moderator.photoPositionY ?? 50}%`,
                               transform: `scale(${(moderator.photoZoom ?? 100) / 100})`,
                               transformOrigin: `${moderator.photoPositionX ?? 50}% ${moderator.photoPositionY ?? 50}%`,
+                              willChange: 'transform',
                             }}
                             loading="lazy"
                           />
