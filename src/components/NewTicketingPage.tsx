@@ -38,7 +38,7 @@ export interface TicketingConfig {
   ctaButtonText: string;
   checkoutUrl: string;
   videoUrl?: string;
-  galleryImages: string[];
+  moderators: TicketingModerator[];
   speakers: TicketingSpeaker[];
   parkingLocations: string;
   passes: TicketingPass[];
@@ -50,6 +50,12 @@ export type TicketingSpeaker = {
   image?: string;
   photoPositionX?: number;
   photoPositionY?: number;
+};
+
+export type TicketingModerator = {
+  name: string;
+  role?: string;
+  image?: string;
 };
 
 type ParkingLocation = {
@@ -74,10 +80,9 @@ const PAGE_TEXT: Record<Locale, {
   perksEyebrow: string;
   perksTitle: string;
   perksItems: { emoji: string; text: string }[];
-  galleryEyebrow: string;
-  galleryTitle: string;
-  galleryAriaLabel: string;
-  galleryImgAlt: string;
+  moderatorsEyebrow: string;
+  moderatorsTitle: string;
+  moderatorsImgAlt: string;
   speakersEyebrow: string;
   speakersTitle: string;
   parkingEyebrow: string;
@@ -117,10 +122,9 @@ const PAGE_TEXT: Record<Locale, {
       { emoji: '🏢', text: 'Accès à tous les exposants.' },
       { emoji: '🎓', text: 'Accès à une masterclass gratuite de tous les intervenants.' },
     ],
-    galleryEyebrow: 'Level Up 2026',
-    galleryTitle: 'Les moments qui nous attendent',
-    galleryAriaLabel: "Photos de l'événement 2026",
-    galleryImgAlt: 'Level Up in Germany 2026',
+    moderatorsEyebrow: 'Level Up 2026',
+    moderatorsTitle: 'Nos modérateurs',
+    moderatorsImgAlt: 'Modérateur Level Up in Germany 2026',
     speakersEyebrow: 'Rencontres',
     speakersTitle: 'Nos intervenants',
     parkingEyebrow: 'Accès',
@@ -164,10 +168,9 @@ const PAGE_TEXT: Record<Locale, {
       { emoji: '🏢', text: 'Access to all exhibitors.' },
       { emoji: '🎓', text: 'Access to a free masterclass with all speakers.' },
     ],
-    galleryEyebrow: 'Level Up 2026',
-    galleryTitle: 'The moments awaiting us',
-    galleryAriaLabel: 'Photos from the 2026 event',
-    galleryImgAlt: 'Level Up in Germany 2026',
+    moderatorsEyebrow: 'Level Up 2026',
+    moderatorsTitle: 'Our moderators',
+    moderatorsImgAlt: 'Level Up in Germany 2026 moderator',
     speakersEyebrow: 'Meet them',
     speakersTitle: 'Our speakers',
     parkingEyebrow: 'Access',
@@ -211,10 +214,9 @@ const PAGE_TEXT: Record<Locale, {
       { emoji: '🏢', text: 'Zugang zu allen Ausstellern.' },
       { emoji: '🎓', text: 'Zugang zu einer kostenlosen Masterclass mit allen Sprecher:innen.' },
     ],
-    galleryEyebrow: 'Level Up 2026',
-    galleryTitle: 'Die Momente, die uns erwarten',
-    galleryAriaLabel: 'Fotos der Veranstaltung 2026',
-    galleryImgAlt: 'Level Up in Germany 2026',
+    moderatorsEyebrow: 'Level Up 2026',
+    moderatorsTitle: 'Unsere Moderator:innen',
+    moderatorsImgAlt: 'Level Up in Germany 2026 Moderator:in',
     speakersEyebrow: 'Begegnungen',
     speakersTitle: 'Unsere Sprecher:innen',
     parkingEyebrow: 'Anfahrt',
@@ -542,11 +544,8 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
         }
         .lu-play-ring-2 { animation-delay: 1.2s; }
         .lu-play-spin { animation: lu-play-spin 6s linear infinite; filter: blur(2px); }
-        @keyframes lu-gallery-scroll { to { transform: translateX(-50%); } }
-        .lu-gallery-track { animation: lu-gallery-scroll 42s linear infinite; }
-        .lu-gallery-track:hover { animation-play-state: paused; }
         @media (prefers-reduced-motion: reduce) {
-          .lu-play-btn, .lu-play-ring, .lu-play-spin, .lu-gallery-track { animation: none !important; }
+          .lu-play-btn, .lu-play-ring, .lu-play-spin { animation: none !important; }
         }
       `}</style>
 
@@ -824,19 +823,51 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
           </div>
         </section>
 
-        {config.galleryImages.length > 0 && (
-          <section className="relative z-10 overflow-hidden border-y border-black/5 bg-[#180b0a] py-10 text-white sm:py-12">
-            <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:px-8">
-              <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-[#f0a530]">{t.galleryEyebrow}</p>
-              <h2 className="mt-2 font-display text-2xl font-bold uppercase sm:text-3xl">{t.galleryTitle}</h2>
-            </div>
-            <div className="overflow-hidden" aria-label={t.galleryAriaLabel}>
-              <div className="lu-gallery-track flex w-max gap-4 px-4">
-                {[...config.galleryImages, ...config.galleryImages].map((image, index) => (
-                  <div key={`${image}-${index}`} className="h-44 w-64 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/5 sm:h-52 sm:w-80">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={image} alt={t.galleryImgAlt} className="h-full w-full object-cover" loading="lazy" />
-                  </div>
+        {config.moderators.length > 0 && (
+          <section className="relative z-10 px-5 py-16 sm:px-8 sm:py-20">
+            <div className="mx-auto max-w-5xl">
+              <div className="mb-10 text-center">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.moderatorsEyebrow}</p>
+                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">{t.moderatorsTitle}</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                {config.moderators.map((moderator, index) => (
+                  <article key={`${moderator.name}-${index}`} className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.45)]">
+                    <div className="aspect-[4/3] bg-[#f4ece6]">
+                      {moderator.image ? (
+                        <button
+                          type="button"
+                          onClick={() => setZoomedSpeaker(moderator.image!)}
+                          className="group relative block h-full w-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                          aria-label={moderator.name}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={moderator.image}
+                            alt={moderator.name || t.moderatorsImgAlt}
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <span className="pointer-events-none absolute bottom-2 right-2 rounded-full bg-black/50 p-1.5 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 8v6M8 11h6" />
+                            </svg>
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="flex h-full items-center justify-center bg-[#8C1A1A] font-display text-5xl font-bold text-white/80">
+                          {moderator.name.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    {(moderator.name || moderator.role) && (
+                      <div className="p-3 sm:p-5">
+                        {moderator.name && <h3 className="font-display text-lg font-bold leading-tight text-neutral-900 sm:text-2xl">{moderator.name}</h3>}
+                        {moderator.role && <p className="mt-1 text-xs leading-relaxed text-neutral-500 sm:text-sm">{moderator.role}</p>}
+                      </div>
+                    )}
+                  </article>
                 ))}
               </div>
             </div>

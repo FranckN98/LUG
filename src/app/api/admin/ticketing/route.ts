@@ -35,6 +35,7 @@ export async function PATCH(req: Request) {
     weezeventUrl: body.weezeventUrl ?? '',
     videoUrl: body.videoUrl ?? '',
     parkingLocations: typeof body.parkingLocations === 'string' ? body.parkingLocations : '[]',
+    moderators: typeof body.moderators === 'string' ? body.moderators : '[]',
     translations: typeof body.translations === 'string'
       ? body.translations
       : JSON.stringify(body.translations ?? {}),

@@ -884,6 +884,7 @@ model TicketingConfig {
   weezeventUrl         String          @default("https://www.weezevent.com/widget_billeterie.php?id_evenement=2098465&widget_key=E2098465&locale=de_DE&color_primary=red&code=red") @map("weezevent_url")
   videoUrl             String          @default("") @map("video_url")
   parkingLocations     String          @default("[]") @map("parking_locations")
+  moderators           String          @default("[]") @map("moderators") // JSON array of {name, role, image}
   translations         String          @default("{}") @map("translations") // JSON: Partial<Record<'en'|'de', {pageTitle,pageSubtitle,pageIntro,eventDate,eventLocation,ctaButtonText}>>
   createdAt            DateTime        @default(now()) @map("created_at")
   updatedAt            DateTime        @updatedAt @map("updated_at")

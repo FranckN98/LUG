@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { adminNotify } from '@/app/admin/components/AdminToaster';
+import { MediaPicker } from '@/app/admin/components/MediaPicker';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,22 @@ function parseTranslations<T>(raw: string | undefined): Partial<Record<'en' | 'd
     return parsed && typeof parsed === 'object' ? parsed : {};
   } catch {
     return {};
+  }
+}
+
+interface Moderator {
+  name: string;
+  role: string;
+  image: string;
+}
+
+function parseModerators(raw: string | undefined): Moderator[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map((m) => ({ name: m?.name ?? '', role: m?.role ?? '', image: m?.image ?? '' })) : [];
+  } catch {
+    return [];
   }
 }
 
@@ -74,6 +91,7 @@ interface TicketingConfig {
   weezeventUrl: string;
   videoUrl: string;
   parkingLocations: string;
+  moderators: string; // JSON: { name: string; role: string; image: string }[]
   translations: string; // JSON: Partial<Record<'en'|'de', Partial<ConfigTranslationFields>>>
   passes: TicketingPass[];
 }
@@ -556,6 +574,7 @@ const DEFAULT_CONFIG: TicketingConfig = {
   weezeventUrl: 'https://www.weezevent.com/widget_billeterie.php?id_evenement=2098465&widget_key=E2098465&locale=de_DE&color_primary=red&code=red',
   videoUrl: '',
   parkingLocations: '[]',
+  moderators: '[]',
   translations: '{}',
   passes: [],
 };
@@ -897,6 +916,94 @@ export default function TicketingAdmin() {
             />
             <p className="mt-1 text-[11px] text-white/30">Renseignez le nom, l'adresse complète et une note facultative. Une carte est créée pour chaque parking.</p>
           </div>
+
+          <div className="border-t border-white/10 pt-5">
+            <h3 className="text-sm font-semibold text-white">Modérateurs</h3>
+            <p className="mt-1 text-xs text-white/40">
+              Ces photos remplacent la galerie « les moments qui nous attendent » sur la page billetterie.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            {parseModerators(config.moderators).map((moderator, index) => (
+              <div key={index} className="relative flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setConfig((c) => {
+                      const list = parseModerators(c.moderators);
+                      list.splice(index, 1);
+                      return { ...c, moderators: JSON.stringify(list) };
+                    })
+                  }
+                  className="absolute right-2 top-2 rounded-lg bg-white/5 p-1 text-white/40 hover:text-red-400 transition"
+                  aria-label="Supprimer ce modérateur"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <MediaPicker
+                  label={`Photo modérateur ${index + 1}`}
+                  value={moderator.image}
+                  onChange={(url) =>
+                    setConfig((c) => {
+                      const list = parseModerators(c.moderators);
+                      list[index] = { ...list[index], image: url };
+                      return { ...c, moderators: JSON.stringify(list) };
+                    })
+                  }
+                  defaultCategory="event"
+                />
+                <div>
+                  <label className={labelCls}>Nom</label>
+                  <input
+                    className={inputCls}
+                    value={moderator.name}
+                    onChange={(e) =>
+                      setConfig((c) => {
+                        const list = parseModerators(c.moderators);
+                        list[index] = { ...list[index], name: e.target.value };
+                        return { ...c, moderators: JSON.stringify(list) };
+                      })
+                    }
+                    placeholder="Prénom Nom"
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Rôle (optionnel)</label>
+                  <input
+                    className={inputCls}
+                    value={moderator.role}
+                    onChange={(e) =>
+                      setConfig((c) => {
+                        const list = parseModerators(c.moderators);
+                        list[index] = { ...list[index], role: e.target.value };
+                        return { ...c, moderators: JSON.stringify(list) };
+                      })
+                    }
+                    placeholder="Modérateur / Modératrice"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              setConfig((c) => {
+                const list = parseModerators(c.moderators);
+                list.push({ name: '', role: '', image: '' });
+                return { ...c, moderators: JSON.stringify(list) };
+              })
+            }
+            className="flex items-center gap-1.5 self-start rounded-lg bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/60 hover:text-white transition"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Ajouter un modérateur
+          </button>
         </div>
 
         <div className="mt-6">

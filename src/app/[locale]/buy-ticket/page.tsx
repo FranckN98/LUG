@@ -5,7 +5,6 @@ import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { NewTicketingPage } from '@/components/NewTicketingPage';
 import { eventInclude, mapEventToEventData } from '@/lib/events-db';
-import { getPublicEventGallery } from '@/lib/eventGallery';
 import { resolveConfigLocale, resolvePassLocale } from '@/lib/ticketingI18n';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
@@ -92,10 +91,7 @@ export default async function BuyTicketPage({
 
   if (ticketingConfig?.isNewTicketingActive) {
     const eventData = event2026 ? mapEventToEventData(event2026, loc) : null;
-    const galleryImages = Array.from(new Set([
-      ...(eventData?.gallery ?? []),
-      ...getPublicEventGallery('2026'),
-    ]));
+    const moderators = JSON.parse(ticketingConfig.moderators || '[]');
     const resolvedCheckoutUrl =
       ticketingConfig.ticketingProvider === 'weezevent'
         ? ticketingConfig.weezeventUrl
@@ -149,7 +145,7 @@ export default async function BuyTicketPage({
           ...localizedConfig,
           checkoutUrl: resolvedCheckoutUrl,
           videoUrl: ticketingConfig.videoUrl,
-          galleryImages,
+          moderators,
           speakers: eventData?.speakers ?? [],
           parkingLocations: ticketingConfig.parkingLocations,
           passes: localizedPasses,
