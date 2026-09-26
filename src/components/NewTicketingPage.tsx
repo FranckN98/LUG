@@ -56,6 +56,9 @@ export type TicketingModerator = {
   name: string;
   role?: string;
   image?: string;
+  photoPositionX?: number;
+  photoPositionY?: number;
+  photoZoom?: number; // percentage, 100 = fit, >100 zooms in
 };
 
 type ParkingLocation = {
@@ -845,7 +848,12 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
                           <img
                             src={moderator.image}
                             alt={moderator.name || t.moderatorsImgAlt}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="h-full w-full object-cover"
+                            style={{
+                              objectPosition: `${moderator.photoPositionX ?? 50}% ${moderator.photoPositionY ?? 50}%`,
+                              transform: `scale(${(moderator.photoZoom ?? 100) / 100})`,
+                              transformOrigin: `${moderator.photoPositionX ?? 50}% ${moderator.photoPositionY ?? 50}%`,
+                            }}
                             loading="lazy"
                           />
                           <span className="pointer-events-none absolute bottom-2 right-2 rounded-full bg-black/50 p-1.5 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">

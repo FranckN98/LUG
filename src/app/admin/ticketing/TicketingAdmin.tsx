@@ -44,13 +44,25 @@ interface Moderator {
   name: string;
   role: string;
   image: string;
+  photoPositionX: number;
+  photoPositionY: number;
+  photoZoom: number;
 }
 
 function parseModerators(raw: string | undefined): Moderator[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map((m) => ({ name: m?.name ?? '', role: m?.role ?? '', image: m?.image ?? '' })) : [];
+    return Array.isArray(parsed)
+      ? parsed.map((m) => ({
+          name: m?.name ?? '',
+          role: m?.role ?? '',
+          image: m?.image ?? '',
+          photoPositionX: typeof m?.photoPositionX === 'number' ? m.photoPositionX : 50,
+          photoPositionY: typeof m?.photoPositionY === 'number' ? m.photoPositionY : 50,
+          photoZoom: typeof m?.photoZoom === 'number' ? m.photoZoom : 100,
+        }))
+      : [];
   } catch {
     return [];
   }
@@ -925,75 +937,122 @@ export default function TicketingAdmin() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            {parseModerators(config.moderators).map((moderator, index) => (
-              <div key={index} className="relative flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setConfig((c) => {
-                      const list = parseModerators(c.moderators);
-                      list.splice(index, 1);
-                      return { ...c, moderators: JSON.stringify(list) };
-                    })
-                  }
-                  className="absolute right-2 top-2 rounded-lg bg-white/5 p-1 text-white/40 hover:text-red-400 transition"
-                  aria-label="Supprimer ce modérateur"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-                <MediaPicker
-                  label={`Photo modérateur ${index + 1}`}
-                  value={moderator.image}
-                  onChange={(url) =>
-                    setConfig((c) => {
-                      const list = parseModerators(c.moderators);
-                      list[index] = { ...list[index], image: url };
-                      return { ...c, moderators: JSON.stringify(list) };
-                    })
-                  }
-                  defaultCategory="event"
-                />
-                <div>
-                  <label className={labelCls}>Nom</label>
-                  <input
-                    className={inputCls}
-                    value={moderator.name}
-                    onChange={(e) =>
+            {parseModerators(config.moderators).map((moderator, index) => {
+              function updateModerator(patch: Partial<Moderator>) {
+                setConfig((c) => {
+                  const list = parseModerators(c.moderators);
+                  list[index] = { ...list[index], ...patch };
+                  return { ...c, moderators: JSON.stringify(list) };
+                });
+              }
+              return (
+                <div key={index} className="relative flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                  <button
+                    type="button"
+                    onClick={() =>
                       setConfig((c) => {
                         const list = parseModerators(c.moderators);
-                        list[index] = { ...list[index], name: e.target.value };
+                        list.splice(index, 1);
                         return { ...c, moderators: JSON.stringify(list) };
                       })
                     }
-                    placeholder="Prénom Nom"
+                    className="absolute right-2 top-2 rounded-lg bg-white/5 p-1 text-white/40 hover:text-red-400 transition"
+                    aria-label="Supprimer ce modérateur"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  <MediaPicker
+                    label={`Photo modérateur ${index + 1}`}
+                    value={moderator.image}
+                    onChange={(url) => updateModerator({ image: url })}
+                    defaultCategory="event"
                   />
+                  {moderator.image && (
+                    <div className="rounded-xl border border-white/10 bg-black/10 p-3">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-white/50">Aperçu</span>
+                        <span className="text-[0.65rem] text-white/45">Cadrage</span>
+                      </div>
+                      <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-[#1a0d0d]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={moderator.image}
+                          alt={moderator.name || 'Photo modérateur'}
+                          className="h-full w-full object-cover"
+                          style={{
+                            objectPosition: `${moderator.photoPositionX}% ${moderator.photoPositionY}%`,
+                            transform: `scale(${moderator.photoZoom / 100})`,
+                            transformOrigin: `${moderator.photoPositionX}% ${moderator.photoPositionY}%`,
+                          }}
+                        />
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <label className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/50">
+                          X
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            value={moderator.photoPositionX}
+                            onChange={(e) => updateModerator({ photoPositionX: Number(e.target.value) })}
+                            className="mt-2 w-full accent-primary"
+                          />
+                        </label>
+                        <label className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/50">
+                          Y
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            value={moderator.photoPositionY}
+                            onChange={(e) => updateModerator({ photoPositionY: Number(e.target.value) })}
+                            className="mt-2 w-full accent-primary"
+                          />
+                        </label>
+                      </div>
+                      <label className="mt-2 block text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/50">
+                        Taille (zoom {moderator.photoZoom}%)
+                        <input
+                          type="range"
+                          min={100}
+                          max={300}
+                          value={moderator.photoZoom}
+                          onChange={(e) => updateModerator({ photoZoom: Number(e.target.value) })}
+                          className="mt-2 w-full accent-primary"
+                        />
+                      </label>
+                    </div>
+                  )}
+                  <div>
+                    <label className={labelCls}>Nom</label>
+                    <input
+                      className={inputCls}
+                      value={moderator.name}
+                      onChange={(e) => updateModerator({ name: e.target.value })}
+                      placeholder="Prénom Nom"
+                    />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Rôle (optionnel)</label>
+                    <input
+                      className={inputCls}
+                      value={moderator.role}
+                      onChange={(e) => updateModerator({ role: e.target.value })}
+                      placeholder="Modérateur / Modératrice"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className={labelCls}>Rôle (optionnel)</label>
-                  <input
-                    className={inputCls}
-                    value={moderator.role}
-                    onChange={(e) =>
-                      setConfig((c) => {
-                        const list = parseModerators(c.moderators);
-                        list[index] = { ...list[index], role: e.target.value };
-                        return { ...c, moderators: JSON.stringify(list) };
-                      })
-                    }
-                    placeholder="Modérateur / Modératrice"
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <button
             type="button"
             onClick={() =>
               setConfig((c) => {
                 const list = parseModerators(c.moderators);
-                list.push({ name: '', role: '', image: '' });
+                list.push({ name: '', role: '', image: '', photoPositionX: 50, photoPositionY: 50, photoZoom: 100 });
                 return { ...c, moderators: JSON.stringify(list) };
               })
             }
