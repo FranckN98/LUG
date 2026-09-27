@@ -826,6 +826,57 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
           </div>
         </section>
 
+        {config.speakers.length > 0 && (
+          <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
+            <div className="mx-auto max-w-6xl">
+              <div className="mb-10 text-center">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.speakersEyebrow}</p>
+                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">{t.speakersTitle}</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+                {config.speakers.map((speaker) => (
+                  <article key={`${speaker.name}-${speaker.role}`} className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.45)]">
+                    <div className="aspect-square bg-[#f4ece6] sm:aspect-[4/3]">
+                      {speaker.image ? (
+                        <button
+                          type="button"
+                          onClick={() => setZoomedSpeaker(speaker.image!)}
+                          className="group relative block h-full w-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                          aria-label={speaker.name}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={speaker.image}
+                            alt={speaker.name}
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            style={{ objectPosition: `${speaker.photoPositionX ?? 50}% ${speaker.photoPositionY ?? 50}%` }}
+                            loading="lazy"
+                          />
+                          <span className="pointer-events-none absolute bottom-2 right-2 rounded-full bg-black/50 p-1.5 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 8v6M8 11h6" />
+                            </svg>
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="flex h-full items-center justify-center bg-[#8C1A1A] font-display text-5xl font-bold text-white/80">
+                          {speaker.name.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 sm:p-5">
+                      <h3 className="font-display text-lg font-bold leading-tight text-neutral-900 sm:text-2xl">{speaker.name}</h3>
+                      {speaker.role && <p className="mt-1 text-xs leading-relaxed text-neutral-500 sm:text-sm">{speaker.role}</p>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <ImageLightbox src={zoomedSpeaker} onClose={() => setZoomedSpeaker(null)} />
+            </div>
+          </section>
+        )}
+
         {config.moderators.length > 0 && (
           <section className="relative z-10 px-5 py-16 sm:px-8 sm:py-20">
             <div className="mx-auto max-w-5xl">
@@ -879,57 +930,6 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
                   </article>
                 ))}
               </div>
-            </div>
-          </section>
-        )}
-
-        {config.speakers.length > 0 && (
-          <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
-            <div className="mx-auto max-w-6xl">
-              <div className="mb-10 text-center">
-                <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.speakersEyebrow}</p>
-                <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">{t.speakersTitle}</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-                {config.speakers.map((speaker) => (
-                  <article key={`${speaker.name}-${speaker.role}`} className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.45)]">
-                    <div className="aspect-square bg-[#f4ece6] sm:aspect-[4/3]">
-                      {speaker.image ? (
-                        <button
-                          type="button"
-                          onClick={() => setZoomedSpeaker(speaker.image!)}
-                          className="group relative block h-full w-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                          aria-label={speaker.name}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={speaker.image}
-                            alt={speaker.name}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                            style={{ objectPosition: `${speaker.photoPositionX ?? 50}% ${speaker.photoPositionY ?? 50}%` }}
-                            loading="lazy"
-                          />
-                          <span className="pointer-events-none absolute bottom-2 right-2 rounded-full bg-black/50 p-1.5 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 8v6M8 11h6" />
-                            </svg>
-                          </span>
-                        </button>
-                      ) : (
-                        <div className="flex h-full items-center justify-center bg-[#8C1A1A] font-display text-5xl font-bold text-white/80">
-                          {speaker.name.slice(0, 1).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3 sm:p-5">
-                      <h3 className="font-display text-lg font-bold leading-tight text-neutral-900 sm:text-2xl">{speaker.name}</h3>
-                      {speaker.role && <p className="mt-1 text-xs leading-relaxed text-neutral-500 sm:text-sm">{speaker.role}</p>}
-                    </div>
-                  </article>
-                ))}
-              </div>
-              <ImageLightbox src={zoomedSpeaker} onClose={() => setZoomedSpeaker(null)} />
             </div>
           </section>
         )}
