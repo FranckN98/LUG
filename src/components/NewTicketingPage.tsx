@@ -565,13 +565,13 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
           .lu-no-motion { animation: none !important; }
           .lu-letter { animation: none !important; }
         }
-        /* Grille des tickets : 1 col (mobile) · 2 col (tablette) · N col (desktop) */
+        /* Grille des tickets : 1 col (mobile) · 2 col (tablette) · 4 col (desktop) */
         .lu-tickets-grid { grid-template-columns: 1fr; }
         @media (min-width: 640px) {
           .lu-tickets-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (min-width: 1024px) {
-          .lu-tickets-grid { grid-template-columns: repeat(var(--lu-cols, 3), minmax(0, 1fr)); }
+          .lu-tickets-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         }
         /* ── Bouton Play animé ─────────────────────────────────────────────── */
         @keyframes lu-play-pulse {
@@ -803,7 +803,6 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
             ) : (
               <div
                 className="lu-tickets-grid grid gap-5 sm:gap-6"
-                style={{ ['--lu-cols' as string]: config.passes.length === 4 ? 2 : config.passes.length } as CSSProperties}
               >
                 {config.passes.map((pass) => (
                   <PassCard key={pass.id} pass={pass} locale={locale} />
