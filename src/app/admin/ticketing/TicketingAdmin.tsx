@@ -1195,7 +1195,7 @@ export default function TicketingAdmin() {
       {config.passes.length === 0 && (
         <div className={sectionCls}>
           <h2 className="mb-2 text-sm font-semibold text-white">Démarrage rapide</h2>
-          <p className="mb-4 text-sm text-white/45">Créez les 3 tickets par défaut de l'édition 2026 en un clic.</p>
+          <p className="mb-4 text-sm text-white/45">Créez les 4 tickets par défaut de l'édition 2026 en un clic.</p>
           <button
             onClick={async () => {
               const defaultPasses = [
@@ -1300,6 +1300,31 @@ export default function TicketingAdmin() {
                   sortOrder: 2,
                   availabilityNote: null,
                 },
+                {
+                  name: 'Level Up Expo Stand',
+                  label: 'Stand exposant',
+                  targetAudience: 'Pour les entreprises et porteurs de projets souhaitant présenter leurs activités.',
+                  description: 'Votre marque mérite d\'être vue.',
+                  highlights: JSON.stringify([]),
+                  includes: JSON.stringify([
+                    "Un espace dans la zone d'exposition avec une table",
+                    "Un billet Business Growth pour une personne",
+                    "Accès à la conférence et au parcours Business Growth",
+                    "Accès à la zone d'exposition",
+                    "Occasions de présenter votre activité et nouer des contacts",
+                  ]),
+                  decisionPhrase: "Offre valable pour une seule personne. Toute personne supplémentaire présente sur le stand doit acheter son propre billet.",
+                  priceCents: 15000,
+                  oldPriceCents: null,
+                  currency: 'EUR',
+                  status: 'available',
+                  isActive: true,
+                  checkoutUrl: '',
+                  colorPrimary: '#6f4e37',
+                  colorSecondary: '#a0826d',
+                  sortOrder: 3,
+                  availabilityNote: null,
+                },
               ];
 
               // Ensure config exists first
@@ -1316,12 +1341,12 @@ export default function TicketingAdmin() {
                   body: JSON.stringify(pass),
                 });
               }
-              adminNotify.success('3 tickets créés avec succès !');
+              adminNotify.success('4 tickets créés avec succès !');
               await load();
             }}
             className="rounded-xl bg-[#1a4a2e] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#2d7a4f]"
           >
-            ✨ Créer les 3 tickets par défaut
+            ✨ Créer les 4 tickets par défaut
           </button>
         </div>
       )}

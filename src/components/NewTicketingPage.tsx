@@ -78,6 +78,7 @@ const PAGE_TEXT: Record<Locale, {
   ticketsEyebrow: string;
   ticketsTitle: string;
   ticketsSubtitle: string;
+  expoStandInfo: string;
   noTickets: string;
   secureNote: string;
   perksEyebrow: string;
@@ -114,6 +115,7 @@ const PAGE_TEXT: Record<Locale, {
     ticketsEyebrow: 'La billetterie',
     ticketsTitle: 'Choisissez votre formule',
     ticketsSubtitle: 'Sélectionnez la formule qui vous correspond.',
+    expoStandInfo: 'Prévoyez vos produits, supports de présentation et éléments de décoration pour mettre votre marque en valeur.',
     noTickets: 'Aucun ticket disponible pour le moment.',
     secureNote: 'Paiement 100 % sécurisé · Confirmation immédiate',
     perksEyebrow: 'Avantages communs',
@@ -160,6 +162,7 @@ const PAGE_TEXT: Record<Locale, {
     ticketsEyebrow: 'Tickets',
     ticketsTitle: 'Choose your pass',
     ticketsSubtitle: 'Pick the pass that suits you best.',
+    expoStandInfo: 'Plan your products, marketing materials and branding elements to showcase your brand effectively.',
     noTickets: 'No ticket available at the moment.',
     secureNote: '100% secure payment · Instant confirmation',
     perksEyebrow: 'Shared perks',
@@ -206,6 +209,7 @@ const PAGE_TEXT: Record<Locale, {
     ticketsEyebrow: 'Ticketing',
     ticketsTitle: 'Wähle dein Ticket',
     ticketsSubtitle: 'Wähle das Ticket, das am besten zu dir passt.',
+    expoStandInfo: 'Planen Sie Ihre Produkte, Präsentationsmaterialien und Branding-Elemente, um Ihre Marke effektiv zu präsentieren.',
     noTickets: 'Derzeit ist kein Ticket verfügbar.',
     secureNote: '100 % sichere Zahlung · Sofortige Bestätigung',
     perksEyebrow: 'Gemeinsame Vorteile',
@@ -759,11 +763,18 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
             ) : (
               <div
                 className="lu-tickets-grid grid gap-5 sm:gap-6"
-                style={{ ['--lu-cols' as string]: config.passes.length } as CSSProperties}
+                style={{ ['--lu-cols' as string]: config.passes.length === 4 ? 2 : config.passes.length } as CSSProperties}
               >
                 {config.passes.map((pass) => (
                   <PassCard key={pass.id} pass={pass} locale={locale} />
                 ))}
+              </div>
+            )}
+
+            {/* Expo Stand info text */}
+            {config.passes.some((p) => p.name === 'Level Up Expo Stand') && (
+              <div className="mt-5 text-center">
+                <p className="text-sm italic text-neutral-500">{t.expoStandInfo}</p>
               </div>
             )}
 
