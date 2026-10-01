@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
@@ -144,26 +144,26 @@ const PAGE_TEXT: Record<Locale, {
     soldOutFooter: 'Sold out',
     dbEyebrow: 'Offre de voyage Deutsche Bahn',
     dbTitle: 'Un bon plan pour votre voyage à Level Up',
-    dbIntro: 'Les participants à Level Up in Germany 2026 bénéficient d’offres DB Event exclusives pour leurs voyages en train longue distance partout en Allemagne avec les ICE, IC et EC.',
+    dbIntro: 'Les participants à Level Up in Germany 2026 bénéficient d'offres DB Event exclusives pour leurs voyages en train longue distance partout en Allemagne avec les ICE, IC et EC.',
     dbBenefits: [
-      'Jusqu’à 10 % d’avantage tarifaire par rapport aux tarifs réduits et flexibles habituels',
+      'Jusqu'à 10 % d'avantage tarifaire par rapport aux tarifs réduits et flexibles habituels',
       'Réduction supplémentaire avec une BahnCard 25 ou 50',
       'Un voyage confortable et plus respectueux du climat avec les trains grandes lignes de Deutsche Bahn',
     ],
     dbOutro: 'Consultez les offres disponibles pour votre trajet et réservez dès maintenant votre billet DB Event.',
     dbCta: 'Réserver mon billet DB Event',
     dbCtaNote: 'Réservation sur la plateforme officielle de Deutsche Bahn.',
-    dbFaqLink: 'Des questions sur l’offre DB ? Consulter la FAQ',
-    venueEyebrow: ’Informations pratiques’,
-    venueTitle: ’Le lieu de l’événement’,
-    venueAddress: ’REGUS Conference Center, 5ème étage, Am Flughafen 12, 60549 Frankfurt am Main’,
-    venueFullAddress: ’REGUS Conference Center Am Flughafen 12 60549 Frankfurt am Main Germany’,
-    navigationTitle: ’Comment accéder au lieu’,
-    navigationFromIce: ’Depuis la gare ICE (Fernbahnhof): Prenez l’escalator vers la Kuppelhalle (hall avec toit en verre). Dirigez-vous vers l’entrée OUEST (REWE-Markt) et prenez l’escalator jusqu’à l’étage 5. Suivez les numéros de maison jusqu’au n°12 sur votre gauche.’,
-    navigationFromAirport: ’Depuis l’aéroport ou les parkings P1-P4: Suivez les panneaux vers la gare Fernbahnhof (ICE). Continuez vers la Kuppelhalle, puis suivez les indications pour l’entrée OUEST (REWE-Markt). Prenez l’escalator jusqu’à l’étage 5 et identifiez le n°12.’,
-    navigationFromSBahn: ’Depuis la S-Bahn ou la gare régionale: Suivez les indications vers la gare Fernbahnhof (ICE). Continuez depuis la Kuppelhalle en direction de l’OUEST jusqu’à l’entrée REWE-Markt, puis prenez l’escalator vers l’étage 5.’,
-    navigationFromParking: ’Depuis le parking THE SQUAIRE: Garez-vous à l’étage 6. Prenez l’ascenseur jusqu’à l’étage 6. Utilisez l’accès THE SQUAIRE Metro qui vous mène à l’étage 5. Suivez vers la gauche et identifiez le n°12 (grand accueil blanc).’,
-    getDirections: ’Obtenir l’itinéraire’,
+    dbFaqLink: 'Des questions sur l'offre DB ? Consulter la FAQ',
+    venueEyebrow: 'Informations pratiques',
+    venueTitle: 'Le lieu de l'événement',
+    venueAddress: 'REGUS Conference Center, 5ème étage, Am Flughafen 12, 60549 Frankfurt am Main',
+    venueFullAddress: 'REGUS Conference Center Am Flughafen 12 60549 Frankfurt am Main Germany',
+    navigationTitle: 'Comment accéder au lieu',
+    navigationFromIce: 'Depuis la gare ICE (Fernbahnhof): Prenez l'escalator vers la Kuppelhalle (hall avec toit en verre). Dirigez-vous vers l'entrée OUEST (REWE-Markt) et prenez l'escalator jusqu'à l'étage 5. Suivez les numéros de maison jusqu'au n°12 sur votre gauche.',
+    navigationFromAirport: 'Depuis l'aéroport ou les parkings P1-P4: Suivez les panneaux vers la gare Fernbahnhof (ICE). Continuez vers la Kuppelhalle, puis suivez les indications pour l'entrée OUEST (REWE-Markt). Prenez l'escalator jusqu'à l'étage 5 et identifiez le n°12.',
+    navigationFromSBahn: 'Depuis la S-Bahn ou la gare régionale: Suivez les indications vers la gare Fernbahnhof (ICE). Continuez depuis la Kuppelhalle en direction de l'OUEST jusqu'à l'entrée REWE-Markt, puis prenez l'escalator vers l'étage 5.',
+    navigationFromParking: 'Depuis le parking THE SQUAIRE: Garez-vous à l'étage 6. Prenez l'ascenseur jusqu'à l'étage 6. Utilisez l'accès THE SQUAIRE Metro qui vous mène à l'étage 5. Suivez vers la gauche et identifiez le n°12 (grand accueil blanc).',
+    getDirections: 'Obtenir l'itinéraire',
   },
   en: {
     heroAlt: 'Level Up in Germany — Ticket sales are open',
