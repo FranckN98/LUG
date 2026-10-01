@@ -154,6 +154,16 @@ const PAGE_TEXT: Record<Locale, {
     dbCta: 'Réserver mon billet DB Event',
     dbCtaNote: 'Réservation sur la plateforme officielle de Deutsche Bahn.',
     dbFaqLink: 'Des questions sur l’offre DB ? Consulter la FAQ',
+    venueEyebrow: ’Informations pratiques’,
+    venueTitle: ’Le lieu de l’événement’,
+    venueAddress: ’REGUS Conference Center, 5ème étage, Am Flughafen 12, 60549 Frankfurt am Main’,
+    venueFullAddress: ’REGUS Conference Center Am Flughafen 12 60549 Frankfurt am Main Germany’,
+    navigationTitle: ’Comment accéder au lieu’,
+    navigationFromIce: ’Depuis la gare ICE (Fernbahnhof): Prenez l’escalator vers la Kuppelhalle (hall avec toit en verre). Dirigez-vous vers l’entrée OUEST (REWE-Markt) et prenez l’escalator jusqu’à l’étage 5. Suivez les numéros de maison jusqu’au n°12 sur votre gauche.’,
+    navigationFromAirport: ’Depuis l’aéroport ou les parkings P1-P4: Suivez les panneaux vers la gare Fernbahnhof (ICE). Continuez vers la Kuppelhalle, puis suivez les indications pour l’entrée OUEST (REWE-Markt). Prenez l’escalator jusqu’à l’étage 5 et identifiez le n°12.’,
+    navigationFromSBahn: ’Depuis la S-Bahn ou la gare régionale: Suivez les indications vers la gare Fernbahnhof (ICE). Continuez depuis la Kuppelhalle en direction de l’OUEST jusqu’à l’entrée REWE-Markt, puis prenez l’escalator vers l’étage 5.’,
+    navigationFromParking: ’Depuis le parking THE SQUAIRE: Garez-vous à l’étage 6. Prenez l’ascenseur jusqu’à l’étage 6. Utilisez l’accès THE SQUAIRE Metro qui vous mène à l’étage 5. Suivez vers la gauche et identifiez le n°12 (grand accueil blanc).’,
+    getDirections: ’Obtenir l’itinéraire’,
   },
   en: {
     heroAlt: 'Level Up in Germany — Ticket sales are open',
@@ -201,6 +211,16 @@ const PAGE_TEXT: Record<Locale, {
     dbCta: 'Book my DB Event ticket',
     dbCtaNote: 'Booking on the official Deutsche Bahn platform.',
     dbFaqLink: 'Questions about the DB offer? See the FAQ',
+    venueEyebrow: 'Practical information',
+    venueTitle: 'Event venue',
+    venueAddress: 'REGUS Conference Center, 5th Floor, Am Flughafen 12, 60549 Frankfurt am Main',
+    venueFullAddress: 'REGUS Conference Center Am Flughafen 12 60549 Frankfurt am Main Germany',
+    navigationTitle: 'How to get there',
+    navigationFromIce: 'From ICE train station (Fernbahnhof): Take the escalator up to the Kuppelhalle (glass dome hall). Head towards the WEST entrance (REWE-Markt) and take the escalator to level 5. Follow the house numbers to #12 on your left.',
+    navigationFromAirport: 'From the airport or parking P1-P4: Follow signs to Fernbahnhof (ICE train station). Continue to the Kuppelhalle, then head towards the WEST entrance (REWE-Markt). Take the escalator to level 5 and look for #12.',
+    navigationFromSBahn: 'From S-Bahn or regional train station: Follow signs to Fernbahnhof (ICE station). Continue from the Kuppelhalle heading WEST to the REWE-Markt entrance, then take the escalator to level 5.',
+    navigationFromParking: 'From THE SQUAIRE parking: Park on level 6. Take the elevator to level 6. Use the THE SQUAIRE Metro access that takes you to level 5. Head left and look for #12 (large white reception desk).',
+    getDirections: 'Get directions',
   },
   de: {
     heroAlt: 'Level Up in Germany — Der Ticketverkauf ist eröffnet',
@@ -248,6 +268,16 @@ const PAGE_TEXT: Record<Locale, {
     dbCta: 'Mein DB Event-Ticket buchen',
     dbCtaNote: 'Buchung auf der offiziellen Plattform der Deutschen Bahn.',
     dbFaqLink: 'Fragen zum DB-Angebot? Zur FAQ',
+    venueEyebrow: 'Praktische Informationen',
+    venueTitle: 'Veranstaltungsort',
+    venueAddress: 'REGUS Conference Center, 5. Etage, Am Flughafen 12, 60549 Frankfurt am Main',
+    venueFullAddress: 'REGUS Conference Center Am Flughafen 12 60549 Frankfurt am Main Germany',
+    navigationTitle: 'Anfahrtsbeschreibung',
+    navigationFromIce: 'Von der ICE-Bahnstation (Fernbahnhof): Nehmen Sie die Rolltreppe zur Kuppelhalle (Glaskuppelhalle). Gehen Sie zum Eingang WEST (REWE-Markt) und nehmen Sie dort die Rolltreppe zur Ebene 5. Folgen Sie den Hausnummern bis zur Nummer 12 auf Ihrer linken Seite.',
+    navigationFromAirport: 'Vom Flughafen oder Parkplätzen P1-P4: Folgen Sie der Beschilderung zum Fernbahnhof (ICE). Fahren Sie zur Kuppelhalle und richten Sie sich nach dem Eingang WEST (REWE-Markt). Nehmen Sie die Rolltreppe zur Ebene 5 und suchen Sie die Nummer 12.',
+    navigationFromSBahn: 'Von der S-Bahn oder dem Regionalbahnhof: Folgen Sie der Beschilderung zum Fernbahnhof (ICE). Gehen Sie von der Kuppelhalle in Richtung WEST zum Eingang REWE-Markt und nehmen Sie die Rolltreppe zur Ebene 5.',
+    navigationFromParking: 'Vom THE SQUAIRE Parkhaus: Parken Sie auf Ebene 6. Nehmen Sie den Aufzug zur Ebene 6. Nutzen Sie den THE SQUAIRE Metro Zugang, der Sie zur Ebene 5 bringt. Folgen Sie nach links und suchen Sie die Nummer 12 (großer weißer Empfang).',
+    getDirections: 'Route anzeigen',
   },
 };
 
@@ -1001,6 +1031,65 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
 
         {/* ── FAQ ──────────────────────────────────────────────────────────────── */}
         <TicketingFAQ />
+
+        {/* ── Venue & Navigation ────────────────────────────────────────────────── */}
+        <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
+          <div className="mx-auto max-w-6xl">
+            <div className="mb-10 text-center">
+              <p className="text-[0.7rem] font-bold uppercase tracking-[0.3em] text-accent">{t.venueEyebrow}</p>
+              <h2 className="mt-2 font-display text-3xl font-bold uppercase text-neutral-900 sm:text-5xl">{t.venueTitle}</h2>
+            </div>
+            <div className="grid gap-8 lg:grid-cols-2">
+              {/* Address Card */}
+              <article className="overflow-hidden rounded-2xl border border-black/[0.07] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.4)]">
+                <iframe
+                  className="h-64 w-full border-0"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(t.venueFullAddress)}&output=embed`}
+                  title={t.venueTitle}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+                <div className="flex flex-col justify-between gap-4 p-5">
+                  <div>
+                    <h3 className="font-display text-xl font-bold text-neutral-900">REGUS Conference Center</h3>
+                    <p className="mt-2 text-sm text-neutral-600">{t.venueAddress}</p>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(t.venueFullAddress)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg bg-[#8C1A1A] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#a82020] text-center"
+                  >
+                    {t.getDirections}
+                  </a>
+                </div>
+              </article>
+
+              {/* Navigation Instructions */}
+              <article className="overflow-hidden rounded-2xl border border-black/[0.07] bg-white shadow-[0_18px_45px_-28px_rgba(0,0,0,0.4)] p-5">
+                <h3 className="font-display text-xl font-bold text-neutral-900 mb-4">{t.navigationTitle}</h3>
+                <div className="space-y-4 text-sm text-neutral-700">
+                  <div>
+                    <p className="font-semibold text-neutral-900 mb-1">🚂 {locale === 'fr' ? 'Gare ICE' : locale === 'en' ? 'ICE Train' : 'ICE-Bahnsteig'}</p>
+                    <p>{t.navigationFromIce}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-neutral-900 mb-1">✈️ {locale === 'fr' ? 'Aéroport' : locale === 'en' ? 'Airport' : 'Flughafen'}</p>
+                    <p>{t.navigationFromAirport}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-neutral-900 mb-1">🚆 {locale === 'fr' ? 'S-Bahn' : 'S-Bahn'}</p>
+                    <p>{t.navigationFromSBahn}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-neutral-900 mb-1">🅿️ {locale === 'fr' ? 'Parking' : locale === 'en' ? 'Parking' : 'Parkhaus'}</p>
+                    <p>{t.navigationFromParking}</p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
 
         {parkingLocations.length > 0 && (
           <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">
