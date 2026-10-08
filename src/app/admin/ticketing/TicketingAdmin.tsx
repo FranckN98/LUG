@@ -236,7 +236,7 @@ const PASS_COLOR_PRESETS = [
 const STATUS_OPTIONS = [
   { value: 'available', label: '✅ Disponible' },
   { value: 'coming_soon', label: '⏳ Bientôt disponible' },
-  { value: 'sold_out', label: '🔴 Sold out' },
+  { value: 'sold_out', label: '🔴 Épuisé' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────

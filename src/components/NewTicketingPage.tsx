@@ -149,9 +149,9 @@ const PAGE_TEXT: Record<Locale, {
     videoAriaLabel: 'Vidéo',
     videoTitle: 'Vidéo Level Up in Germany',
     close: 'Fermer',
-    soldOutOverlay: 'Sold Out',
+    soldOutOverlay: 'Rupture de stock',
     comingSoonFooter: '⏳ Bientôt disponible',
-    soldOutFooter: 'Sold out',
+    soldOutFooter: 'Épuisé',
     dbEyebrow: 'Offre de voyage Deutsche Bahn',
     dbTitle: 'Un bon plan pour votre voyage à Level Up',
     dbIntro: 'Les participants à Level Up in Germany 2026 bénéficient d\'offres DB Event exclusives pour leurs voyages en train longue distance partout en Allemagne avec les ICE, IC et EC.',
@@ -413,7 +413,7 @@ function PassCard({
         style={{ background: `linear-gradient(90deg, ${pass.colorPrimary}, ${pass.colorSecondary})` }}
       />
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
+      <div className="flex flex-1 flex-col p-6 sm:p-7 lg:p-8">
         {/* Header: tier name (left) + price pill (right) — Mboa style */}
         <div className="mb-3 flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -522,6 +522,7 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
 
   const hasCheckout = Boolean(config.checkoutUrl);
   const hasAvailablePass = config.passes.some((p) => p.status === 'available');
+  const allSoldOut = config.passes.length > 0 && !hasAvailablePass;
   const isOpen = hasCheckout && hasAvailablePass;
   const ytId = youtubeId(config.videoUrl ?? '');
   const parkingLocations = parseParkingLocations(config.parkingLocations);
@@ -565,13 +566,13 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
           .lu-no-motion { animation: none !important; }
           .lu-letter { animation: none !important; }
         }
-        /* Grille des tickets : 1 col (mobile) · 2 col (tablette) · 4 col (desktop) */
+        /* Grille des tickets : 1 col (mobile) · 2 col (tablette) · 3 col (desktop) */
         .lu-tickets-grid { grid-template-columns: 1fr; }
         @media (min-width: 640px) {
           .lu-tickets-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (min-width: 1024px) {
-          .lu-tickets-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+          .lu-tickets-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
         /* ── Bouton Play animé ─────────────────────────────────────────────── */
         @keyframes lu-play-pulse {
@@ -802,7 +803,7 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
               <p className="text-center text-neutral-400">{t.noTickets}</p>
             ) : (
               <div
-                className="lu-tickets-grid grid gap-5 sm:gap-6"
+                className="lu-tickets-grid grid gap-6 sm:gap-7 lg:gap-8"
               >
                 {config.passes.map((pass) => (
                   <PassCard key={pass.id} pass={pass} locale={locale} />
@@ -817,32 +818,53 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
               </div>
             )}
 
-            {/* Single animated CTA */}
-            {isOpen && (
-              <div className="mt-14 flex flex-col items-center animate-hero-buttons">
+            {/* Single animated CTA - Shows both available and sold out states */}
+            {hasCheckout && (
+              <div className="mt-14 flex flex-col items-center" style={isOpen ? { animation: 'var(--animate-hero-buttons, none)' } : {}}>
                 <button
                   onClick={handleBuy}
-                  className="animate-cta-glow group/cta relative w-full max-w-md overflow-hidden rounded-full py-5 text-base font-extrabold text-white transition active:scale-[0.98]"
-                  style={{ background: 'linear-gradient(135deg, #6f1414, #8C1A1A)' }}
+                  disabled={!isOpen}
+                  className={`group/cta relative w-full max-w-md overflow-hidden rounded-full py-5 text-base font-extrabold text-white transition active:scale-[0.98] ${
+                    isOpen 
+                      ? 'animate-cta-glow cursor-pointer' 
+                      : 'cursor-not-allowed opacity-60'
+                  }`}
+                  style={{ 
+                    background: isOpen 
+                      ? 'linear-gradient(135deg, #6f1414, #8C1A1A)' 
+                      : 'linear-gradient(135deg, #999999, #666666)'
+                  }}
                 >
                   <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
-                    🎟️ {config.ctaButtonText}
-                    <svg className="h-5 w-5 transition-transform group-hover/cta:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
+                    {isOpen ? (
+                      <>
+                        🎟️ {config.ctaButtonText}
+                        <svg className="h-5 w-5 transition-transform group-hover/cta:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+                          <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                      </>
+                    ) : (
+                      <>
+                        🔴 SOLD OUT
+                      </>
+                    )}
                   </span>
-                  {/* Shimmer sweep */}
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                  />
+                  {/* Shimmer sweep - only for available state */}
+                  {isOpen && (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                    />
+                  )}
                 </button>
-                <p className="mt-4 flex items-center gap-2 text-xs font-medium text-neutral-500">
-                  <svg className="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                  {t.secureNote}
-                </p>
+                {isOpen && (
+                  <p className="mt-4 flex items-center gap-2 text-xs font-medium text-neutral-500">
+                    <svg className="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                    {t.secureNote}
+                  </p>
+                )}
               </div>
             )}
           </div>
