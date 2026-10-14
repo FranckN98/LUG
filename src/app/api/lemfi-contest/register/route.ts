@@ -140,6 +140,14 @@ export async function POST(request: NextRequest) {
       throw dbError;
     }
 
+    // Check if contest is full
+    if (!result) {
+      return NextResponse.json(
+        { error: 'Contest is full', isFull: true },
+        { status: 409 }
+      );
+    }
+
     // Send confirmation email (non-blocking)
     sendContestConfirmationEmail({
       email: result.entry.email,
