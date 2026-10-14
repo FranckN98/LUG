@@ -1035,7 +1035,7 @@ model LemFiContestEntry {
   // Screenshots stored in Vercel Blob; we keep URL here
   screenshotUrl            String   @map("screenshot_url")
   // Hash of screenshot content for duplicate detection
-  screenshotHash           String?  @map("screenshot_hash")
+  screenshotHash           String?  @unique @map("screenshot_hash")
   // Validation status: pending | validated | rejected
   status                   String   @default("pending")
   // Admin reason for rejection (if applicable)

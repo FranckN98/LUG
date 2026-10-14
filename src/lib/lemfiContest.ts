@@ -63,7 +63,7 @@ export function hashScreenshot(buffer: Buffer): string {
  * Check if screenshot hash already exists (duplicate protection).
  */
 export async function checkScreenshotDuplicate(hash: string): Promise<boolean> {
-  const existing = await prisma.lemFiContestEntry.findUnique({
+  const existing = await prisma.lemFiContestEntry.findFirst({
     where: { screenshotHash: hash },
     select: { id: true },
   });
