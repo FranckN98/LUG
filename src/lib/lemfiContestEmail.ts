@@ -70,10 +70,14 @@ export async function sendContestConfirmationEmail({
       to: email,
       subject: `Participation reçue - Concours Level Up × LemFi - ${displayNumber}`,
       html,
-      tags: ['lemfi-contest', 'confirmation'],
+      tags: [{ name: 'category', value: 'lemfi_confirmation' }],
     });
 
-    return { success: true, messageId: result.id };
+    if (result.error) {
+      console.error('Resend rejected contest confirmation email:', result.error);
+      return { success: false, error: result.error };
+    }
+    return { success: true, messageId: result.data?.id };
   } catch (error) {
     console.error('Failed to send contest confirmation email:', error);
     return { success: false, error };
@@ -110,7 +114,7 @@ export async function sendAdminValidationAlert({
         </p>
         <p><a href="${adminDashboardUrl}">Accéder au tableau de bord admin</a></p>
       `,
-      tags: ['lemfi-contest', 'admin-alert'],
+      tags: [{ name: 'category', value: 'lemfi_admin_alert' }],
     });
   } catch (error) {
     console.error('Failed to send admin alert:', error);
@@ -140,7 +144,7 @@ export async function sendValidationConfirmationEmail({
         <p>Votre numéro <strong>${displayNumber}</strong> est maintenant éligible au tirage au sort.</p>
         <p>À bientôt ! 🎉</p>
       `,
-      tags: ['lemfi-contest', 'validated'],
+      tags: [{ name: 'category', value: 'lemfi_validated' }],
     });
   } catch (error) {
     console.error('Failed to send validation email:', error);
@@ -173,7 +177,7 @@ export async function sendRejectionEmail({
         <p><strong>${reason}</strong></p>
         <p>Nous vous invitons à vérifier les conditions du concours et de réessayer si applicable.</p>
       `,
-      tags: ['lemfi-contest', 'rejected'],
+      tags: [{ name: 'category', value: 'lemfi_rejected' }],
     });
   } catch (error) {
     console.error('Failed to send rejection email:', error);

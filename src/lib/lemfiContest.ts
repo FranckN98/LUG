@@ -155,9 +155,6 @@ export async function getEntryByAccessToken(accessToken: string) {
 export async function getEntryById(id: string) {
   return prisma.lemFiContestEntry.findUnique({
     where: { id },
-    include: {
-      // future: validations if needed
-    },
   });
 }
 
