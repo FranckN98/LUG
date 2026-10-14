@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
     let screenshotUrl: string;
     try {
       const blob = await put(filename, buffer, {
-        access: 'private',
+        access: 'public',
         contentType: file.type,
         addRandomSuffix: true,
       });
