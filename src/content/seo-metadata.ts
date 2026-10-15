@@ -1,4 +1,5 @@
 import type { Locale } from '@/i18n/config';
+import { lemfiCopy } from './lemfi-contest';
 
 export type SeoEntry = { title: string; description: string; keywords?: string[] };
 
@@ -335,6 +336,11 @@ export const SEO_BY_PATH: Record<string, Record<Locale, SeoEntry>> = {
       title: 'Confidentialit\u00e9',
       description: 'Politique de confidentialit\u00e9 de Level Up in Germany : traitement des donn\u00e9es.',
     },
+  },
+  '/lemfi-contest': {
+    de: lemfiCopy.de.seo,
+    en: lemfiCopy.en.seo,
+    fr: lemfiCopy.fr.seo,
   },
 };
 

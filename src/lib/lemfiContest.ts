@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'crypto';
 import { Prisma } from '@prisma/client';
 import { prisma } from './prisma';
+import type { Locale } from '@/i18n/config';
 import {
   LEMFI_COUNTER_ID,
   LEMFI_FIRST_NUMBER,
@@ -50,6 +51,7 @@ const REGISTERED_SELECT = {
   emailAttempts: true,
   emailLastAttemptAt: true,
   submissionKey: true,
+  locale: true,
 } satisfies Prisma.LemFiContestEntrySelect;
 
 export type RegisteredEntry = Prisma.LemFiContestEntryGetPayload<{ select: typeof REGISTERED_SELECT }>;
@@ -59,6 +61,7 @@ export type RegisterInput = {
   lastName: string;
   email: string;
   submissionKey: string;
+  locale?: Locale;
   proof: { data: Buffer; mimeType: string; hash: string };
 };
 
@@ -123,6 +126,7 @@ export async function registerEntry(input: RegisterInput): Promise<RegisterResul
             email: input.email,
             accessToken: generateAccessToken(),
             submissionKey: input.submissionKey,
+            locale: input.locale ?? 'fr',
             proofHash: input.proof.hash,
             duplicateOfNumber: identical?.sequentialNumber ?? null,
             consentGiven: true,

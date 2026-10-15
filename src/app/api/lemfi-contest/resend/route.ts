@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getClientIp, rateLimit } from '@/lib/rateLimit';
+import { getLemfiCopy, resolveLemfiLocale } from '@/content/lemfi-contest';
 import { getRegisteredEntryByToken } from '@/lib/lemfiContest';
 import { deliverConfirmation } from '@/lib/lemfiContestDelivery';
 
@@ -10,13 +11,12 @@ const NO_STORE = { 'Cache-Control': 'no-store' };
 
 /** Nouvelle tentative d'envoi de l'e-mail de confirmation, sans recréer de participation. */
 export async function POST(req: NextRequest) {
+  const copy = getLemfiCopy(resolveLemfiLocale(req.nextUrl.searchParams.get('locale')));
+
   const ip = getClientIp(req);
   const limit = rateLimit({ key: 'lemfi-resend', id: ip, windowMs: 10 * 60_000, max: 5, blockMs: 10 * 60_000 });
   if (!limit.allowed) {
-    return NextResponse.json(
-      { ok: false, error: 'Trop de demandes. Patientez quelques minutes.' },
-      { status: 429, headers: NO_STORE },
-    );
+    return NextResponse.json({ ok: false, error: copy.errors.rate_limited }, { status: 429, headers: NO_STORE });
   }
 
   let token = '';
@@ -29,15 +29,12 @@ export async function POST(req: NextRequest) {
 
   const entry = await getRegisteredEntryByToken(token);
   if (!entry) {
-    return NextResponse.json({ ok: false, error: 'Lien invalide.' }, { status: 404, headers: NO_STORE });
+    return NextResponse.json({ ok: false, error: copy.errors.invalid_link }, { status: 404, headers: NO_STORE });
   }
 
   const tooSoon = entry.emailLastAttemptAt && Date.now() - entry.emailLastAttemptAt.getTime() < 15_000;
   if (tooSoon || entry.emailAttempts >= 8) {
-    return NextResponse.json(
-      { ok: false, error: 'Patientez quelques secondes avant de redemander l’e-mail.' },
-      { status: 429, headers: NO_STORE },
-    );
+    return NextResponse.json({ ok: false, error: copy.errors.resend_wait }, { status: 429, headers: NO_STORE });
   }
 
   const emailStatus = await deliverConfirmation(entry);

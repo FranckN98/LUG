@@ -2,8 +2,7 @@
  * Jeu concours Level Up in Germany x LemFi — réglages.
  *
  * Variables d'environnement (toutes optionnelles, lues à l'exécution) :
- *   LEMFI_PARTNER_URL               lien partenaire du bouton « Télécharger LemFi » (https://…)
- *   LEMFI_LOGO_PATH                 logo officiel fourni, ex. /partners/lemfi-logo.svg (dans public/) ou URL https
+ *   LEMFI_PARTNER_URL               remplace le lien partenaire par défaut du bouton « Télécharger LemFi » (https://…)
  *   LEMFI_CASHBACK_CONFIRMED=true   affiche « Recevez 25 % de cashback » (uniquement après accord de LemFi)
  *   LEMFI_EXISTING_USERS_CONFIRMED=true   affiche la mention « Vous utilisez déjà LemFi ? … »
  *   LEMFI_RETENTION_DAYS            durée de conservation des participations (défaut 90 jours)
@@ -22,6 +21,9 @@ export const LEMFI_CLIENT_TARGET_BYTES = 4_000_000;
 
 export const LEMFI_DEFAULT_RETENTION_DAYS = 90;
 
+/** Lien de parrainage officiel LemFi (bouton « Télécharger LemFi »). */
+export const LEMFI_DEFAULT_PARTNER_URL = 'https://referral.lemfi.com/hKwsPoVa66b';
+
 function flag(name: string): boolean {
   return process.env[name]?.trim().toLowerCase() === 'true';
 }
@@ -36,24 +38,15 @@ function httpUrlOrNull(raw: string | undefined): string | null {
   }
 }
 
-function logoPathOrNull(raw: string | undefined): string | null {
-  const v = raw?.trim();
-  if (!v) return null;
-  if (/^\/[A-Za-z0-9/_.-]+$/.test(v) && !v.includes('..')) return v;
-  return httpUrlOrNull(v);
-}
-
 export type LemfiPublicSettings = {
   partnerUrl: string | null;
-  logoPath: string | null;
   cashbackConfirmed: boolean;
   existingUsersConfirmed: boolean;
 };
 
 export function getLemfiPublicSettings(): LemfiPublicSettings {
   return {
-    partnerUrl: httpUrlOrNull(process.env.LEMFI_PARTNER_URL),
-    logoPath: logoPathOrNull(process.env.LEMFI_LOGO_PATH),
+    partnerUrl: httpUrlOrNull(process.env.LEMFI_PARTNER_URL) ?? LEMFI_DEFAULT_PARTNER_URL,
     cashbackConfirmed: flag('LEMFI_CASHBACK_CONFIRMED'),
     existingUsersConfirmed: flag('LEMFI_EXISTING_USERS_CONFIRMED'),
   };

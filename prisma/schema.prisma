@@ -1041,6 +1041,8 @@ model LemFiContestEntry {
   accessToken        String                 @unique @map("access_token")
   // Client-generated per form session: a retry of the same submission returns the same entry
   submissionKey      String?                @unique @map("submission_key")
+  // Language of the form (de | en | fr): used for the confirmation e-mail and the tracking link
+  locale             String                 @default("fr")
   // SHA-256 of the proof. Not unique: identical proofs are flagged for review, not rejected.
   proofHash          String?                @map("proof_hash")
   duplicateOfNumber  Int?                   @map("duplicate_of_number")

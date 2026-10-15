@@ -7,6 +7,24 @@ const defaultLocale = 'en';
 
 type Locale = (typeof locales)[number];
 
+/** Première langue supportée de l'en-tête Accept-Language, ou null. */
+function localeFromAcceptLanguage(header: string | null): Locale | null {
+  if (!header) return null;
+  const ranked = header
+    .split(',')
+    .map((part) => {
+      const [tag, ...params] = part.trim().split(';');
+      const q = Number.parseFloat(params.find((p) => p.trim().startsWith('q='))?.split('=')[1] ?? '1');
+      return { lang: (tag ?? '').trim().toLowerCase().split('-')[0] ?? '', q: Number.isFinite(q) ? q : 0 };
+    })
+    .filter((x) => x.q > 0)
+    .sort((a, b) => b.q - a.q);
+  for (const { lang } of ranked) {
+    if (locales.includes(lang as Locale)) return lang as Locale;
+  }
+  return null;
+}
+
 function legacyLocalePathRedirect(request: NextRequest, pathnameNorm: string): NextResponse | null {
   const m = pathnameNorm.match(/^\/(de|en|fr)(\/[^?#]*)?$/);
   if (!m) return null;
@@ -34,11 +52,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  /* ── Jeu concours LemFi : page française hors locale, sans préfixe /fr ── */
-  if (pathname === '/lemfi-contest' || pathname.startsWith('/lemfi-contest/')) {
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-locale', 'fr');
-    return NextResponse.next({ request: { headers: requestHeaders } });
+  /* ── Jeu concours LemFi : /lemfi-contest → /{langue}/lemfi-contest (cookie, puis navigateur, puis français) ── */
+  const lemfiLegacy = pathname.match(/^\/lemfi-contest(\/.*)?$/);
+  if (lemfiLegacy) {
+    const cookieLoc = request.cookies.get('lug_locale')?.value;
+    const target =
+      cookieLoc && locales.includes(cookieLoc as Locale)
+        ? (cookieLoc as Locale)
+        : localeFromAcceptLanguage(request.headers.get('accept-language')) ?? 'fr';
+    const url = new URL(`/${target}/lemfi-contest${lemfiLegacy[1] ?? ''}`, request.url);
+    url.search = request.nextUrl.search;
+    return NextResponse.redirect(url, 307);
   }
   /**
    * Fichiers sous public/ sont servis à la racine (/events/…, /downloads/…, /hero/…).

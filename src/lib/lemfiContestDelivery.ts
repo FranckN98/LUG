@@ -10,6 +10,7 @@ export async function deliverConfirmation(entry: RegisteredEntry): Promise<Email
     firstName: entry.firstName,
     sequentialNumber: entry.sequentialNumber,
     accessToken: entry.accessToken,
+    locale: entry.locale,
   });
 
   try {
