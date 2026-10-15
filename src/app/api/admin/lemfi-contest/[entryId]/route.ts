@@ -1,83 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdmin } from '@/lib/adminAuth';
-import { getEntryById, updateEntryStatus } from '@/lib/lemfiContest';
-import { sendValidationConfirmationEmail, sendRejectionEmail } from '@/lib/lemfiContestEmail';
+import { requireAdmin } from '@/lib/adminAuth';
+import { decideEntry, getEntryDetailForAdmin } from '@/lib/lemfiContest';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { entryId: string } }
-) {
-  if (!isAdmin()) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
+type Ctx = { params: { entryId: string } };
+
+export async function GET(_req: NextRequest, { params }: Ctx) {
+  const unauth = requireAdmin();
+  if (unauth) return unauth;
+
+  const entry = await getEntryDetailForAdmin(params.entryId);
+  if (!entry) return NextResponse.json({ error: 'Participation introuvable.' }, { status: 404 });
+  return NextResponse.json({ entry }, { headers: { 'Cache-Control': 'no-store' } });
+}
+
+export async function POST(req: NextRequest, { params }: Ctx) {
+  const unauth = requireAdmin();
+  if (unauth) return unauth;
+
+  let body: { action?: unknown; reason?: unknown } = {};
   try {
-    const { entryId } = params;
-    const body = await request.json();
-    const { action, reason } = body;
-
-    if (!action || !['validated', 'rejected'].includes(action)) {
-      return NextResponse.json(
-        { error: 'Invalid action' },
-        { status: 400 }
-      );
-    }
-
-    if (action === 'rejected' && !reason?.trim()) {
-      return NextResponse.json(
-        { error: 'Rejection reason is required' },
-        { status: 400 }
-      );
-    }
-
-    const entry = await getEntryById(entryId);
-
-    if (!entry) {
-      return NextResponse.json(
-        { error: 'Entry not found' },
-        { status: 404 }
-      );
-    }
-
-    const displayNumber = `LU${entry.sequentialNumber}`;
-
-    // Update status
-    const updated = await updateEntryStatus(
-      entryId,
-      action,
-      action === 'rejected' ? reason : undefined
-    );
-
-    // Send email to participant (non-blocking)
-    if (action === 'validated') {
-      sendValidationConfirmationEmail({
-        email: entry.email,
-        firstName: entry.firstName,
-        displayNumber,
-      }).catch((err) => console.error('Validation email failed:', err));
-    } else if (action === 'rejected') {
-      sendRejectionEmail({
-        email: entry.email,
-        firstName: entry.firstName,
-        displayNumber,
-        reason,
-      }).catch((err) => console.error('Rejection email failed:', err));
-    }
-
-    return NextResponse.json({
-      success: true,
-      entry: {
-        id: updated.id,
-        displayNumber,
-        status: updated.status,
-        rejectionReason: updated.rejectionReason,
-      },
-    });
-  } catch (error) {
-    console.error('Validation error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update entry' },
-      { status: 500 }
-    );
+    body = await req.json();
+  } catch {
+    /* corps invalide : rejeté ci-dessous */
   }
+  if (body.action !== 'validated' && body.action !== 'rejected') {
+    return NextResponse.json({ error: 'Action invalide.' }, { status: 400 });
+  }
+
+  const result = await decideEntry(
+    params.entryId,
+    body.action,
+    typeof body.reason === 'string' ? body.reason : null,
+  );
+  if (!result.ok) {
+    const map = {
+      not_found: [404, 'Participation introuvable.'],
+      unchanged: [409, 'Cette participation a déjà ce statut.'],
+      reason_required: [400, 'Un motif est obligatoire pour refuser.'],
+    } as const;
+    const [status, error] = map[result.code];
+    return NextResponse.json({ error }, { status });
+  }
+
+  const entry = await getEntryDetailForAdmin(params.entryId);
+  return NextResponse.json({ ok: true, entry }, { headers: { 'Cache-Control': 'no-store' } });
 }

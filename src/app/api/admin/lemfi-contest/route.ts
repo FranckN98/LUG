@@ -1,46 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdmin } from '@/lib/adminAuth';
+import { requireAdmin } from '@/lib/adminAuth';
+import { getLemfiRetentionDays, LEMFI_CAPACITY } from '@/config/lemfiContest';
 import {
+  countEntriesWithoutConfirmedEmail,
+  countExpiredEntries,
+  getAdminStats,
   listEntriesForAdmin,
-  getEntryById,
-  updateEntryStatus,
-  getEntryStats,
 } from '@/lib/lemfiContest';
-import { sendValidationConfirmationEmail, sendRejectionEmail } from '@/lib/lemfiContestEmail';
 
-export async function GET(request: NextRequest) {
-  if (!isAdmin()) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-  try {
-    const url = new URL(request.url);
-    const status = url.searchParams.get('status') || undefined;
-    const search = url.searchParams.get('search') || undefined;
-    const limit = parseInt(url.searchParams.get('limit') || '50');
-    const offset = parseInt(url.searchParams.get('offset') || '0');
+export async function GET(req: NextRequest) {
+  const unauth = requireAdmin();
+  if (unauth) return unauth;
 
-    const { entries, total } = await listEntriesForAdmin({
-      status: status || undefined,
-      search: search || undefined,
-      limit,
-      offset,
-    });
+  const sp = req.nextUrl.searchParams;
+  const limit = Math.min(Math.max(Number.parseInt(sp.get('limit') ?? '25', 10) || 25, 1), 100);
+  const offset = Math.max(Number.parseInt(sp.get('offset') ?? '0', 10) || 0, 0);
+  const retentionDays = getLemfiRetentionDays();
 
-    const stats = await getEntryStats();
+  const [list, stats, expired, emailsPending] = await Promise.all([
+    listEntriesForAdmin({ status: sp.get('status'), q: sp.get('q'), limit, offset }),
+    getAdminStats(),
+    countExpiredEntries(retentionDays),
+    countEntriesWithoutConfirmedEmail(),
+  ]);
 
-    return NextResponse.json({
-      success: true,
-      entries,
-      total,
-      stats,
-      contestFull: stats.total >= 151,
-    });
-  } catch (error) {
-    console.error('List entries error:', error);
-    return NextResponse.json(
-      { error: 'Failed to list entries' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json(
+    { ...list, stats, capacity: LEMFI_CAPACITY, retentionDays, expired, emailsPending },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
 }

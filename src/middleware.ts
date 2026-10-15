@@ -33,6 +33,13 @@ export function middleware(request: NextRequest) {
     }
     return NextResponse.next();
   }
+
+  /* ── Jeu concours LemFi : page française hors locale, sans préfixe /fr ── */
+  if (pathname === '/lemfi-contest' || pathname.startsWith('/lemfi-contest/')) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-locale', 'fr');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
   /**
    * Fichiers sous public/ sont servis à la racine (/events/…, /downloads/…, /hero/…).
    * Ne pas les préfixer par /de|en|fr/ sinon les images renvoient 404.

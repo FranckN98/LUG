@@ -1,185 +1,79 @@
 import { Resend } from 'resend';
+import { getSiteUrl } from '@/config/site';
+import { EMAIL_LOGO_URL } from './emailFooter';
+import { escapeHtml, formatLemfiNumber } from './lemfiContestUtils';
 
-const apiKey = process.env.RESEND_API_KEY?.trim();
-if (!apiKey) {
-  throw new Error('RESEND_API_KEY is not set');
+export type EmailResult = { ok: true; id: string } | { ok: false; error: string };
+
+export function trackingUrl(accessToken: string): string {
+  return `${getSiteUrl()}/lemfi-contest/track/${accessToken}`;
 }
-const resend = new Resend(apiKey);
 
-export type ContestEmailType = 'confirmation' | 'validation_required' | 'validated' | 'rejected';
+function fromAddress(): string {
+  return (
+    process.env.LEMFI_FROM_EMAIL?.trim() ||
+    process.env.NEWSLETTER_FROM_EMAIL?.trim() ||
+    'Level Up in Germany <info@levelupingermany.com>'
+  );
+}
 
 /**
- * Send LemFi contest confirmation email to participant.
+ * Envoie l'e-mail de confirmation. Ne lève jamais d'exception.
+ * `ok: true` UNIQUEMENT si Resend a accepté le message et renvoyé un identifiant.
  */
-export async function sendContestConfirmationEmail({
-  email,
-  firstName,
-  displayNumber,
-  accessToken,
-}: {
-  email: string;
+export async function sendConfirmationEmail(p: {
+  to: string;
   firstName: string;
-  displayNumber: string;
+  sequentialNumber: number;
   accessToken: string;
-}) {
-  const trackingLink = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://levelupingermany.com'}/lemfi-contest/track/${accessToken}`;
+}): Promise<EmailResult> {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) return { ok: false, error: 'not_configured' };
 
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-          .content { background: #f9f9f9; padding: 30px; }
-          .number { font-size: 32px; font-weight: bold; color: #ff6b35; margin: 20px 0; }
-          .button { display: inline-block; background: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 20px 0; }
-          .footer { background: #333; color: white; padding: 20px; text-align: center; font-size: 12px; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Participation reçue !</h1>
-          </div>
-          <div class="content">
-            <p>Bonjour <strong>${firstName}</strong>,</p>
-            <p>Merci de votre participation au concours <strong>Level Up in Germany × LemFi</strong> !</p>
-            <p>Votre numéro de participation est:</p>
-            <div class="number">${displayNumber}</div>
-            <p>Votre éligibilité au tirage sera confirmée après vérification de votre preuve de transfert.</p>
-            <p>Suivez votre participation:</p>
-            <a href="${trackingLink}" class="button">Consulter mon statut</a>
-            <p style="margin-top: 30px; color: #666; font-size: 12px;">
-              Lien sécurisé: <a href="${trackingLink}">${trackingLink}</a>
-            </p>
-          </div>
-          <div class="footer">
-            <p>À vous de jouer ! Level Up in Germany</p>
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
+  const number = formatLemfiNumber(p.sequentialNumber);
+  const link = trackingUrl(p.accessToken);
+  const name = escapeHtml(p.firstName);
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><body style="margin:0;padding:0;background:#f4f1eb;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1eb;padding:24px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden">
+<tr><td style="background:#8C1A1A;padding:20px 24px"><img src="${EMAIL_LOGO_URL}" alt="Level Up in Germany" height="44" style="display:block;border:0;height:44px"></td></tr>
+<tr><td style="padding:28px 24px">
+<p style="margin:0 0 12px;font-size:16px">Bonjour ${name},</p>
+<p style="margin:0 0 16px;font-size:16px;line-height:1.5"><strong>Participation reçue</strong> au jeu concours Level Up in Germany × LemFi.</p>
+<p style="margin:0 0 4px;font-size:14px;color:#555">Votre numéro</p>
+<p style="margin:0 0 16px;font-size:34px;font-weight:bold;color:#8C1A1A;letter-spacing:1px">${number}</p>
+<p style="margin:0 0 6px;font-size:15px"><strong>Statut :</strong> en attente de vérification</p>
+<p style="margin:0 0 24px;font-size:15px;line-height:1.5">Votre éligibilité au tirage sera confirmée après vérification de votre preuve.</p>
+<p style="margin:0 0 24px"><a href="${link}" style="display:inline-block;background:#E98C0B;color:#1a1a1a;text-decoration:none;font-weight:bold;padding:14px 22px;border-radius:999px;font-size:15px">Suivre ma participation</a></p>
+<p style="margin:0;font-size:12px;color:#777;line-height:1.5">Ce lien est personnel : ne le partagez pas.<br>Si le bouton ne fonctionne pas, copiez cette adresse : ${link}</p>
+</td></tr></table></td></tr></table></body></html>`;
+
+  const text = [
+    `Bonjour ${p.firstName},`,
+    '',
+    'Participation reçue au jeu concours Level Up in Germany × LemFi.',
+    `Votre numéro : ${number}`,
+    'Statut : en attente de vérification.',
+    'Votre éligibilité au tirage sera confirmée après vérification de votre preuve.',
+    '',
+    `Suivre ma participation : ${link}`,
+    'Ce lien est personnel : ne le partagez pas.',
+  ].join('\n');
 
   try {
-    const result = await resend.emails.send({
-      from: 'contest@levelupingermany.com',
-      to: email,
-      subject: `Participation reçue - Concours Level Up × LemFi - ${displayNumber}`,
+    const { data, error } = await new Resend(apiKey).emails.send({
+      from: fromAddress(),
+      to: p.to,
+      subject: `Participation reçue – ${number} – Level Up in Germany × LemFi`,
       html,
+      text,
       tags: [{ name: 'category', value: 'lemfi_confirmation' }],
     });
-
-    if (result.error) {
-      console.error('Resend rejected contest confirmation email:', result.error);
-      return { success: false, error: result.error };
-    }
-    return { success: true, messageId: result.data?.id };
-  } catch (error) {
-    console.error('Failed to send contest confirmation email:', error);
-    return { success: false, error };
-  }
-}
-
-/**
- * Send validation reminder to admin (when new entry added).
- */
-export async function sendAdminValidationAlert({
-  displayNumber,
-  email,
-  firstName,
-  lastName,
-}: {
-  displayNumber: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-}) {
-  const adminDashboardUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://levelupingermany.com'}/admin/lemfi-contest`;
-
-  try {
-    await resend.emails.send({
-      from: 'contest@levelupingermany.com',
-      to: 'levelupdiaspo@gmail.com',
-      subject: `[Concours] Nouvelle inscription à valider - ${displayNumber}`,
-      html: `
-        <p>Nouvelle inscription au concours LemFi:</p>
-        <p>
-          <strong>Numéro:</strong> ${displayNumber}<br>
-          <strong>Nom:</strong> ${firstName} ${lastName}<br>
-          <strong>Email:</strong> ${email}
-        </p>
-        <p><a href="${adminDashboardUrl}">Accéder au tableau de bord admin</a></p>
-      `,
-      tags: [{ name: 'category', value: 'lemfi_admin_alert' }],
-    });
-  } catch (error) {
-    console.error('Failed to send admin alert:', error);
-  }
-}
-
-/**
- * Send validation confirmation to participant.
- */
-export async function sendValidationConfirmationEmail({
-  email,
-  firstName,
-  displayNumber,
-}: {
-  email: string;
-  firstName: string;
-  displayNumber: string;
-}) {
-  try {
-    await resend.emails.send({
-      from: 'contest@levelupingermany.com',
-      to: email,
-      subject: `Participation validée - Concours Level Up × LemFi - ${displayNumber}`,
-      html: `
-        <p>Bonjour <strong>${firstName}</strong>,</p>
-        <p>Bonne nouvelle ! Votre participation au concours <strong>Level Up in Germany × LemFi</strong> a été validée.</p>
-        <p>Votre numéro <strong>${displayNumber}</strong> est maintenant éligible au tirage au sort.</p>
-        <p>À bientôt ! 🎉</p>
-      `,
-      tags: [{ name: 'category', value: 'lemfi_validated' }],
-    });
-  } catch (error) {
-    console.error('Failed to send validation email:', error);
-  }
-}
-
-/**
- * Send rejection reason to participant.
- */
-export async function sendRejectionEmail({
-  email,
-  firstName,
-  displayNumber,
-  reason,
-}: {
-  email: string;
-  firstName: string;
-  displayNumber: string;
-  reason: string;
-}) {
-  try {
-    await resend.emails.send({
-      from: 'contest@levelupingermany.com',
-      to: email,
-      subject: `Participation refusée - Concours Level Up × LemFi - ${displayNumber}`,
-      html: `
-        <p>Bonjour <strong>${firstName}</strong>,</p>
-        <p>Merci de votre participation au concours <strong>Level Up in Germany × LemFi</strong>.</p>
-        <p>Malheureusement, votre participation n'a pas pu être validée pour la raison suivante:</p>
-        <p><strong>${reason}</strong></p>
-        <p>Nous vous invitons à vérifier les conditions du concours et de réessayer si applicable.</p>
-      `,
-      tags: [{ name: 'category', value: 'lemfi_rejected' }],
-    });
-  } catch (error) {
-    console.error('Failed to send rejection email:', error);
+    if (error || !data?.id) return { ok: false, error: error?.message ?? 'no_message_id' };
+    return { ok: true, id: data.id };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'unknown_error' };
   }
 }

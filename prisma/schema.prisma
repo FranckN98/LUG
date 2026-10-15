@@ -1,7 +1,7 @@
 // Newsletter leads (event PDF downloads). Local: DATABASE_URL="file:./dev.db"
-// Production: use PostgreSQL (Neon, etc.) — change provider to "postgresql" + update DATABASE_URL.
-// LOCAL DEV: provider = "sqlite"  →  run: npx prisma db push
-// PRODUCTION: provider = "sqlite"  →  run: npx prisma migrate deploy
+// Production: use PostgreSQL (Neon, etc.) ÔÇö change provider to "postgresql" + update DATABASE_URL.
+// LOCAL DEV: provider = "sqlite"  ÔåÆ  run: npx prisma db push
+// PRODUCTION: provider = "sqlite"  ÔåÆ  run: npx prisma migrate deploy
 generator client {
   provider = "prisma-client-js"
 }
@@ -98,7 +98,7 @@ model NewsletterCampaign {
   complaintCount   Int                             @default(0) @map("complaint_count")
   openCount        Int                             @default(0) @map("open_count")
   clickCount       Int                             @default(0) @map("click_count")
-  // ── Template library (reusable starting points for new campaigns) ──
+  // ÔöÇÔöÇ Template library (reusable starting points for new campaigns) ÔöÇÔöÇ
   // A row with isTemplate=true never gets sent directly; admins "use" it via
   // POST /api/admin/newsletter/campaigns/[id]/duplicate which copies it into a
   // fresh isTemplate=false draft campaign (see src/app/admin/newsletter).
@@ -155,7 +155,7 @@ model NewsletterCampaignTranslation {
   @@map("newsletter_campaign_translations")
 }
 
-// Idempotency log for /api/webhooks/resend — Resend guarantees "at-least-once"
+// Idempotency log for /api/webhooks/resend ÔÇö Resend guarantees "at-least-once"
 // delivery, so the same event can arrive more than once. We record each
 // processed `svix-id` and skip duplicates.
 model NewsletterWebhookEvent {
@@ -304,7 +304,7 @@ model BlogPost {
   title        String
   body         String
   coverImage   String?
-  author       String                @default("Équipe Level Up in Germany")
+  author       String                @default("├ëquipe Level Up in Germany")
   category     String?
   published    Boolean               @default(false)
   publishedAt  DateTime?             @map("published_at")
@@ -362,7 +362,7 @@ model AnalyticsEvent {
   utmCampaign String?  @map("utm_campaign")
   utmTerm     String?  @map("utm_term")
   utmContent  String?  @map("utm_content")
-  source      String? // 'tiktok' | 'instagram' | 'whatsapp' | 'linkedin' | 'google' | 'direct' | 'newsletter' | …
+  source      String? // 'tiktok' | 'instagram' | 'whatsapp' | 'linkedin' | 'google' | 'direct' | 'newsletter' | ÔÇª
   visitorHash String?  @map("visitor_hash")
   sessionId   String?  @map("session_id")
   country     String?
@@ -868,14 +868,14 @@ model EventDocumentTranslation {
   @@map("event_document_translations")
 }
 
-// ── Billetterie 2026 ────────────────────────────────────────────────────────────
+// ÔöÇÔöÇ Billetterie 2026 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
 
 model TicketingConfig {
   id                   String          @id @default("singleton")
   isNewTicketingActive Boolean         @default(false) @map("is_new_ticketing_active")
   ticketingProvider    String          @default("tailor") @map("ticketing_provider")
   pageTitle            String          @default("Level Up in Germany 2026") @map("page_title")
-  pageSubtitle         String          @default("Une journée pour accélérer votre avenir en Allemagne.") @map("page_subtitle")
+  pageSubtitle         String          @default("Une journ├®e pour acc├®l├®rer votre avenir en Allemagne.") @map("page_subtitle")
   pageIntro            String          @default("") @map("page_intro")
   eventDate            String          @default("17 octobre 2026") @map("event_date")
   eventLocation        String          @default("Francfort") @map("event_location")
@@ -1024,52 +1024,74 @@ model BoothReservation {
   @@map("booth_reservations")
 }
 
-// LemFi Contest - Level Up in Germany × LemFi partnership
+// ── LemFi contest (Level Up in Germany × LemFi) ─────────────────────────────
+// status: pending | validated | rejected. Numbers LU200..LU350 come from LemFiContestCounter
+// and are never reused, even after a purge.
 model LemFiContestEntry {
-  id                       String   @id @default(uuid())
-  // Sequential unique number: LU200 to LU350 (151 total entries)
-  sequentialNumber         Int      @unique @map("sequential_number")
-  firstName                String   @map("first_name")
-  lastName                 String   @map("last_name")
-  email                    String   @unique
-  // Screenshots stored in Vercel Blob; we keep URL here
-  screenshotUrl            String   @map("screenshot_url")
-  // Hash of screenshot content for duplicate detection
-  screenshotHash           String?  @unique @map("screenshot_hash")
-  // Validation status: pending | validated | rejected
-  status                   String   @default("pending")
-  // Admin reason for rejection (if applicable)
-  rejectionReason          String?  @map("rejection_reason")
-  // Secure access token for participant to check their status
-  accessToken              String   @unique @map("access_token")
-  // Email sending tracking
-  confirmationEmailSentAt  DateTime? @map("confirmation_email_sent_at")
-  confirmationEmailAttempts Int     @default(0) @map("confirmation_email_attempts")
-  lastEmailAttemptAt       DateTime? @map("last_email_attempt_at")
-  // Consent checkbox: confirmed participation & data usage
-  consentGiven             Boolean  @default(false) @map("consent_given")
-  // Audit trail
-  createdAt                DateTime @default(now()) @map("created_at")
-  updatedAt                DateTime @updatedAt @map("updated_at")
-  validatedAt              DateTime? @map("validated_at")
-  rejectedAt               DateTime? @map("rejected_at")
+  id                 String                 @id @default(uuid())
+  sequentialNumber   Int                    @unique @map("sequential_number")
+  firstName          String                 @map("first_name")
+  lastName           String                 @map("last_name")
+  email              String                 @unique
+  status             String                 @default("pending")
+  // Decision reason shown to the participant (set on reject, optional on validate)
+  decisionReason     String?                @map("decision_reason")
+  decidedAt          DateTime?              @map("decided_at")
+  // Secret in the participant's personal link
+  accessToken        String                 @unique @map("access_token")
+  // Client-generated per form session: a retry of the same submission returns the same entry
+  submissionKey      String?                @unique @map("submission_key")
+  // SHA-256 of the proof. Not unique: identical proofs are flagged for review, not rejected.
+  proofHash          String?                @map("proof_hash")
+  duplicateOfNumber  Int?                   @map("duplicate_of_number")
+  consentGiven       Boolean                @default(true) @map("consent_given")
+  consentAt          DateTime?              @map("consent_at")
+  // Set ONLY when Resend confirmed acceptance of the message
+  emailSentAt        DateTime?              @map("email_sent_at")
+  emailAttempts      Int                    @default(0) @map("email_attempts")
+  emailLastAttemptAt DateTime?              @map("email_last_attempt_at")
+  emailLastError     String?                @map("email_last_error")
+  createdAt          DateTime               @default(now()) @map("created_at")
+  updatedAt          DateTime               @updatedAt @map("updated_at")
+  proof              LemFiContestProof?
+  decisions          LemFiContestDecision[]
 
   @@index([status, createdAt])
-  @@index([email])
-  @@index([sequentialNumber])
+  @@index([proofHash])
+  @@index([createdAt])
   @@map("lemfi_contest_entries")
 }
 
-// Admin validation log for audit trail
-model LemFiContestValidation {
-  id        String   @id @default(uuid())
-  entryId   String   @map("entry_id")
-  action    String   // 'validated' | 'rejected'
-  reason    String?
-  adminNote String?  @map("admin_note")
-  createdAt DateTime @default(now()) @map("created_at")
+// Private storage of the proof image: only served by authenticated admin routes.
+model LemFiContestProof {
+  entryId   String            @id @map("entry_id")
+  mimeType  String            @map("mime_type")
+  sizeBytes Int               @map("size_bytes")
+  data      Bytes
+  createdAt DateTime          @default(now()) @map("created_at")
+  entry     LemFiContestEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
 
-  @@index([entryId])
-  @@index([action, createdAt])
-  @@map("lemfi_contest_validations")
+  @@map("lemfi_contest_proofs")
+}
+
+model LemFiContestDecision {
+  id         String            @id @default(uuid())
+  entryId    String            @map("entry_id")
+  fromStatus String            @map("from_status")
+  toStatus   String            @map("to_status")
+  reason     String?
+  createdAt  DateTime          @default(now()) @map("created_at")
+  entry      LemFiContestEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@index([entryId, createdAt])
+  @@map("lemfi_contest_decisions")
+}
+
+// Single row (id = 'lemfi'): nextNumber only ever increases.
+model LemFiContestCounter {
+  id         String   @id
+  nextNumber Int      @map("next_number")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("lemfi_contest_counter")
 }

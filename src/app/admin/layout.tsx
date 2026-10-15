@@ -163,6 +163,15 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    href: '/admin/lemfi-contest',
+    label: 'LemFi',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v13m0-13a4 4 0 10-4-4m4 4a4 4 0 114-4M4 12h16v9H4v-9zm-1-4h18v4H3V8z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

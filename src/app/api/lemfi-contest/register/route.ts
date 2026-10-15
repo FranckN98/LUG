@@ -1,183 +1,127 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put } from '@vercel/blob';
+import { getClientIp, rateLimit } from '@/lib/rateLimit';
+import { verifyTurnstileToken } from '@/lib/turnstile';
+import { LEMFI_MAX_PROOF_BYTES } from '@/config/lemfiContest';
+import { hashProof, isContestFull, registerEntry } from '@/lib/lemfiContest';
+import { deliverConfirmation, type EmailStatus } from '@/lib/lemfiContestDelivery';
+import { trackingUrl } from '@/lib/lemfiContestEmail';
 import {
-  createContestEntry,
-  checkEmailExists,
-  isContestFull,
-  hashScreenshot,
-  checkScreenshotDuplicate,
-} from '@/lib/lemfiContest';
-import { sendContestConfirmationEmail, sendAdminValidationAlert } from '@/lib/lemfiContestEmail';
-import { prisma } from '@/lib/prisma';
+  cleanPersonName,
+  detectProofMime,
+  formatLemfiNumber,
+  isValidEmail,
+  isValidSubmissionKey,
+  normalizeEmail,
+} from '@/lib/lemfiContestUtils';
 
-// Max 5 MB
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
-export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData();
+const NO_STORE = { 'Cache-Control': 'no-store' };
 
-    // Extract fields
-    const firstName = formData.get('firstName') as string;
-    const lastName = formData.get('lastName') as string;
-    const email = formData.get('email') as string;
-    const consentGiven = formData.get('consentGiven') === 'true';
-    const file = formData.get('screenshot') as File;
+function fail(status: number, code: string, error: string, field?: string) {
+  return NextResponse.json({ ok: false, code, error, field }, { status, headers: NO_STORE });
+}
 
-    // Validate required fields
-    if (!firstName?.trim() || !lastName?.trim() || !email?.trim()) {
-      return NextResponse.json(
-        { error: 'First name, last name, and email are required' },
-        { status: 400 }
-      );
-    }
-
-    if (!consentGiven) {
-      return NextResponse.json(
-        { error: 'Consent is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!file) {
-      return NextResponse.json(
-        { error: 'Screenshot is required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate file type
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Only JPG, PNG, and WebP formats are allowed' },
-        { status: 400 }
-      );
-    }
-
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json(
-        { error: 'File must be smaller than 5 MB' },
-        { status: 400 }
-      );
-    }
-
-    // Check if contest is full
-    if (await isContestFull()) {
-      return NextResponse.json(
-        { error: 'Contest is full', isFull: true },
-        { status: 409 }
-      );
-    }
-
-    // Check if email already exists
-    if (await checkEmailExists(email.toLowerCase().trim())) {
-      return NextResponse.json(
-        { error: 'This email is already registered' },
-        { status: 409 }
-      );
-    }
-
-    // Convert file to buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    // Hash screenshot for duplicate detection
-    const screenshotHash = hashScreenshot(buffer);
-
-    // Check for duplicate screenshots
-    if (await checkScreenshotDuplicate(screenshotHash)) {
-      return NextResponse.json(
-        { error: 'This screenshot has already been submitted' },
-        { status: 409 }
-      );
-    }
-
-    // Upload to Vercel Blob
-    const timestamp = Date.now();
-    const filename = `lemfi-contest/${timestamp}-${file.name}`;
-
-    let screenshotUrl: string;
-    try {
-      const blob = await put(filename, buffer, {
-        access: 'public',
-        contentType: file.type,
-        addRandomSuffix: true,
-      });
-      screenshotUrl = blob.url;
-    } catch (blobError) {
-      console.error('Blob upload failed:', blobError);
-      return NextResponse.json(
-        { error: 'Failed to upload screenshot' },
-        { status: 500 }
-      );
-    }
-
-    // Create contest entry
-    let result;
-    try {
-      result = await createContestEntry({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        email: email.toLowerCase().trim(),
-        screenshotUrl,
-        screenshotHash,
-        consentGiven,
-      });
-    } catch (dbError: any) {
-      if (dbError.message.includes('already registered')) {
-        return NextResponse.json(
-          { error: 'This email is already registered' },
-          { status: 409 }
-        );
-      }
-      if (dbError.message.includes('Contest is full')) {
-        return NextResponse.json(
-          { error: 'Contest is full', isFull: true },
-          { status: 409 }
-        );
-      }
-      throw dbError;
-    }
-
-    // Check if contest is full
-    if (!result) {
-      return NextResponse.json(
-        { error: 'Contest is full', isFull: true },
-        { status: 409 }
-      );
-    }
-
-    // Send confirmation email (non-blocking)
-    sendContestConfirmationEmail({
-      email: result.entry.email,
-      firstName: result.entry.firstName,
-      displayNumber: result.displayNumber,
-      accessToken: result.entry.accessToken,
-    }).catch((err) => console.error('Confirmation email failed:', err));
-
-    // Send admin alert (non-blocking)
-    sendAdminValidationAlert({
-      displayNumber: result.displayNumber,
-      email: result.entry.email,
-      firstName: result.entry.firstName,
-      lastName: result.entry.lastName,
-    }).catch((err) => console.error('Admin alert failed:', err));
-
-    // Return success
-    return NextResponse.json(
-      {
-        success: true,
-        displayNumber: result.displayNumber,
-        accessToken: result.entry.accessToken,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error('Registration error:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred' },
-      { status: 500 }
-    );
+export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const limit = rateLimit({ key: 'lemfi-register', id: ip, windowMs: 10 * 60_000, max: 6, blockMs: 10 * 60_000 });
+  if (!limit.allowed) {
+    return fail(429, 'rate_limited', 'Trop de tentatives. Patientez quelques minutes avant de réessayer.');
   }
+
+  const declared = Number(req.headers.get('content-length') ?? 0);
+  if (declared > LEMFI_MAX_PROOF_BYTES + 512 * 1024) {
+    return fail(413, 'file_too_large', 'Fichier trop lourd. La taille maximale est de 5 Mo.', 'proof');
+  }
+
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    return fail(400, 'invalid_request', "Le formulaire n'a pas pu être lu. Réessayez.");
+  }
+
+  // Champ piège : invisible pour les personnes, rempli par les robots.
+  if (String(form.get('website') ?? '').trim() !== '') {
+    return fail(400, 'invalid_request', "Le formulaire n'a pas pu être lu. Réessayez.");
+  }
+
+  const turnstileConfigured = Boolean(
+    process.env.TURNSTILE_SECRET_KEY?.trim() && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim(),
+  );
+  if (turnstileConfigured) {
+    const ok = await verifyTurnstileToken(String(form.get('captchaToken') ?? '') || undefined);
+    if (!ok) return fail(400, 'captcha', 'La vérification anti-robot a échoué. Réessayez.');
+  }
+
+  const firstName = cleanPersonName(String(form.get('firstName') ?? ''));
+  if (!firstName) return fail(400, 'invalid_field', 'Indiquez un prénom valide.', 'firstName');
+  const lastName = cleanPersonName(String(form.get('lastName') ?? ''));
+  if (!lastName) return fail(400, 'invalid_field', 'Indiquez un nom valide.', 'lastName');
+
+  const email = normalizeEmail(String(form.get('email') ?? ''));
+  if (!isValidEmail(email)) return fail(400, 'invalid_field', 'Indiquez une adresse e-mail valide.', 'email');
+
+  if (String(form.get('consent') ?? '') !== 'true') {
+    return fail(400, 'consent_required', 'Cochez la case de confirmation pour participer.', 'consent');
+  }
+
+  const submissionKey = form.get('submissionKey');
+  if (!isValidSubmissionKey(submissionKey)) {
+    return fail(400, 'invalid_request', "Le formulaire n'a pas pu être lu. Rechargez la page.");
+  }
+
+  const file = form.get('proof');
+  if (!(file instanceof File) || file.size === 0) {
+    return fail(400, 'proof_required', 'Ajoutez la capture de confirmation du transfert.', 'proof');
+  }
+  if (file.size > LEMFI_MAX_PROOF_BYTES) {
+    return fail(413, 'file_too_large', 'Fichier trop lourd. La taille maximale est de 5 Mo.', 'proof');
+  }
+  const data = Buffer.from(await file.arrayBuffer());
+  const mimeType = detectProofMime(data);
+  if (!mimeType) {
+    return fail(400, 'file_type', 'Format non accepté. Utilisez une image JPG, PNG ou WebP.', 'proof');
+  }
+
+  if (await isContestFull()) {
+    return fail(409, 'full', 'Inscriptions complètes');
+  }
+
+  let result;
+  try {
+    result = await registerEntry({
+      firstName,
+      lastName,
+      email,
+      submissionKey,
+      proof: { data, mimeType, hash: hashProof(data) },
+    });
+  } catch (e) {
+    console.error('[lemfi] register failed', e instanceof Error ? e.name : 'unknown');
+    return fail(500, 'server_error', "L'enregistrement a échoué. Vos informations sont conservées : réessayez dans un instant.");
+  }
+
+  if (result.kind === 'full') return fail(409, 'full', 'Inscriptions complètes');
+  if (result.kind === 'email_taken') {
+    return fail(409, 'email_taken', 'Cette adresse e-mail est déjà inscrite. Une seule participation est possible par adresse.', 'email');
+  }
+
+  const { entry } = result;
+  let emailStatus: EmailStatus = 'sent';
+  if (!entry.emailSentAt) emailStatus = await deliverConfirmation(entry);
+
+  return NextResponse.json(
+    {
+      ok: true,
+      number: formatLemfiNumber(entry.sequentialNumber),
+      token: entry.accessToken,
+      trackUrl: trackingUrl(entry.accessToken),
+      emailStatus,
+      alreadyRegistered: result.kind === 'existing',
+    },
+    { status: result.kind === 'created' ? 201 : 200, headers: NO_STORE },
+  );
 }
