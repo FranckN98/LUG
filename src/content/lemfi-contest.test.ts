@@ -55,10 +55,11 @@ describe('lemfi contest copy (fr / en / de)', () => {
     expect(lemfiCopy.fr.errors.full).toBe('Inscriptions complètes');
   });
 
-  it('keeps the code LEVELUP and the 10 € minimum in every language', () => {
+  it('keeps the code LEVELUP and the 25 € minimum in every language', () => {
     for (const loc of ['fr', 'en', 'de'] as const) {
       expect(lemfiCopy[loc].step2.title).toContain('LEVELUP');
-      expect(lemfiCopy[loc].step2.title).toMatch(/10\s?€|€10/);
+      expect(lemfiCopy[loc].step2.title).toMatch(/25\s?€|€25/);
+      expect(lemfiCopy[loc].step2.title).not.toMatch(/\b10\b/);
     }
   });
 

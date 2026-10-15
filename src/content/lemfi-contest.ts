@@ -120,7 +120,7 @@ const fr: LemfiCopy = {
     soon: 'Le lien sera disponible très prochainement.',
   },
   step2: {
-    title: 'Effectuez un transfert d’au moins 10 € avec le code LEVELUP.',
+    title: 'Effectuez un transfert d’au moins 25 € avec le code LEVELUP.',
     codeLabel: 'Code',
     copy: 'Copier',
     copied: 'Copié',
@@ -236,7 +236,7 @@ const en: LemfiCopy = {
     soon: 'The link will be available very soon.',
   },
   step2: {
-    title: 'Make a transfer of at least €10 with the code LEVELUP.',
+    title: 'Make a transfer of at least €25 with the code LEVELUP.',
     codeLabel: 'Code',
     copy: 'Copy',
     copied: 'Copied',
@@ -358,7 +358,7 @@ const de: LemfiCopy = {
     soon: 'Der Link ist in Kürze verfügbar.',
   },
   step2: {
-    title: 'Überweise mindestens 10 € mit dem Code LEVELUP.',
+    title: 'Überweise mindestens 25 € mit dem Code LEVELUP.',
     codeLabel: 'Code',
     copy: 'Kopieren',
     copied: 'Kopiert',
