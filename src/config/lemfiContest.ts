@@ -21,6 +21,11 @@ export const LEMFI_CLIENT_TARGET_BYTES = 4_000_000;
 
 export const LEMFI_DEFAULT_RETENTION_DAYS = 90;
 
+/** Lots proposés par défaut dans l'écran de tirage (le nom reste libre). */
+export const LEMFI_PRIZE_PRESETS = ['Tablette', 'AirPods', 'Parapluie', 'T-shirt', 'Surprise'] as const;
+/** Nombre maximal de gagnants tirés en une fois. */
+export const LEMFI_MAX_DRAW_COUNT = 50;
+
 /** Lien de parrainage officiel LemFi (bouton « Télécharger LemFi »). */
 export const LEMFI_DEFAULT_PARTNER_URL = 'https://referral.lemfi.com/hKwsPoVa66b';
 

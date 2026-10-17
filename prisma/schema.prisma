@@ -1057,6 +1057,7 @@ model LemFiContestEntry {
   updatedAt          DateTime               @updatedAt @map("updated_at")
   proof              LemFiContestProof?
   decisions          LemFiContestDecision[]
+  winner             LemFiContestWinner?
 
   @@index([status, createdAt])
   @@index([proofHash])
@@ -1087,6 +1088,22 @@ model LemFiContestDecision {
 
   @@index([entryId, createdAt])
   @@map("lemfi_contest_decisions")
+}
+
+// One row per draw result. entryId is unique: a participant wins at most once, and a forfeited
+// winner (status 'forfeited', e.g. absent on the day) is never drawn again.
+model LemFiContestWinner {
+  id          String            @id @default(uuid())
+  entryId     String            @unique @map("entry_id")
+  prize       String
+  // won | forfeited
+  status      String            @default("won")
+  drawnAt     DateTime          @default(now()) @map("drawn_at")
+  forfeitedAt DateTime?         @map("forfeited_at")
+  entry       LemFiContestEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@index([drawnAt])
+  @@map("lemfi_contest_winners")
 }
 
 // Single row (id = 'lemfi'): nextNumber only ever increases.

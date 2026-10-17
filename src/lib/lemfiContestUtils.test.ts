@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   cleanPersonName,
+  cleanPrizeName,
   detectProofMime,
   escapeHtml,
   formatLemfiNumber,
@@ -8,7 +9,39 @@ import {
   isValidSubmissionKey,
   normalizeEmail,
   parseNumberQuery,
+  pickRandom,
 } from './lemfiContestUtils';
+
+describe('prize draw helpers', () => {
+  it('draws distinct items and never more than available', () => {
+    const items = [1, 2, 3, 4, 5];
+    const rng = (max: number) => Math.floor(Math.random() * max);
+    for (let i = 0; i < 200; i++) {
+      const picked = pickRandom(items, 3, rng);
+      expect(picked).toHaveLength(3);
+      expect(new Set(picked).size).toBe(3);
+    }
+    expect(pickRandom(items, 99, rng).sort()).toEqual(items);
+    expect(pickRandom(items, 0, rng)).toEqual([]);
+    expect(items).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('is uniform for a single draw', () => {
+    const rng = (max: number) => Math.floor(Math.random() * max);
+    const hits = [0, 0, 0, 0];
+    for (let i = 0; i < 20000; i++) hits[pickRandom([0, 1, 2, 3], 1, rng)[0]!]!++;
+    for (const h of hits) expect(h).toBeGreaterThan(4500);
+  });
+
+  it('cleans prize names', () => {
+    expect(cleanPrizeName('  Tablette   Samsung ')).toBe('Tablette Samsung');
+    expect(cleanPrizeName('')).toBeNull();
+    expect(cleanPrizeName('   ')).toBeNull();
+    expect(cleanPrizeName('x'.repeat(61))).toBeNull();
+    expect(cleanPrizeName('a\u0000b')).toBeNull();
+    expect(cleanPrizeName(42)).toBeNull();
+  });
+});
 
 describe('lemfi numbers', () => {
   it('formats and parses LU numbers', () => {

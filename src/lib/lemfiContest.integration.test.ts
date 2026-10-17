@@ -30,6 +30,7 @@ describe.skipIf(!url)('lemfi contest — PostgreSQL integration', () => {
   });
 
   async function reset(next = 200) {
+    await prisma.lemFiContestWinner.deleteMany();
     await prisma.lemFiContestDecision.deleteMany();
     await prisma.lemFiContestProof.deleteMany();
     await prisma.lemFiContestEntry.deleteMany();
@@ -153,5 +154,79 @@ describe.skipIf(!url)('lemfi contest — PostgreSQL integration', () => {
     expect(await lib.purgeExpiredEntries(90)).toBe(1);
     expect(await prisma.lemFiContestEntry.count()).toBe(1);
     expect(await prisma.lemFiContestProof.count()).toBe(1);
+  });
+
+  describe('prize draw', () => {
+    type Draw = typeof import('./lemfiContestDraw');
+    let draw: Draw;
+
+    async function seed(validated: number, pending = 0) {
+      await reset();
+      const ids: string[] = [];
+      for (let i = 0; i < validated + pending; i++) {
+        const r = await lib.registerEntry(input(`d${i}@example.com`));
+        if (r.kind !== 'created') throw new Error('expected created');
+        if (i < validated) await lib.decideEntry(r.entry.id, 'validated', null);
+        ids.push(r.entry.id);
+      }
+      return ids;
+    }
+
+    beforeAll(async () => {
+      draw = await import('./lemfiContestDraw');
+    });
+
+    it('only draws validated participants, each at most once', async () => {
+      await seed(5, 3);
+      const first = await draw.drawWinners('Tablette', 3);
+      const second = await draw.drawWinners('AirPods', 3);
+      if (!first.ok || !second.ok) throw new Error('expected ok');
+      expect(first.winners).toHaveLength(3);
+      expect(second.winners).toHaveLength(2);
+      const all = [...first.winners, ...second.winners];
+      expect(new Set(all.map((w) => w.entry.id)).size).toBe(5);
+      expect(all.every((w) => w.entry.status === 'validated')).toBe(true);
+      expect(await draw.drawWinners('Surprise', 1)).toEqual({ ok: false, code: 'no_eligible' });
+    });
+
+    it('never gives the same participant two prizes under simultaneous draws', async () => {
+      await seed(10);
+      const results = await Promise.all(Array.from({ length: 6 }, () => draw.drawWinners('T-shirt', 2)));
+      const winners = results.flatMap((r) => (r.ok ? r.winners : []));
+      expect(new Set(winners.map((w) => w.entry.id)).size).toBe(winners.length);
+      expect(winners.length).toBeLessThanOrEqual(10);
+      expect(await prisma.lemFiContestWinner.count()).toBe(winners.length);
+    });
+
+    it('rejects invalid input', async () => {
+      await seed(1);
+      expect(await draw.drawWinners('  ', 1)).toEqual({ ok: false, code: 'invalid_prize' });
+      expect(await draw.drawWinners('Lot', 0)).toEqual({ ok: false, code: 'invalid_count' });
+      expect(await draw.drawWinners('Lot', 1.5)).toEqual({ ok: false, code: 'invalid_count' });
+      expect(await draw.drawWinners('Lot', 9999)).toEqual({ ok: false, code: 'invalid_count' });
+    });
+
+    it('lets a winner forfeit, keeps them out of later draws, and shows prizes in the admin views', async () => {
+      const ids = await seed(2);
+      const first = await draw.drawWinners('Tablette', 1);
+      if (!first.ok) throw new Error('expected ok');
+      const w = first.winners[0]!;
+
+      expect(await draw.forfeitWinner(w.id)).toEqual({ ok: true, prize: 'Tablette' });
+      expect(await draw.forfeitWinner(w.id)).toEqual({ ok: false, code: 'unchanged' });
+      expect(await draw.forfeitWinner('00000000-0000-0000-0000-000000000000')).toEqual({ ok: false, code: 'not_found' });
+
+      const state = await draw.getDrawState();
+      expect(state.eligible).toBe(1);
+      const replacement = await draw.drawWinners('Tablette', 1);
+      if (!replacement.ok) throw new Error('expected ok');
+      expect(replacement.winners[0]!.entry.id).not.toBe(w.entry.id);
+      expect(await draw.drawWinners('Tablette', 1)).toEqual({ ok: false, code: 'no_eligible' });
+
+      const detail = await lib.getEntryDetailForAdmin(ids.find((id) => id === w.entry.id)!);
+      expect(detail?.winner).toEqual({ prize: 'Tablette', status: 'forfeited' });
+      const list = await lib.listEntriesForAdmin({ limit: 10, offset: 0 });
+      expect(list.entries.filter((e) => e.winner?.status === 'won')).toHaveLength(1);
+    });
   });
 });

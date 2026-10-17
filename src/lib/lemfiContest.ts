@@ -263,6 +263,7 @@ export async function listEntriesForAdmin(opts: {
         emailLastError: true,
         duplicateOfNumber: true,
         proofHash: true,
+        winner: { select: { prize: true, status: true } },
       },
     }),
     prisma.lemFiContestEntry.count({ where }),
@@ -323,6 +324,7 @@ export async function getEntryDetailForAdmin(id: string) {
       duplicateOfNumber: true,
       proofHash: true,
       proof: { select: { mimeType: true, sizeBytes: true } },
+      winner: { select: { prize: true, status: true } },
       decisions: {
         orderBy: { createdAt: 'desc' },
         select: { id: true, fromStatus: true, toStatus: true, reason: true, createdAt: true },

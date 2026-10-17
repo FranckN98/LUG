@@ -1,6 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { LemfiWinnerStatus } from '@/lib/lemfiContestUtils';
+import { api, fmtDate } from './adminShared';
+import { DrawPanel } from './DrawPanel';
 
 type Status = 'pending' | 'validated' | 'rejected';
 
@@ -19,6 +22,7 @@ type ListEntry = {
   emailLastError: string | null;
   duplicateOfNumber: number | null;
   sameProofCount: number;
+  winner: { prize: string; status: LemfiWinnerStatus } | null;
 };
 
 type Detail = Omit<ListEntry, 'sameProofCount'> & {
@@ -45,24 +49,12 @@ const STATUS_STYLE: Record<Status, string> = {
   rejected: 'border-red-400/40 bg-red-400/10 text-red-300',
 };
 
-const dateFmt = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Europe/Berlin' });
-const fmtDate = (iso: string) => dateFmt.format(new Date(iso));
-
 function StatusBadge({ status }: { status: Status }) {
   return (
     <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[0.7rem] font-bold uppercase tracking-wider ${STATUS_STYLE[status]}`}>
       {STATUS_LABEL[status]}
     </span>
   );
-}
-
-async function api<T>(url: string, init?: RequestInit): Promise<{ ok: boolean; status: number; data: T }> {
-  const res = await fetch(url, { cache: 'no-store', ...init });
-  if (res.status === 401) {
-    window.location.href = '/admin/login?from=/admin/lemfi-contest';
-  }
-  const data = (await res.json().catch(() => ({}))) as T;
-  return { ok: res.ok, status: res.status, data };
 }
 
 export function LemFiAdmin() {
@@ -76,6 +68,7 @@ export function LemFiAdmin() {
   const [notice, setNotice] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [view, setView] = useState<'entries' | 'draw'>('entries');
   const requestId = useRef(0);
 
   useEffect(() => {
@@ -106,9 +99,10 @@ export function LemFiAdmin() {
     [status, debounced],
   );
 
+  // Recharge aussi au retour de l'onglet Tirage : un gagnant a pu être ajouté ou annulé.
   useEffect(() => {
-    void load(0);
-  }, [load]);
+    if (view === 'entries') void load(0);
+  }, [load, view]);
 
   async function retryEmails() {
     setBusy(true);
@@ -155,6 +149,28 @@ export function LemFiAdmin() {
         </div>
       )}
 
+      <div className="flex gap-2" role="tablist" aria-label="Section">
+        {([['entries', 'Participations'], ['draw', 'Tirage au sort']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={view === key}
+            onClick={() => setView(key)}
+            className={`rounded-full border px-5 py-2 text-sm font-semibold transition ${
+              view === key
+                ? 'border-accent/60 bg-accent/15 text-accent'
+                : 'border-white/15 bg-white/[0.04] text-white/70 hover:border-white/30'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'draw' && <DrawPanel />}
+
+      {view === 'entries' && (
+      <>
       {data && data.emailsPending > 0 && (
         <Bar tone="amber" text={`${data.emailsPending} e-mail(s) de confirmation non confirmé(s) par le service d’envoi.`}>
           <BarButton disabled={busy} onClick={retryEmails}>Relancer les envois</BarButton>
@@ -211,6 +227,17 @@ export function LemFiAdmin() {
                 <span className="block truncate text-sm text-white/50">{e.email}</span>
               </span>
               <span className="flex flex-wrap items-center gap-2 sm:justify-end">
+                {e.winner && (
+                  <span
+                    className={`rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold ${
+                      e.winner.status === 'won'
+                        ? 'border-yellow-400/50 bg-yellow-400/10 text-yellow-200'
+                        : 'border-white/20 text-white/50 line-through'
+                    }`}
+                  >
+                    {e.winner.status === 'won' ? `Gagnant : ${e.winner.prize}` : `Absent : ${e.winner.prize}`}
+                  </span>
+                )}
                 {e.sameProofCount > 1 && (
                   <span className="rounded-full border border-orange-400/40 bg-orange-400/10 px-2.5 py-0.5 text-[0.7rem] font-semibold text-orange-300">
                     Capture identique{e.duplicateOfNumber ? ` à LU${e.duplicateOfNumber}` : ''}
@@ -246,6 +273,8 @@ export function LemFiAdmin() {
           onClose={() => setSelected(null)}
           onChanged={() => void load(0)}
         />
+      )}
+      </>
       )}
     </div>
   );
@@ -349,7 +378,14 @@ function DetailModal({ id, onClose, onChanged }: { id: string; onClose: () => vo
               <p className="font-mono text-3xl font-bold text-accent">LU{d.sequentialNumber}</p>
               <p className="mt-1 text-lg font-semibold text-white">{d.firstName} {d.lastName}</p>
               <p className="break-all text-sm text-white/60">{d.email}</p>
-              <div className="mt-3"><StatusBadge status={d.status} /></div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <StatusBadge status={d.status} />
+                {d.winner && (
+                  <span className="rounded-full border border-yellow-400/50 bg-yellow-400/10 px-2.5 py-0.5 text-[0.7rem] font-semibold text-yellow-200">
+                    {d.winner.status === 'won' ? `Gagnant : ${d.winner.prize}` : `Absent : ${d.winner.prize}`}
+                  </span>
+                )}
+              </div>
               <dl className="mt-4 space-y-1 text-xs text-white/50">
                 <div>Reçue le {fmtDate(d.createdAt)}</div>
                 {d.consentAt && <div>Consentement enregistré le {fmtDate(d.consentAt)}</div>}

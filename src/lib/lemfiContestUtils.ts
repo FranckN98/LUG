@@ -69,6 +69,32 @@ export function detectProofMime(b: Uint8Array): ProofMime | null {
   return null;
 }
 
+export type LemfiWinnerStatus = 'won' | 'forfeited';
+
+/** Nom du lot nettoyé, ou null s'il est vide, trop long ou contient des caractères de contrôle. */
+export function cleanPrizeName(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const v = raw.replace(/\s+/g, ' ').trim();
+  if (v.length < 1 || v.length > 60) return null;
+  return /[\u0000-\u001f\u007f]/.test(v) ? null : v;
+}
+
+/**
+ * Tirage uniforme sans remise (Fisher-Yates partiel).
+ * `randomInt(max)` doit renvoyer un entier uniforme dans [0, max[.
+ */
+export function pickRandom<T>(items: readonly T[], count: number, randomInt: (max: number) => number): T[] {
+  const pool = items.slice();
+  const n = Math.min(Math.max(Math.floor(count), 0), pool.length);
+  for (let i = 0; i < n; i++) {
+    const j = i + randomInt(pool.length - i);
+    const tmp = pool[i]!;
+    pool[i] = pool[j]!;
+    pool[j] = tmp;
+  }
+  return pool.slice(0, n);
+}
+
 export function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
