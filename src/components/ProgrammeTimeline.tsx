@@ -42,7 +42,7 @@ function SessionBody({ item, locale }: { item: ProgrammeItem; locale: Locale }) 
   const isBreak = item.kind === 'break';
   return (
     <>
-      <p className={isBreak ? 'font-medium leading-snug text-gray-700' : 'font-semibold leading-snug text-brand-dark'}>
+      <p className={`break-words ${isBreak ? 'font-medium leading-snug text-gray-700' : 'font-semibold leading-snug text-brand-dark'}`}>
         {item.lang && <DeBadge locale={locale} className="mr-2 -translate-y-px" />}
         {item.title}
       </p>

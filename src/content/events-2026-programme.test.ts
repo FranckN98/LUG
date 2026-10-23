@@ -65,15 +65,15 @@ describe('2026 programme', () => {
       ['12:30–13:30', 'The keys to succeeding in your training, reading the job market and seizing opportunities', 'Marina Kengne · Aurélien Donkeng', ''],
       ['13:30–14:00', 'Building your path to leadership roles in nursing', 'Franc Fotso', ''],
       ['14:00–15:00', 'From Pflegefachkraft to Geschäftsführer: building a care business in Germany', 'Raphaël Ndongmo', ''],
-      ['12:30–13:20', 'Building a digital business: from idea to a structured, profitable company built to scale', 'Lydie Fankwe', ''],
+      ['12:30–13:20', 'Building a digital business: from idea to a structured, profitable company built to scale', 'Lydie Fonkwe', ''],
       ['13:20–14:10', 'How to build a portfolio that fits your profile and your appetite for risk', 'Prof. Dr. Giles-Arnaud Nzouankeu Nana', ''],
-      ['14:10–15:00', 'Real estate in 2026: building wealth despite high interest rates', 'Franklin Djingué', ''],
+      ['14:10–15:00', 'Real estate in 2026: building wealth despite high interest rates', 'Franklin Ndjingue', ''],
       ['15:00–16:00', 'Lunch Break & Networking', '', ''],
       ['16:00–16:45', '€800, €2,000 or €5,000 a month… the money lessons nobody ever taught you', 'Gaël Djoukang Necdem, MBA', ''],
       [
         '16:45–18:00',
         'The Great Investment Battle',
-        'Franklin Djingué · Lydie Fankwe · Prof. Dr. Giles-Arnaud Nzouankeu Nana',
+        'Franklin Ndjingue · Lydie Fonkwe · Prof. Dr. Giles-Arnaud Nzouankeu Nana',
         'Dr Constantin Fahom',
       ],
       ['18:00–18:30', 'Official Closing', '', ''],
@@ -85,14 +85,37 @@ describe('2026 programme', () => {
     expect(german.map((i) => i.time)).toEqual(['09:00–09:45', '09:45–11:00']);
   });
 
-  it('is numbered (detailed layout), and identical across languages except for interface text', () => {
+  it('is numbered (detailed layout) and translated in every language, with the same times, names and structure', () => {
     expect(blocks.every((b) => b.number !== undefined)).toBe(true);
+    const flatten = (bs: typeof blocks) => [...bs[0]!.items, ...bs[1]!.tracks!.flatMap((t) => t.items), ...bs[2]!.items];
     for (const locale of locales) {
       const p = getProgramme2026(locale);
-      expect(p.blocks.map((b) => b.items)).toEqual(blocks.map((b) => b.items));
-      expect(p.blocks[1]!.tracks).toEqual(tracksBlock!.tracks);
+      const mine = flatten(p.blocks);
+      const en = flatten(blocks);
+      expect(mine).toHaveLength(en.length);
+      mine.forEach((item, i) => {
+        // Seuls le titre et la description changent d'une langue à l'autre.
+        expect({ ...item, title: '', desc: '' }).toEqual({ ...en[i], title: '', desc: '' });
+        expect(item.title.length).toBeGreaterThan(3);
+        if (locale !== 'en') expect(item.title).not.toBe(en[i]!.title);
+      });
+      expect(p.blocks[1]!.tracks!.map((t) => t.name)).toEqual(tracksBlock!.tracks!.map((t) => t.name));
+      expect(p.blocks.map((b) => b.heading).every((h) => h.length > 10)).toBe(true);
       expect(p.blocks[1]!.trackNotice).toBeTruthy();
       expect(p.subtitle).toContain('The Squaire Conference Center · Am Flughafen 12 · 60549 Frankfurt am Main');
+    }
+    expect(getProgramme2026('fr').blocks[0]!.items[2]!.title).toBe(
+      'Le vrai Level Up : devenir la personne que les opportunités viennent chercher',
+    );
+    expect(getProgramme2026('de').blocks[2]!.heading).toBe('FINANZEN · VERMÖGEN · DER LANGFRISTIGE BLICK');
+  });
+
+  it('spells the corrected names the same way everywhere', () => {
+    for (const locale of locales) {
+      const names = JSON.stringify(getProgramme2026(locale).blocks);
+      expect(names).toContain('Franklin Ndjingue');
+      expect(names).toContain('Lydie Fonkwe');
+      expect(names).not.toMatch(/Djingu|Fankwe/);
     }
   });
 });
