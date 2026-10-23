@@ -1114,3 +1114,55 @@ model LemFiContestCounter {
 
   @@map("lemfi_contest_counter")
 }
+
+// ── Feedback 2e édition (anonyme par défaut) ────────────────────────────────
+// Confidentialité par construction : aucune colonne ne relie une réponse à un code, à une adresse
+// e-mail ou à une heure précise. `submittedOn` est un jour (Europe/Berlin), les ids sont aléatoires
+// (uuid, pas cuid) et il n'y a ni createdAt exact ni @updatedAt : l'ordre et l'heure d'envoi ne
+// permettent pas de rapprocher une réponse d'un code utilisé ou d'une inscription.
+model FeedbackResponse {
+  id                   String        @id @default(uuid())
+  submittedOn          DateTime      @map("submitted_on") @db.Date
+  rating               Int
+  highlights           String?
+  likesAndImprovements String?       @map("likes_and_improvements")
+  wantedSpeakers       String?       @map("wanted_speakers")
+  wantedTopics         String?       @map("wanted_topics")
+  isSigned             Boolean       @default(false) @map("is_signed")
+  firstName            String?       @map("first_name")
+  lastName             String?       @map("last_name")
+  tags                 FeedbackTag[]
+
+  @@index([submittedOn])
+  @@index([rating])
+  @@map("feedback_responses")
+}
+
+model FeedbackTag {
+  id        String             @id @default(uuid())
+  name      String             @unique
+  responses FeedbackResponse[]
+
+  @@map("feedback_tags")
+}
+
+// Codes à usage unique distribués aux participants : seul le hash est conservé, `used` est un
+// simple indicateur (pas de date) et rien ne le relie à une réponse.
+model FeedbackCode {
+  id        String   @id @default(uuid())
+  codeHash  String   @unique @map("code_hash")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("feedback_codes")
+}
+
+// Inscriptions « prochaines nouvelles » : table séparée, volontairement sans date ni lien avec les réponses.
+model FeedbackNewsSignup {
+  id        String  @id @default(uuid())
+  email     String  @unique
+  firstName String? @map("first_name")
+  lastName  String? @map("last_name")
+
+  @@map("feedback_news_signups")
+}
