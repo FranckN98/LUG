@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import type { Locale } from '@/i18n/config';
-import { eventsCopy, withProgrammeFallback } from '@/content/events';
+import { eventsCopy, withOfficialProgramme } from '@/content/events';
 import type { EventData, EventEdition } from '@/content/events';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { EventPdfDownloadCta } from '@/components/EventPdfDownloadCta';
@@ -603,7 +603,7 @@ export function EventsTabs({ locale, gallery2025FromDisk, gallery2026FromDisk, f
   }, [locale, gallery2025FromDisk, apiGallery2025, event2025Data]);
   const data2026 = useMemo(() => {
     const staticEdition = eventsCopy[locale].edition2026;
-    const base = withProgrammeFallback(event2026Data ?? staticEdition, staticEdition);
+    const base = withOfficialProgramme(event2026Data ?? staticEdition, staticEdition);
     const fromProps = mergeGallery(gallery2026FromDisk, base.gallery);
     const gallery =
       event2026Data ? base.gallery : apiGallery2026 && apiGallery2026.length > 0 ? apiGallery2026 : fromProps;

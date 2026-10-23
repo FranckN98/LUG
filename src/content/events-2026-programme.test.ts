@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Locale } from '@/i18n/config';
-import { eventsCopy, withProgrammeFallback } from './events';
+import { eventsCopy, withOfficialProgramme } from './events';
 import { getProgramme2026 } from './events-2026-programme';
 
 const locales: Locale[] = ['fr', 'en', 'de'];
@@ -97,18 +97,26 @@ describe('2026 programme', () => {
   });
 });
 
-describe('withProgrammeFallback', () => {
-  const fallback = eventsCopy.fr.edition2026;
+describe('withOfficialProgramme', () => {
+  const official = eventsCopy.fr.edition2026;
 
-  it('uses the code-level programme when the database has none', () => {
-    const fromDb = { ...fallback, programmeBlocks: undefined, programmeTitle: undefined, programmeSubtitle: undefined };
-    const merged = withProgrammeFallback(fromDb, fallback);
-    expect(merged.programmeBlocks).toBe(fallback.programmeBlocks);
-    expect(merged.programmeTitle).toBe(fallback.programmeTitle);
+  it('adds the official programme when the database has none', () => {
+    const fromDb = { ...official, programmeBlocks: undefined, programmeTitle: undefined, programmeSubtitle: undefined };
+    const merged = withOfficialProgramme(fromDb, official);
+    expect(merged.programmeBlocks).toBe(official.programmeBlocks);
+    expect(merged.programmeTitle).toBe(official.programmeTitle);
   });
 
-  it('never overrides a programme entered in the database', () => {
-    const fromDb = { ...fallback, programmeBlocks: [{ heading: 'Matinée', items: [{ time: '09:00', title: 'Accueil' }] }] };
-    expect(withProgrammeFallback(fromDb, fallback)).toBe(fromDb);
+  it('replaces placeholder programme data entered in the database, keeping the rest of the event', () => {
+    const fromDb = {
+      ...official,
+      date: '17.10.2026',
+      programmeTitle: 'Programme Test',
+      programmeBlocks: [{ heading: 'MATINÉE', items: [{ time: '09:00 - 10:30', title: 'Panel', desc: 'test' }] }],
+    };
+    const merged = withOfficialProgramme(fromDb, official);
+    expect(merged.programmeBlocks).toBe(official.programmeBlocks);
+    expect(merged.programmeTitle).toBe(official.programmeTitle);
+    expect(merged.date).toBe('17.10.2026');
   });
 });

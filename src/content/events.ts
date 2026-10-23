@@ -68,14 +68,14 @@ function programme2026(locale: Locale): Pick<EventData, 'programmeTitle' | 'prog
   return { programmeTitle: p.title, programmeSubtitle: p.subtitle, programmeBlocks: p.blocks };
 }
 
-/** Données issues de la base sans programme (ex. édition « upcoming ») : reprend le programme publié dans le code. */
-export function withProgrammeFallback(base: EventData, fallback: EventData): EventData {
-  if (base.programmeBlocks?.length || !fallback.programmeBlocks?.length) return base;
+/** Le programme détaillé (parcours, intervenants, badge DE) vit dans le code : il remplace celui de la base, qui ne sait pas le représenter. */
+export function withOfficialProgramme(base: EventData, official: EventData): EventData {
+  if (!official.programmeBlocks?.length) return base;
   return {
     ...base,
-    programmeBlocks: fallback.programmeBlocks,
-    programmeTitle: base.programmeTitle ?? fallback.programmeTitle,
-    programmeSubtitle: base.programmeSubtitle ?? fallback.programmeSubtitle,
+    programmeBlocks: official.programmeBlocks,
+    programmeTitle: official.programmeTitle,
+    programmeSubtitle: official.programmeSubtitle,
   };
 }
 
