@@ -7,6 +7,7 @@ import {
   detail2025Fr,
   type ProgrammeBlock,
 } from '@/content/events-2025-detail';
+import { getProgramme2026 } from '@/content/events-2026-programme';
 
 export type EventEdition = '2025' | '2026';
 
@@ -61,6 +62,22 @@ export type EventData = {
 };
 
 const gallery2025 = [...EVENT_2025_GALLERY_PATHS];
+
+function programme2026(locale: Locale): Pick<EventData, 'programmeTitle' | 'programmeSubtitle' | 'programmeBlocks'> {
+  const p = getProgramme2026(locale);
+  return { programmeTitle: p.title, programmeSubtitle: p.subtitle, programmeBlocks: p.blocks };
+}
+
+/** Données issues de la base sans programme (ex. édition « upcoming ») : reprend le programme publié dans le code. */
+export function withProgrammeFallback(base: EventData, fallback: EventData): EventData {
+  if (base.programmeBlocks?.length || !fallback.programmeBlocks?.length) return base;
+  return {
+    ...base,
+    programmeBlocks: fallback.programmeBlocks,
+    programmeTitle: base.programmeTitle ?? fallback.programmeTitle,
+    programmeSubtitle: base.programmeSubtitle ?? fallback.programmeSubtitle,
+  };
+}
 
 const eventsContent: Record<
   Locale,
@@ -181,6 +198,7 @@ const eventsContent: Record<
     },
     edition2026: {
       programme: [],
+      ...programme2026('de'),
       speakers: [],
       theme: 'In Kürze',
       tagline: 'Mega-Konferenz · Ausgabe 2026 · Frankfurt',
@@ -269,6 +287,7 @@ const eventsContent: Record<
     },
     edition2026: {
       programme: [],
+      ...programme2026('en'),
       speakers: [],
       theme: 'Coming soon',
       tagline: 'Mega Conference · 2026 edition · Frankfurt',
@@ -357,6 +376,7 @@ const eventsContent: Record<
     },
     edition2026: {
       programme: [],
+      ...programme2026('fr'),
       speakers: [],
       theme: 'Bientôt',
       tagline: 'Mega conférence · Édition 2026 · Francfort',

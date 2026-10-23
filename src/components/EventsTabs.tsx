@@ -2,10 +2,11 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import type { Locale } from '@/i18n/config';
-import { eventsCopy } from '@/content/events';
+import { eventsCopy, withProgrammeFallback } from '@/content/events';
 import type { EventData, EventEdition } from '@/content/events';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { EventPdfDownloadCta } from '@/components/EventPdfDownloadCta';
+import { ProgrammeTimeline, isDetailedProgramme } from '@/components/ProgrammeTimeline';
 
 function IconCalendar() {
   return (
@@ -336,7 +337,11 @@ export function EditionContent({
             </div>
           )}
 
+          {hasBlocks && isDetailedProgramme(data.programmeBlocks) && (
+            <ProgrammeTimeline blocks={data.programmeBlocks} locale={locale} />
+          )}
           {hasBlocks &&
+            !isDetailedProgramme(data.programmeBlocks) &&
             data.programmeBlocks!.map((block, bi) => (
               <div key={bi} className={bi > 0 ? 'mt-10' : ''}>
                 <h4 className="text-sm font-bold uppercase tracking-wider text-accent mb-4 pl-1 border-l-4 border-accent pl-3">
@@ -597,7 +602,8 @@ export function EventsTabs({ locale, gallery2025FromDisk, gallery2026FromDisk, f
     return { ...base, gallery };
   }, [locale, gallery2025FromDisk, apiGallery2025, event2025Data]);
   const data2026 = useMemo(() => {
-    const base = event2026Data ?? eventsCopy[locale].edition2026;
+    const staticEdition = eventsCopy[locale].edition2026;
+    const base = withProgrammeFallback(event2026Data ?? staticEdition, staticEdition);
     const fromProps = mergeGallery(gallery2026FromDisk, base.gallery);
     const gallery =
       event2026Data ? base.gallery : apiGallery2026 && apiGallery2026.length > 0 ? apiGallery2026 : fromProps;
@@ -605,7 +611,11 @@ export function EventsTabs({ locale, gallery2025FromDisk, gallery2026FromDisk, f
   }, [locale, gallery2026FromDisk, apiGallery2026, event2026Data]);
 
   const isEmpty2026 =
-    !data2026.gallery?.length && !data2026.programme?.length && !data2026.speakers?.length && !data2026.tagline;
+    !data2026.gallery?.length &&
+    !data2026.programme?.length &&
+    !data2026.programmeBlocks?.length &&
+    !data2026.speakers?.length &&
+    !data2026.tagline;
 
   return (
     <div className="space-y-8">

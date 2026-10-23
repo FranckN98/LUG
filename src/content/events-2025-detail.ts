@@ -3,9 +3,31 @@
  * Basé sur les supports officiels (programme, flyers, OCR).
  */
 import { SITE_CONTACT } from '@/config/siteContact';
-export type ProgrammeItem = { time: string; title: string; desc?: string };
+export type ProgrammeItem = {
+  time: string;
+  title: string;
+  desc?: string;
+  /** Intervenants, noms tels que publiés. */
+  speakers?: string[];
+  moderator?: string;
+  /** Session tenue en allemand : affiche le badge « DE ». */
+  lang?: 'DE';
+  /** `break` : accueil, pause ou networking, rendu plus discret qu'une session. */
+  kind?: 'session' | 'break';
+};
 export type SpeakerRow = { name: string; role: string; domain: string };
-export type ProgrammeBlock = { heading: string; items: ProgrammeItem[] };
+/** Parcours parallèle d'une partie de la journée (ex. A · Career Launch). */
+export type ProgrammeTrack = { id: string; name: string; items: ProgrammeItem[] };
+export type ProgrammeBlock = {
+  heading: string;
+  items: ProgrammeItem[];
+  /** Numéro de la grande partie ; active l'affichage « timeline » détaillé. */
+  number?: number;
+  /** Parcours en parallèle : ils remplacent `items` pour cette partie. */
+  tracks?: ProgrammeTrack[];
+  /** Consigne affichée au-dessus des parcours (ex. chacun rejoint celui de son billet). */
+  trackNotice?: string;
+};
 
 /**
  * Fallback si le dossier public/events/2025 est vide ou illisible au build.
