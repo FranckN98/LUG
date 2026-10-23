@@ -141,7 +141,7 @@ const eventsContent: Record<
     introDedicated2025:
       'Level Up in Germany 2025 – Rückblick auf die Mega-Konferenz: Programm, Galerie und Highlights.',
     introDedicated2026:
-      'Level Up in Germany 2026 – kommende Ausgabe in Frankfurt: Stand, Vorschau und Galerie.',
+      'Level Up in Germany 2026 – 2. Ausgabe in Frankfurt: Programm, Redner:innen und Galerie.',
     tab2025: 'Level Up in Germany 2025',
     tab2026: 'Level Up in Germany 2026',
     backToEvents: '← Alle Editionen',
@@ -230,7 +230,7 @@ const eventsContent: Record<
     introDedicated2025:
       'Level Up in Germany 2025 – Mega conference recap: programme, gallery and highlights.',
     introDedicated2026:
-      'Level Up in Germany 2026 – next edition in Frankfurt: status, preview and gallery.',
+      'Level Up in Germany 2026 – 2nd edition in Frankfurt: programme, speakers and gallery.',
     tab2025: 'Level Up in Germany 2025',
     tab2026: 'Level Up in Germany 2026',
     backToEvents: '← All editions',
@@ -319,7 +319,7 @@ const eventsContent: Record<
     introDedicated2025:
       'Level Up in Germany 2025 – rétrospective de la méga-conférence : programme, galerie et temps forts.',
     introDedicated2026:
-      'Level Up in Germany 2026 – prochaine édition à Francfort : infos, aperçu et galerie.',
+      'Level Up in Germany 2026 – 2e édition à Francfort : programme, intervenants et galerie.',
     tab2025: 'Level Up in Germany 2025',
     tab2026: 'Level Up in Germany 2026',
     backToEvents: '← Toutes les éditions',

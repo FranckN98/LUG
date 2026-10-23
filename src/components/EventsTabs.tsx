@@ -302,10 +302,34 @@ export function EditionContent({
     data.speakers.length > 0 ||
     (data.date && data.date !== '—' && data.date !== '-') ||
     (data.venue?.name && data.venue.name !== '—' && data.venue.name !== '-');
+  const showProgramme = data.showProgramme !== false && (hasBlocks || hasFlat);
+  const jumpLinks =
+    edition === '2026'
+      ? [
+          showProgramme && { id: 'programme', label: t.sections.programme },
+          data.speakers.length > 0 && { id: 'speakers', label: t.sections.speakers },
+          showMetaRow && { id: 'infos', label: `${t.sections.date} · ${t.sections.venue}` },
+          data.gallery.length > 0 && { id: 'gallery', label: t.sections.gallery },
+        ].filter((l): l is { id: string; label: string } => !!l)
+      : [];
 
   return (
     <div className="space-y-12 animate-tab-fade-in">
       <EventHero data={data} t={t} />
+
+      {jumpLinks.length > 1 && (
+        <nav aria-label={t.title} className="-mt-6 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {jumpLinks.map((l) => (
+            <a
+              key={l.id}
+              href={`#${edition}-${l.id}`}
+              className="shrink-0 rounded-full border border-primary/20 bg-white px-4 py-2 text-sm font-semibold text-primary shadow-sm transition hover:border-accent hover:bg-accent/5"
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+      )}
 
       {data.highlights && data.highlights.length > 0 && (
         <section>
@@ -324,8 +348,8 @@ export function EditionContent({
         </section>
       )}
 
-      {data.showProgramme !== false && (hasBlocks || hasFlat) && (
-        <section>
+      {showProgramme && (
+        <section id={`${edition}-programme`} className="scroll-mt-28">
           <h3 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
             <IconCalendar />
             {t.sections.programme}
@@ -387,7 +411,7 @@ export function EditionContent({
       )}
 
       {data.speakers.length > 0 && (
-        <section>
+        <section id={`${edition}-speakers`} className="scroll-mt-28">
           <h3 className="text-lg font-semibold text-primary mb-4">{t.sections.speakers}</h3>
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {(speakersExpanded ? data.speakers : data.speakers.slice(0, SPEAKERS_PREVIEW_COUNT)).map((s, i) => (
@@ -418,7 +442,7 @@ export function EditionContent({
       )}
 
       {showMetaRow && (
-        <div className="grid lg:grid-cols-3 gap-4">
+        <div id={`${edition}-infos`} className="grid scroll-mt-28 gap-4 lg:grid-cols-3">
           <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-accent mb-3">{t.sections.date}</h3>
             <p className="text-xl font-bold text-brand-dark">{data.date}</p>
@@ -497,7 +521,7 @@ export function EditionContent({
       )}
 
       {data.gallery.length > 0 && (
-        <section>
+        <section id={`${edition}-gallery`} className="scroll-mt-28">
           <h3 className="text-lg font-semibold text-primary mb-2">{t.sections.gallery}</h3>
           {data.galleryIntro && <p className="text-sm text-gray-600 mb-6 max-w-3xl leading-relaxed">{data.galleryIntro}</p>}
           <GalleryGrid paths={data.gallery} masonry={galleryMasonry} locale={locale} />
