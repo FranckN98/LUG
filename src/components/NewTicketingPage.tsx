@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
+import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { TicketingModal } from './TicketingModal';
 import { TicketingFAQ } from './TicketingFAQ';
@@ -81,6 +82,7 @@ const PAGE_TEXT: Record<Locale, {
   expoStandInfo: string;
   noTickets: string;
   secureNote: string;
+  programmeCta: string;
   perksEyebrow: string;
   perksTitle: string;
   perksItems: { emoji: string; text: string }[];
@@ -128,6 +130,7 @@ const PAGE_TEXT: Record<Locale, {
     expoStandInfo: 'Prévoyez vos produits, supports de présentation et éléments de décoration pour mettre votre marque en valeur.',
     noTickets: 'Aucun ticket disponible pour le moment.',
     secureNote: 'Paiement 100 % sécurisé · Confirmation immédiate',
+    programmeCta: 'Voir le programme',
     perksEyebrow: 'Avantages communs',
     perksTitle: 'Inclus dans tous les tickets',
     perksItems: [
@@ -149,9 +152,9 @@ const PAGE_TEXT: Record<Locale, {
     videoAriaLabel: 'Vidéo',
     videoTitle: 'Vidéo Level Up in Germany',
     close: 'Fermer',
-    soldOutOverlay: 'Rupture de stock',
+    soldOutOverlay: 'Sold Out',
     comingSoonFooter: '⏳ Bientôt disponible',
-    soldOutFooter: 'Épuisé',
+    soldOutFooter: 'Sold out',
     dbEyebrow: 'Offre de voyage Deutsche Bahn',
     dbTitle: 'Un bon plan pour votre voyage à Level Up',
     dbIntro: 'Les participants à Level Up in Germany 2026 bénéficient d\'offres DB Event exclusives pour leurs voyages en train longue distance partout en Allemagne avec les ICE, IC et EC.',
@@ -185,6 +188,7 @@ const PAGE_TEXT: Record<Locale, {
     expoStandInfo: 'Plan your products, marketing materials and branding elements to showcase your brand effectively.',
     noTickets: 'No ticket available at the moment.',
     secureNote: '100% secure payment · Instant confirmation',
+    programmeCta: 'View the programme',
     perksEyebrow: 'Shared perks',
     perksTitle: 'Included with every ticket',
     perksItems: [
@@ -242,6 +246,7 @@ const PAGE_TEXT: Record<Locale, {
     expoStandInfo: 'Planen Sie Ihre Produkte, Präsentationsmaterialien und Branding-Elemente, um Ihre Marke effektiv zu präsentieren.',
     noTickets: 'Derzeit ist kein Ticket verfügbar.',
     secureNote: '100 % sichere Zahlung · Sofortige Bestätigung',
+    programmeCta: 'Programm ansehen',
     perksEyebrow: 'Gemeinsame Vorteile',
     perksTitle: 'In jedem Ticket enthalten',
     perksItems: [
@@ -395,16 +400,27 @@ function PassCard({
 
   return (
     <div
-      className={`group relative flex flex-col rounded-3xl bg-white transition-transform duration-300 hover:-translate-y-1 ${isSoldOut ? 'opacity-70' : ''}`}
+      className="group relative flex flex-col rounded-3xl bg-white transition-transform duration-300 hover:-translate-y-1"
       style={{
         boxShadow: `0 24px 60px -24px ${pass.colorPrimary}55, 0 0 0 1px ${pass.colorPrimary}22`,
       }}
     >
-      {/* Sold out overlay */}
+      {/* Sold out : le contenu reste lisible, un badge animé marque la catégorie en haut à droite */}
       {isSoldOut && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white/60 backdrop-blur-[2px]">
-          <span className="rounded-full border border-black/10 bg-white px-5 py-2 text-sm font-bold uppercase tracking-widest text-neutral-500 shadow">{t.soldOutOverlay}</span>
-        </div>
+        <span
+          className="lu-sold-badge pointer-events-none absolute -right-2 -top-3 z-20 inline-flex items-center gap-2 overflow-hidden rounded-full border-2 border-white px-4 py-1.5 text-xs font-extrabold uppercase tracking-[0.18em] text-white sm:text-sm"
+          style={{ background: 'linear-gradient(135deg, #dc2626, #8C1A1A)' }}
+        >
+          <span aria-hidden className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/80" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+          </span>
+          {t.soldOutOverlay}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/40 to-transparent"
+          />
+        </span>
       )}
 
       {/* Top color band */}
@@ -522,7 +538,6 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
 
   const hasCheckout = Boolean(config.checkoutUrl);
   const hasAvailablePass = config.passes.some((p) => p.status === 'available');
-  const allSoldOut = config.passes.length > 0 && !hasAvailablePass;
   const isOpen = hasCheckout && hasAvailablePass;
   const ytId = youtubeId(config.videoUrl ?? '');
   const parkingLocations = parseParkingLocations(config.parkingLocations);
@@ -594,6 +609,19 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
         .lu-play-spin { animation: lu-play-spin 6s linear infinite; filter: blur(2px); }
         @media (prefers-reduced-motion: reduce) {
           .lu-play-btn, .lu-play-ring, .lu-play-spin { animation: none !important; }
+        }
+        /* ── Badge « Sold out » animé (coin supérieur droit de chaque catégorie) ─ */
+        @keyframes lu-sold-wobble {
+          0%, 100% { transform: rotate(4deg) scale(1); }
+          50%      { transform: rotate(-3deg) scale(1.06); }
+        }
+        @keyframes lu-sold-glow {
+          0%, 100% { box-shadow: 0 6px 18px -4px rgba(185,28,28,0.55), 0 0 0 0 rgba(220,38,38,0.45); }
+          60%      { box-shadow: 0 8px 22px -4px rgba(185,28,28,0.7), 0 0 0 9px rgba(220,38,38,0); }
+        }
+        .lu-sold-badge { animation: lu-sold-wobble 3s ease-in-out infinite, lu-sold-glow 2.2s ease-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .lu-sold-badge, .lu-sold-badge * { animation: none !important; }
         }
       `}</style>
 
@@ -818,55 +846,44 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
               </div>
             )}
 
-            {/* Single animated CTA - Shows both available and sold out states */}
-            {hasCheckout && (
-              <div className="mt-14 flex flex-col items-center" style={isOpen ? { animation: 'var(--animate-hero-buttons, none)' } : {}}>
-                <button
-                  onClick={handleBuy}
-                  disabled={!isOpen}
-                  className={`group/cta relative w-full max-w-md overflow-hidden rounded-full py-5 text-base font-extrabold text-white transition active:scale-[0.98] ${
-                    isOpen 
-                      ? 'animate-cta-glow cursor-pointer' 
-                      : 'cursor-not-allowed opacity-60'
-                  }`}
-                  style={{ 
-                    background: isOpen 
-                      ? 'linear-gradient(135deg, #6f1414, #8C1A1A)' 
-                      : 'linear-gradient(135deg, #999999, #666666)'
-                  }}
-                >
-                  <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
-                    {isOpen ? (
-                      <>
-                        🎟️ {config.ctaButtonText}
-                        <svg className="h-5 w-5 transition-transform group-hover/cta:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
-                          <path d="M5 12h14M13 6l6 6-6 6" />
-                        </svg>
-                      </>
-                    ) : (
-                      <>
-                        🔴 SOLD OUT
-                      </>
-                    )}
-                  </span>
-                  {/* Shimmer sweep - only for available state */}
-                  {isOpen && (
+            {/* Primary CTA + programme access */}
+            <div className="mt-14 flex flex-col items-center animate-hero-buttons">
+              <div className="flex w-full max-w-2xl flex-col gap-3 sm:flex-row sm:justify-center">
+                {isOpen && (
+                  <button
+                    onClick={handleBuy}
+                    className="animate-cta-glow group/cta relative w-full overflow-hidden rounded-full py-5 text-base font-extrabold text-white transition active:scale-[0.98] sm:max-w-md sm:flex-1"
+                    style={{ background: 'linear-gradient(135deg, #6f1414, #8C1A1A)' }}
+                  >
+                    <span className="relative z-10 inline-flex items-center justify-center gap-2.5 uppercase tracking-[0.08em]">
+                      🎟️ {config.ctaButtonText}
+                      <svg className="h-5 w-5 transition-transform group-hover/cta:translate-x-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    </span>
+                    {/* Shimmer sweep */}
                     <span
                       aria-hidden
                       className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shimmer-sweep bg-gradient-to-r from-transparent via-white/40 to-transparent"
                     />
-                  )}
-                </button>
-                {isOpen && (
-                  <p className="mt-4 flex items-center gap-2 text-xs font-medium text-neutral-500">
-                    <svg className="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                    {t.secureNote}
-                  </p>
+                  </button>
                 )}
+                <Link
+                  href={`/${locale}/events/levelup2026#2026-programme`}
+                  className="inline-flex w-full items-center justify-center gap-2.5 rounded-full border-2 border-[#8C1A1A]/25 bg-white px-8 py-5 text-base font-extrabold uppercase tracking-[0.08em] text-[#8C1A1A] transition hover:border-[#8C1A1A] hover:bg-[#8C1A1A]/5 active:scale-[0.98] sm:w-auto"
+                >
+                  🗓️ {t.programmeCta}
+                </Link>
               </div>
-            )}
+              {isOpen && (
+                <p className="mt-4 flex items-center gap-2 text-xs font-medium text-neutral-500">
+                  <svg className="h-4 w-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  {t.secureNote}
+                </p>
+              )}
+            </div>
           </div>
         </section>
 
