@@ -1,59 +1,37 @@
-import { randomInt } from 'crypto';
 import { Prisma } from '@prisma/client';
 import { prisma } from './prisma';
 import {
   berlinDay,
   cleanTagName,
   DEFAULT_FEEDBACK_TAGS,
-  formatCode,
-  generateCode,
-  hashCode,
   type FeedbackFilters,
   type FeedbackInput,
 } from './feedbackUtils';
 
 // ── Envoi d'une réponse ─────────────────────────────────────────────────────
 
-class CodeRejected extends Error {}
-
-export type SubmitResult =
-  | { kind: 'ok'; newsletter: 'none' | 'saved' | 'failed' }
-  | { kind: 'code_invalid' }
-  | { kind: 'code_used' };
+export type SubmitResult = { newsletter: 'none' | 'saved' | 'failed' };
 
 /**
- * Le code est consommé et la réponse enregistrée dans une même transaction : si l'une échoue, le code
- * n'est pas brûlé. La réponse ne contient ni le code ni aucune heure précise.
- * L'inscription aux nouvelles est écrite après coup, hors transaction, dans une autre table.
+ * La réponse ne contient aucune heure précise ni aucun identifiant.
+ * L'inscription aux nouvelles est écrite après coup, dans une autre table, sans lien avec elle.
  */
 export async function submitFeedback(input: FeedbackInput): Promise<SubmitResult> {
-  const codeHash = hashCode(input.code);
+  await prisma.feedbackResponse.create({
+    data: {
+      submittedOn: berlinDay(),
+      rating: input.rating,
+      highlights: input.highlights,
+      likesAndImprovements: input.likesAndImprovements,
+      wantedSpeakers: input.wantedSpeakers,
+      wantedTopics: input.wantedTopics,
+      isSigned: input.isSigned,
+      firstName: input.firstName,
+      lastName: input.lastName,
+    },
+  });
 
-  try {
-    await prisma.$transaction(async (tx) => {
-      const consumed = await tx.feedbackCode.updateMany({ where: { codeHash, used: false }, data: { used: true } });
-      if (consumed.count !== 1) throw new CodeRejected();
-      await tx.feedbackResponse.create({
-        data: {
-          submittedOn: berlinDay(),
-          rating: input.rating,
-          highlights: input.highlights,
-          likesAndImprovements: input.likesAndImprovements,
-          wantedSpeakers: input.wantedSpeakers,
-          wantedTopics: input.wantedTopics,
-          isSigned: input.isSigned,
-          firstName: input.firstName,
-          lastName: input.lastName,
-        },
-      });
-    });
-  } catch (e) {
-    if (!(e instanceof CodeRejected)) throw e;
-    const known = await prisma.feedbackCode.findUnique({ where: { codeHash }, select: { id: true } });
-    return { kind: known ? 'code_used' : 'code_invalid' };
-  }
-
-  if (!input.news) return { kind: 'ok', newsletter: 'none' };
+  if (!input.news) return { newsletter: 'none' };
   try {
     await prisma.feedbackNewsSignup.upsert({
       where: { email: input.news.email },
@@ -63,9 +41,9 @@ export async function submitFeedback(input: FeedbackInput): Promise<SubmitResult
         ...(input.news.lastName ? { lastName: input.news.lastName } : {}),
       },
     });
-    return { kind: 'ok', newsletter: 'saved' };
+    return { newsletter: 'saved' };
   } catch {
-    return { kind: 'ok', newsletter: 'failed' };
+    return { newsletter: 'failed' };
   }
 }
 
@@ -209,39 +187,4 @@ export async function listNewsSignups() {
     orderBy: { email: 'asc' },
     select: { id: true, email: true, firstName: true, lastName: true },
   });
-}
-
-// ── Administration : codes ──────────────────────────────────────────────────
-
-export async function getCodeStats() {
-  const [total, used] = await Promise.all([prisma.feedbackCode.count(), prisma.feedbackCode.count({ where: { used: true } })]);
-  return { total, used, unused: total - used };
-}
-
-export const MAX_CODES_PER_BATCH = 500;
-
-/** Crée `count` codes et les renvoie en clair UNE seule fois : seuls leurs hash sont conservés. */
-export async function generateCodes(count: number): Promise<string[] | null> {
-  if (!Number.isInteger(count) || count < 1 || count > MAX_CODES_PER_BATCH) return null;
-
-  const fresh = new Map<string, string>(); // hash → code
-  while (fresh.size < count) {
-    const batch = new Map<string, string>();
-    while (fresh.size + batch.size < count) {
-      const code = generateCode(randomInt);
-      batch.set(hashCode(code), code);
-    }
-    const hashes = Array.from(batch.keys());
-    const taken = await prisma.feedbackCode.findMany({ where: { codeHash: { in: hashes } }, select: { codeHash: true } });
-    const takenSet = new Set(taken.map((t) => t.codeHash));
-    batch.forEach((code, hash) => {
-      if (!takenSet.has(hash)) fresh.set(hash, code);
-    });
-  }
-
-  await prisma.feedbackCode.createMany({
-    data: Array.from(fresh.keys()).map((codeHash) => ({ codeHash })),
-    skipDuplicates: true,
-  });
-  return Array.from(fresh.values()).map(formatCode);
 }

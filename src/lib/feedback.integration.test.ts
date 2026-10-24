@@ -14,8 +14,7 @@ describe.skipIf(!url)('feedback — PostgreSQL integration', () => {
   let utils: typeof import('./feedbackUtils');
   let prisma: typeof import('./prisma').prisma;
 
-  const answer = (code: string, extra: Partial<FeedbackInput> = {}): FeedbackInput => ({
-    code,
+  const answer = (extra: Partial<FeedbackInput> = {}): FeedbackInput => ({
     rating: 4,
     highlights: null,
     likesAndImprovements: null,
@@ -32,10 +31,7 @@ describe.skipIf(!url)('feedback — PostgreSQL integration', () => {
     await prisma.feedbackResponse.deleteMany();
     await prisma.feedbackTag.deleteMany();
     await prisma.feedbackNewsSignup.deleteMany();
-    await prisma.feedbackCode.deleteMany();
   }
-
-  const newCodes = async (n: number) => (await lib.generateCodes(n))!.map((c) => utils.normalizeCode(c)!);
 
   beforeAll(async () => {
     if (!isLocal) throw new Error('FEEDBACK_TEST_DATABASE_URL doit pointer vers une base locale (localhost).');
@@ -49,55 +45,17 @@ describe.skipIf(!url)('feedback — PostgreSQL integration', () => {
     await prisma?.$disconnect();
   });
 
-  it('generates unique codes and stores only their hash', async () => {
+  it('saves an anonymous answer without any identifier or exact time', async () => {
     await reset();
-    const shown = (await lib.generateCodes(30))!;
-    expect(new Set(shown).size).toBe(30);
-    expect(shown.every((c) => /^[A-Z2-9]{5}-[A-Z2-9]{5}$/.test(c))).toBe(true);
+    expect(await lib.submitFeedback(answer({ highlights: 'Très bien' }))).toEqual({ newsletter: 'none' });
+    const [row] = await prisma.feedbackResponse.findMany();
+    expect(row).toMatchObject({ rating: 4, highlights: 'Très bien', isSigned: false, firstName: null, lastName: null });
 
-    const rows = await prisma.feedbackCode.findMany();
-    expect(rows).toHaveLength(30);
-    const stored = JSON.stringify(rows);
-    for (const c of shown) expect(stored).not.toContain(utils.normalizeCode(c)!);
-    expect(await lib.getCodeStats()).toEqual({ total: 30, used: 0, unused: 30 });
-    expect(await lib.generateCodes(0)).toBeNull();
-    expect(await lib.generateCodes(501)).toBeNull();
-  });
-
-  it('accepts a code once, then refuses it; unknown codes are refused', async () => {
-    await reset();
-    const [code] = await newCodes(1);
-    expect(await lib.submitFeedback(answer(code!))).toEqual({ kind: 'ok', newsletter: 'none' });
-    expect(await lib.submitFeedback(answer(code!))).toEqual({ kind: 'code_used' });
-    expect(await lib.submitFeedback(answer('ZZZZZZZZZZ'))).toEqual({ kind: 'code_invalid' });
-    expect(await prisma.feedbackResponse.count()).toBe(1);
-    expect(await lib.getCodeStats()).toMatchObject({ used: 1, unused: 0 });
-  });
-
-  it('lets exactly one of many simultaneous submissions with the same code through', async () => {
-    await reset();
-    const [code] = await newCodes(1);
-    const results = await Promise.all(Array.from({ length: 8 }, () => lib.submitFeedback(answer(code!))));
-    expect(results.filter((r) => r.kind === 'ok')).toHaveLength(1);
-    expect(results.filter((r) => r.kind === 'code_used')).toHaveLength(7);
-    expect(await prisma.feedbackResponse.count()).toBe(1);
-  });
-
-  it('does not burn the code when the response cannot be saved', async () => {
-    await reset();
-    const [code] = await newCodes(1);
-    await expect(lib.submitFeedback(answer(code!, { rating: 2 ** 40 }))).rejects.toThrow();
-    expect(await lib.getCodeStats()).toMatchObject({ used: 0, unused: 1 });
-    expect(await lib.submitFeedback(answer(code!))).toMatchObject({ kind: 'ok' });
-  });
-
-  it('keeps nothing that links a response to a code, an e-mail, or an exact time', async () => {
     const cols = async (table: string) =>
       (
         await prisma.$queryRaw<{ column_name: string }[]>`
           SELECT column_name FROM information_schema.columns WHERE table_name = ${table} ORDER BY column_name`
       ).map((c) => c.column_name);
-
     expect(await cols('feedback_responses')).toEqual(
       [
         'first_name', 'highlights', 'id', 'is_signed', 'last_name', 'likes_and_improvements',
@@ -105,41 +63,35 @@ describe.skipIf(!url)('feedback — PostgreSQL integration', () => {
       ].sort(),
     );
     expect(await cols('feedback_news_signups')).toEqual(['email', 'first_name', 'id', 'last_name']);
-    expect(await cols('feedback_codes')).toEqual(['code_hash', 'created_at', 'id', 'used']);
 
-    await reset();
-    const [code] = await newCodes(1);
-    await lib.submitFeedback(answer(code!, { news: { email: 'awa@example.com', firstName: null, lastName: null } }));
-    const [row] = await prisma.$queryRaw<{ submitted_on: Date; day: string }[]>`
+    const [day] = await prisma.$queryRaw<{ submitted_on: Date; day: string }[]>`
       SELECT submitted_on, submitted_on::text AS day FROM feedback_responses`;
-    expect(row!.submitted_on.getUTCHours()).toBe(0);
-    expect(row!.day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(JSON.stringify(await prisma.feedbackResponse.findMany())).not.toContain('awa@example.com');
+    expect(day!.submitted_on.getUTCHours()).toBe(0);
+    expect(day!.day).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it('stores the newsletter signup separately, only when asked, and merges repeats', async () => {
     await reset();
-    const [a, b, c] = await newCodes(3);
-    expect(await lib.submitFeedback(answer(a!))).toEqual({ kind: 'ok', newsletter: 'none' });
+    expect(await lib.submitFeedback(answer())).toEqual({ newsletter: 'none' });
     expect(await prisma.feedbackNewsSignup.count()).toBe(0);
 
     const news = { email: 'awa@example.com', firstName: 'Awa', lastName: null };
-    expect(await lib.submitFeedback(answer(b!, { news }))).toEqual({ kind: 'ok', newsletter: 'saved' });
-    expect(await lib.submitFeedback(answer(c!, { news: { ...news, firstName: null, lastName: 'Diallo' } }))).toMatchObject({ kind: 'ok' });
+    expect(await lib.submitFeedback(answer({ news }))).toEqual({ newsletter: 'saved' });
+    expect(await lib.submitFeedback(answer({ news: { ...news, firstName: null, lastName: 'Diallo' } }))).toEqual({ newsletter: 'saved' });
 
     const signups = await lib.listNewsSignups();
     expect(signups).toHaveLength(1);
     expect(signups[0]).toMatchObject({ email: 'awa@example.com', firstName: 'Awa', lastName: 'Diallo' });
     expect(await prisma.feedbackResponse.count()).toBe(3);
+    expect(JSON.stringify(await prisma.feedbackResponse.findMany())).not.toContain('awa@example.com');
   });
 
   it('lists, filters, searches and tags responses', async () => {
     await reset();
-    const codes = await newCodes(4);
-    await lib.submitFeedback(answer(codes[0]!, { rating: 5, highlights: 'Le networking était excellent' }));
-    await lib.submitFeedback(answer(codes[1]!, { rating: 2, likesAndImprovements: 'Trop court, la restauration a manqué', isSigned: true, firstName: 'Awa', lastName: 'Diallo' }));
-    await lib.submitFeedback(answer(codes[2]!, { rating: 5, wantedSpeakers: 'Un entrepreneur local' }));
-    await lib.submitFeedback(answer(codes[3]!, { rating: 3 }));
+    await lib.submitFeedback(answer({ rating: 5, highlights: 'Le networking était excellent' }));
+    await lib.submitFeedback(answer({ rating: 2, likesAndImprovements: 'Trop court, la restauration a manqué', isSigned: true, firstName: 'Awa', lastName: 'Diallo' }));
+    await lib.submitFeedback(answer({ rating: 5, wantedSpeakers: 'Un entrepreneur local' }));
+    await lib.submitFeedback(answer({ rating: 3 }));
 
     const all = await lib.listFeedback({}, { limit: 10, offset: 0 });
     expect(all.total).toBe(4);

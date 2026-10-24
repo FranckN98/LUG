@@ -12,8 +12,8 @@ export default function FeedbackAdminPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/70 mb-1">Level Up in Germany 2026</p>
         <h1 className="text-2xl font-bold text-white">Feedback — deuxième édition</h1>
         <p className="mt-1 text-sm text-white/40">
-          Retours anonymes par défaut. Les réponses, les codes à usage unique et les inscriptions aux prochaines
-          nouvelles sont stockés séparément : rien ne permet de relier une adresse e-mail ou un code à une réponse.
+          Retours anonymes par défaut. Les réponses et les inscriptions aux prochaines nouvelles sont stockées
+          séparément : rien ne permet de relier une adresse e-mail à une réponse.
         </p>
       </div>
       <div className="mt-6">

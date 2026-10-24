@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const loc: Locale = locales.includes(locale as Locale) ? (locale as Locale) : 'fr';
   return {
     ...buildPageMetadata(loc, '/feedback', { ...t.seo, noindex: true }),
-    // Le lien personnel contient le code : il ne doit jamais partir dans un en-tête Referer.
+    // Page anonyme : aucun en-tête Referer n'est envoyé depuis cette page.
     referrer: 'no-referrer',
   };
 }

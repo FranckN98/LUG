@@ -10,7 +10,7 @@ const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 const UMAMI_SRC = process.env.NEXT_PUBLIC_UMAMI_SRC;
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
-// Pages anonymes : ni suivi de page, ni script tiers (le lien de la page de feedback contient un code personnel).
+// Pages anonymes : ni suivi de page, ni script tiers (les répondants ne doivent pas pouvoir être identifiés).
 const UNTRACKED_PATH = /^\/(de|en|fr)\/feedback(\/|$)/;
 
 export function AnalyticsProvider() {

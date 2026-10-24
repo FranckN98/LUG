@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { CodesTab } from './CodesTab';
 import { ResponsesTab } from './ResponsesTab';
 import { SignupsTab } from './SignupsTab';
 
 const TABS = [
   ['responses', 'Réponses'],
   ['signups', 'Inscriptions aux nouvelles'],
-  ['codes', 'Codes à usage unique'],
 ] as const;
 
 export function FeedbackAdmin() {
@@ -36,7 +34,6 @@ export function FeedbackAdmin() {
 
       {tab === 'responses' && <ResponsesTab />}
       {tab === 'signups' && <SignupsTab />}
-      {tab === 'codes' && <CodesTab />}
     </div>
   );
 }

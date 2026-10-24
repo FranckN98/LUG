@@ -1,39 +1,7 @@
-import { createHash } from 'crypto';
 import { DEFAULT_FEEDBACK_TAGS, FEEDBACK_LIMITS } from '@/content/feedback';
 import { cleanPersonName, isValidEmail, normalizeEmail } from './lemfiContestUtils';
 
 export { DEFAULT_FEEDBACK_TAGS };
-
-// ── Codes à usage unique ────────────────────────────────────────────────────
-
-/** 31 symboles sans I, L, O, 0, 1 (confusions à la saisie). 10 symboles ≈ 50 bits. */
-export const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-export const CODE_LENGTH = 10;
-
-/** `randomInt(max)` doit renvoyer un entier uniforme dans [0, max[ (crypto.randomInt en production). */
-export function generateCode(randomInt: (max: number) => number): string {
-  let out = '';
-  for (let i = 0; i < CODE_LENGTH; i++) out += CODE_ALPHABET[randomInt(CODE_ALPHABET.length)];
-  return out;
-}
-
-export function formatCode(code: string): string {
-  return `${code.slice(0, 5)}-${code.slice(5)}`;
-}
-
-/** « abcde-fghjk » → « ABCDEFGHJK » ; null si le format est invalide. */
-export function normalizeCode(raw: unknown): string | null {
-  if (typeof raw !== 'string') return null;
-  const v = raw.toUpperCase().replace(/[\s-]/g, '');
-  if (v.length !== CODE_LENGTH) return null;
-  for (const ch of v) if (CODE_ALPHABET.indexOf(ch) === -1) return null;
-  return v;
-}
-
-/** Seul ce hash est conservé en base ; `FEEDBACK_CODE_PEPPER` (facultatif) rend un vol de base inexploitable. */
-export function hashCode(code: string, pepper: string = process.env.FEEDBACK_CODE_PEPPER ?? ''): string {
-  return createHash('sha256').update(`${pepper}:${code}`).digest('hex');
-}
 
 // ── Dates ───────────────────────────────────────────────────────────────────
 
@@ -84,7 +52,6 @@ export function cleanTagName(raw: unknown): string | null {
 }
 
 export type FeedbackInput = {
-  code: string;
   rating: number;
   highlights: string | null;
   likesAndImprovements: string | null;
@@ -98,15 +65,11 @@ export type FeedbackInput = {
 
 export type ParsedFeedback =
   | { ok: true; value: FeedbackInput }
-  | { ok: false; code: 'code' | 'codeFormat' | 'rating' | 'email' | 'name' | 'tooLong' | 'invalid'; field?: string };
+  | { ok: false; code: 'rating' | 'email' | 'name' | 'tooLong' | 'invalid'; field?: string };
 
 export function parseFeedbackBody(body: unknown): ParsedFeedback {
   if (typeof body !== 'object' || body === null || Array.isArray(body)) return { ok: false, code: 'invalid' };
   const b = body as Record<string, unknown>;
-
-  if (typeof b.code !== 'string' || !b.code.trim()) return { ok: false, code: 'code', field: 'code' };
-  const code = normalizeCode(b.code);
-  if (!code) return { ok: false, code: 'codeFormat', field: 'code' };
 
   const rating = b.rating;
   if (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) {
@@ -153,7 +116,6 @@ export function parseFeedbackBody(body: unknown): ParsedFeedback {
   return {
     ok: true,
     value: {
-      code,
       rating,
       highlights: val('highlights'),
       likesAndImprovements: val('likesAndImprovements'),

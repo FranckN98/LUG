@@ -14,9 +14,10 @@ type FieldKey =
   | 'lastName'
   | 'newsEmail'
   | 'newsFirstName'
-  | 'newsLastName'
-  | 'code';
+  | 'newsLastName';
 type Errors = Partial<Record<FieldKey, string>>;
+
+const DONE_KEY = 'lug:feedback-2026:done';
 
 // Ordre d'affichage : sert à placer le focus sur la première erreur.
 const FIELD_ORDER: FieldKey[] = [
@@ -30,7 +31,6 @@ const FIELD_ORDER: FieldKey[] = [
   'newsEmail',
   'newsFirstName',
   'newsLastName',
-  'code',
 ];
 
 const inputCls =
@@ -99,18 +99,19 @@ export function FeedbackForm({ homeHref }: { homeHref: string }) {
   const [newsEmail, setNewsEmail] = useState('');
   const [newsFirstName, setNewsFirstName] = useState('');
   const [newsLastName, setNewsLastName] = useState('');
-  const [code, setCode] = useState('');
+  const [website, setWebsite] = useState('');
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'done'>('idle');
   const [newsletterFailed, setNewsletterFailed] = useState(false);
+  const [alreadyAnswered, setAlreadyAnswered] = useState(false);
 
-  // Le code arrive dans le lien personnel : on le lit puis on le retire de la barre d'adresse et de l'historique.
+  // Limite souple : simple repère dans ce navigateur, pas une garantie d'une seule réponse par personne.
   useEffect(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get('code');
-    if (fromUrl) {
-      setCode(fromUrl.slice(0, 20));
-      window.history.replaceState(null, '', window.location.pathname);
+    try {
+      if (window.localStorage.getItem(DONE_KEY)) setAlreadyAnswered(true);
+    } catch {
+      /* stockage indisponible : on laisse répondre */
     }
   }, []);
 
@@ -129,7 +130,6 @@ export function FeedbackForm({ homeHref }: { homeHref: string }) {
     const next: Errors = {};
     if (!rating) next.rating = t.errors.rating;
     if (news && !/^\S+@\S+\.\S+$/.test(newsEmail.trim())) next.newsEmail = t.errors.email;
-    if (!code.trim()) next.code = t.errors.code;
     setFormError('');
     if (Object.keys(next).length > 0) return showErrors(next);
 
@@ -142,7 +142,7 @@ export function FeedbackForm({ homeHref }: { homeHref: string }) {
         credentials: 'omit',
         referrerPolicy: 'no-referrer',
         body: JSON.stringify({
-          code,
+          website,
           rating,
           highlights,
           likesAndImprovements: likes,
@@ -159,6 +159,11 @@ export function FeedbackForm({ homeHref }: { homeHref: string }) {
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; field?: FieldKey; newsletter?: string };
       if (res.ok) {
+        try {
+          window.localStorage.setItem(DONE_KEY, '1');
+        } catch {
+          /* stockage indisponible : sans conséquence */
+        }
         setNewsletterFailed(data.newsletter === 'failed');
         setStatus('done');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -173,7 +178,7 @@ export function FeedbackForm({ homeHref }: { homeHref: string }) {
     }
   }
 
-  if (status === 'done') {
+  if (status === 'done' || alreadyAnswered) {
     return (
       <div
         role="status"
@@ -184,8 +189,10 @@ export function FeedbackForm({ homeHref }: { homeHref: string }) {
             <path strokeLinecap="round" strokeLinejoin="round" d="m5 12.5 4.5 4.5L19 7.5" />
           </svg>
         </span>
-        <p className="mt-6 font-display text-3xl font-bold leading-snug text-primary sm:text-4xl">{t.success}</p>
-        {newsletterFailed && (
+        <p className="mt-6 font-display text-3xl font-bold leading-snug text-primary sm:text-4xl">
+          {status === 'done' ? t.success : t.alreadyAnswered}
+        </p>
+        {status === 'done' && newsletterFailed && (
           <p className="mt-5 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">{t.newsletterFailed}</p>
         )}
         <Link
@@ -500,31 +507,17 @@ export function FeedbackForm({ homeHref }: { homeHref: string }) {
           <p className="mt-4 text-sm leading-relaxed text-gray-600">{t.contact.privacy}</p>
         </section>
 
-        {/* Code à usage unique + envoi */}
-        <div>
-          <label htmlFor="fb-code" className="font-semibold text-brand-dark">
-            {t.code.label}
-          </label>
+        {/* Champ piège : invisible et hors navigation clavier, une personne ne le remplit jamais. */}
+        <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+          <label htmlFor="fb-website">Site web</label>
           <input
-            id="fb-code"
-            value={code}
-            onChange={(e) => {
-              setCode(e.target.value);
-              setErrors((x) => ({ ...x, code: undefined }));
-            }}
-            maxLength={20}
-            placeholder={t.code.placeholder}
+            id="fb-website"
+            name="website"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            tabIndex={-1}
             autoComplete="off"
-            autoCapitalize="characters"
-            spellCheck={false}
-            aria-invalid={!!errors.code}
-            aria-describedby={`fb-code-help${errors.code ? ' fb-code-error' : ''}`}
-            className={`${inputCls} max-w-xs font-mono uppercase tracking-widest`}
           />
-          <p id="fb-code-help" className="mt-1.5 text-sm text-gray-500">
-            {t.code.help}
-          </p>
-          <FieldError id="fb-code-error" message={errors.code} />
         </div>
 
         {formError && (

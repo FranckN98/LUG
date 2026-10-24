@@ -58,22 +58,14 @@ export const feedbackCopy = {
     privacy:
       'Cette inscription est facultative. Vos coordonnées sont enregistrées séparément de vos réponses au feedback : votre adresse e-mail ne permet pas d’identifier la réponse que vous avez donnée.',
   },
-  code: {
-    label: 'Votre code personnel',
-    help: 'Utilisez le code reçu avec votre invitation. Il ne sert qu’une seule fois et n’est relié ni à votre nom ni à votre réponse.',
-    placeholder: 'XXXXX-XXXXX',
-  },
   submit: 'Envoyer mon retour',
   sending: 'Envoi en cours…',
   success: 'Merci d’avoir pris le temps de nous répondre. Votre retour nous aidera à faire grandir Level Up.',
+  alreadyAnswered: 'Un retour a déjà été envoyé depuis ce navigateur. Merci pour votre participation !',
   newsletterFailed:
     'Votre retour est bien enregistré, mais votre inscription aux prochaines nouvelles n’a pas pu l’être. Vous pouvez réessayer plus tard.',
   errors: {
     rating: 'Choisissez une note de 1 à 5 étoiles.',
-    code: 'Saisissez votre code personnel.',
-    codeFormat: 'Ce code n’a pas le bon format. Vérifiez-le (10 caractères, lettres et chiffres).',
-    codeInvalid: 'Ce code n’est pas valide. Vérifiez-le ou utilisez le lien reçu avec votre invitation.',
-    codeUsed: 'Ce code a déjà été utilisé : une seule réponse est possible par code.',
     email: 'Saisissez une adresse e-mail valide pour recevoir nos nouvelles.',
     name: 'Ce nom contient des caractères non valides.',
     tooLong: 'Ce texte est trop long.',

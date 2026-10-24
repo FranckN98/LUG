@@ -36,6 +36,11 @@ export async function POST(req: NextRequest) {
     return fail(400, feedbackCopy.errors.generic);
   }
 
+  // Champ piège invisible pour les personnes : un robot qui le remplit reçoit un faux succès, rien n'est enregistré.
+  if (typeof body === 'object' && body !== null && (body as { website?: unknown }).website) {
+    return NextResponse.json({ ok: true, newsletter: 'none' }, { headers: NO_STORE });
+  }
+
   const parsed = parseFeedbackBody(body);
   if (!parsed.ok) {
     const message = parsed.code === 'invalid' ? feedbackCopy.errors.generic : feedbackCopy.errors[parsed.code];
@@ -43,7 +48,5 @@ export async function POST(req: NextRequest) {
   }
 
   const result = await submitFeedback(parsed.value);
-  if (result.kind === 'code_invalid') return fail(422, feedbackCopy.errors.codeInvalid, 'code');
-  if (result.kind === 'code_used') return fail(409, feedbackCopy.errors.codeUsed, 'code');
   return NextResponse.json({ ok: true, newsletter: result.newsletter }, { headers: NO_STORE });
 }

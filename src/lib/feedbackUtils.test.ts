@@ -1,48 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   berlinDay,
-  CODE_ALPHABET,
-  CODE_LENGTH,
   csvCell,
-  formatCode,
-  generateCode,
-  hashCode,
-  normalizeCode,
   parseFeedbackBody,
   parseFeedbackFilters,
   toCsv,
 } from './feedbackUtils';
 
-const base = { code: 'abcde-fghjk', rating: 4 };
-
-describe('feedback codes', () => {
-  it('generates codes from the safe alphabet', () => {
-    const rng = (max: number) => Math.floor(Math.random() * max);
-    for (let i = 0; i < 200; i++) {
-      const code = generateCode(rng);
-      expect(code).toHaveLength(CODE_LENGTH);
-      for (const ch of code) expect(CODE_ALPHABET).toContain(ch);
-    }
-    expect(CODE_ALPHABET).not.toMatch(/[ILO01]/);
-  });
-
-  it('normalizes what people type and rejects the rest', () => {
-    expect(normalizeCode(' abcde-fghjk ')).toBe('ABCDEFGHJK');
-    expect(normalizeCode('ABCDE FGHJK')).toBe('ABCDEFGHJK');
-    expect(normalizeCode('ABCDE-FGHJ')).toBeNull();
-    expect(normalizeCode('ABCDE-FGHJI')).toBeNull();
-    expect(normalizeCode('ABCDE-FGHJ0')).toBeNull();
-    expect(normalizeCode(12345)).toBeNull();
-    expect(formatCode('ABCDEFGHJK')).toBe('ABCDE-FGHJK');
-  });
-
-  it('hashes deterministically, never stores the code itself', () => {
-    expect(hashCode('ABCDEFGHJK', '')).toBe(hashCode('ABCDEFGHJK', ''));
-    expect(hashCode('ABCDEFGHJK', '')).not.toBe(hashCode('ABCDEFGHJM', ''));
-    expect(hashCode('ABCDEFGHJK', 'pepper')).not.toBe(hashCode('ABCDEFGHJK', ''));
-    expect(hashCode('ABCDEFGHJK', '')).toMatch(/^[0-9a-f]{64}$/);
-  });
-});
+const base = { rating: 4 };
 
 describe('berlinDay', () => {
   it('keeps only the Berlin calendar day, at UTC midnight', () => {
@@ -58,7 +23,6 @@ describe('parseFeedbackBody', () => {
     expect(r).toEqual({
       ok: true,
       value: {
-        code: 'ABCDEFGHJK',
         rating: 4,
         highlights: null,
         likesAndImprovements: null,
@@ -94,8 +58,7 @@ describe('parseFeedbackBody', () => {
 
   it('rejects invalid input with a field', () => {
     expect(parseFeedbackBody(null)).toMatchObject({ ok: false, code: 'invalid' });
-    expect(parseFeedbackBody({ rating: 4 })).toMatchObject({ ok: false, code: 'code', field: 'code' });
-    expect(parseFeedbackBody({ ...base, code: 'ABC' })).toMatchObject({ ok: false, code: 'codeFormat' });
+    expect(parseFeedbackBody({})).toMatchObject({ ok: false, code: 'rating', field: 'rating' });
     for (const rating of [0, 6, 2.5, '4', null]) {
       expect(parseFeedbackBody({ ...base, rating })).toMatchObject({ ok: false, code: 'rating', field: 'rating' });
     }
