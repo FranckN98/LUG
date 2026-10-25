@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { locales, localeNames, type Locale } from '@/i18n/config';
 import { isWhoWeArePathname, localeSwitcherHref, whoWeAreHref } from '@/lib/whoWeAreRoutes';
+import { localizeSiteHref } from '@/lib/localizeSiteHref';
 
 // Même pictogramme que la favicon (icône U / flèche, bandes orange–rouge–noir)
 import navLogoImage from '@/assets/lug-mark-nobg.png';
@@ -111,10 +112,8 @@ export function Header({
   const base = `/${locale}`;
   const joinTarget = siteConfig?.headerJoinLink?.trim() || '/contact';
   const sponsorTarget = siteConfig?.headerSponsorLink?.trim() || '/sponsor-donate';
-  const contactHref = /^https?:\/\//i.test(joinTarget) ? joinTarget : `${base}${joinTarget.startsWith('/') ? joinTarget : `/${joinTarget}`}`;
-  const sponsorHref = /^https?:\/\//i.test(sponsorTarget)
-    ? sponsorTarget
-    : `${base}${sponsorTarget.startsWith('/') ? sponsorTarget : `/${sponsorTarget}`}`;
+  const contactHref = localizeSiteHref(joinTarget, locale);
+  const sponsorHref = localizeSiteHref(sponsorTarget, locale);
 
   const joinLabel =
     locale === 'de'

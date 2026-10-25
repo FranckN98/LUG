@@ -7,6 +7,7 @@ import type { Locale } from '@/i18n/config';
 import { TicketingModal } from './TicketingModal';
 import { TicketingFAQ } from './TicketingFAQ';
 import { ImageLightbox } from './ImageLightbox';
+import { localizeModeratorRole, translateKnownPhrase } from '@/lib/ticketingGlossary';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -243,7 +244,7 @@ const PAGE_TEXT: Record<Locale, {
     ticketsEyebrow: 'Ticketing',
     ticketsTitle: 'Wähle dein Ticket',
     ticketsSubtitle: 'Wähle das Ticket, das am besten zu dir passt.',
-    expoStandInfo: 'Planen Sie Ihre Produkte, Präsentationsmaterialien und Branding-Elemente, um Ihre Marke effektiv zu präsentieren.',
+    expoStandInfo: 'Plane deine Produkte, Präsentationsmaterialien und Branding-Elemente, um deine Marke wirkungsvoll in Szene zu setzen.',
     noTickets: 'Derzeit ist kein Ticket verfügbar.',
     secureNote: '100 % sichere Zahlung · Sofortige Bestätigung',
     programmeCta: 'Programm ansehen',
@@ -288,10 +289,10 @@ const PAGE_TEXT: Record<Locale, {
     venueAddress: 'REGUS Conference Center, 5. Etage, Am Flughafen 12, 60549 Frankfurt am Main',
     venueFullAddress: 'REGUS Conference Center Am Flughafen 12 60549 Frankfurt am Main Germany',
     navigationTitle: 'Anfahrtsbeschreibung',
-    navigationFromIce: 'Von der ICE-Bahnstation (Fernbahnhof): Nehmen Sie die Rolltreppe zur Kuppelhalle (Glaskuppelhalle). Gehen Sie zum Eingang WEST (REWE-Markt) und nehmen Sie dort die Rolltreppe zur Ebene 5. Folgen Sie den Hausnummern bis zur Nummer 12 auf Ihrer linken Seite.',
-    navigationFromAirport: 'Vom Flughafen oder Parkplätzen P1-P4: Folgen Sie der Beschilderung zum Fernbahnhof (ICE). Fahren Sie zur Kuppelhalle und richten Sie sich nach dem Eingang WEST (REWE-Markt). Nehmen Sie die Rolltreppe zur Ebene 5 und suchen Sie die Nummer 12.',
-    navigationFromSBahn: 'Von der S-Bahn oder dem Regionalbahnhof: Folgen Sie der Beschilderung zum Fernbahnhof (ICE). Gehen Sie von der Kuppelhalle in Richtung WEST zum Eingang REWE-Markt und nehmen Sie die Rolltreppe zur Ebene 5.',
-    navigationFromParking: 'Vom THE SQUAIRE Parkhaus: Parken Sie auf Ebene 6. Nehmen Sie den Aufzug zur Ebene 6. Nutzen Sie den THE SQUAIRE Metro Zugang, der Sie zur Ebene 5 bringt. Folgen Sie nach links und suchen Sie die Nummer 12 (großer weißer Empfang).',
+    navigationFromIce: 'Von der ICE-Bahnstation (Fernbahnhof): Nimm die Rolltreppe zur Kuppelhalle (Glaskuppelhalle). Geh zum Eingang WEST (REWE-Markt) und nimm dort die Rolltreppe zur Ebene 5. Folge den Hausnummern bis zur Nummer 12 auf deiner linken Seite.',
+    navigationFromAirport: 'Vom Flughafen oder den Parkplätzen P1-P4: Folge der Beschilderung zum Fernbahnhof (ICE). Geh weiter zur Kuppelhalle und orientiere dich am Eingang WEST (REWE-Markt). Nimm die Rolltreppe zur Ebene 5 und suche die Nummer 12.',
+    navigationFromSBahn: 'Von der S-Bahn oder dem Regionalbahnhof: Folge der Beschilderung zum Fernbahnhof (ICE). Geh von der Kuppelhalle in Richtung WEST zum Eingang REWE-Markt und nimm die Rolltreppe zur Ebene 5.',
+    navigationFromParking: 'Vom THE SQUAIRE Parkhaus: Parke auf Ebene 6. Nimm den Aufzug zur Ebene 6. Nutze den THE SQUAIRE Metro Zugang, der dich zur Ebene 5 bringt. Halte dich links und suche die Nummer 12 (großer weißer Empfang).',
     getDirections: 'Route anzeigen',
   },
 };
@@ -956,7 +957,7 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
                     </div>
                     <div className="p-3 sm:p-5">
                       <h3 className="font-display text-lg font-bold leading-tight text-neutral-900 sm:text-2xl">{speaker.name}</h3>
-                      {speaker.role && <p className="mt-1 text-xs leading-relaxed text-neutral-500 sm:text-sm">{speaker.role}</p>}
+                      {speaker.role && <p className="mt-1 text-xs leading-relaxed text-neutral-500 sm:text-sm">{translateKnownPhrase(speaker.role, locale) ?? speaker.role}</p>}
                     </div>
                   </article>
                 ))}
@@ -1013,7 +1014,7 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
                     {(moderator.name || moderator.role) && (
                       <div className="p-3 sm:p-5">
                         {moderator.name && <h3 className="font-display text-lg font-bold leading-tight text-neutral-900 sm:text-2xl">{moderator.name}</h3>}
-                        {moderator.role && <p className="mt-1 text-xs leading-relaxed text-neutral-500 sm:text-sm">{moderator.role}</p>}
+                        {moderator.role && <p className="mt-1 text-xs leading-relaxed text-neutral-500 sm:text-sm">{localizeModeratorRole(moderator.role, locale)}</p>}
                       </div>
                     )}
                   </article>
@@ -1078,7 +1079,7 @@ export function NewTicketingPage({ config, locale = 'fr' }: { config: TicketingC
         </section>
 
         {/* ── FAQ ──────────────────────────────────────────────────────────────── */}
-        <TicketingFAQ />
+        <TicketingFAQ locale={locale} />
 
         {/* ── Venue & Navigation ────────────────────────────────────────────────── */}
         <section className="relative z-10 px-5 py-20 sm:px-8 sm:py-24">

@@ -1,10 +1,12 @@
 import type { Locale } from '@/i18n/config';
+import { translateFrenchDate, translateKnownPhrase } from '@/lib/ticketingGlossary';
 
 // The base TicketingConfig/TicketingPass columns are authored in French (the
 // site's default authoring language). `translations` stores optional EN/DE
 // overrides as a JSON string: `Partial<Record<'en' | 'de', Partial<Fields>>>`.
-// Locale resolution: fr -> base columns; en/de -> base columns overridden by
-// whatever is present (non-empty) in translations[locale].
+// Locale resolution: fr -> base columns; en/de -> translations[locale] when non-empty,
+// otherwise the built-in glossary (src/lib/ticketingGlossary.ts) for known French
+// phrases, otherwise the French base text.
 
 export type TicketingConfigTranslatable = {
   pageTitle: string;
@@ -51,6 +53,16 @@ function nonEmpty(value: string | undefined | null): value is string {
   return typeof value === 'string' && value.trim() !== '';
 }
 
+function pickText(override: string | undefined | null, base: string, locale: Locale): string {
+  if (nonEmpty(override)) return override;
+  return translateKnownPhrase(base, locale) ?? base;
+}
+
+function pickList(override: string[] | undefined, base: string[], locale: Locale): string[] {
+  if (Array.isArray(override) && override.length > 0) return override;
+  return base.map((item) => translateKnownPhrase(item, locale) ?? item);
+}
+
 export function resolveConfigLocale(
   base: TicketingConfigTranslatable,
   translationsRaw: string | null | undefined,
@@ -60,12 +72,12 @@ export function resolveConfigLocale(
   const translations = parseTranslationsJson<TicketingConfigTranslatable>(translationsRaw);
   const override = translations[locale as TicketingTranslatableLocale] ?? {};
   return {
-    pageTitle: nonEmpty(override.pageTitle) ? override.pageTitle : base.pageTitle,
-    pageSubtitle: nonEmpty(override.pageSubtitle) ? override.pageSubtitle : base.pageSubtitle,
-    pageIntro: nonEmpty(override.pageIntro) ? override.pageIntro : base.pageIntro,
-    eventDate: nonEmpty(override.eventDate) ? override.eventDate : base.eventDate,
-    eventLocation: nonEmpty(override.eventLocation) ? override.eventLocation : base.eventLocation,
-    ctaButtonText: nonEmpty(override.ctaButtonText) ? override.ctaButtonText : base.ctaButtonText,
+    pageTitle: pickText(override.pageTitle, base.pageTitle, locale),
+    pageSubtitle: pickText(override.pageSubtitle, base.pageSubtitle, locale),
+    pageIntro: pickText(override.pageIntro, base.pageIntro, locale),
+    eventDate: nonEmpty(override.eventDate) ? override.eventDate : translateFrenchDate(base.eventDate, locale) ?? base.eventDate,
+    eventLocation: pickText(override.eventLocation, base.eventLocation, locale),
+    ctaButtonText: pickText(override.ctaButtonText, base.ctaButtonText, locale),
   };
 }
 
@@ -78,13 +90,13 @@ export function resolvePassLocale(
   const translations = parseTranslationsJson<TicketingPassTranslatable>(translationsRaw);
   const override = translations[locale as TicketingTranslatableLocale] ?? {};
   return {
-    name: nonEmpty(override.name) ? override.name : base.name,
-    label: nonEmpty(override.label) ? override.label : base.label,
-    targetAudience: nonEmpty(override.targetAudience) ? override.targetAudience : base.targetAudience,
-    description: nonEmpty(override.description) ? override.description : base.description,
-    highlights: Array.isArray(override.highlights) && override.highlights.length > 0 ? override.highlights : base.highlights,
-    includes: Array.isArray(override.includes) && override.includes.length > 0 ? override.includes : base.includes,
-    decisionPhrase: nonEmpty(override.decisionPhrase) ? override.decisionPhrase : base.decisionPhrase,
-    availabilityNote: nonEmpty(override.availabilityNote) ? override.availabilityNote : base.availabilityNote,
+    name: pickText(override.name, base.name, locale),
+    label: pickText(override.label, base.label, locale),
+    targetAudience: pickText(override.targetAudience, base.targetAudience, locale),
+    description: pickText(override.description, base.description, locale),
+    highlights: pickList(override.highlights, base.highlights, locale),
+    includes: pickList(override.includes, base.includes, locale),
+    decisionPhrase: pickText(override.decisionPhrase, base.decisionPhrase, locale),
+    availabilityNote: pickText(override.availabilityNote, base.availabilityNote, locale),
   };
 }
