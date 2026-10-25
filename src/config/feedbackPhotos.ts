@@ -9,7 +9,7 @@ export type FeedbackPhoto = { src: string; alt: string; position?: string };
 export const FEEDBACK_PHOTOS: FeedbackPhoto[] = [
   {
     src: '/feedback/edition-2-groupe.jpg',
-    position: 'center top',
+    position: 'center 35%',
     alt: 'Photo de groupe sur le tapis rouge devant le mur Level Up in Germany, deuxième édition',
   },
 ];
