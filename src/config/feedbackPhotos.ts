@@ -6,4 +6,9 @@
  */
 export type FeedbackPhoto = { src: string; alt: string; position?: string };
 
-export const FEEDBACK_PHOTOS: FeedbackPhoto[] = [];
+export const FEEDBACK_PHOTOS: FeedbackPhoto[] = [
+  {
+    src: '/feedback/edition-2-groupe.jpg',
+    alt: 'Photo de groupe sur le tapis rouge devant le mur Level Up in Germany, deuxième édition',
+  },
+];
