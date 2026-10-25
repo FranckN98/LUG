@@ -3,7 +3,7 @@ import type { FeedbackPhoto } from '@/config/feedbackPhotos';
 
 // Une grande photo et jusqu'à trois photos complémentaires ; sur mobile la grande photo passe au-dessus.
 const LAYOUTS: Record<number, { grid: string; cells: string[] }> = {
-  1: { grid: 'mx-auto w-full max-w-4xl grid-cols-1 aspect-[1219/768]', cells: [''] },
+  1: { grid: 'mx-auto w-full max-w-4xl grid-cols-1 aspect-video', cells: [''] },
   2: { grid: 'grid-cols-3 h-64 sm:h-[26rem]', cells: ['col-span-2', ''] },
   3: {
     grid: 'grid-cols-2 grid-rows-[3fr_2fr] h-[26rem] sm:grid-cols-3 sm:grid-rows-2 sm:h-[28rem]',
