@@ -587,12 +587,10 @@ export function EditionContent({
 
       {data.firstEditionBookUrl && (
         <EventPdfDownloadCta
-          locale={locale}
-          edition={edition}
+          anchorId={edition === '2026' ? 'ebook' : `${edition}-ebook`}
           pdfPath={data.firstEditionBookUrl}
           title={t.downloadBookTitle}
           subtitle={t.downloadBookSubtitle}
-          t={t}
         />
       )}
     </div>
