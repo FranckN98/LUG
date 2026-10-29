@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { isPresignedS3Url } from '@/lib/presignedUrl';
+import { uploadMediaFile } from '@/lib/clientUpload';
 
 type MediaItem = {
   id: string;
@@ -15,13 +17,17 @@ type MediaItem = {
 
 const CATEGORIES = [
   { value: 'all', label: 'Tous' },
-  { value: 'community', label: 'Communauté (Accueil)' },
   { value: 'blog', label: 'Blog' },
   { value: 'team', label: 'Équipe' },
-  { value: 'hero', label: 'Carrousel' },
   { value: 'event', label: 'Événements' },
   { value: 'partner', label: 'Partenaires' },
   { value: 'general', label: 'Général' },
+];
+
+/** Bibliothèques propres à l'accueil : proposées uniquement quand le sélecteur les demande via `categories`. */
+const HOME_CATEGORIES = [
+  { value: 'hero', label: 'Images Hero' },
+  { value: 'community', label: 'Galerie communauté' },
 ];
 
 type Props = {
@@ -29,6 +35,10 @@ type Props = {
   onChange: (url: string) => void;
   label?: string;
   defaultCategory?: string;
+  /** Restreint la médiathèque à ces catégories (les uploads y sont rangés). */
+  categories?: string[];
+  /** Appelé après un upload réussi (ex. rafraîchir une liste qui dépend de la médiathèque). */
+  onUploaded?: () => void;
   placeholder?: string;
   helperText?: string;
 };
@@ -38,23 +48,67 @@ export function MediaPicker({
   onChange,
   label = 'Image',
   defaultCategory = 'all',
+  categories,
+  onUploaded,
   placeholder = '/media/... ou URL externe',
   helperText,
 }: Props) {
+  const tabs = categories ? [...CATEGORIES, ...HOME_CATEGORIES].filter((c) => categories.includes(c.value)) : CATEGORIES;
   const [open, setOpen] = useState(false);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(defaultCategory);
+  const [activeCategory, setActiveCategory] = useState(
+    categories && !categories.includes(defaultCategory) ? (tabs[0]?.value ?? 'general') : defaultCategory,
+  );
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [rehosting, setRehosting] = useState(false);
+  const [rehostError, setRehostError] = useState('');
+
+  // Un lien S3 signé expire en quelques minutes : on en garde une copie sur le site et on met l'URL permanente à la place.
+  async function rehost(url: string) {
+    setRehosting(true);
+    setRehostError('');
+    try {
+      const res = await fetch('/api/admin/media/rehost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, category: activeCategory === 'all' ? 'general' : activeCategory }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setRehostError(data.error ?? "Impossible d'héberger cette image.");
+        return;
+      }
+      onChange(data.url);
+      onUploaded?.();
+    } catch {
+      setRehostError('Erreur réseau.');
+    } finally {
+      setRehosting(false);
+    }
+  }
+
+  function handleManualChange(next: string) {
+    onChange(next);
+    setRehostError('');
+    if (isPresignedS3Url(next)) void rehost(next);
+  }
 
   const fetchMedia = useCallback(async (category: string) => {
     setLoading(true);
-    const res = await fetch(`/api/admin/media?category=${category}`);
-    const data = await res.json();
-    setMedia(data);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/admin/media?category=${category}`);
+      const data = await res.json().catch(() => null);
+      setMedia(res.ok && Array.isArray(data) ? data : []);
+      if (!res.ok) setUploadError(res.status === 401 ? 'Session expirée : reconnectez-vous.' : 'Impossible de charger la médiathèque.');
+    } catch {
+      setMedia([]);
+      setUploadError('Erreur réseau : médiathèque indisponible.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -74,16 +128,23 @@ export function MediaPicker({
     setUploading(true);
     setUploadError('');
     try {
+      const category = activeCategory === 'all' ? 'general' : activeCategory;
+      const uploaded: string[] = [];
+      const errors: string[] = [];
       for (const file of Array.from(files)) {
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('category', activeCategory === 'all' ? 'general' : activeCategory);
-        const res = await fetch('/api/admin/media/upload', { method: 'POST', body: fd });
-        if (!res.ok) {
-          const d = await res.json();
-          setUploadError(d.error ?? 'Erreur upload');
-          break;
+        const result = await uploadMediaFile(file, category);
+        if (result.ok) {
+          uploaded.push(result.item.url);
+          onUploaded?.();
+        } else {
+          errors.push(result.error);
         }
+      }
+      if (errors.length > 0) setUploadError(errors.join(' • '));
+      // Une seule photo envoyée sans erreur : elle est sélectionnée directement.
+      if (uploaded.length === 1 && errors.length === 0) {
+        select(uploaded[0]!);
+        return;
       }
       await fetchMedia(activeCategory);
     } finally {
@@ -117,11 +178,15 @@ export function MediaPicker({
             <input
               type="text"
               value={value}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={(e) => handleManualChange(e.target.value)}
               placeholder={placeholder}
               className="w-full rounded-xl bg-white/[0.06] border border-white/10 text-white placeholder-white/25 px-3 py-2 text-sm focus:outline-none focus:border-accent/40 transition"
             />
             {helperText && <p className="text-xs text-white/35">{helperText}</p>}
+            {rehosting && (
+              <p className="text-xs text-accent">Lien S3 signé détecté : copie de l&apos;image sur le site en cours…</p>
+            )}
+            {rehostError && <p className="text-xs text-red-400">{rehostError}</p>}
             <div className="flex gap-2">
               <button
                 type="button"
@@ -214,22 +279,24 @@ export function MediaPicker({
             )}
 
             {/* Category tabs */}
-            <div className="flex gap-1 px-5 pt-3 pb-1 overflow-x-auto scrollbar-hide">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.value}
-                  type="button"
-                  onClick={() => setActiveCategory(cat.value)}
-                  className={`shrink-0 px-3 py-1 rounded-lg text-xs font-semibold transition ${
-                    activeCategory === cat.value
-                      ? 'bg-primary text-white'
-                      : 'text-white/40 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
+            {tabs.length > 1 && (
+              <div className="flex gap-1 px-5 pt-3 pb-1 overflow-x-auto scrollbar-hide">
+                {tabs.map((cat) => (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => setActiveCategory(cat.value)}
+                    className={`shrink-0 px-3 py-1 rounded-lg text-xs font-semibold transition ${
+                      activeCategory === cat.value
+                        ? 'bg-primary text-white'
+                        : 'text-white/40 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Grid */}
             <div className="flex-1 overflow-y-auto p-5">

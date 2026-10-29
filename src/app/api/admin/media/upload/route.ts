@@ -1,71 +1,75 @@
 import { NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
+import { syncHeroMediaToSlides } from '@/lib/heroSync';
+import { saveMediaFile } from '@/lib/mediaStorage';
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 
-// On Vercel the filesystem is read-only at runtime. When BLOB_READ_WRITE_TOKEN is
-// present we upload to Vercel Blob instead of /public. Locally we keep writing to
-// /public so dev works without any extra service.
-const useBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+const TYPE_BY_EXT: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  svg: 'image/svg+xml',
+};
+const EXT_BY_TYPE: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+  'image/svg+xml': 'svg',
+};
 
-async function saveFile(buffer: Buffer, savedFilename: string, subfolder: 'media' | 'community'): Promise<string> {
-  if (useBlob) {
-    const { put } = await import('@vercel/blob');
-    const blob = await put(`${subfolder}/${savedFilename}`, buffer, {
-      access: 'public',
-      addRandomSuffix: false,
-    });
-    return blob.url; // absolute https URL
-  }
-
-  const dir = join(process.cwd(), 'public', subfolder);
-  await mkdir(dir, { recursive: true });
-  await writeFile(join(dir, savedFilename), buffer);
-  return `/${subfolder}/${savedFilename}`;
+/** Certains navigateurs n'envoient aucun type (ou « image/jpg ») : on se rabat sur l'extension du fichier. */
+function resolveImageType(file: File): string | null {
+  const declared = file.type === 'image/jpg' ? 'image/jpeg' : file.type;
+  if (EXT_BY_TYPE[declared]) return declared;
+  const nameExt = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : '';
+  return TYPE_BY_EXT[nameExt] ?? null;
 }
 
 export async function POST(request: Request) {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
-  const formData = await request.formData();
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json({ error: "Fichier illisible ou trop volumineux pour l'envoi." }, { status: 400 });
+  }
   const file = formData.get('file') as File | null;
-  const category = (formData.get('category') as string) || 'general';
+  const rawCategory = ((formData.get('category') as string) || 'general').trim();
+  const category = /^[a-z0-9_-]{1,40}$/i.test(rawCategory) ? rawCategory : 'general';
   const altText = (formData.get('altText') as string) || '';
 
-  if (!file) {
+  if (!file || typeof file === 'string') {
     return NextResponse.json({ error: 'Aucun fichier reçu.' }, { status: 400 });
   }
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return NextResponse.json({ error: 'Type de fichier non autorisé. Utilisez JPG, PNG, WebP ou GIF.' }, { status: 400 });
+  const mimeType = resolveImageType(file);
+  if (!mimeType) {
+    return NextResponse.json(
+      { error: "Format non pris en charge. Utilisez JPG, PNG, WebP ou GIF (les photos HEIC d'iPhone doivent être exportées en JPG)." },
+      { status: 400 },
+    );
   }
   if (file.size > MAX_SIZE) {
     return NextResponse.json({ error: 'Fichier trop lourd (max 10 Mo).' }, { status: 400 });
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-  const uuid = crypto.randomUUID();
-  const savedFilename = `${uuid}.${ext}`;
+  const savedFilename = `${crypto.randomUUID()}.${EXT_BY_TYPE[mimeType]}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  if (category === 'community') {
-    const url = await saveFile(buffer, savedFilename, 'community');
-    // Also persist in DB so the public gallery can pick it up in production
-    // (where filesystem listing of /public/community is read-only at runtime).
+  try {
+    // La galerie communauté garde ses fichiers dans /community ; elle est aussi enregistrée en base pour la production (disque en lecture seule).
+    const url = await saveMediaFile(buffer, savedFilename, category === 'community' ? 'community' : 'media');
     const media = await prisma.media.create({
-      data: {
-        filename: file.name,
-        url,
-        altText,
-        category: 'community',
-        size: file.size,
-        mimeType: file.type,
-      },
+      data: { filename: file.name, url, altText, category, size: file.size, mimeType },
     });
+    if (category === 'hero') await syncHeroMediaToSlides().catch(() => undefined);
+
     return NextResponse.json(
       {
         id: media.id,
@@ -77,21 +81,11 @@ export async function POST(request: Request) {
         mimeType: media.mimeType,
         createdAt: media.createdAt.toISOString(),
       },
-      { status: 201 }
+      { status: 201 },
     );
+  } catch (e) {
+    console.error('[media-upload]', e);
+    const hint = process.env.VERCEL && !process.env.BLOB_READ_WRITE_TOKEN ? ' (BLOB_READ_WRITE_TOKEN manquant sur le serveur)' : '';
+    return NextResponse.json({ error: `Enregistrement impossible : stockage indisponible${hint}.` }, { status: 500 });
   }
-
-  const url = await saveFile(buffer, savedFilename, 'media');
-  const media = await prisma.media.create({
-    data: {
-      filename: file.name,
-      url,
-      altText,
-      category,
-      size: file.size,
-      mimeType: file.type,
-    },
-  });
-
-  return NextResponse.json(media, { status: 201 });
 }

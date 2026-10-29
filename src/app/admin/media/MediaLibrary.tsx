@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { PartnersSection } from './PartnersSection';
 import { adminNotify } from '@/app/admin/components/AdminToaster';
+import { isExpiredPresignedUrl } from '@/lib/presignedUrl';
+import { uploadMediaFiles } from '@/lib/clientUpload';
 
 type MediaItem = {
   id: string;
@@ -17,14 +19,13 @@ type MediaItem = {
 
 const CATEGORIES = [
   { value: 'all', label: 'Tous' },
-  { value: 'community', label: 'Communauté (Accueil)' },
   { value: 'blog', label: 'Blog' },
   { value: 'team', label: 'Équipe' },
-  { value: 'hero', label: 'Carrousel' },
   { value: 'event', label: 'Événements' },
   { value: 'partner', label: 'Partenaires' },
   { value: 'sponsor', label: 'Sponsors' },
   { value: 'general', label: 'Général' },
+  { value: 'hero', label: 'Carrousel (Hero)' },
 ];
 
 function inferFilenameFromUrl(value: string) {
@@ -60,7 +61,7 @@ export function MediaLibrary() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
-  const [uploadCategory, setUploadCategory] = useState('community');
+  const [uploadCategory, setUploadCategory] = useState('general');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [dragOver, setDragOver] = useState(false);
@@ -80,10 +81,21 @@ export function MediaLibrary() {
 
   const fetchMedia = useCallback(async (category: string) => {
     setLoading(true);
-    const res = await fetch(`/api/admin/media?category=${category}`);
-    const data = await res.json();
-    setMedia(data);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/admin/media?category=${category}`);
+      const data = await res.json().catch(() => null);
+      if (res.ok && Array.isArray(data)) {
+        setMedia(data);
+      } else {
+        setMedia([]);
+        adminNotify.error(res.status === 401 ? 'Session expirée : reconnectez-vous.' : 'Impossible de charger la médiathèque.');
+      }
+    } catch {
+      setMedia([]);
+      adminNotify.error('Erreur réseau : médiathèque indisponible.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -100,26 +112,16 @@ export function MediaLibrary() {
     setUploading(true);
     setUploadError('');
     try {
-      let count = 0;
-      for (const file of Array.from(files)) {
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('category', uploadCategory);
-        const res = await fetch('/api/admin/media/upload', { method: 'POST', body: fd });
-        if (!res.ok) {
-          const d = await res.json();
-          const msg = d.error ?? 'Erreur upload';
-          setUploadError(msg);
-          adminNotify.error(msg);
-          return;
-        }
-        count++;
+      const { added, errors } = await uploadMediaFiles(Array.from(files), uploadCategory);
+      if (added > 0) adminNotify.success(added === 1 ? 'Fichier ajouté.' : `${added} fichiers ajoutés.`);
+      if (errors.length > 0) {
+        setUploadError(errors.join(' • '));
+        errors.forEach((msg) => adminNotify.error(msg));
       }
-      adminNotify.success(count === 1 ? 'Fichier ajouté.' : `${count} fichiers ajoutés.`);
-      await fetchMedia(activeCategory);
-    } catch {
-      setUploadError('Erreur réseau lors de l\'upload.');
-      adminNotify.error('Erreur réseau lors de l\'upload.');
+      // « Tous » n'affiche pas le Carrousel (Hero) : on bascule sur l'onglet qui a reçu les fichiers pour les voir.
+      if (activeCategory !== 'all' && activeCategory !== uploadCategory) setActiveCategory(uploadCategory);
+      else if (activeCategory === 'all' && uploadCategory === 'hero') setActiveCategory('hero');
+      else await fetchMedia(activeCategory);
     } finally {
       setUploading(false);
     }
@@ -181,15 +183,21 @@ export function MediaLibrary() {
   async function deleteMedia(item: MediaItem) {
     if (!confirm(`Supprimer "${item.filename}" ?`)) return;
     setDeleting(item.id);
-    const res = await fetch(`/api/admin/media?id=${item.id}`, { method: 'DELETE' });
-    if (res.ok) {
-      setMedia((prev) => prev.filter((m) => m.id !== item.id));
-      if (selected?.id === item.id) setSelected(null);
-      adminNotify.success('Média supprimé.');
-    } else {
-      adminNotify.error('Suppression impossible.');
+    try {
+      const res = await fetch(`/api/admin/media?id=${encodeURIComponent(item.id)}`, { method: 'DELETE' });
+      if (res.ok) {
+        setMedia((prev) => prev.filter((m) => m.id !== item.id));
+        if (selected?.id === item.id) setSelected(null);
+        adminNotify.success('Média supprimé.');
+      } else {
+        const d = await res.json().catch(() => null);
+        adminNotify.error(d?.error ? `Suppression impossible : ${d.error}` : 'Suppression impossible.');
+      }
+    } catch {
+      adminNotify.error('Erreur réseau : suppression impossible.');
+    } finally {
+      setDeleting(null);
     }
-    setDeleting(null);
   }
 
   return (
@@ -197,7 +205,13 @@ export function MediaLibrary() {
       <div className="mb-6 sm:mb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent/70 mb-1">Admin</p>
         <h1 className="text-xl font-bold text-white sm:text-2xl">Médiathèque</h1>
-        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/40">Gérez toutes les images du site depuis cet espace.</p>
+        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-white/40">
+          Images du blog, de l&apos;équipe, des événements, des partenaires et sponsors. Les images de la catégorie « Carrousel (Hero) »
+          rejoignent automatiquement le carousel du Hero (gérable dans{' '}
+          <a href="/admin/homepage#hero-images" className="text-accent/80 underline underline-offset-2 hover:text-accent">Page d&apos;accueil › Images Hero</a>).
+          La galerie communauté du bas de page a son propre espace :{' '}
+          <a href="/admin/homepage#community" className="text-accent/80 underline underline-offset-2 hover:text-accent">Page d&apos;accueil › Galerie communauté</a>.
+        </p>
       </div>
 
       {/* Upload zone */}
@@ -301,7 +315,7 @@ export function MediaLibrary() {
                 required
                 className="w-full rounded-xl bg-white/[0.06] border border-white/10 text-white placeholder-white/25 px-3 py-2 text-sm focus:outline-none focus:border-accent/40 transition"
               />
-              <p className="mt-1 text-[10px] text-white/25">Liens HTTPS AWS S3, CloudFront et CDN acceptés. Les URLs signées S3 fonctionnent aussi.</p>
+              <p className="mt-1 text-[10px] text-white/25">Liens HTTPS AWS S3, CloudFront et CDN acceptés. Un lien S3 signé expire en quelques minutes : l&apos;image est donc téléchargée et hébergée sur le site pour rester affichée.</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
               <div className="min-w-0">
@@ -434,6 +448,11 @@ export function MediaLibrary() {
                       loading="lazy"
                     />
                     {/* Hover overlay with filename */}
+                    {isExpiredPresignedUrl(item.url) && (
+                      <span className="absolute inset-x-0 top-0 bg-red-600/90 px-1 py-0.5 text-center text-[9px] font-bold leading-tight text-white">
+                        Lien S3 expiré
+                      </span>
+                    )}
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-6">
                       <span className="text-[9px] text-white/80 font-medium px-2 text-center line-clamp-2 leading-tight">
                         {item.filename}

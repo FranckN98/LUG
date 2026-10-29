@@ -3,6 +3,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import SiteConfigAdmin from './SiteConfigAdmin';
+import CommunityGalleryAdmin from './CommunityGalleryAdmin';
+import { MediaPicker } from '@/app/admin/components/MediaPicker';
+import { isExpiredPresignedUrl } from '@/lib/presignedUrl';
 import { adminNotify } from '@/app/admin/components/AdminToaster';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -362,16 +365,15 @@ function HeroAdmin() {
             <button onClick={() => setEditId(null)} className="text-white/40 hover:text-white/80 text-xs">Annuler</button>
           </div>
 
-          <div>
-            <label className={labelCls}>URL de l'image *</label>
-            <input type="text" value={form.imageUrl} onChange={(e) => set('imageUrl')(e.target.value)}
-              placeholder="/hero-pic/photo.jpg  ou  https://s3.amazonaws.com/…" className={inputCls} />
-            {form.imageUrl && (
-              <div className="mt-2 relative h-24 w-40 rounded-lg overflow-hidden border border-white/10">
-                <Image src={form.imageUrl} alt="preview" fill className="object-cover" unoptimized />
-              </div>
-            )}
-          </div>
+          <MediaPicker
+            label="Image du Hero *"
+            value={form.imageUrl}
+            onChange={(url) => set('imageUrl')(url)}
+            categories={['hero']}
+            onUploaded={load}
+            placeholder="/hero-pic/photo.jpg  ou  https://s3.amazonaws.com/…"
+            helperText="Les images téléversées ici sont ajoutées automatiquement au carousel. Bibliothèque dédiée au Hero : elles n'apparaissent pas dans la galerie communauté."
+          />
 
           <div>
             <p className={`${labelCls} mb-2`}>Titre principal (optionnel — remplace le titre du site si renseigné)</p>
@@ -438,6 +440,11 @@ function HeroAdmin() {
               <div className="relative h-36 bg-black/40">
                 <Image src={s.imageUrl} alt={s.altTextFr ?? ''} fill className="object-cover" unoptimized />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                {isExpiredPresignedUrl(s.imageUrl) && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/75 p-3 text-center text-[11px] font-semibold leading-snug text-red-300">
+                    Lien S3 expiré : cette image n&apos;est plus affichée sur le site. Remplacez-la en collant un nouveau lien ou en téléversant le fichier.
+                  </div>
+                )}
                 <div className="absolute top-2 left-2 flex gap-1.5">
                   {s.isMain && <span className="rounded-full bg-yellow-500 px-2 py-0.5 text-[10px] font-bold text-black">★ Principale</span>}
                   {!s.isActive && <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white/60">Désactivée</span>}
@@ -642,11 +649,11 @@ function HeroButtonsAdmin() {
 // Main component — tabbed
 // ═══════════════════════════════════════════════════════════════════════════════
 
-type TabKey = 'hero-images' | 'hero-buttons' | 'header';
+type TabKey = 'hero-images' | 'hero-buttons' | 'header' | 'community';
 
 function parseTabFromHash(hash: string): TabKey {
   const v = hash.replace(/^#/, '');
-  if (v === 'hero-buttons' || v === 'header' || v === 'hero-images') return v;
+  if (v === 'hero-buttons' || v === 'header' || v === 'hero-images' || v === 'community') return v;
   return 'hero-images';
 }
 
@@ -683,6 +690,7 @@ export default function HomepageAdmin() {
   const TABS: { key: TabKey; label: string; icon: string; badge: string | number | null }[] = [
     { key: 'hero-images',  label: 'Images Hero',         icon: '🖼️', badge: imageCount },
     { key: 'hero-buttons', label: 'Boutons Hero',        icon: '🔘', badge: 3 },
+    { key: 'community',    label: 'Galerie communauté', icon: '👥', badge: null },
     { key: 'header',       label: 'Header & Membership', icon: '⚙️', badge: 2 },
   ];
 
@@ -693,7 +701,7 @@ export default function HomepageAdmin() {
           <p className="text-[0.65rem] font-bold uppercase tracking-[0.3em] text-accent/60 mb-1">Configuration</p>
           <h1 className="text-2xl font-bold text-white">Page d&apos;accueil</h1>
           <p className="text-sm text-white/40 mt-1">
-            Gérez les images du carousel, les 3 boutons du Hero et les 2 boutons du Header.
+            Gérez les images du carousel Hero, la galerie communauté du bas de page (deux espaces séparés), les 3 boutons du Hero et les 2 boutons du Header.
           </p>
         </div>
         <a
@@ -731,6 +739,7 @@ export default function HomepageAdmin() {
 
       {tab === 'hero-images'  && <HeroAdmin />}
       {tab === 'hero-buttons' && <HeroButtonsAdmin />}
+      {tab === 'community'    && <CommunityGalleryAdmin />}
       {tab === 'header'       && <SiteConfigAdmin />}
     </div>
   );
