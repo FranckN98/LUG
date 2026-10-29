@@ -85,16 +85,16 @@ function SessionBody({ item, locale }: { item: ProgrammeItem; locale: Locale }) 
   const isBreak = item.kind === 'break';
   return (
     <>
-      <p className={`break-words ${isBreak ? 'font-medium leading-snug text-gray-700' : 'font-semibold leading-snug text-brand-dark'}`}>
+      <p className={`break-words text-sm leading-snug sm:text-[0.95rem] ${isBreak ? 'font-medium text-gray-700' : 'font-semibold text-brand-dark'}`}>
         {item.lang && <DeBadge locale={locale} className="mr-2 -translate-y-px" />}
         {item.title}
       </p>
-      {item.desc && <p className="mt-1 text-sm leading-relaxed text-gray-600">{item.desc}</p>}
+      {item.desc && <p className="mt-0.5 text-xs leading-snug text-gray-600 sm:text-sm">{item.desc}</p>}
       {item.speakers && item.speakers.length > 0 && (
-        <p className="mt-1.5 text-sm font-medium leading-snug text-primary">{item.speakers.join(' · ')}</p>
+        <p className="mt-1 text-xs font-medium leading-snug text-primary sm:text-sm">{item.speakers.join(' · ')}</p>
       )}
       {item.moderator && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-0.5 text-xs text-gray-500">
           {UI[locale].moderatedBy} <span className="font-semibold text-gray-700">{item.moderator}</span>
         </p>
       )}
@@ -104,27 +104,17 @@ function SessionBody({ item, locale }: { item: ProgrammeItem; locale: Locale }) 
 
 function Timeline({ items, locale }: { items: ProgrammeItem[]; locale: Locale }) {
   return (
-    <ol className="relative ml-3 mt-1 border-l-2 border-primary/15 sm:ml-[7.5rem]">
+    <ol className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-white">
       {items.map((item, i) => {
         const [start, end] = splitTime(item.time);
         const isBreak = item.kind === 'break';
         return (
-          <li key={i} className="relative pb-3 pl-6 last:pb-0">
-            <span
-              aria-hidden="true"
-              className={`absolute -left-[7px] top-4 h-3 w-3 rounded-full ring-4 ring-white ${isBreak ? 'bg-gray-300' : 'bg-accent'}`}
-            />
-            <p className="mb-1.5 text-xs tabular-nums sm:absolute sm:right-full sm:top-3 sm:mb-0 sm:mr-5 sm:w-24 sm:text-right">
-              <span className="text-sm font-bold text-primary sm:text-base">{start}</span>
-              {end && <span className="font-medium text-gray-400 sm:block sm:text-xs"> – {end}</span>}
+          <li key={i} className={`flex flex-col gap-0.5 px-4 py-3 sm:flex-row sm:gap-5 ${isBreak ? 'bg-gray-50/80' : ''}`}>
+            <p className="shrink-0 text-xs tabular-nums sm:w-24 sm:pt-0.5">
+              <span className="text-sm font-bold text-primary">{start}</span>
+              {end && <span className="font-medium text-gray-400"> – {end}</span>}
             </p>
-            <div
-              className={
-                isBreak
-                  ? 'rounded-xl border border-dashed border-gray-200 bg-gray-50/80 px-4 py-3'
-                  : 'rounded-xl border border-gray-100 bg-white px-4 py-3.5 shadow-sm'
-              }
-            >
+            <div className="min-w-0 flex-1">
               <SessionBody item={item} locale={locale} />
             </div>
           </li>
@@ -147,39 +137,57 @@ function TicketIcon() {
 }
 
 function Tracks({ block, locale }: { block: ProgrammeBlock; locale: Locale }) {
+  const tracks = block.tracks!;
+  const [active, setActive] = useState(tracks[0]!.id);
   return (
     <>
       {block.trackNotice && (
-        <div role="note" className="flex items-start gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-5 py-4">
+        <div role="note" className="flex items-start gap-3 rounded-xl border border-accent/40 bg-accent/10 px-4 py-3">
           <TicketIcon />
-          <p className="text-sm font-semibold leading-snug text-brand-dark sm:text-base">{block.trackNotice}</p>
+          <p className="text-sm font-semibold leading-snug text-brand-dark">{block.trackNotice}</p>
         </div>
       )}
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        {block.tracks!.map((track) => (
+      {/* Mobile : un parcours à la fois ; desktop : les trois côte à côte. */}
+      <div className="mt-3 flex gap-2 lg:hidden">
+        {tracks.map((track) => (
+          <button
+            key={track.id}
+            type="button"
+            aria-pressed={active === track.id}
+            onClick={() => setActive(track.id)}
+            className={`flex-1 rounded-lg border px-2 py-2 text-xs font-bold transition ${
+              active === track.id
+                ? 'border-primary bg-primary text-white'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-primary/40'
+            }`}
+          >
+            {track.id} · {track.name}
+          </button>
+        ))}
+      </div>
+      <div className="mt-3 grid gap-4 lg:grid-cols-3">
+        {tracks.map((track) => (
           <section
             key={track.id}
             aria-label={`${UI[locale].track} ${track.id} · ${track.name}`}
-            className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+            className={`overflow-hidden rounded-xl border border-gray-100 bg-white ${active === track.id ? 'block' : 'hidden lg:block print:block'}`}
           >
-            <header className="flex items-center gap-3 bg-gradient-to-br from-primary to-primary-dark px-4 py-3.5 text-white">
+            <header className="flex items-center gap-3 bg-gradient-to-br from-primary to-primary-dark px-4 py-2.5 text-white">
               <span
                 aria-hidden="true"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 font-display text-2xl font-bold leading-none"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 font-display text-xl font-bold leading-none"
               >
                 {track.id}
               </span>
               <div className="min-w-0">
-                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-accent-light">{UI[locale].track}</p>
-                <h5 className="text-lg font-bold leading-tight">{track.name}</h5>
+                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-accent-light">{UI[locale].track}</p>
+                <h5 className="text-base font-bold leading-tight">{track.name}</h5>
               </div>
             </header>
             <ol className="divide-y divide-gray-100">
               {track.items.map((item, i) => (
-                <li key={i} className="px-4 py-4">
-                  <p className="mb-2 inline-flex rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold tabular-nums text-primary">
-                    {item.time}
-                  </p>
+                <li key={i} className="px-4 py-3">
+                  <p className="mb-1 text-xs font-bold tabular-nums text-primary">{item.time}</p>
                   <SessionBody item={item} locale={locale} />
                 </li>
               ))}
@@ -284,7 +292,7 @@ export function ProgrammeTimeline({ blocks, locale }: { blocks: ProgrammeBlock[]
               id={panelId}
               role="region"
               aria-labelledby={headingId}
-              className={expanded ? 'animate-tab-fade-in border-t border-gray-100 px-4 pb-5 pt-5 sm:px-5' : 'hidden print:block print:px-5 print:pb-5'}
+              className={expanded ? 'animate-tab-fade-in border-t border-gray-100 px-4 pb-4 pt-4 sm:px-5' : 'hidden print:block print:px-5 print:pb-5'}
             >
               {block.tracks?.length ? <Tracks block={block} locale={locale} /> : <Timeline items={block.items} locale={locale} />}
             </div>
