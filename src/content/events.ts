@@ -109,6 +109,8 @@ const eventsContent: Record<
     pdfPrivacyLinkText: string;
     /** Annonce accessibilité quand le prix est volontairement flouté */
     priceBlurredAria: string;
+    /** Bloc billetterie de l'édition 2026 (remplace la section intervenants) */
+    ticketCta: { label: string; title: string; subtitle: string; button: string };
     sections: {
       programme: string;
       speakers: string;
@@ -141,7 +143,7 @@ const eventsContent: Record<
     introDedicated2025:
       'Level Up in Germany 2025 – Rückblick auf die Mega-Konferenz: Programm, Galerie und Highlights.',
     introDedicated2026:
-      'Level Up in Germany 2026 – 2. Ausgabe in Frankfurt: Programm, Redner:innen und Galerie.',
+      'Level Up in Germany 2026 – 2. Ausgabe in Frankfurt: Programm, Tickets und Galerie.',
     tab2025: 'Level Up in Germany 2025',
     tab2026: 'Level Up in Germany 2026',
     backToEvents: '← Alle Editionen',
@@ -162,6 +164,12 @@ const eventsContent: Record<
       'Ich möchte Neuigkeiten zu Level Up erhalten und habe die Datenschutzerklärung zur Kenntnis genommen (optional).',
     pdfPrivacyLinkText: 'Datenschutz',
     priceBlurredAria: 'Teilnahmepreis wird noch bekannt gegeben.',
+    ticketCta: {
+      label: 'Tickets',
+      title: 'Sichern Sie sich Ihren Platz',
+      subtitle: 'Alle Informationen und Ihr Ticket finden Sie auf unserer offiziellen Ticketseite.',
+      button: 'Zu den Tickets',
+    },
     sections: {
       programme: 'Programm',
       speakers: 'Redner:innen & Gäste',
@@ -230,7 +238,7 @@ const eventsContent: Record<
     introDedicated2025:
       'Level Up in Germany 2025 – Mega conference recap: programme, gallery and highlights.',
     introDedicated2026:
-      'Level Up in Germany 2026 – 2nd edition in Frankfurt: programme, speakers and gallery.',
+      'Level Up in Germany 2026 – 2nd edition in Frankfurt: programme, tickets and gallery.',
     tab2025: 'Level Up in Germany 2025',
     tab2026: 'Level Up in Germany 2026',
     backToEvents: '← All editions',
@@ -251,6 +259,12 @@ const eventsContent: Record<
       'I would like to receive updates about Level Up and I have read the privacy policy (optional).',
     pdfPrivacyLinkText: 'Privacy',
     priceBlurredAria: 'Ticket price will be announced later.',
+    ticketCta: {
+      label: 'Tickets',
+      title: 'Secure your spot',
+      subtitle: 'Find all the details and book your ticket on our official ticketing page.',
+      button: 'Go to ticketing',
+    },
     sections: {
       programme: 'Programme',
       speakers: 'Speakers & guests',
@@ -319,7 +333,7 @@ const eventsContent: Record<
     introDedicated2025:
       'Level Up in Germany 2025 – rétrospective de la méga-conférence : programme, galerie et temps forts.',
     introDedicated2026:
-      'Level Up in Germany 2026 – 2e édition à Francfort : programme, intervenants et galerie.',
+      'Level Up in Germany 2026 – 2e édition à Francfort : programme, billetterie et galerie.',
     tab2025: 'Level Up in Germany 2025',
     tab2026: 'Level Up in Germany 2026',
     backToEvents: '← Toutes les éditions',
@@ -340,6 +354,12 @@ const eventsContent: Record<
       'Je souhaite recevoir des actualités sur Level Up et j’ai pris connaissance de la politique de confidentialité (optionnel).',
     pdfPrivacyLinkText: 'Confidentialité',
     priceBlurredAria: 'Le tarif sera communiqué prochainement.',
+    ticketCta: {
+      label: 'Billetterie',
+      title: 'Réservez votre place',
+      subtitle: 'Retrouvez toutes les informations et réservez votre billet sur notre billetterie officielle.',
+      button: 'Accéder à la billetterie',
+    },
     sections: {
       programme: 'Programme',
       speakers: 'Intervenants & invités',

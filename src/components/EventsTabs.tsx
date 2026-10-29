@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { eventsCopy, withOfficialProgramme } from '@/content/events';
 import type { EventData, EventEdition } from '@/content/events';
@@ -307,7 +308,7 @@ export function EditionContent({
     edition === '2026'
       ? [
           showProgramme && { id: 'programme', label: t.sections.programme },
-          data.speakers.length > 0 && { id: 'speakers', label: t.sections.speakers },
+          { id: 'tickets', label: t.ticketCta.label },
           showMetaRow && { id: 'infos', label: `${t.sections.date} · ${t.sections.venue}` },
           data.gallery.length > 0 && { id: 'gallery', label: t.sections.gallery },
         ].filter((l): l is { id: string; label: string } => !!l)
@@ -410,35 +411,58 @@ export function EditionContent({
         </section>
       )}
 
-      {data.speakers.length > 0 && (
-        <section id={`${edition}-speakers`} className="scroll-mt-28">
-          <h3 className="text-lg font-semibold text-primary mb-4">{t.sections.speakers}</h3>
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {(speakersExpanded ? data.speakers : data.speakers.slice(0, SPEAKERS_PREVIEW_COUNT)).map((s, i) => (
-              <SpeakerCard key={`${s.name}-${i}`} name={s.name} role={s.role} domain={s.domain} />
-            ))}
-          </div>
-          {data.speakers.length > SPEAKERS_PREVIEW_COUNT && (
-            <div className="mt-6 flex justify-center">
-              <button
-                type="button"
-                onClick={() => setSpeakersExpanded((v) => !v)}
-                className="inline-flex items-center gap-2 rounded-full border-2 border-primary/25 bg-white px-6 py-3 text-sm font-semibold text-primary shadow-sm transition hover:border-accent hover:bg-accent/5 hover:shadow-md"
+      {edition === '2026' ? (
+        <section id={`${edition}-tickets`} className="scroll-mt-28">
+          <div className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-[#2a1212] via-primary to-[#4a1515] p-6 text-white shadow-xl shadow-primary/20 sm:p-8">
+            <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-accent/25 blur-3xl" />
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="max-w-xl">
+                <h3 className="text-xl font-semibold sm:text-2xl">{t.ticketCta.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/85">{t.ticketCta.subtitle}</p>
+              </div>
+              <Link
+                href={`/${locale}/buy-ticket`}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold text-brand-dark shadow-lg transition hover:bg-accent-light"
               >
-                {speakersExpanded ? t.speakersSeeLess : t.speakersSeeMore}
-                <svg
-                  className={`h-4 w-4 transition-transform ${speakersExpanded ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                {t.ticketCta.button}
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </button>
+              </Link>
             </div>
-          )}
+          </div>
         </section>
+      ) : (
+        data.speakers.length > 0 && (
+          <section id={`${edition}-speakers`} className="scroll-mt-28">
+            <h3 className="text-lg font-semibold text-primary mb-4">{t.sections.speakers}</h3>
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {(speakersExpanded ? data.speakers : data.speakers.slice(0, SPEAKERS_PREVIEW_COUNT)).map((s, i) => (
+                <SpeakerCard key={`${s.name}-${i}`} name={s.name} role={s.role} domain={s.domain} />
+              ))}
+            </div>
+            {data.speakers.length > SPEAKERS_PREVIEW_COUNT && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setSpeakersExpanded((v) => !v)}
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-primary/25 bg-white px-6 py-3 text-sm font-semibold text-primary shadow-sm transition hover:border-accent hover:bg-accent/5 hover:shadow-md"
+                >
+                  {speakersExpanded ? t.speakersSeeLess : t.speakersSeeMore}
+                  <svg
+                    className={`h-4 w-4 transition-transform ${speakersExpanded ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </section>
+        )
       )}
 
       {showMetaRow && (
