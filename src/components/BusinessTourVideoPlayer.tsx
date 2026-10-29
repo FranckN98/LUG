@@ -10,6 +10,11 @@ type Props = {
   posterUrl?: string;
   /** Accessible title for the iframe */
   title?: string;
+  /** `light` : sans halo ni cadre translucide, pour un fond clair. */
+  tone?: 'dark' | 'light';
+  /** Mode contrôlé : permet à un bouton externe de lancer la vidéo. */
+  playing?: boolean;
+  onPlay?: () => void;
 };
 
 const labels: Record<Locale, { aria: string; cta: string }> = {
@@ -24,8 +29,14 @@ const labels: Record<Locale, { aria: string; cta: string }> = {
  * - On click, swaps the poster for the actual iframe with autoplay (user-initiated → allowed).
  * - Uses youtube-nocookie for privacy.
  */
-export function BusinessTourVideoPlayer({ videoId, locale, posterUrl, title }: Props) {
-  const [playing, setPlaying] = useState(false);
+export function BusinessTourVideoPlayer({ videoId, locale, posterUrl, title, tone = 'dark', playing: playingProp, onPlay }: Props) {
+  const [playingState, setPlayingState] = useState(false);
+  const playing = playingProp ?? playingState;
+  const start = () => {
+    setPlayingState(true);
+    onPlay?.();
+  };
+  const light = tone === 'light';
   const t = labels[locale] ?? labels.en;
   const poster = posterUrl ?? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
   const embedSrc =
@@ -35,13 +46,21 @@ export function BusinessTourVideoPlayer({ videoId, locale, posterUrl, title }: P
   return (
     <div className="relative">
       {/* Outer ambient glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-4 sm:-inset-6 rounded-[28px] bg-gradient-to-br from-accent/25 via-primary/10 to-transparent blur-2xl"
-      />
+      {!light && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -inset-4 sm:-inset-6 rounded-[28px] bg-gradient-to-br from-accent/25 via-primary/10 to-transparent blur-2xl"
+        />
+      )}
       {/* Card */}
-      <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-white/[0.04] p-2 sm:p-3 shadow-[0_30px_120px_-30px_rgba(233,140,11,0.45)] backdrop-blur-sm">
-        <div className="relative w-full overflow-hidden rounded-xl sm:rounded-2xl bg-black aspect-video">
+      <div
+        className={
+          light
+            ? 'relative overflow-hidden rounded-2xl border border-gray-200'
+            : 'relative rounded-2xl sm:rounded-3xl border border-white/10 bg-white/[0.04] p-2 sm:p-3 shadow-[0_30px_120px_-30px_rgba(233,140,11,0.45)] backdrop-blur-sm'
+        }
+      >
+        <div className={`relative w-full overflow-hidden bg-black aspect-video ${light ? '' : 'rounded-xl sm:rounded-2xl'}`}>
           {playing ? (
             <iframe
               src={embedSrc}
@@ -55,9 +74,9 @@ export function BusinessTourVideoPlayer({ videoId, locale, posterUrl, title }: P
           ) : (
             <button
               type="button"
-              onClick={() => setPlaying(true)}
+              onClick={start}
               aria-label={t.aria}
-              className="group absolute inset-0 flex items-center justify-center focus:outline-none"
+              className="group absolute inset-0 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-accent"
             >
               {/* Poster */}
               {/* eslint-disable-next-line @next/next/no-img-element */}

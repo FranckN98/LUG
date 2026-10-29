@@ -3,11 +3,13 @@ import HeroCarousel from '@/components/HeroCarousel';
 import { HomePageSections } from '@/components/HomePageSections';
 import type { Locale } from '@/i18n/config';
 import { homeContent } from '@/content/home';
-import { getWhatsAppJoinUrl } from '@/config/whatsapp';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { getPublicCommunityGallery } from '@/lib/communityGallery';
+import { getHomeNextEdition, getHomeProofStats } from '@/lib/homeData';
 import { DEFAULT_HERO_IMAGES } from '@/lib/heroDefaults';
+import { syncHeroMediaToSlides } from '@/lib/heroSync';
+import { isExpiredPresignedUrl } from '@/lib/presignedUrl';
 import { pickLocalized, type CountdownLocale } from '@/lib/countdown';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
@@ -23,8 +25,11 @@ export default async function LocaleHomePage({
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
   const t = homeContent[loc];
   const base = `/${loc}`;
-  const joinWhatsAppUrl = getWhatsAppJoinUrl(loc);
-  const communityPhotos = await getPublicCommunityGallery();
+  const [communityPhotos, nextEdition, proofStats] = await Promise.all([
+    getPublicCommunityGallery(),
+    getHomeNextEdition(loc),
+    getHomeProofStats(loc),
+  ]);
 
   // ── Hero images ─────────────────────────────────────────────────────────────
   let heroImages: string[] = [];
@@ -39,16 +44,22 @@ export default async function LocaleHomePage({
   let hasDbButtons = false;
 
   try {
+    // Images ajoutées à la médiathèque « hero » : elles rejoignent le carousel
+    await syncHeroMediaToSlides().catch(() => undefined);
+
     // Hero slides
     const heroSlides = await prisma.heroSlide.findMany({
       where: { isActive: true },
       orderBy: [{ isMain: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
 
-    if (heroSlides.length > 0) {
-      heroImages = heroSlides.map((s) => s.imageUrl);
+    // Les liens S3 signés expirés ne s'affichent plus : on les écarte plutôt que d'afficher une image cassée.
+    const liveSlides = heroSlides.filter((s) => !isExpiredPresignedUrl(s.imageUrl));
+
+    if (liveSlides.length > 0) {
+      heroImages = liveSlides.map((s) => s.imageUrl);
       // Use the main (first) slide's locale-specific title/subtitle if set
-      const mainSlide = heroSlides[0];
+      const mainSlide = liveSlides[0];
       const titleKey = `title${loc.charAt(0).toUpperCase()}${loc.slice(1)}` as 'titleFr' | 'titleDe' | 'titleEn';
       const subtitleKey = `subtitle${loc.charAt(0).toUpperCase()}${loc.slice(1)}` as 'subtitleFr' | 'subtitleDe' | 'subtitleEn';
       dbHeroTitle = (mainSlide[titleKey] ?? null) || null;
@@ -72,7 +83,7 @@ export default async function LocaleHomePage({
         });
         heroImages = DEFAULT_HERO_IMAGES;
       } else {
-        heroImages = rows.map((r) => r.url);
+        heroImages = rows.map((r) => r.url).filter((url) => !isExpiredPresignedUrl(url));
       }
     }
 
@@ -165,10 +176,10 @@ export default async function LocaleHomePage({
         countdown={countdownProp}
       />
       <HomePageSections
-        t={t}
         base={base}
-        joinWhatsAppUrl={joinWhatsAppUrl}
         locale={loc}
+        nextEdition={nextEdition}
+        proofStats={proofStats}
         communityPhotos={communityPhotos}
       />
     </>

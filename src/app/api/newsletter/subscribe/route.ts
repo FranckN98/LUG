@@ -4,8 +4,13 @@ import { randomUUID } from 'crypto';
 import { prisma } from '@/lib/prisma';
 import { checkSubscribeRateLimit } from '@/lib/subscribe-rate-limit';
 import { parseNameFromEmail } from '@/lib/emailName';
+import { parseTags, serializeTags } from '@/lib/newsletterTags';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Origines de formulaire acceptées ; la valeur « home_next_edition » ajoute le tag d'intérêt « next-edition ». */
+const SOURCES = new Set(['footer_newsletter', 'home_next_edition']);
+const NEXT_EDITION_TAG = 'next-edition';
 
 function normalizeEmail(s: string) {
   return s.trim().toLowerCase();
@@ -18,6 +23,7 @@ export async function POST(req: Request) {
       consent?: boolean;
       website?: string; // honeypot
       locale?: string;
+      source?: string;
     };
 
     if (body.website) {
@@ -38,7 +44,8 @@ export async function POST(req: Request) {
 
     const consent = Boolean(body.consent);
     const parsedName = parseNameFromEmail(email);
-    const source = 'footer_newsletter';
+    const source = body.source && SOURCES.has(body.source) ? body.source : 'footer_newsletter';
+    const interestTag = source === 'home_next_edition' ? NEXT_EDITION_TAG : null;
     const acceptLang = (h.get('accept-language') ?? '').toLowerCase();
     const detectedLocale: 'fr' | 'en' | 'de' =
       body.locale === 'de' || body.locale === 'fr' || body.locale === 'en'
@@ -60,7 +67,7 @@ export async function POST(req: Request) {
           source,
           consent,
           locale: detectedLocale,
-          tags: `newsletter,locale:${detectedLocale}`,
+          tags: `newsletter,locale:${detectedLocale}${interestTag ? `,${interestTag}` : ''}`,
           // Always issue a hard-to-guess unsubscribe token so the user can
           // securely opt out without exposing their internal id.
           unsubscribeToken: randomUUID(),
@@ -71,6 +78,9 @@ export async function POST(req: Request) {
         where: { email },
         data: {
           consent: consent || existing.consent,
+          ...(interestTag && !parseTags(existing.tags).includes(interestTag)
+            ? { tags: serializeTags([...parseTags(existing.tags), interestTag]) }
+            : {}),
           ...(existing.locale ? {} : { locale: detectedLocale }),
           // Backfill an unsubscribe token if a legacy record is missing one.
           ...(existing.unsubscribeToken ? {} : { unsubscribeToken: randomUUID() }),

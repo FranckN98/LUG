@@ -9,9 +9,10 @@ const SPEED_PX_PER_SEC = 38;
 // Widths cycle to create a natural, non-uniform rhythm
 const WIDTHS = [230, 310, 250, 360, 270, 320, 210, 290, 340, 240, 300, 260];
 
-export function PhotoStrip({ photos }: { photos: Photo[] }) {
+export function PhotoStrip({ photos, label = 'Galerie photos Level Up in Germany' }: { photos: Photo[]; label?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isPausedRef = useRef(false);
+  const reducedMotionRef = useRef(false);
   const rafRef = useRef<number>(0);
   const lastTsRef = useRef<number>(0);
   const isDragging = useRef(false);
@@ -41,6 +42,13 @@ export function PhotoStrip({ photos }: { photos: Photo[] }) {
     const el = containerRef.current;
     if (!el) return;
 
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reducedMotionRef.current = media.matches;
+    const onChange = () => {
+      reducedMotionRef.current = media.matches;
+    };
+    media.addEventListener('change', onChange);
+
     const step = (ts: number) => {
       const oneSet = el.scrollWidth / 3;
 
@@ -51,8 +59,8 @@ export function PhotoStrip({ photos }: { photos: Photo[] }) {
         el.scrollLeft += oneSet;
       }
 
-      // Auto-advance when not paused
-      if (!isPausedRef.current && lastTsRef.current) {
+      // Auto-advance when not paused (never with reduced motion: the strip stays scrollable by hand)
+      if (!isPausedRef.current && !reducedMotionRef.current && lastTsRef.current) {
         const dt = Math.min(ts - lastTsRef.current, 100); // cap to avoid jumps on tab refocus
         el.scrollLeft += (SPEED_PX_PER_SEC * dt) / 1000;
       }
@@ -62,7 +70,10 @@ export function PhotoStrip({ photos }: { photos: Photo[] }) {
     };
 
     rafRef.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafRef.current);
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      media.removeEventListener('change', onChange);
+    };
   }, []);
 
   const pause = useCallback(() => {
@@ -119,8 +130,9 @@ export function PhotoStrip({ photos }: { photos: Photo[] }) {
     <div
       ref={containerRef}
       role="region"
-      aria-label="Galerie photos Level Up in Germany 2025"
-      className={`flex overflow-x-scroll gap-3 sm:gap-4 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      aria-label={label}
+      tabIndex={0}
+      className={`flex overflow-x-scroll gap-3 sm:gap-4 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
@@ -130,22 +142,25 @@ export function PhotoStrip({ photos }: { photos: Photo[] }) {
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {tripled.map((photo, i) => (
-        <div
-          key={`${photo.src}-${i}`}
-          className="shrink-0 h-60 sm:h-72 md:h-84 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/10"
-          style={{ width: `${WIDTHS[i % WIDTHS.length]}px` }}
-          aria-hidden={i >= photos.length || i < photos.length ? undefined : true}
-        >
-          <img
-            src={photo.src}
-            alt={photo.alt ?? 'Level Up in Germany'}
-            className="h-full w-full object-cover pointer-events-none transition-transform duration-700 hover:scale-[1.04]"
-            draggable={false}
-            loading="lazy"
-          />
-        </div>
-      ))}
+      {tripled.map((photo, i) => {
+        const isMiddleCopy = i >= photos.length && i < photos.length * 2;
+        return (
+          <div
+            key={`${photo.src}-${i}`}
+            className="shrink-0 h-60 sm:h-72 md:h-84 rounded-xl sm:rounded-2xl overflow-hidden ring-1 ring-black/10"
+            style={{ width: `${WIDTHS[i % WIDTHS.length]}px` }}
+            aria-hidden={isMiddleCopy ? undefined : true}
+          >
+            <img
+              src={photo.src}
+              alt={isMiddleCopy ? (photo.alt ?? 'Level Up in Germany') : ''}
+              className="h-full w-full object-cover pointer-events-none motion-safe:transition-transform motion-safe:duration-700 motion-safe:hover:scale-[1.04]"
+              draggable={false}
+              loading="lazy"
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
