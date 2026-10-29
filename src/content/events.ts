@@ -110,7 +110,7 @@ const eventsContent: Record<
     /** Annonce accessibilité quand le prix est volontairement flouté */
     priceBlurredAria: string;
     /** Bloc billetterie de l'édition 2026 (remplace la section intervenants) */
-    ticketCta: { label: string; title: string; subtitle: string; button: string };
+    ticketCta: { label: string; subtitle: string; button: string };
     sections: {
       programme: string;
       speakers: string;
@@ -166,7 +166,6 @@ const eventsContent: Record<
     priceBlurredAria: 'Teilnahmepreis wird noch bekannt gegeben.',
     ticketCta: {
       label: 'Tickets',
-      title: 'Sichern Sie sich Ihren Platz',
       subtitle: 'Alle Informationen und Ihr Ticket finden Sie auf unserer offiziellen Ticketseite.',
       button: 'Zu den Tickets',
     },
@@ -261,7 +260,6 @@ const eventsContent: Record<
     priceBlurredAria: 'Ticket price will be announced later.',
     ticketCta: {
       label: 'Tickets',
-      title: 'Secure your spot',
       subtitle: 'Find all the details and book your ticket on our official ticketing page.',
       button: 'Go to ticketing',
     },
@@ -356,7 +354,6 @@ const eventsContent: Record<
     priceBlurredAria: 'Le tarif sera communiqué prochainement.',
     ticketCta: {
       label: 'Billetterie',
-      title: 'Réservez votre place',
       subtitle: 'Retrouvez toutes les informations et réservez votre billet sur notre billetterie officielle.',
       button: 'Accéder à la billetterie',
     },

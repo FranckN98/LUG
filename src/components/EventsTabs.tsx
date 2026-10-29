@@ -413,23 +413,17 @@ export function EditionContent({
 
       {edition === '2026' ? (
         <section id={`${edition}-tickets`} className="scroll-mt-28">
-          <div className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-[#2a1212] via-primary to-[#4a1515] p-6 text-white shadow-xl shadow-primary/20 sm:p-8">
-            <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-accent/25 blur-3xl" />
-            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="max-w-xl">
-                <h3 className="text-xl font-semibold sm:text-2xl">{t.ticketCta.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/85">{t.ticketCta.subtitle}</p>
-              </div>
-              <Link
-                href={`/${locale}/buy-ticket`}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold text-brand-dark shadow-lg transition hover:bg-accent-light"
-              >
-                {t.ticketCta.button}
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
+          <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-gray-600">{t.ticketCta.subtitle}</p>
+            <Link
+              href={`/${locale}/buy-ticket`}
+              className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-primary underline-offset-4 transition hover:text-accent hover:underline"
+            >
+              {t.ticketCta.button}
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
           </div>
         </section>
       ) : (
