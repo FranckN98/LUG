@@ -101,7 +101,6 @@ describe('2026 programme', () => {
       });
       expect(p.blocks[1]!.tracks!.map((t) => t.name)).toEqual(tracksBlock!.tracks!.map((t) => t.name));
       expect(p.blocks.map((b) => b.heading).every((h) => h.length > 10)).toBe(true);
-      expect(p.blocks[1]!.trackNotice).toBeTruthy();
       expect(p.subtitle).toContain('The Squaire Conference Center · Am Flughafen 12 · 60549 Frankfurt am Main');
     }
     expect(getProgramme2026('fr').blocks[0]!.items[2]!.title).toBe(

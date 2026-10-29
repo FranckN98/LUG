@@ -211,12 +211,11 @@ const finance: RawItem[] = [
 
 const COPY: Record<
   Locale,
-  { title: string; subtitle: string; ticketNotice: string; headings: [string, string, string] }
+  { title: string; subtitle: string; headings: [string, string, string] }
 > = {
   fr: {
     title: 'Level Up in Germany — 2e édition',
     subtitle: 'Samedi 17 octobre 2026 · The Squaire Conference Center · Am Flughafen 12 · 60549 Frankfurt am Main',
-    ticketNotice: 'Chaque participant rejoint le parcours correspondant à son billet.',
     headings: [
       'VISION · INSPIRATION · OPPORTUNITÉS',
       'CHAQUE INVITÉ REJOINT LE PARCOURS INCLUS DANS SON BILLET',
@@ -226,7 +225,6 @@ const COPY: Record<
   en: {
     title: 'Level Up in Germany — 2nd Edition',
     subtitle: 'Saturday, 17 October 2026 · The Squaire Conference Center · Am Flughafen 12 · 60549 Frankfurt am Main',
-    ticketNotice: 'Each guest joins the track that matches their ticket.',
     headings: [
       'VISION · INSPIRATION · OPPORTUNITIES',
       'EACH GUEST JOINS THE TRACK INCLUDED WITH THEIR TICKET',
@@ -236,7 +234,6 @@ const COPY: Record<
   de: {
     title: 'Level Up in Germany — 2. Ausgabe',
     subtitle: 'Samstag, 17. Oktober 2026 · The Squaire Conference Center · Am Flughafen 12 · 60549 Frankfurt am Main',
-    ticketNotice: 'Jeder Gast besucht den Track, der zu seinem Ticket gehört.',
     headings: [
       'VISION · INSPIRATION · CHANCEN',
       'JEDER GAST BESUCHT DEN TRACK, DER IN SEINEM TICKET ENTHALTEN IST',
@@ -257,7 +254,7 @@ export function getProgramme2026(locale: Locale): {
     subtitle: copy.subtitle,
     blocks: [
       { number: 1, heading: copy.headings[0], items: pick(opening, locale) },
-      { number: 2, heading: copy.headings[1], items: [], tracks: localizedTracks, trackNotice: copy.ticketNotice },
+      { number: 2, heading: copy.headings[1], items: [], tracks: localizedTracks },
       { number: 3, heading: copy.headings[2], items: pick(finance, locale) },
     ],
   };
