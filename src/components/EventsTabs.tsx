@@ -355,7 +355,7 @@ export function EditionContent({
             <IconCalendar />
             {t.sections.programme}
           </h3>
-          {(data.programmeTitle || data.programmeSubtitle) && (
+          {(data.programmeTitle || data.programmeSubtitle) && !isDetailedProgramme(data.programmeBlocks) && (
             <div className="mb-5 rounded-2xl border border-primary/10 bg-primary/[0.03] px-5 py-4">
               {data.programmeTitle && <p className="font-semibold text-brand-dark">{data.programmeTitle}</p>}
               {data.programmeSubtitle && <p className="mt-1 text-sm text-gray-600">{data.programmeSubtitle}</p>}
