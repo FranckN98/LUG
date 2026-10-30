@@ -48,4 +48,11 @@ describe('POST /api/admin/media/upload', () => {
     expect(res.status).toBe(500);
     expect((await res.json()).error).toMatch(/stockage/i);
   });
+
+  it('tells a database failure apart from a storage failure', async () => {
+    media.create.mockRejectedValue(new Error('P1001'));
+    const res = await upload(new File(['x'], 'a.png', { type: 'image/png' }));
+    expect(res.status).toBe(500);
+    expect((await res.json()).error).toMatch(/base de donn/i);
+  });
 });

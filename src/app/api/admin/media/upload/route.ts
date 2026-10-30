@@ -62,9 +62,17 @@ export async function POST(request: Request) {
   const savedFilename = `${crypto.randomUUID()}.${EXT_BY_TYPE[mimeType]}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
+  let url: string;
   try {
     // La galerie communauté garde ses fichiers dans /community ; elle est aussi enregistrée en base pour la production (disque en lecture seule).
-    const url = await saveMediaFile(buffer, savedFilename, category === 'community' ? 'community' : 'media');
+    url = await saveMediaFile(buffer, savedFilename, category === 'community' ? 'community' : 'media');
+  } catch (e) {
+    console.error('[media-upload] storage', e);
+    const hint = process.env.VERCEL && !process.env.BLOB_READ_WRITE_TOKEN ? ' (BLOB_READ_WRITE_TOKEN manquant sur le serveur)' : '';
+    return NextResponse.json({ error: `Enregistrement impossible : stockage des fichiers indisponible${hint}.` }, { status: 500 });
+  }
+
+  try {
     const media = await prisma.media.create({
       data: { filename: file.name, url, altText, category, size: file.size, mimeType },
     });
@@ -84,8 +92,7 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (e) {
-    console.error('[media-upload]', e);
-    const hint = process.env.VERCEL && !process.env.BLOB_READ_WRITE_TOKEN ? ' (BLOB_READ_WRITE_TOKEN manquant sur le serveur)' : '';
-    return NextResponse.json({ error: `Enregistrement impossible : stockage indisponible${hint}.` }, { status: 500 });
+    console.error('[media-upload] database', e);
+    return NextResponse.json({ error: 'Enregistrement impossible : base de données indisponible.' }, { status: 500 });
   }
 }

@@ -40,7 +40,7 @@ async function removeStoredFile(url: string) {
   }
 }
 
-export async function GET(request: Request) {
+async function listMedia(request: Request) {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
@@ -73,7 +73,7 @@ export async function GET(request: Request) {
 }
 
 // POST /api/admin/media — enregistre une URL externe (ex: AWS S3) sans upload fichier
-export async function POST(request: Request) {
+async function addMediaByUrl(request: Request) {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
 }
 
 // DELETE /api/admin/media?id=xxx
-export async function DELETE(request: Request) {
+async function removeMedia(request: Request) {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
@@ -184,4 +184,33 @@ export async function DELETE(request: Request) {
     if (media.category === 'hero') await prisma.heroSlide.deleteMany({ where: { imageUrl: media.url } });
   }
   return NextResponse.json({ ok: true });
+}
+
+function failed(error: unknown) {
+  console.error('[admin-media]', error);
+  return NextResponse.json({ error: 'Base de données indisponible : opération impossible.' }, { status: 500 });
+}
+
+export async function GET(request: Request) {
+  try {
+    return await listMedia(request);
+  } catch (e) {
+    return failed(e);
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    return await addMediaByUrl(request);
+  } catch (e) {
+    return failed(e);
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    return await removeMedia(request);
+  } catch (e) {
+    return failed(e);
+  }
 }

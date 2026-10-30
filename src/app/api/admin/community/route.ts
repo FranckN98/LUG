@@ -7,5 +7,10 @@ export async function GET() {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
-  return NextResponse.json(await listCommunityGalleryItems());
+  try {
+    return NextResponse.json(await listCommunityGalleryItems());
+  } catch (e) {
+    console.error('[admin-community]', e);
+    return NextResponse.json({ error: 'Galerie indisponible.' }, { status: 500 });
+  }
 }
