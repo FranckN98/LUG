@@ -445,17 +445,35 @@ model SocialLink {
   url          String
   description  String?  @default("")
   coverImageUrl String? @map("cover_image_url")
+  episodeNumber Int?    @map("episode_number")
+  badge        String?
   sortOrder    Int      @default(0) @map("sort_order")
   isActive     Boolean  @default(true) @map("is_active")
   isNew        Boolean  @default(false) @map("is_new")
   isFeatured   Boolean  @default(false) @map("is_featured")
+  isDiscoverable Boolean @default(false) @map("is_discoverable")
+  categoryId   String?  @map("category_id")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+  category     SocialLinkCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   translations SocialLinkTranslation[]
 
   @@index([isActive, sortOrder])
   @@index([isFeatured])
+  @@index([categoryId, sortOrder])
   @@map("social_links")
+}
+
+model SocialLinkCategory {
+  id        String      @id @default(uuid())
+  name      String
+  sortOrder Int         @default(0) @map("sort_order")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  links     SocialLink[]
+
+  @@index([sortOrder])
+  @@map("social_link_categories")
 }
 
 model SocialLinkTranslation {
@@ -1090,13 +1108,10 @@ model LemFiContestDecision {
   @@map("lemfi_contest_decisions")
 }
 
-// One row per draw result. entryId is unique: a participant wins at most once, and a forfeited
-// winner (status 'forfeited', e.g. absent on the day) is never drawn again.
 model LemFiContestWinner {
   id          String            @id @default(uuid())
   entryId     String            @unique @map("entry_id")
   prize       String
-  // won | forfeited
   status      String            @default("won")
   drawnAt     DateTime          @default(now()) @map("drawn_at")
   forfeitedAt DateTime?         @map("forfeited_at")
@@ -1115,11 +1130,6 @@ model LemFiContestCounter {
   @@map("lemfi_contest_counter")
 }
 
-// ── Feedback 2e édition (anonyme par défaut) ────────────────────────────────
-// Confidentialité par construction : aucune colonne ne relie une réponse à une adresse e-mail ou à
-// une heure précise. `submittedOn` est un jour (Europe/Berlin), les ids sont aléatoires (uuid,
-// pas cuid) et il n'y a ni createdAt exact ni @updatedAt : l'ordre et l'heure d'envoi ne
-// permettent pas de rapprocher une réponse d'une inscription aux nouvelles.
 model FeedbackResponse {
   id                   String        @id @default(uuid())
   submittedOn          DateTime      @map("submitted_on") @db.Date
@@ -1146,7 +1156,6 @@ model FeedbackTag {
   @@map("feedback_tags")
 }
 
-// Inscriptions « prochaines nouvelles » : table séparée, volontairement sans date ni lien avec les réponses.
 model FeedbackNewsSignup {
   id        String  @id @default(uuid())
   email     String  @unique

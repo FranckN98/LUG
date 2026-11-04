@@ -14,9 +14,14 @@ type SocialLink = {
   isActive: boolean;
   isNew: boolean;
   isFeatured: boolean;
+  isDiscoverable: boolean;
+  categoryId: string | null;
+  category: { id: string; name: string } | null;
   createdAt: string;
   updatedAt: string;
 };
+
+type LinkCategory = { id: string; name: string; sortOrder: number; _count?: { links: number } };
 
 const FEATURED_SOCIALS = [
   { name: 'TikTok', emoji: '🎵' },
@@ -67,6 +72,8 @@ export function SocialLinksAdmin() {
   const [saving, setSaving] = useState(false);
   const [savingFeaturedId, setSavingFeaturedId] = useState<string | null>(null);
   const [featuredUrls, setFeaturedUrls] = useState<Record<string, string>>({});
+  const [categories, setCategories] = useState<LinkCategory[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   // CRUD form state for manual links
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -78,6 +85,8 @@ export function SocialLinksAdmin() {
     sortOrder: 0,
     isActive: true,
     isNew: false,
+    isDiscoverable: false,
+    categoryId: '',
   });
 
   const refresh = useCallback(async () => {
@@ -85,8 +94,12 @@ export function SocialLinksAdmin() {
     try {
       const res = await fetch('/api/admin/social-links', { cache: 'no-store' });
       if (!res.ok) throw new Error('load failed');
-      const data = (await res.json()) as SocialLink[];
+      const [data, categoryRes] = await Promise.all([
+        res.json() as Promise<SocialLink[]>,
+        fetch('/api/admin/social-link-categories', { cache: 'no-store' }).then((response) => response.ok ? response.json() as Promise<LinkCategory[]> : Promise.reject(new Error('categories'))),
+      ]);
       setLinks(data);
+      setCategories(categoryRes);
     } catch {
       adminNotify.error('Impossible de charger les liens.');
     } finally {
@@ -179,6 +192,8 @@ export function SocialLinksAdmin() {
       sortOrder: nextOrder,
       isActive: true,
       isNew: false,
+      isDiscoverable: false,
+      categoryId: '',
     });
   }
 
@@ -192,6 +207,8 @@ export function SocialLinksAdmin() {
       sortOrder: link.sortOrder,
       isActive: link.isActive,
       isNew: link.isNew,
+      isDiscoverable: link.isDiscoverable,
+      categoryId: link.categoryId ?? '',
     });
   }
 
@@ -205,6 +222,8 @@ export function SocialLinksAdmin() {
       sortOrder: 0,
       isActive: true,
       isNew: false,
+      isDiscoverable: false,
+      categoryId: '',
     });
   }
 
@@ -229,6 +248,8 @@ export function SocialLinksAdmin() {
         sortOrder: form.sortOrder,
         isActive: form.isActive,
         isNew: form.isNew,
+        isDiscoverable: form.isDiscoverable,
+        categoryId: form.categoryId || null,
       };
 
       const res = editingId
@@ -327,6 +348,70 @@ export function SocialLinksAdmin() {
     }
   }
 
+  async function createCategory() {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    const res = await fetch('/api/admin/social-link-categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, sortOrder: categories.length }),
+    });
+    if (!res.ok) {
+      adminNotify.error('Création de la catégorie impossible.');
+      return;
+    }
+    setNewCategoryName('');
+    adminNotify.success('Catégorie créée.');
+    await refresh();
+  }
+
+  async function renameCategory(category: LinkCategory) {
+    const name = window.prompt('Nom de la catégorie', category.name)?.trim();
+    if (!name || name === category.name) return;
+    const res = await fetch(`/api/admin/social-link-categories/${category.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) {
+      adminNotify.error('Modification impossible.');
+      return;
+    }
+    await refresh();
+  }
+
+  async function removeCategory(category: LinkCategory) {
+    const warning = category._count?.links
+      ? `Cette catégorie contient ${category._count.links} lien(s). Ils seront conservés sans catégorie. Supprimer ?`
+      : 'Supprimer cette catégorie ?';
+    if (!window.confirm(warning)) return;
+    const res = await fetch(`/api/admin/social-link-categories/${category.id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      adminNotify.error('Suppression impossible.');
+      return;
+    }
+    adminNotify.success('Catégorie supprimée, les liens ont été conservés.');
+    await refresh();
+  }
+
+  async function moveCategory(category: LinkCategory, direction: 'up' | 'down') {
+    const index = categories.findIndex((item) => item.id === category.id);
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (index < 0 || target < 0 || target >= categories.length) return;
+    const reordered = [...categories];
+    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+    const res = await fetch('/api/admin/social-link-categories/reorder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: reordered.map((item) => item.id) }),
+    });
+    if (!res.ok) {
+      adminNotify.error('Réorganisation impossible.');
+      return;
+    }
+    await refresh();
+  }
+
   return (
     <div className="max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
       <div className="space-y-8">
@@ -418,6 +503,35 @@ export function SocialLinksAdmin() {
           )}
         </section>
 
+        <section className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:p-6">
+          <div>
+            <p className="text-[0.62rem] font-bold uppercase tracking-[0.25em] text-accent">Organisation</p>
+            <h2 className="mt-1 text-lg font-semibold text-white">Catégories des liens</h2>
+            <p className="mt-1 text-xs text-white/50">Les liens restent conservés lorsqu’une catégorie est supprimée et deviennent alors non classés.</p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              value={newCategoryName}
+              onChange={(event) => setNewCategoryName(event.target.value)}
+              placeholder="Nom de la nouvelle catégorie"
+              className="min-h-10 flex-1 rounded-lg border border-white/10 bg-[#0f0606] px-3 text-sm text-white placeholder-white/30"
+            />
+            <button type="button" onClick={createCategory} className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-black hover:bg-accent/90">Créer</button>
+          </div>
+          <ul className="grid gap-2 md:grid-cols-2">
+            {categories.map((category, index) => (
+              <li key={category.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+                <span className="min-w-0 flex-1 text-sm font-semibold text-white">{category.name}</span>
+                <span className="text-xs text-white/40">{category._count?.links ?? 0} lien(s)</span>
+                <button type="button" onClick={() => moveCategory(category, 'up')} disabled={index === 0} className="text-xs text-white/60 disabled:opacity-30" aria-label={`Monter ${category.name}`}>↑</button>
+                <button type="button" onClick={() => moveCategory(category, 'down')} disabled={index === categories.length - 1} className="text-xs text-white/60 disabled:opacity-30" aria-label={`Descendre ${category.name}`}>↓</button>
+                <button type="button" onClick={() => renameCategory(category)} className="text-xs font-semibold text-accent">Renommer</button>
+                <button type="button" onClick={() => removeCategory(category)} className="text-xs font-semibold text-red-300">Supprimer</button>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         {/* Manual Links CRUD Section */}
         <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           {/* Left: Links list */}
@@ -453,6 +567,16 @@ export function SocialLinksAdmin() {
                             {link.isNew && (
                               <span className="rounded-full bg-accent/20 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-accent">
                                 New
+                              </span>
+                            )}
+                            {link.isDiscoverable && (
+                              <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-emerald-200">
+                                À découvrir
+                              </span>
+                            )}
+                            {link.category && (
+                              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-white/60">
+                                {link.category.name}
                               </span>
                             )}
                             {!link.isActive && (
@@ -595,6 +719,27 @@ export function SocialLinksAdmin() {
                 />
                 <span>Marquer comme <span className="font-semibold text-accent">NEW</span></span>
               </label>
+
+              <label className="flex items-center gap-2 rounded-lg border border-emerald-400/20 bg-emerald-400/5 px-3 py-2 text-sm text-white/70 transition hover:border-emerald-400/40 hover:bg-emerald-400/10">
+                <input
+                  type="checkbox"
+                  checked={form.isDiscoverable}
+                  onChange={(e) => setForm((prev) => ({ ...prev, isDiscoverable: e.target.checked }))}
+                />
+                <span>Afficher dans <span className="font-semibold text-emerald-200">À découvrir</span></span>
+              </label>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-white/60">Catégorie</label>
+                <select
+                  value={form.categoryId}
+                  onChange={(e) => setForm((prev) => ({ ...prev, categoryId: e.target.value }))}
+                  className="w-full rounded-lg border border-white/10 bg-[#0f0606] px-3 py-2 text-sm text-white"
+                >
+                  <option value="">Sans catégorie</option>
+                  {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                </select>
+              </div>
 
               <div className="flex gap-2 pt-2">
                 <button

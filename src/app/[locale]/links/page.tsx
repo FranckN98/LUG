@@ -1,147 +1,86 @@
-import type { Locale } from '@/i18n/config';
+import Image from 'next/image';
 import Link from 'next/link';
+import { Lora, Poppins } from 'next/font/google';
+import type { Locale } from '@/i18n/config';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
-import { resolveSocialLinkCoverImage, seedSocialLinksIfEmpty, localizeSocialLink } from '@/lib/socialLinks';
+import { localizeSocialLink, seedSocialLinksIfEmpty } from '@/lib/socialLinks';
+import { getEmailSocialLinks } from '@/lib/emailSocialLinks';
+import { SITE_CONTACT } from '@/config/siteContact';
+import { LinksCopyButton } from '@/components/LinksCopyButton';
 
-type SocialLink = {
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--links-font' });
+const lora = Lora({ subsets: ['latin'], style: ['italic'], weight: ['500'], variable: '--links-display-font' });
+
+const copy = {
+  fr: { home: 'Accueil Level Up in Germany', welcome: 'Bienvenue', tagline: 'Tout notre univers, en un seul endroit', seeAll: 'Tout voir', episode: 'Épisode', new: 'Nouveau', events: 'Événements', discover: 'Découvrir', partner: 'Partenaire', lemfiTitle: 'Télécharge LemFi', lemfiSub: 'Avec notre code promo', copy: 'Copier le code', copied: 'Copié', talk: 'Parlons directement', email: 'E-mail', legal: 'Mentions légales', privacy: 'Confidentialité', empty: 'Aucun lien à afficher.' },
+  de: { home: 'Startseite Level Up in Germany', welcome: 'Willkommen', tagline: 'Unser ganzes Universum an einem Ort', seeAll: 'Alle ansehen', episode: 'Folge', new: 'Neu', events: 'Veranstaltungen', discover: 'Entdecken', partner: 'Partner', lemfiTitle: 'Lade LemFi herunter', lemfiSub: 'Mit unserem Promo-Code', copy: 'Code kopieren', copied: 'Kopiert', talk: 'Schreib uns direkt', email: 'E-Mail', legal: 'Impressum', privacy: 'Datenschutz', empty: 'Keine Links verfügbar.' },
+  en: { home: 'Level Up in Germany home', welcome: 'Welcome', tagline: 'Our whole universe, in one place', seeAll: 'See all', episode: 'Episode', new: 'New', events: 'Events', discover: 'Discover', partner: 'Partner', lemfiTitle: 'Download LemFi', lemfiSub: 'With our promo code', copy: 'Copy code', copied: 'Copied', talk: 'Talk to us directly', email: 'Email', legal: 'Legal notice', privacy: 'Privacy', empty: 'No links available.' },
+} as const;
+
+type LinkRecord = {
   id: string;
   title: string;
   url: string;
   description: string | null;
   coverImageUrl: string | null;
+  episodeNumber: number | null;
+  badge: string | null;
+  isActive: boolean;
   isNew: boolean;
   isFeatured: boolean;
+  isDiscoverable: boolean;
+  sortOrder: number;
+  createdAt: Date;
+  category: { id: string; name: string; sortOrder: number } | null;
   translations: Array<{ locale: string; title: string; description: string | null }>;
 };
 
-const FEATURED_SOCIALS = [
-  { name: 'TikTok' },
-  { name: 'Instagram' },
-  { name: 'LinkedIn' },
-  { name: 'Facebook' },
-  { name: 'YouTube' },
-] as const;
-
-function BrandIcon({ name }: { name: string }) {
-  const commonClassName = 'h-7 w-7 md:h-9 md:w-9';
-
-  switch (name) {
-    case 'TikTok':
-      return (
-        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <circle cx="32" cy="32" r="26" fill="#000000" />
-          <g transform="translate(6,6) scale(2.1667)">
-            <path
-              transform="translate(-1.1,-0.9)"
-              fill="#25F4EE"
-              d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"
-            />
-            <path
-              transform="translate(1.1,0.9)"
-              fill="#FE2C55"
-              d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"
-            />
-            <path
-              fill="#ffffff"
-              d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"
-            />
-          </g>
-        </svg>
-      );
-    case 'Instagram':
-      return (
-        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <circle cx="32" cy="32" r="25" fill="url(#instaGradient)" />
-          <rect x="18" y="18" width="28" height="28" rx="8" fill="none" stroke="#ffffff" strokeWidth="3.2" />
-          <circle cx="32" cy="32" r="7.5" fill="none" stroke="#ffffff" strokeWidth="3.2" />
-          <circle cx="41.5" cy="22.5" r="2.3" fill="#ffffff" />
-          <defs>
-            <linearGradient id="instaGradient" x1="8" y1="10" x2="56" y2="54" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#f9ce34" />
-              <stop offset="0.35" stopColor="#ee2a7b" />
-              <stop offset="0.7" stopColor="#6228d7" />
-              <stop offset="1" stopColor="#1f8fff" />
-            </linearGradient>
-          </defs>
-        </svg>
-      );
-    case 'LinkedIn':
-      return (
-        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <circle cx="32" cy="32" r="26" fill="#0A66C2" />
-          <path d="M17 24.5h7.1v19.5H17V24.5Zm3.5-10.2a4.1 4.1 0 1 1 0 8.2 4.1 4.1 0 0 1 0-8.2ZM27.8 24.5h6.8v2.6h.1c1-1.8 3.2-3.7 6.7-3.7 7.1 0 8.4 4.6 8.4 10.7v10H43v-9.4c0-2.3-.1-5.2-3.3-5.2-3.3 0-3.8 2.6-3.8 5.2v9.4h-6.9V24.5Z" fill="#ffffff" />
-        </svg>
-      );
-    case 'Facebook':
-      return (
-        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <circle cx="32" cy="32" r="26" fill="#1877f2" />
-          <path d="M35.6 22.3h5.2V13h-6.2c-7.7 0-9.1 4.9-9.1 9.4v4H20v9.3h5.5V52h9.9V35.7h7.1l1.2-9.3h-8.3v-4c0-1.6.8-3.1 3.1-3.1Z" fill="#ffffff" />
-        </svg>
-      );
-    case 'YouTube':
-      return (
-        <svg viewBox="0 0 64 64" className={commonClassName} aria-hidden>
-          <circle cx="32" cy="32" r="26" fill="#ff0000" />
-          <path d="m27 24 16 8-16 8V24Z" fill="#ffffff" />
-        </svg>
-      );
-    default:
-      return null;
-  }
+function normalized(value: string) {
+  return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-function normalizeSocialKey(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
+function categoryIs(link: LinkRecord, keyword: string) {
+  return normalized(link.category?.name ?? '').includes(keyword);
 }
 
-// Only ever called on links already flagged isFeatured=true, to pick which of
-// the 5 platform slots a given featured record belongs to.
-function matchesPlatformSlot(link: SocialLink, name: string): boolean {
-  const key = normalizeSocialKey(`${link.title} ${link.url}`);
-  const platform = normalizeSocialKey(name);
+const SOCIAL_PLATFORMS = ['TikTok', 'Instagram', 'LinkedIn', 'Facebook', 'YouTube'] as const;
+type FeaturedSocial = { id: string; title: string; url: string };
 
-  if (platform === 'facebook') return key.includes('facebook') || key.includes('fb');
-  if (platform === 'instagram') return key.includes('instagram') || key.includes('insta');
-  if (platform === 'linkedin') return key.includes('linkedin');
-  if (platform === 'youtube') return key.includes('youtube') || key.includes('youtu');
-  if (platform === 'tiktok') return key.includes('tiktok');
-  return key.includes(platform);
+function matchesSocialPlatform(link: LinkRecord, platform: string) {
+  const key = normalized(`${link.title} ${link.url}`);
+  const name = normalized(platform);
+  if (name === 'facebook') return key.includes('facebook') || key.includes('fb');
+  if (name === 'youtube') return key.includes('youtube') || key.includes('youtu');
+  return key.includes(name);
 }
 
-const copy: Record<Locale, { eyebrow: string; tagline: string; title: string; subtitle: string; empty: string; cta: string; newBadge: string }> = {
-  de: {
-    eyebrow: 'Willkommen',
-    tagline: 'Unser ganzes Universum, an einem Ort ✨',
-    title: 'Schön, dich hier zu sehen 👋',
-    subtitle:
-      'Hier findest du alle Wege, mit unserer Community in Verbindung zu bleiben — Socials, Ressourcen und Projekte. Folge uns, schreib uns oder klick rein, wo es dich neugierig macht.',
-    empty: 'Bald gibt es hier neue Links zu entdecken.',
-    cta: 'Öffnen',
-    newBadge: 'Neu',
-  },
-  en: {
-    eyebrow: 'Welcome',
-    tagline: 'Our whole universe, in one place ✨',
-    title: 'So glad you stopped by 👋',
-    subtitle:
-      'All the ways to stay connected with our community in one place — socials, resources and projects. Follow along, reach out, or just explore whatever sparks your curiosity.',
-    empty: 'New links are coming soon — stay tuned.',
-    cta: 'Open',
-    newBadge: 'New',
-  },
-  fr: {
-    eyebrow: 'Bienvenue',
-    tagline: 'Tout notre univers, en un seul endroit ✨',
-    title: 'Heureux de te voir ici 👋',
-    subtitle:
-      'Tous les moyens de rester connecté à notre communauté en un seul endroit — réseaux, ressources et projets. Suis-nous, écris-nous, ou explore simplement ce qui éveille ta curiosité.',
-    empty: 'De nouveaux liens arrivent bientôt — reste à l’écoute.',
-    cta: 'Ouvrir',
-    newBadge: 'Nouveau',
-  },
-};
+function Icon({ kind }: { kind: 'home' | 'play' | 'chevron' | 'whatsapp' | 'mail' | 'social' }) {
+  const common = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  if (kind === 'home') return <svg viewBox="0 0 24 24" aria-hidden="true" {...common}><path d="m3 11 9-7 9 7" /><path d="M5 10v10h14V10M10 20v-6h4v6" /></svg>;
+  if (kind === 'play') return <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="m9 6 10 6-10 6V6Z" /></svg>;
+  if (kind === 'chevron') return <svg viewBox="0 0 24 24" aria-hidden="true" {...common}><path d="m9 5 7 7-7 7" /></svg>;
+  if (kind === 'mail') return <svg viewBox="0 0 24 24" aria-hidden="true" {...common}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></svg>;
+  if (kind === 'whatsapp') return <svg viewBox="0 0 24 24" aria-hidden="true" {...common}><path d="M20 4a11 11 0 0 0-17 13L2 22l5-1a11 11 0 0 0 13-17Z" /><path d="M8 8c.3 2 2 4 4 5 .6.3 1 .2 1.3-.2l.6-.8c.2-.3.4-.3.7-.2l2 .9" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true" {...common}><circle cx="12" cy="12" r="8" /><path d="M8 12h8M12 8v8" /></svg>;
+}
+
+function SocialIcon({ title }: { title: string }) {
+  const key = normalized(title);
+  if (key.includes('youtube')) return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="6" width="18" height="12" rx="4" /><path fill="currentColor" stroke="none" d="m10 9 5 3-5 3V9Z" /></svg>;
+  if (key.includes('linkedin')) return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M6 9v9M6 6v.1M10 18v-5a3 3 0 0 1 6 0v5M10 9v9" /><circle cx="6" cy="6" r=".8" fill="currentColor" /></svg>;
+  if (key.includes('instagram')) return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="4" y="4" width="16" height="16" rx="5" /><circle cx="12" cy="12" r="3.5" /><circle cx="17.2" cy="6.8" r=".8" fill="currentColor" /></svg>;
+  if (key.includes('facebook')) return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M14 20v-8h2.5l.5-3H14V7.2c0-1 .4-1.7 1.8-1.7H17V2.8c-.5-.1-1.2-.2-2.1-.2-2.7 0-4.4 1.7-4.4 4.5V9H8v3h2.5v8" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M14 4c.2 3 1.8 5 5 5v3c-1.8 0-3.5-.6-5-1.6V16a5 5 0 1 1-3.8-4.8v3a2 2 0 1 0 .8 1.8V4h3Z" /></svg>;
+}
+
+function SectionHeading({ title, count, seeAll, href }: { title: string; count?: number; seeAll?: string; href?: string }) {
+  return <div className="lu-section-heading"><h2>{title}{typeof count === 'number' && <span className="lu-count">{count}</span>}</h2>{seeAll && href && <a href={href} target={href.startsWith('http') ? '_blank' : undefined} rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}>{seeAll}<Icon kind="chevron" /></a>}</div>;
+}
+
+function localizedLink(link: LinkRecord, locale: Locale) {
+  return { ...link, ...localizeSocialLink(link, link.translations, locale) };
+}
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/links');
@@ -151,204 +90,49 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   const { locale } = await params;
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
   const t = copy[loc];
+  let links: LinkRecord[] = [];
+  let emailSocialLinks: Awaited<ReturnType<typeof getEmailSocialLinks>> | null = null;
 
-  let links: SocialLink[] = [];
   try {
     await seedSocialLinksIfEmpty();
-    links = await prisma.socialLink.findMany({
-      where: { isActive: true },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-      select: {
-        id: true,
-        title: true,
-        url: true,
-        description: true,
-        coverImageUrl: true,
-        isNew: true,
-        isFeatured: true,
-        translations: { select: { locale: true, title: true, description: true } },
-      },
-    });
+    links = await prisma.socialLink.findMany({ where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }], select: { id: true, title: true, url: true, description: true, coverImageUrl: true, episodeNumber: true, badge: true, isActive: true, isNew: true, isFeatured: true, isDiscoverable: true, sortOrder: true, createdAt: true, category: { select: { id: true, name: true, sortOrder: true } }, translations: { select: { locale: true, title: true, description: true } } } });
+    emailSocialLinks = await getEmailSocialLinks();
   } catch {
     links = [];
   }
 
-  const featuredLinks = FEATURED_SOCIALS.flatMap((social) => {
-    const link = links.find((item) => item.isFeatured && matchesPlatformSlot(item, social.name));
-    return link ? [{ ...social, link }] : [];
+  const featured: FeaturedSocial[] = SOCIAL_PLATFORMS.flatMap((platform) => {
+    const link = links.find((item) => item.isActive && item.isFeatured && matchesSocialPlatform(item, platform))
+      ?? links.find((item) => item.isActive && matchesSocialPlatform(item, platform));
+    if (link) return [{ id: link.id, title: localizedLink(link, loc).title, url: link.url }];
+
+    const key = platform.toLowerCase() as 'tiktok' | 'instagram' | 'linkedin' | 'youtube';
+    const fallbackUrl = platform === 'Facebook' ? '' : emailSocialLinks?.[key] ?? '';
+    return fallbackUrl.trim() ? [{ id: `email-social-${key}`, title: platform, url: fallbackUrl }] : [];
   });
-  const featuredIds = new Set(featuredLinks.map((social) => social.link.id));
-  const contentLinks = links
-    .filter((link) => !featuredIds.has(link.id))
-    .map((link) => ({ ...link, ...localizeSocialLink(link, link.translations, loc) }));
+  const featuredIds = new Set(featured.map((link) => link.id));
+  const content = links.filter((link) => !featuredIds.has(link.id)).map((link) => localizedLink(link, loc));
+  const businessEpisodes = content.filter((link) => categoryIs(link, 'business tour')).sort((a, b) => (b.episodeNumber ?? -1) - (a.episodeNumber ?? -1) || a.sortOrder - b.sortOrder);
+  const eventFeedback = content.find((link) => categoryIs(link, 'evenement') && normalized(`${link.title} ${link.description ?? ''}`).includes('feedback'));
+  const discover = content.filter((link) => !categoryIs(link, 'business tour') && !categoryIs(link, 'career tour') && !categoryIs(link, 'evenement') && !categoryIs(link, 'partner') && !categoryIs(link, 'partenaire'));
+  const partnerLink = content.find((link) => categoryIs(link, 'partenaire') || categoryIs(link, 'partner'))
+    ?? content.find((link) => normalized(`${link.title} ${link.url}`).includes('lemfi'));
+  const promoCode = partnerLink?.badge?.trim() || partnerLink?.description?.match(/\b[A-Z][A-Z0-9]{2,}\b/)?.[0] || null;
+  const discoverLinks = [...discover.filter((link) => link.isDiscoverable || !categoryIs(link, 'business tool')), ...(eventFeedback ? [eventFeedback] : [])].sort((a, b) => Number(b.isDiscoverable) - Number(a.isDiscoverable) || a.sortOrder - b.sortOrder);
+  const whatsappHref = `https://wa.me/${SITE_CONTACT.phoneDisplay.replace(/\D/g, '')}`;
 
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0b0606] text-white">
-      {/* Hide the global site header on this landing-style page only */}
-      <style>{`
-        header.fixed{display:none!important}
-        main{padding-top:0!important}
-        @keyframes lu-logo-glow {
-          0%, 100% { opacity: 0.35; transform: scale(0.99); }
-          50% { opacity: 0.5; transform: scale(1.02); }
-        }
-        .lu-logo-glow {
-          animation: lu-logo-glow 8s ease-in-out infinite;
-          filter: saturate(0.9) blur(0.18rem);
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .lu-logo-glow { animation: none !important; }
-        }
-      `}</style>
-
-      {/* Home button (top-right) */}
-      <Link
-        href={`/${loc}`}
-        aria-label="Home"
-        className="group fixed right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white/80 backdrop-blur-md transition-all hover:border-accent/60 hover:bg-accent/15 hover:text-accent sm:right-6 sm:top-6 sm:h-11 sm:w-11"
-      >
-        <svg
-          aria-hidden
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-5 w-5 transition-transform group-hover:-translate-y-0.5"
-        >
-          <path d="M3 11.5 12 4l9 7.5" />
-          <path d="M5 10v10h14V10" />
-          <path d="M10 20v-6h4v6" />
-        </svg>
-      </Link>
-
-      {/* Ambient background — warm glow on dark */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#120808] via-[#0b0606] to-[#070303]" />
-        <div className="absolute -top-1/3 left-1/2 h-[80vh] w-[120vw] -translate-x-1/2 bg-[radial-gradient(ellipse_60%_50%_at_50%_30%,rgba(233,140,11,0.18),transparent_70%)]" />
-        <div className="absolute bottom-[-30%] right-[-10%] h-[70vh] w-[80vw] bg-[radial-gradient(circle_at_70%_70%,rgba(140,26,26,0.22),transparent_65%)]" />
-        <div className="absolute top-1/3 left-[-10%] h-[60vh] w-[60vw] bg-[radial-gradient(circle_at_30%_50%,rgba(233,140,11,0.08),transparent_60%)]" />
-      </div>
-
-      <section className="relative z-10 mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-        {/* Hero / welcome */}
-        <header className="relative mb-8 flex flex-col items-center text-center">
-          {/* Avatar with soft ambient glow */}
-          <div className="relative mb-6">
-            <div
-              aria-hidden
-              className="lu-logo-glow absolute -inset-8 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,242,196,0.72)_0%,rgba(255,214,128,0.46)_20%,rgba(255,181,66,0.28)_36%,rgba(233,140,11,0.14)_56%,rgba(233,140,11,0.04)_72%,transparent_82%)]"
-            />
-            <div
-              aria-hidden
-              className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_62%)] blur-sm"
-            />
-            <div className="relative grid h-[7.69rem] w-[7.69rem] place-items-center overflow-hidden rounded-full border border-[#f7d57d]/20 bg-white shadow-[0_0_18px_rgba(255,189,71,0.12),0_10px_28px_-16px_rgba(0,0,0,0.75)] sm:h-[8.96rem] sm:w-[8.96rem]">
-              <img
-                src="/logo.png"
-                alt="Level Up in Germany"
-                className="h-[95%] w-[95%] object-contain"
-              />
-            </div>
-          </div>
-
-          {/* Verified handle */}
-          <div className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-white/90">
-            <span>@levelupingermany</span>
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              className="h-4 w-4 text-accent"
-              fill="currentColor"
-            >
-              <path d="M12 2l2.39 2.39 3.39-.05.06 3.39L20.24 10 17.84 12l2.4 2-2.4 2.27.05 3.39-3.39.06L12 22l-2.39-2.28-3.39.05-.06-3.39L3.76 14l2.4-2-2.4-2 2.4-2.27-.05-3.39 3.39-.06L12 2zm-1.18 13.07l5.6-5.6-1.41-1.41-4.19 4.18-1.8-1.79-1.41 1.41 3.21 3.21z" />
-            </svg>
-          </div>
-
-          {/* Eyebrow */}
-          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.4em] text-accent/90">{t.eyebrow}</p>
-
-          {/* Tagline */}
-          <p className="mt-1 font-display text-xl italic tracking-tight text-white sm:text-2xl">{t.tagline}</p>
-        </header>
-
-        {featuredLinks.length > 0 && (
-          <nav aria-label="Réseaux sociaux" className="mb-8">
-            <div className="grid grid-cols-5 gap-2 sm:gap-3">
-              {featuredLinks.map(({ name, link }) => (
-                <a
-                  key={link.id}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={name}
-                  title={name}
-                  className="group relative flex aspect-square min-w-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.04] shadow-[0_18px_35px_-20px_rgba(0,0,0,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_16px_30px_-18px_rgba(0,0,0,0.8)]"
-                >
-                  <span className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,220,140,0.22),rgba(255,180,52,0.08)_30%,transparent_68%)]" />
-                  <span className="relative z-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.03]">
-                    <BrandIcon name={name} />
-                  </span>
-                  <span className="sr-only">{name}</span>
-                </a>
-              ))}
-            </div>
-          </nav>
-        )}
-
-        {links.length === 0 ? (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-8 text-center text-sm text-white/60">
-            {t.empty}
-          </p>
-        ) : contentLinks.length > 0 ? (
-          <ul className="space-y-2">
-            {contentLinks.map((link) => {
-              const cover = link.coverImageUrl?.trim() || resolveSocialLinkCoverImage(link.title, link.url);
-              const isHighlighted = link.isNew;
-              return (
-                <li key={link.id} className="relative">
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border bg-white/[0.06] p-2 backdrop-blur-xl transition-all duration-300 ease-out hover:-translate-y-0.5 hover:bg-white/[0.09] hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)] sm:gap-3.5 sm:p-2.5 ${
-                      isHighlighted ? 'border-accent/25 hover:border-accent/40' : 'border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#0a0505] sm:h-12 sm:w-12">
-                      <img
-                        src={cover}
-                        alt={link.title}
-                        className="h-full w-full object-cover opacity-90 transition-all duration-500 group-hover:scale-[1.05] group-hover:opacity-100"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    </div>
-
-                    <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="truncate text-sm font-semibold text-white sm:text-base">{link.title}</h2>
-                          {isHighlighted && (
-                            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-[#25D366]">
-                              <span className="h-1.5 w-1.5 rounded-full bg-[#25D366]" />
-                              {t.newBadge}
-                            </span>
-                          )}
-                        </div>
-                        {link.description && <p className="mt-0.5 line-clamp-1 text-xs text-white/60 sm:text-sm">{link.description}</p>}
-                      </div>
-                      <span className="shrink-0 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent transition-colors group-hover:border-accent group-hover:bg-accent group-hover:text-[#0b0606]">
-                        {t.cta}
-                      </span>
-                    </div>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        ) : null}
-      </section>
+  return <div className={`${poppins.variable} ${lora.variable} lu-links-page`}>
+    <style>{`body:has(.lu-links-page) header.fixed,body:has(.lu-links-page) footer{display:none!important}body:has(.lu-links-page) main{padding-top:0!important}.lu-links-page .lu-hero,.lu-links-page .lu-section,.lu-links-page .lu-footer{animation:lu-links-rise .6s cubic-bezier(.2,.7,.2,1) both}.lu-links-page .lu-section:nth-of-type(2){animation-delay:80ms}.lu-links-page .lu-section:nth-of-type(3){animation-delay:160ms}.lu-links-page .lu-section:nth-of-type(4){animation-delay:240ms}.lu-links-page .lu-section:nth-of-type(5){animation-delay:320ms}@keyframes lu-links-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){.lu-links-page .lu-hero,.lu-links-page .lu-section,.lu-links-page .lu-footer{animation:none!important}}`}</style>
+    <style>{` .lu-links-page{--lu-bg:#1a1a1a;--lu-surface:#242424;--lu-surface-2:#333;--lu-cover:#262626;--lu-text:#fff;--lu-muted:#b5b5b0;--lu-line:rgba(255,255,255,.18);--lu-orange:var(--accent,#e98c0b);--lu-red:var(--primary,#8c1a1a);background:var(--lu-bg);color:var(--lu-text);font-family:var(--links-font),sans-serif;min-height:100vh}.lu-links-page *{box-sizing:border-box}.lu-links-page a,.lu-links-page button{outline:0}.lu-links-page a:focus-visible,.lu-links-page button:focus-visible{outline:2px solid var(--lu-orange);outline-offset:2px}.lu-links-shell{width:min(100% - 40px,440px);margin:auto;padding:16px 0 36px}.lu-links-top{display:flex;justify-content:space-between;align-items:center}.lu-home,.lu-language{border:1px solid var(--lu-line);background:var(--lu-surface);color:var(--lu-text);border-radius:999px}.lu-home{width:44px;height:44px;display:grid;place-items:center}.lu-home svg{width:20px;height:20px}.lu-language{display:flex;padding:3px;gap:2px}.lu-language a{min-width:40px;height:34px;display:grid;place-items:center;border-radius:999px;color:var(--lu-muted);font-size:11px;font-weight:600}.lu-language a[aria-current=true]{background:var(--lu-text);color:var(--lu-bg)}.lu-hero{text-align:center;padding:22px 0 30px}.lu-logo-wrap{position:relative;width:88px;height:88px;margin:0 auto 15px}.lu-logo-halo{position:absolute;width:460px;height:460px;left:50%;top:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(245,130,31,.12) 0%,rgba(245,130,31,.06) 26%,rgba(212,42,32,.03) 46%,transparent 70%);animation:lu-halo 7s ease-in-out infinite}.lu-logo{position:relative;width:88px;height:88px;border-radius:999px;object-fit:contain;background:#fff}.lu-handle{font-size:12px}.lu-welcome{margin-top:7px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--lu-muted)}.lu-links-page h1{font-size:24px;line-height:1.2;font-weight:600;margin:6px 0}.lu-tagline{font-size:14px;color:var(--lu-muted)}.lu-spark{color:var(--lu-orange);display:inline-block;animation:lu-spark 2.4s ease-in-out infinite}.lu-socials{display:flex;justify-content:center;gap:10px;margin-top:20px}.lu-social{width:44px;height:44px;border:1px solid var(--lu-line);border-radius:999px;display:grid;place-items:center;color:var(--lu-text);transition:.2s}.lu-social:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.55)}.lu-social svg{width:21px;height:21px}.lu-section{margin-top:30px}.lu-section-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.lu-section-heading h2{font-size:16px;font-weight:600;margin:0;display:flex;align-items:center;gap:8px}.lu-section-heading>a{display:flex;align-items:center;gap:2px;color:var(--lu-muted);font-size:12px}.lu-section-heading>a svg{width:14px;height:14px}.lu-count{font-size:11px;color:var(--lu-muted);border:1px solid var(--lu-line);padding:2px 7px;border-radius:999px}.lu-episodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.lu-episode-card{min-width:0;color:var(--lu-text);transition:transform .25s}.lu-episode-card:hover{transform:translateY(-2px)}.lu-cover{height:112px;position:relative;border-radius:14px;overflow:hidden;background:var(--lu-cover);border:1px solid transparent}.lu-cover.is-new{border:1.5px solid var(--lu-red)}.lu-cover img{width:100%;height:100%;object-fit:cover;transition:transform .25s}.lu-episode-card:hover .lu-cover img{transform:scale(1.04)}.lu-cover:after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent 60%)}.lu-episode-label{position:absolute;z-index:1;top:7px;left:8px;font-size:9px;color:#fff}.lu-episode-number{position:absolute;z-index:1;bottom:-5px;left:7px;font-family:var(--links-display-font),serif;font-size:80px;font-style:italic;line-height:1;color:var(--lu-orange)}.lu-play{position:absolute;z-index:1;right:8px;bottom:8px;width:30px;height:30px;background:#fff;color:#111;border-radius:999px;display:grid;place-items:center}.lu-play svg{width:14px;height:14px}.lu-new{position:absolute;z-index:2;right:7px;top:7px;background:var(--lu-red);padding:3px 6px;border-radius:999px;font-size:9px}.lu-guest{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:600;margin-top:7px}.lu-event-list,.lu-discover-list{display:grid;gap:7px}.lu-event-row,.lu-discover-row{min-height:58px;background:var(--lu-surface);border-radius:14px;display:flex;align-items:center;gap:12px;padding:7px 10px;color:var(--lu-text);transition:.2s}.lu-event-row:hover,.lu-discover-row:hover{background:#2e2e2e}.lu-event-year{width:50px;height:44px;flex:none;display:grid;place-items:center;background:var(--lu-orange);border-radius:10px;font-family:var(--links-display-font),serif;font-size:26px;font-style:italic}.lu-event-row:nth-child(even) .lu-event-year{background:var(--lu-red)}.lu-event-copy{min-width:0;flex:1}.lu-event-name,.lu-discover-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lu-event-meta{font-size:10px;color:var(--lu-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.lu-discover-icon{width:44px;height:44px;flex:none;border-radius:10px;background:var(--lu-surface-2);display:grid;place-items:center;color:var(--lu-muted)}.lu-discover-row:first-child .lu-discover-icon{background:var(--lu-orange);color:#111}.lu-discover-icon img{width:30px;height:30px;object-fit:cover;border-radius:7px}.lu-discover-row>svg{width:17px;height:17px;color:var(--lu-muted);flex:none}.lu-discover-copy{min-width:0;flex:1}.lu-badge{display:inline-block;margin-left:7px;background:var(--lu-red);border-radius:999px;padding:3px 6px;font-size:9px;font-weight:500;vertical-align:middle}.lu-partner{display:flex;align-items:center;gap:12px;padding:14px;background:#e8f0f7;color:#10243a;border-radius:14px}.lu-partner-link{display:flex;align-items:center;gap:10px;min-width:0;flex:1}.lu-partner-logo{width:42px;height:42px;object-fit:contain;background:#fff;border-radius:10px;padding:4px}.lu-partner-copy{min-width:0}.lu-partner-copy strong,.lu-partner-copy span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lu-partner-copy strong{font-size:13px}.lu-partner-copy span{font-size:10px;margin-top:2px}.lu-copy-button{min-width:84px;min-height:44px;border:1px dashed #10243a;background:transparent;color:#10243a;border-radius:9px;padding:5px 8px;display:flex;align-items:center;justify-content:center;gap:5px;font:600 11px var(--links-font);cursor:pointer}.lu-contact{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lu-contact a{height:52px;border-radius:14px;background:var(--lu-surface);display:flex;align-items:center;justify-content:center;gap:8px;color:var(--lu-text);font-size:12px}.lu-contact svg{width:19px;height:19px}.lu-footer{text-align:center;padding-top:30px}.lu-motto{font:italic 500 18px var(--links-display-font),serif;color:var(--lu-orange)}.lu-footer-links{margin-top:8px;color:var(--lu-muted);font-size:11px}.lu-footer-links a:hover{text-decoration:underline}@keyframes lu-halo{0%,100%{opacity:.82;transform:translate(-50%,-50%) scale(.94)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}}@keyframes lu-spark{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.8);opacity:.55}}@media(prefers-reduced-motion:reduce){.lu-logo-halo,.lu-spark{animation:none}.lu-social,.lu-episode-card,.lu-event-row,.lu-discover-row{transition:none}}@media(min-width:700px){.lu-links-shell{padding-top:24px}}
+    `}</style>
+    <div className="lu-links-shell">
+      <div className="lu-links-top"><Link className="lu-home" href={`/${loc}`} aria-label={t.home}><Icon kind="home" /></Link><nav className="lu-language" aria-label="Language"><Link href={`/fr/links`} aria-current={loc === 'fr' ? 'true' : undefined}>FR</Link><Link href={`/de/links`} aria-current={loc === 'de' ? 'true' : undefined}>DE</Link><Link href={`/en/links`} aria-current={loc === 'en' ? 'true' : undefined}>EN</Link></nav></div>
+      <header className="lu-hero"><div className="lu-logo-wrap"><span className="lu-logo-halo" aria-hidden="true" /><Image className="lu-logo" src="/logo.png" alt="Level Up in Germany" width={88} height={88} priority /></div><div className="lu-handle">@levelupingermany</div><div className="lu-welcome">{t.welcome}</div><h1>Level Up in Germany</h1><p className="lu-tagline">{t.tagline} <span className="lu-spark" aria-hidden="true">✦</span></p><nav className="lu-socials" aria-label="Social media">{featured.map((link) => <a className="lu-social" key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.title} title={link.title}><SocialIcon title={link.title} /></a>)}</nav></header>
+      {businessEpisodes.length > 0 && <section className="lu-section" aria-labelledby="business-tour"><SectionHeading title={businessEpisodes[0]?.category?.name ?? 'Level Up Business Tour'} count={businessEpisodes.length} seeAll={t.seeAll} href={featured.find((link) => normalized(link.title).includes('youtube'))?.url ?? '#'} /><div className="lu-episodes">{businessEpisodes.map((link) => <a className="lu-episode-card" key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"><div className={`lu-cover ${link.isNew ? 'is-new' : ''}`}><Image src={link.coverImageUrl || '/hero/hero-1.png'} alt={`${link.title} ${link.episodeNumber ?? ''}`} width={140} height={112} sizes="(max-width: 440px) 33vw, 140px" /><span className="lu-episode-label">{t.episode}</span><strong className="lu-episode-number">{link.episodeNumber ?? ''}</strong><span className="lu-play"><Icon kind="play" /></span>{link.isNew && <span className="lu-new">{t.new}</span>}</div><span className="lu-guest">{link.title}</span></a>)}</div></section>}
+      {discoverLinks.length > 0 && <section className="lu-section" aria-labelledby="discover"><SectionHeading title={t.discover} count={discoverLinks.length} /><div className="lu-discover-list">{discoverLinks.map((link) => <a className="lu-discover-row" key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"><span className="lu-discover-icon">{link.coverImageUrl ? <Image src={link.coverImageUrl} alt="" width={30} height={30} /> : <Icon kind="social" />}</span><span className="lu-discover-copy"><span className="lu-discover-title">{link.title}{link.isNew && <span className="lu-badge">{t.new}</span>}</span></span><Icon kind="chevron" /></a>)}</div></section>}
+      {partnerLink && <section className="lu-section" aria-labelledby="partner"><SectionHeading title={t.partner} /><div className="lu-partner"><a className="lu-partner-link" href={partnerLink.url} target="_blank" rel="noopener noreferrer"><Image className="lu-partner-logo" src="/partners/lemfi-logo.png" alt="LemFi" width={42} height={42} /><span className="lu-partner-copy"><strong>{t.lemfiTitle}</strong><span>{t.lemfiSub}</span></span></a>{promoCode && <LinksCopyButton value={promoCode} copyLabel={t.copy} copiedLabel={t.copied} />}</div></section>}
+      <section className="lu-section" aria-labelledby="talk"><SectionHeading title={t.talk} /><div className="lu-contact"><a href={whatsappHref} target="_blank" rel="noopener noreferrer"><Icon kind="whatsapp" />WhatsApp</a><a href={`mailto:${SITE_CONTACT.email}`}><Icon kind="mail" />{t.email}</a></div></section>
+      <footer className="lu-footer"><div className="lu-motto">Dare to be different</div><div className="lu-footer-links"><Link href={`/${loc}/imprint`}>{t.legal}</Link> · <Link href={`/${loc}/privacy`}>{t.privacy}</Link> · © {new Date().getFullYear()} Level Up in Germany</div></footer>
     </div>
-  );
+  </div>;
 }

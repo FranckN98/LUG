@@ -5,6 +5,15 @@ import { translateRecord, type TranslatableLocale } from '@/lib/translateText';
 const SOURCE_LOCALE: TranslatableLocale = 'fr';
 const TARGET_LOCALES: TranslatableLocale[] = ['en', 'de'];
 
+const DEFAULT_LINK_CATEGORIES = [
+  { name: 'Level Up Business Tools', sortOrder: 0 },
+  { name: 'Événements Level Up', sortOrder: 1 },
+  { name: 'Level Up Business Tour', sortOrder: 2 },
+  { name: 'Level Up Career Tour', sortOrder: 3 },
+  { name: 'Partenaire', sortOrder: 4 },
+  { name: 'Communauté', sortOrder: 5 },
+] as const;
+
 /**
  * Translate a manual link's title/description into the other two site
  * locales and upsert them into SocialLinkTranslation. Assumes admins type
@@ -81,6 +90,35 @@ export function matchesFeaturedPlatform(title: string, url: string, platform: st
   if (key === 'facebook') return haystack.includes('facebook') || haystack.includes('fb');
   if (key === 'youtube') return haystack.includes('youtube') || haystack.includes('youtu');
   return haystack.includes(key);
+}
+
+async function ensureSocialLinkCategories(): Promise<void> {
+  for (const category of DEFAULT_LINK_CATEGORIES) {
+    const existing = await prisma.socialLinkCategory.findFirst({ where: { name: category.name }, select: { id: true } });
+    if (!existing) await prisma.socialLinkCategory.create({ data: category });
+  }
+}
+
+function defaultCategoryName(title: string, url: string, description: string | null): string {
+  const key = normalizeSocialKey(`${title} ${url} ${description ?? ''}`);
+  if (/(career|job|emploi|recrut|carriere)/.test(key)) return 'Level Up Career Tour';
+  if (/(business|entrepreneur|unternehmen|business tour)/.test(key)) return 'Level Up Business Tour';
+  if (/(event|evenement|conference|ticket|billet)/.test(key)) return 'Événements Level Up';
+  if (/(tool|outil|resource|ressource)/.test(key)) return 'Level Up Business Tools';
+  return 'Communauté';
+}
+
+async function assignDefaultCategories(): Promise<void> {
+  const categories = await prisma.socialLinkCategory.findMany({ select: { id: true, name: true } });
+  const categoryByName = new Map(categories.map((category) => [category.name, category.id]));
+  const uncategorized = await prisma.socialLink.findMany({
+    where: { categoryId: null, isFeatured: false },
+    select: { id: true, title: true, url: true, description: true },
+  });
+  for (const link of uncategorized) {
+    const categoryId = categoryByName.get(defaultCategoryName(link.title, link.url, link.description));
+    if (categoryId) await prisma.socialLink.update({ where: { id: link.id }, data: { categoryId } });
+  }
 }
 
 export async function ensureFeaturedSocialLinks(): Promise<void> {
@@ -171,6 +209,7 @@ export async function resetFeaturedSocialLinksToDefaults(): Promise<void> {
 }
 
 export async function seedSocialLinksIfEmpty(): Promise<void> {
+  await ensureSocialLinkCategories();
   const count = await prisma.socialLink.count();
   if (count > 0) {
     const missingCover = await prisma.socialLink.findMany({
@@ -188,6 +227,7 @@ export async function seedSocialLinksIfEmpty(): Promise<void> {
     }
 
     await ensureFeaturedSocialLinks();
+    await assignDefaultCategories();
     return;
   }
 
@@ -233,4 +273,5 @@ export async function seedSocialLinksIfEmpty(): Promise<void> {
   });
 
   await ensureFeaturedSocialLinks();
+  await assignDefaultCategories();
 }

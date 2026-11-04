@@ -82,6 +82,10 @@ export async function PATCH(
   if (typeof record.sortOrder === 'number') data.sortOrder = record.sortOrder;
   if (typeof record.isActive === 'boolean') data.isActive = record.isActive;
   if (typeof record.isNew === 'boolean') data.isNew = record.isNew;
+  if (typeof record.isDiscoverable === 'boolean') data.isDiscoverable = record.isDiscoverable;
+  if ('categoryId' in record) {
+    data.categoryId = typeof record.categoryId === 'string' && record.categoryId.trim() ? record.categoryId.trim() : null;
+  }
 
   try {
     const updated = await prisma.socialLink.update({ where: { id }, data });

@@ -33,7 +33,7 @@ export async function GET() {
 
   const links = await prisma.socialLink.findMany({
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-    include: { translations: true },
+    include: { translations: true, category: true },
   });
 
   return NextResponse.json(links);
@@ -71,6 +71,8 @@ export async function POST(request: Request) {
       sortOrder: typeof data.sortOrder === 'number' ? data.sortOrder : 0,
       isActive: typeof data.isActive === 'boolean' ? data.isActive : true,
       isNew: typeof data.isNew === 'boolean' ? data.isNew : false,
+      isDiscoverable: typeof data.isDiscoverable === 'boolean' ? data.isDiscoverable : false,
+      categoryId: typeof data.categoryId === 'string' && data.categoryId.trim() ? data.categoryId.trim() : null,
     },
   });
 
