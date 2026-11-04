@@ -60,7 +60,7 @@ export function LinksContactActions({ phone, email, whatsappLabel, emailLabel, c
       <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
         <div>
           <a href={`mailto:${email}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-white transition hover:border-accent/70 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"><ContactIcon name="email" />{emailLabel}</a>
-          <p className="mt-2 break-all text-sm text-white/75">{email}</p>
+          <p className="mt-2 break-all text-xs text-white/75">{email}</p>
         </div>
         <button type="button" onClick={() => copy(email, 'email')} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-white/15 px-3 py-2 text-xs font-semibold text-white/80 transition hover:border-accent/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
           <ContactIcon name="copy" />{copied === 'email' ? 'Adresse copiée' : copyEmailLabel}
