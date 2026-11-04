@@ -46,7 +46,7 @@ export function LinksContactActions({ phone, email, whatsappLabel, emailLabel, c
 
   return (
     <div className="mt-5 space-y-3">
-      <div className="flex flex-col gap-3 rounded-2xl border border-[#25D366]/25 bg-[#25D366]/[0.08] p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl border border-[#25D366]/25 bg-[#25D366]/[0.08] p-4">
         <div>
           <a href={`https://wa.me/${phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-bold text-[#071b0d] transition hover:bg-[#50e184] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366]">
             <ContactIcon name="whatsapp" />{whatsappLabel}
@@ -57,7 +57,7 @@ export function LinksContactActions({ phone, email, whatsappLabel, emailLabel, c
           <ContactIcon name="copy" />{copied === 'phone' ? 'Numéro copié' : copyPhoneLabel}
         </button>
       </div>
-      <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
         <div>
           <a href={`mailto:${email}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/20 bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-white transition hover:border-accent/70 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"><ContactIcon name="email" />{emailLabel}</a>
           <p className="mt-2 break-all text-sm text-white/75">{email}</p>
