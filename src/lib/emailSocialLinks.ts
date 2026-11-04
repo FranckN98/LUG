@@ -7,7 +7,7 @@ export const DEFAULT_SOCIAL_LINKS: SocialLinks = {
   linkedin: "https://www.linkedin.com/company/level-up-in-germany/",
   instagram: "https://www.instagram.com/levelupingermany/",
   tiktok: "https://www.tiktok.com/@levelupingermany",
-  youtube: "",
+  youtube: "https://www.youtube.com/@levelupingermany",
   whatsapp: "",
   email: "contact@levelupingermany.com",
   ...(socialLinksSeed as Partial<SocialLinks>),

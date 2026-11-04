@@ -40,6 +40,12 @@ function normalized(value: string) {
   return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
+function normalizeLinkUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed || /^(?:https?:|mailto:|tel:|\/|#)/i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 function categoryIs(link: LinkRecord, keyword: string) {
   return normalized(link.category?.name ?? '').includes(keyword);
 }
@@ -79,7 +85,7 @@ function SectionHeading({ title, count, seeAll, href }: { title: string; count?:
 }
 
 function localizedLink(link: LinkRecord, locale: Locale) {
-  return { ...link, ...localizeSocialLink(link, link.translations, locale) };
+  return { ...link, url: normalizeLinkUrl(link.url), ...localizeSocialLink(link, link.translations, locale) };
 }
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
@@ -104,11 +110,12 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
   const featured: FeaturedSocial[] = SOCIAL_PLATFORMS.flatMap((platform) => {
     const link = links.find((item) => item.isActive && item.isFeatured && matchesSocialPlatform(item, platform))
       ?? links.find((item) => item.isActive && matchesSocialPlatform(item, platform));
-    if (link) return [{ id: link.id, title: localizedLink(link, loc).title, url: link.url }];
+    if (link) return [{ id: link.id, title: localizedLink(link, loc).title, url: normalizeLinkUrl(link.url) }];
 
     const key = platform.toLowerCase() as 'tiktok' | 'instagram' | 'linkedin' | 'youtube';
-    const fallbackUrl = platform === 'Facebook' ? '' : emailSocialLinks?.[key] ?? '';
-    return fallbackUrl.trim() ? [{ id: `email-social-${key}`, title: platform, url: fallbackUrl }] : [];
+    const fallbackUrl = platform === 'Facebook' ? '' : emailSocialLinks?.[key] || (platform === 'YouTube' ? 'https://www.youtube.com/@levelupingermany' : '');
+    const normalizedFallbackUrl = normalizeLinkUrl(fallbackUrl);
+    return normalizedFallbackUrl ? [{ id: `email-social-${key}`, title: platform, url: normalizedFallbackUrl }] : [];
   });
   const featuredIds = new Set(featured.map((link) => link.id));
   const content = links.filter((link) => !featuredIds.has(link.id)).map((link) => localizedLink(link, loc));
@@ -128,7 +135,7 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
     <div className="lu-links-shell">
       <div className="lu-links-top"><Link className="lu-home" href={`/${loc}`} aria-label={t.home}><Icon kind="home" /></Link><nav className="lu-language" aria-label="Language"><Link href={`/fr/links`} aria-current={loc === 'fr' ? 'true' : undefined}>FR</Link><Link href={`/de/links`} aria-current={loc === 'de' ? 'true' : undefined}>DE</Link><Link href={`/en/links`} aria-current={loc === 'en' ? 'true' : undefined}>EN</Link></nav></div>
       <header className="lu-hero"><div className="lu-logo-wrap"><span className="lu-logo-halo" aria-hidden="true" /><Image className="lu-logo" src="/logo.png" alt="Level Up in Germany" width={88} height={88} priority /></div><div className="lu-handle">@levelupingermany</div><div className="lu-welcome">{t.welcome}</div><h1>Level Up in Germany</h1><p className="lu-tagline">{t.tagline} <span className="lu-spark" aria-hidden="true">✦</span></p><nav className="lu-socials" aria-label="Social media">{featured.map((link) => <a className="lu-social" key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.title} title={link.title}><SocialIcon title={link.title} /></a>)}</nav></header>
-      {businessEpisodes.length > 0 && <section className="lu-section" aria-labelledby="business-tour"><SectionHeading title={businessEpisodes[0]?.category?.name ?? 'Level Up Business Tour'} count={businessEpisodes.length} seeAll={t.seeAll} href={featured.find((link) => normalized(link.title).includes('youtube'))?.url ?? '#'} /><div className="lu-episodes">{businessEpisodes.map((link) => <a className="lu-episode-card" key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"><div className={`lu-cover ${link.isNew ? 'is-new' : ''}`}><Image src={link.coverImageUrl || '/hero/hero-1.png'} alt={`${link.title} ${link.episodeNumber ?? ''}`} width={140} height={112} sizes="(max-width: 440px) 33vw, 140px" /><span className="lu-episode-label">{t.episode}</span><strong className="lu-episode-number">{link.episodeNumber ?? ''}</strong><span className="lu-play"><Icon kind="play" /></span>{link.isNew && <span className="lu-new">{t.new}</span>}</div><span className="lu-guest">{link.title}</span></a>)}</div></section>}
+      {businessEpisodes.length > 0 && <section className="lu-section" aria-labelledby="business-tour"><SectionHeading title={businessEpisodes[0]?.category?.name ?? 'Level Up Business Tour'} count={businessEpisodes.length} seeAll={t.seeAll} href={featured.find((link) => normalized(link.title).includes('youtube'))?.url} /><div className="lu-episodes">{businessEpisodes.map((link) => <a className="lu-episode-card" key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"><div className={`lu-cover ${link.isNew ? 'is-new' : ''}`}><Image src={link.coverImageUrl || '/hero/hero-1.png'} alt={`${link.title} ${link.episodeNumber ?? ''}`} width={140} height={112} sizes="(max-width: 440px) 33vw, 140px" /><span className="lu-episode-label">{t.episode}</span><strong className="lu-episode-number">{link.episodeNumber ?? ''}</strong><span className="lu-play"><Icon kind="play" /></span>{link.isNew && <span className="lu-new">{t.new}</span>}</div><span className="lu-guest">{link.title}</span></a>)}</div></section>}
       {discoverLinks.length > 0 && <section className="lu-section" aria-labelledby="discover"><SectionHeading title={t.discover} count={discoverLinks.length} /><div className="lu-discover-list">{discoverLinks.map((link) => <a className="lu-discover-row" key={link.id} href={link.url} target="_blank" rel="noopener noreferrer"><span className="lu-discover-icon">{link.coverImageUrl ? <Image src={link.coverImageUrl} alt="" width={30} height={30} /> : <Icon kind="social" />}</span><span className="lu-discover-copy"><span className="lu-discover-title">{link.title}{link.isNew && <span className="lu-badge">{t.new}</span>}</span></span><Icon kind="chevron" /></a>)}</div></section>}
       {partnerLink && <section className="lu-section" aria-labelledby="partner"><SectionHeading title={t.partner} /><div className="lu-partner"><a className="lu-partner-link" href={partnerLink.url} target="_blank" rel="noopener noreferrer"><Image className="lu-partner-logo" src="/partners/lemfi-logo.png" alt="LemFi" width={42} height={42} /><span className="lu-partner-copy"><strong>{t.lemfiTitle}</strong><span>{t.lemfiSub}</span></span></a>{promoCode && <LinksCopyButton value={promoCode} copyLabel={t.copy} copiedLabel={t.copied} />}</div></section>}
       <section className="lu-section" aria-labelledby="talk"><SectionHeading title={t.talk} /><div className="lu-contact"><a href={whatsappHref} target="_blank" rel="noopener noreferrer"><Icon kind="whatsapp" />WhatsApp</a><a href={`mailto:${SITE_CONTACT.email}`}><Icon kind="mail" />{t.email}</a></div></section>
