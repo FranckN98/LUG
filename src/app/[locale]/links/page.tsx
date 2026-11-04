@@ -125,9 +125,9 @@ export default async function LinksPage({ params }: { params: Promise<{ locale: 
     .sort((a, b) => (b.episodeNumber ?? -1) - (a.episodeNumber ?? -1) || a.sortOrder - b.sortOrder)
     .map((link, index, items) => link.episodeNumber == null ? { ...link, episodeNumber: items.length - index } : link);
   const eventFeedback = content.find((link) => categoryIs(link, 'evenement') && normalized(`${link.title} ${link.description ?? ''}`).includes('feedback'));
-  const discover = content.filter((link) => !categoryIs(link, 'business tour') && !categoryIs(link, 'career tour') && !categoryIs(link, 'evenement') && !categoryIs(link, 'partner') && !categoryIs(link, 'partenaire'));
   const partnerLink = content.find((link) => categoryIs(link, 'partenaire') || categoryIs(link, 'partner'))
     ?? content.find((link) => normalized(`${link.title} ${link.url}`).includes('lemfi'));
+  const discover = content.filter((link) => link.id !== partnerLink?.id && !categoryIs(link, 'business tour') && !categoryIs(link, 'career tour') && !categoryIs(link, 'evenement') && !categoryIs(link, 'partner') && !categoryIs(link, 'partenaire'));
   const promoCode = partnerLink?.badge?.trim() || partnerLink?.description?.match(/\b[A-Z][A-Z0-9]{2,}\b/)?.[0] || null;
   const discoverLinks = [...discover.filter((link) => link.isDiscoverable || !categoryIs(link, 'business tool')), ...(eventFeedback ? [eventFeedback] : [])].sort((a, b) => Number(b.isDiscoverable) - Number(a.isDiscoverable) || a.sortOrder - b.sortOrder);
 

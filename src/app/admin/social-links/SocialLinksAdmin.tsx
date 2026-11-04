@@ -51,6 +51,11 @@ function normalizeSocialKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '');
 }
 
+function isPartnerLink(link: SocialLink): boolean {
+  const key = normalizeSocialKey(`${link.title} ${link.url} ${link.category?.name ?? ''}`);
+  return key.includes('partner') || key.includes('partenaire') || key.includes('lemfi');
+}
+
 // Only ever called on links already flagged isFeatured=true, to pick which of
 // the 5 platform slots a given featured record belongs to. Never used to
 // decide whether a link is featured — that's the isFeatured DB field.
@@ -550,7 +555,7 @@ export function SocialLinksAdmin() {
             {loading ? (
               <p className="text-sm text-white/50">Chargement…</p>
             ) : (() => {
-              const manualLinks = links.filter((l) => !l.isFeatured);
+              const manualLinks = links.filter((l) => !l.isFeatured || isPartnerLink(l));
               return manualLinks.length === 0 ? (
                 <p className="text-sm text-white/50">Aucun lien pour le moment.</p>
               ) : (
