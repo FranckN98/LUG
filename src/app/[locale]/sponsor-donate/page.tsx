@@ -1,281 +1,112 @@
-
-import React from 'react';
-import { Form } from '@/components/Form';
+import Image from 'next/image';
 import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
+import { Form } from '@/components/Form';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
+import { SponsorshipBrochureButton } from '@/components/SponsorshipBrochureButton';
 import { generateMetadataForPath } from '@/lib/seo';
-import { FsconPdfViewer } from '@/components/FsconPdfViewer';
-import { getFeaturedSponsorPdfUrl, listPublicSponsorDocs, publicShareUrl } from '@/lib/sponsorDocuments';
+import { getFeaturedSponsorPdfUrl } from '@/lib/sponsorDocuments';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/sponsor-donate');
 }
 
-const content: Record<Locale, {
-  eyebrow: string; title: string; intro: string;
-  donateTitle: string; donateBody: string;
-  ibanLabel: string; iban: string; bic: string; paypal: string;
-  formTitle: string; formBody: string;
-  submit: string; consent: string; policy: string; sending: string; success: string; error: string;
-  whyTitle: string;
-  perks: { title: string; body: string }[];
-}> = {
-  de: {
-    eyebrow: 'Unterstützung',
-    title: 'Sponsor / Spenden',
-    intro: 'Jede Unterstützung bringt uns näher ans Ziel: eine Diaspora, die zusammen wächst und gemeinsam weiter kommt.',
-    donateTitle: 'Direkt spenden',
-    donateBody: 'Ihre Spende fließt direkt in Events, Mentoring-Programme und Community-Ressourcen.',
-    ibanLabel: 'Banküberweisung',
-    iban: 'IBAN: DE00 0000 0000 0000 0000 00',
-    bic: 'BIC: ABCDDEFFXXX',
-    paypal: 'Via PayPal spenden',
-    formTitle: 'Sponsoring-Anfrage',
-    formBody: 'Sie möchten uns als Unternehmen oder Organisation unterstützen? Senden Sie uns Ihre Anfrage.',
-    submit: 'Anfrage senden',
-    consent: 'Ich stimme der Verarbeitung meiner Daten gemäß der',
-    policy: 'Datenschutzerklärung',
-    sending: 'Wird gesendet…',
-    success: 'Anfrage gesendet. Wir melden uns bald!',
-    error: 'Senden fehlgeschlagen. Bitte erneut versuchen.',
-    whyTitle: 'Warum uns unterstützen?',
-    perks: [
-      { title: 'Direkte Wirkung', body: 'Ihre Mittel erreichen direkt die Menschen, die sie brauchen — keine langen Bürokratiewege.' },
-      { title: 'Sichtbarkeit', body: 'Als Sponsor erscheinen Sie auf unserer Website, bei Events und in allen Kommunikationskanälen.' },
-      { title: 'Gemeinschaft', body: 'Sie werden Teil einer wachsenden, engagierten Diaspora-Community in Deutschland.' },
-    ],
-  },
-  en: {
-    eyebrow: 'Support us',
-    title: 'Sponsor / Donate',
-    intro: 'Every contribution brings us closer to our goal: a diaspora that grows together and goes further together.',
-    donateTitle: 'Donate directly',
-    donateBody: 'Your donation goes directly into events, mentoring programmes and community resources.',
-    ibanLabel: 'Bank transfer',
-    iban: 'IBAN: DE00 0000 0000 0000 0000 00',
-    bic: 'BIC: ABCDDEFFXXX',
-    paypal: 'Donate via PayPal',
-    formTitle: 'Sponsorship request',
-    formBody: 'Want to support us as a company or organisation? Send us your request.',
-    submit: 'Send request',
-    consent: 'I agree to the processing of my data according to the',
-    policy: 'Privacy Policy',
-    sending: 'Sending…',
-    success: 'Request sent. We will get back to you soon!',
-    error: 'Submission failed. Please try again.',
-    whyTitle: 'Why support us?',
-    perks: [
-      { title: 'Direct impact', body: 'Your funds reach directly the people who need them — no lengthy bureaucracy.' },
-      { title: 'Visibility', body: 'As a sponsor, you appear on our website, at events and across all communication channels.' },
-      { title: 'Community', body: 'You become part of a growing, engaged diaspora community in Germany.' },
-    ],
-  },
-  fr: {
-    eyebrow: 'Nous soutenir',
-    title: 'Sponsor / Don',
-    intro: 'Chaque contribution nous rapproche de notre objectif : une diaspora qui grandit ensemble et avance ensemble.',
-    donateTitle: 'Faire un don directement',
-    donateBody: 'Votre don va directement aux événements, programmes de mentorat et ressources communautaires.',
-    ibanLabel: 'Virement bancaire',
-    iban: 'IBAN : DE00 0000 0000 0000 0000 00',
-    bic: 'BIC : ABCDDEFFXXX',
-    paypal: 'Donner via PayPal',
-    formTitle: 'Demande de sponsoring',
-    formBody: 'Vous souhaitez nous soutenir en tant qu\'entreprise ou organisation ? Envoyez-nous votre demande.',
-    submit: 'Envoyer la demande',
-    consent: 'J\'accepte le traitement de mes données selon la',
-    policy: 'Politique de confidentialité',
-    sending: 'Envoi en cours…',
-    success: 'Demande envoyée. Nous vous répondrons bientôt !',
-    error: 'L\'envoi a échoué. Réessayez.',
-    whyTitle: 'Pourquoi nous soutenir ?',
-    perks: [
-      { title: 'Impact direct', body: 'Vos fonds atteignent directement les personnes qui en ont besoin — sans longue bureaucratie.' },
-      { title: 'Visibilité', body: 'En tant que sponsor, vous apparaissez sur notre site, lors des événements et sur tous nos canaux.' },
-      { title: 'Communauté', body: 'Vous faites partie d\'une communauté diaspora croissante et engagée en Allemagne.' },
-    ],
-  },
-};
+const journey = [
+  { year: '2025', title: 'Where it all began', image: '/hero-pic/_DSC9293.JPG', items: [{ value: '130', label: 'Participants', body: 'Professionals, students, entrepreneurs and ambitious individuals brought together around a shared vision.' }, { value: '8', label: 'Countries represented', body: 'Cameroon, Côte d’Ivoire, Senegal, Togo, Benin, Belgium, Switzerland and France.' }, { value: '15', label: 'Speakers', body: 'Professionals and experts sharing practical insight, experience and perspective.' }] },
+  { year: '2026', title: 'A new level of experience', image: '/hero-pic/_DSC8987.JPG', items: [{ value: '18', label: 'Speakers', body: 'An expanded network of experts, professionals and industry voices.' }, { value: '1', label: 'Main plenary', body: 'A central space for keynotes, discussions, leadership perspectives and shared experiences.' }, { value: '3', label: 'Specialized tracks', body: 'Career & Professional Development, Business & Investment, and Healthcare & Professional Opportunities.' }] },
+  { year: 'Next', title: 'More ways to connect', image: '/hero-pic/leveluper1.jpg', items: [{ value: 'Tour', label: 'Business Tour', body: 'Meet founders and explore the decisions and strategies behind building businesses.' }, { value: 'Tour', label: 'Career Tour', body: 'Explore professional journeys, companies, career paths and actionable insights.' }, { value: '+', label: 'New formats', body: 'Masterclasses, expert discussions, networking experiences and digital education.' }] },
+];
+
+const benefits = [
+  ['01', 'Access to talent', 'Connect with the people shaping tomorrow.', 'Engage with ambitious professionals, entrepreneurs, researchers, students, innovators and emerging leaders across Europe.'],
+  ['02', 'Employer branding', 'Position your company as an employer of choice.', 'Showcase your culture, career opportunities, workplace values and commitment to diversity through meaningful interactions.'],
+  ['03', 'Brand visibility', 'Build visibility beyond the event.', 'Integrate your brand into the ecosystem before, during and after our events through campaigns, content, acknowledgements and on-site presence, depending on the selected partnership format.'],
+  ['04', 'Community impact', 'Invest in opportunity. Create lasting impact.', 'Support international talent navigating careers, entrepreneurship, integration, education and professional development.'],
+  ['05', 'Thought leadership', 'Put your expertise in the conversation.', 'Bring your experts into talks, panels, workshops, interviews, mentoring and career-focused discussions, subject to agreement.'],
+] as const;
+
+const opportunities = [
+  ['Corporate sponsorship', 'Support our events and initiatives while creating relevant brand visibility and engagement opportunities.'],
+  ['Talent & recruitment partnerships', 'Build relationships with ambitious professionals, graduates and emerging talent.'],
+  ['Knowledge & expertise partnerships', 'Contribute expertise through masterclasses, panels, talks and mentoring initiatives.'],
+  ['Community & strategic partnerships', 'Collaborate on projects that create sustained value for the community.'],
+  ['Media & visibility partnerships', 'Work together on content, interviews, campaigns and digital storytelling.'],
+] as const;
+
+const expertise = ['Technology', 'Engineering', 'Finance', 'Mobility', 'Entrepreneurship', 'Healthcare'];
+
+function Arrow() {
+  return <span aria-hidden className="text-accent">↗</span>;
+}
 
 export default async function SponsorDonatePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const loc = (locale === 'de' || locale === 'en' || locale === 'fr' ? locale : 'en') as Locale;
-  const t = content[loc];
   const base = `/${loc}`;
-  const featuredPdfUrl = await getFeaturedSponsorPdfUrl();
-  const allDocs = await listPublicSponsorDocs();
-  const featuredDoc = allDocs.find((d) => d.isFeatured);
-  const featuredPdfLink = featuredDoc ? publicShareUrl(featuredDoc.slug, featuredDoc.url) : featuredPdfUrl;
-  const shareableDocs = allDocs.filter((d) => !d.isFeatured);
+  const brochureHref = await getFeaturedSponsorPdfUrl();
 
   return (
-    <div className="overflow-hidden">
-
-      {/* ── HERO ── */}
-      <section className="relative min-h-[50vh] flex items-end overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#110808] via-[#1f0d0d] to-brand-dark" />
-        <div className="absolute inset-0 opacity-50 bg-[radial-gradient(circle_at_20%_30%,rgba(233,140,11,0.22),transparent_50%)]" />
-        <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_85%_80%,rgba(140,26,26,0.5),transparent_45%)]" />
-        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.7) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.7) 1px,transparent 1px)`, backgroundSize: '64px 64px' }} />
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pb-14 sm:pb-20 pt-24 sm:pt-28 w-full">
+    <main className="bg-[#100908] text-white">
+      <section className="relative isolate min-h-[min(800px,92vh)] overflow-hidden">
+        <Image src="/hero-pic/_DSC8987.JPG" alt="Level Up in Germany speakers in conversation with the audience" fill priority sizes="100vw" className="object-cover object-center" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,5,5,.94)_0%,rgba(8,5,5,.72)_42%,rgba(8,5,5,.18)_100%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#100908] to-transparent" />
+        <div className="relative mx-auto flex min-h-[min(800px,92vh)] max-w-7xl items-end px-5 pb-16 pt-28 sm:px-8 sm:pb-24 lg:px-12">
           <RevealOnScroll>
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.3em] text-accent mb-4">{t.eyebrow}</p>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white font-display leading-[1.02] max-w-3xl">{t.title}</h1>
-            <p className="mt-5 text-base sm:text-lg text-white/65 max-w-xl leading-relaxed">{t.intro}</p>
+            <div className="max-w-3xl">
+              <p className="mb-6 text-xs font-semibold uppercase tracking-[.32em] text-accent">Level Up in Germany · Partnerships</p>
+              <h1 className="font-display text-5xl font-semibold leading-[.98] tracking-tight sm:text-7xl lg:text-[6.4rem]">Partner with the next generation of talent, leadership & opportunity.</h1>
+              <p className="mt-7 max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">Level Up in Germany connects ambitious professionals, entrepreneurs, researchers, students and emerging leaders across Europe. Partner with a growing platform where talent, ideas and opportunities come together.</p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <a href="#contact" className="rounded-full bg-accent px-6 py-3 text-sm font-bold text-[#1b0c05] transition hover:bg-[#f4a52e]">Become a partner <Arrow /></a>
+                <a href="#impact" className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:border-white hover:bg-white/10">Explore our impact <Arrow /></a>
+              </div>
+            </div>
           </RevealOnScroll>
         </div>
       </section>
 
-      {/* ── WHY + DONATE ── */}
-      <section className="relative py-20 sm:py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-[#0d0806]" />
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_60%_50%_at_80%_50%,rgba(233,140,11,0.12),transparent)]" />
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid md:grid-cols-2 gap-14 md:gap-20">
-
-            {/* Why */}
-            <RevealOnScroll>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="h-px w-10 bg-accent" />
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">{t.whyTitle}</p>
-              </div>
-              <div className="space-y-4">
-                {t.perks.map((perk, i) => (
-                  <div key={i} className="flex gap-5 rounded-2xl border border-white/10 bg-white/5 p-5 transition-all hover:bg-white/8 hover:border-accent/30">
-                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent text-sm font-bold">
-                      {String(i + 1).padStart(2, '0')}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white mb-1">{perk.title}</h3>
-                      <p className="text-sm text-white/60 leading-relaxed">{perk.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      <section id="impact" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
+        <RevealOnScroll>
+          <p className="text-xs font-bold uppercase tracking-[.3em] text-accent">01 · The journey</p>
+          <h2 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight sm:text-6xl">Our journey. Our growth. Our impact.</h2>
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/60 sm:text-lg">What started as a bold idea in 2025 is evolving into a dynamic platform connecting talent, expertise, business and opportunity across Europe.</p>
+        </RevealOnScroll>
+        <div className="mt-14 grid gap-5 lg:grid-cols-3">
+          {journey.map((phase, index) => (
+            <RevealOnScroll key={phase.year} delayMs={index * 80}>
+              <article className="group overflow-hidden border border-white/10 bg-white/[.035]">
+                <div className="relative aspect-[1.25] overflow-hidden"><Image src={phase.image} alt={phase.title} fill sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-[#100908] via-transparent to-transparent" /><span className="absolute bottom-4 left-5 font-display text-5xl font-semibold text-white">{phase.year}</span></div>
+                <div className="p-5 sm:p-6"><h3 className="text-xl font-semibold">{phase.title}</h3><div className="mt-5 divide-y divide-white/10">{phase.items.map((item) => <div key={item.label} className="grid grid-cols-[auto_1fr] gap-4 py-4 first:pt-0 last:pb-0"><strong className="font-display text-3xl text-accent">{item.value}</strong><div><p className="text-sm font-semibold">{item.label}</p><p className="mt-1 text-xs leading-relaxed text-white/55">{item.body}</p></div></div>)}</div></div>
+              </article>
             </RevealOnScroll>
-
-            {/* Donate */}
-            <RevealOnScroll delayMs={100}>
-              <div className="flex items-center gap-4 mb-8">
-                <div className="h-px w-10 bg-accent" />
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">{t.donateTitle}</p>
-              </div>
-              <p className="text-white/65 text-base leading-relaxed mb-6">{t.donateBody}</p>
-
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-accent/70">{t.ibanLabel}</p>
-                {/* IBAN flouté */}
-                <p className="font-mono text-white/80 text-sm blur-sm select-none" title="IBAN masqué pour sécurité">{t.iban}</p>
-                <p className="font-mono text-white/80 text-sm blur-sm select-none" title="BIC masqué pour sécurité">{t.bic}</p>
-                <div className="pt-2">
-                  <a
-                    href="https://www.paypal.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-brand-dark hover:bg-accent-light hover:scale-[1.02] transition-all duration-300"
-                  >
-                    {t.paypal} →
-                  </a>
-                </div>
-              </div>
-              {/* PDF FSCon intégré, agrandi, sans description */}
-              <div className="mt-8 flex flex-col items-center gap-2">
-                <FsconPdfViewer src={featuredPdfUrl} />
-                <a
-                  href={featuredPdfLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-accent underline text-sm hover:text-accent-light transition-colors mt-2"
-                >
-                  Ouvrir le PDF dans un nouvel onglet
-                </a>
-                {shareableDocs.length > 0 && (
-                  <div className="mt-8 w-full max-w-4xl space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-accent/80">
-                      Autres documents
-                    </p>
-                    <ul className="grid gap-3 sm:grid-cols-2">
-                      {shareableDocs.map((d) => (
-                        <li
-                          key={d.id}
-                          className="rounded-xl border border-white/10 bg-white/5 p-4 hover:border-accent/40 transition-colors"
-                        >
-                          <a
-                            href={publicShareUrl(d.slug, d.url)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-start gap-3"
-                          >
-                            <span className="mt-0.5 inline-flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-accent/15 text-accent">
-                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z" />
-                              </svg>
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block truncate text-sm font-semibold text-white">{d.title}</span>
-                              {d.description && (
-                                <span className="block text-xs text-white/60 mt-0.5 line-clamp-2">{d.description}</span>
-                              )}
-                              <span className="block text-[0.7rem] text-accent/80 mt-1">Ouvrir le PDF →</span>
-                            </span>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </RevealOnScroll>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* ── SPONSOR FORM ── */}
-      <section className="relative py-20 sm:py-28 bg-white overflow-hidden">
-        <div className="absolute left-0 top-16 bottom-16 w-1 bg-gradient-to-b from-transparent via-accent to-transparent rounded-full" />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid md:grid-cols-2 gap-14 md:gap-20 items-start">
-            <RevealOnScroll>
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-px w-10 bg-accent" />
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-accent">{t.formTitle}</p>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-display font-semibold text-brand-dark text-balance mb-4 leading-tight">{t.formBody}</h2>
-              <p className="text-gray-500 text-base leading-relaxed">
-                {loc === 'fr' ? 'Nous vous répondons dans les 48h.' : loc === 'de' ? 'Wir antworten innerhalb von 48h.' : 'We reply within 48 hours.'}
-              </p>
-              <div className="mt-8">
-                <Link href={`/${loc}/partners`} className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-light transition-colors">
-                  ← {loc === 'fr' ? 'Voir nos partenaires' : loc === 'de' ? 'Unsere Partner ansehen' : 'See our partners'}
-                </Link>
-              </div>
-            </RevealOnScroll>
-
-            <RevealOnScroll delayMs={100}>
-              <Form
-                locale={loc}
-                formType="sponsor-inquiry"
-                fields={[
-                  { name: 'name', type: 'text', label: 'Name', required: true },
-                  { name: 'organization', type: 'text', label: loc === 'fr' ? 'Organisation' : 'Organization', required: true },
-                  { name: 'email', type: 'email', label: 'E-Mail', required: true },
-                  { name: 'message', type: 'textarea', label: 'Message', required: true },
-                ]}
-                submitLabel={t.submit}
-                consentLabel={t.consent}
-                consentLinkHref={`${base}/privacy`}
-                consentLinkText={t.policy}
-                sendingLabel={t.sending}
-                successMessage={t.success}
-                errorMessage={t.error}
-              />
-            </RevealOnScroll>
-          </div>
+      <section className="bg-[#f3eee8] text-[#1d1714]">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
+          <RevealOnScroll><p className="text-xs font-bold uppercase tracking-[.3em] text-primary">02 · The opportunity</p><h2 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight sm:text-6xl">Why partner with Level Up?</h2><p className="mt-5 max-w-2xl text-base leading-relaxed text-black/60 sm:text-lg">More than event sponsorship. A strategic opportunity to connect your brand with an ambitious international community.</p></RevealOnScroll>
+          <div className="mt-14 grid gap-px overflow-hidden border border-black/10 bg-black/10 md:grid-cols-2 lg:grid-cols-3">{benefits.map(([number, eyebrow, title, body], index) => <RevealOnScroll key={number} delayMs={index * 50}><article className="min-h-[255px] bg-[#f3eee8] p-6 sm:p-8"><span className="font-display text-4xl text-accent">{number}</span><p className="mt-8 text-xs font-bold uppercase tracking-[.2em] text-primary">{eyebrow}</p><h3 className="mt-3 text-2xl font-semibold leading-tight">{title}</h3><p className="mt-3 text-sm leading-relaxed text-black/60">{body}</p></article></RevealOnScroll>)}</div>
+          <div className="mt-8 flex flex-wrap items-end justify-between gap-6 border-t border-black/15 pt-8"><div><strong className="font-display text-6xl font-semibold text-primary">6.7K+</strong><p className="mt-1 text-sm font-semibold">Combined social media following</p></div><p className="max-w-md text-sm leading-relaxed text-black/60">An expanding community across our digital platforms, creating opportunities for partner visibility, storytelling and engagement. Combined total, not verified unique reach.</p></div>
         </div>
       </section>
 
-    </div>
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
+        <div className="grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-20"><RevealOnScroll><p className="text-xs font-bold uppercase tracking-[.3em] text-accent">03 · The community</p><h2 className="mt-4 font-display text-4xl font-semibold leading-tight sm:text-6xl">A growing community. Real connections.</h2><p className="mt-5 max-w-md text-base leading-relaxed text-white/60">The numbers are a snapshot of the community we are building, grounded in the 2025 edition and the confirmed 2026 programme.</p></RevealOnScroll><div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3">{[['130', 'participants in 2025'], ['8', 'countries represented'], ['15 → 18', 'speakers, 2025 to 2026'], ['6.7K+', 'combined social following'], ['3', 'specialized 2026 tracks']].map(([value, label]) => <div key={label} className="border-t border-white/20 pt-4"><strong className="font-display text-4xl font-semibold text-accent sm:text-5xl">{value}</strong><p className="mt-2 text-sm text-white/65">{label}</p></div>)}</div></div>
+      </section>
+
+      <section className="bg-[#18100d]">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28 lg:px-12"><div className="grid gap-12 lg:grid-cols-[.85fr_1.15fr] lg:gap-20"><RevealOnScroll><p className="text-xs font-bold uppercase tracking-[.3em] text-accent">04 · Speaker ecosystems</p><h2 className="mt-4 font-display text-4xl font-semibold leading-tight sm:text-6xl">Professional expertise from leading ecosystems.</h2><p className="mt-5 max-w-md text-base leading-relaxed text-white/60">Our speakers bring perspectives from technology, engineering, finance, mobility, entrepreneurship, healthcare and beyond.</p></RevealOnScroll><RevealOnScroll delayMs={100}><div><p className="mb-5 text-xs uppercase tracking-[.18em] text-white/45">Areas represented through our speakers’ professional experience</p><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{expertise.map((item) => <div key={item} className="border border-white/10 bg-white/[.03] p-5 text-lg font-semibold">{item}</div>)}</div><p className="mt-5 text-xs leading-relaxed text-white/40">Speaker affiliations are presented as professional experience and do not imply sponsorship, endorsement or institutional support.</p></div></RevealOnScroll></div></div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28 lg:px-12"><RevealOnScroll><p className="text-xs font-bold uppercase tracking-[.3em] text-accent">05 · Partnership formats</p><h2 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight sm:text-6xl">Let’s build meaningful partnerships.</h2><p className="mt-5 max-w-2xl text-base leading-relaxed text-white/60">We are open to flexible collaboration formats shaped around your objectives and our community’s needs.</p></RevealOnScroll><div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{opportunities.map(([title, body], index) => <RevealOnScroll key={title} delayMs={index * 50}><article className="border border-white/10 p-6 transition hover:border-accent/60 hover:bg-white/[.035]"><span className="text-sm text-accent">0{index + 1}</span><h3 className="mt-8 text-xl font-semibold">{title}</h3><p className="mt-3 text-sm leading-relaxed text-white/55">{body}</p></article></RevealOnScroll>)}</div></section>
+
+      <section className="bg-[#f3eee8] text-[#1d1714]"><div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-[.85fr_1.15fr] lg:items-center lg:px-12"><RevealOnScroll><p className="text-xs font-bold uppercase tracking-[.3em] text-primary">06 · The partnership brochure</p><h2 className="mt-4 font-display text-4xl font-semibold leading-tight sm:text-6xl">Discover what we can build together.</h2><p className="mt-5 max-w-lg text-base leading-relaxed text-black/60">Explore partnership opportunities and discover how your organization can become part of the Level Up in Germany ecosystem.</p><SponsorshipBrochureButton href={brochureHref} className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 text-sm font-bold text-white transition hover:bg-[#a72525]">Download sponsorship brochure <Arrow /></SponsorshipBrochureButton></RevealOnScroll><RevealOnScroll delayMs={100}><div className="relative mx-auto aspect-[4/5] w-full max-w-sm rotate-2 overflow-hidden bg-[#24110d] shadow-2xl"><Image src="/hero-pic/_DSC9293.JPG" alt="Level Up in Germany community" fill sizes="(max-width: 1024px) 80vw, 360px" className="object-cover opacity-65" /><div className="absolute inset-0 bg-gradient-to-t from-[#24110d] via-transparent to-transparent" /><div className="absolute inset-x-7 bottom-7"><p className="text-xs uppercase tracking-[.25em] text-accent">Level Up in Germany</p><p className="mt-3 font-display text-4xl font-semibold text-white">Partnership<br />opportunities</p><p className="mt-10 text-xs text-white/60">Latest active edition · PDF</p></div></div></RevealOnScroll></div></section>
+
+      <section id="contact" className="bg-white text-[#1d1714]"><div className="mx-auto grid max-w-7xl gap-14 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-[.8fr_1.2fr] lg:px-12"><RevealOnScroll><p className="text-xs font-bold uppercase tracking-[.3em] text-primary">07 · Start a conversation</p><h2 className="mt-4 font-display text-4xl font-semibold leading-tight sm:text-6xl">Your brand. Our community. Greater impact.</h2><p className="mt-5 max-w-md text-base leading-relaxed text-black/60">Let’s connect your organization with ambitious talent, new perspectives and meaningful opportunities across Europe.</p><div className="mt-8 flex flex-wrap gap-3"><SponsorshipBrochureButton href={brochureHref} className="rounded-full border border-primary px-5 py-3 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white">Download partnership brochure</SponsorshipBrochureButton><Link href={`/${loc}/partners`} className="rounded-full border border-black/15 px-5 py-3 text-sm font-semibold text-black/70 transition hover:border-primary hover:text-primary">Meet our partners</Link></div></RevealOnScroll><RevealOnScroll delayMs={100}><div><h3 className="mb-6 text-xl font-semibold">Tell us what you would like to build.</h3><Form locale={loc} formType="sponsor-inquiry" fields={[{ name: 'name', type: 'text', label: 'Name', required: true }, { name: 'organization', type: 'text', label: 'Organization', required: true }, { name: 'email', type: 'email', label: 'Email', required: true }, { name: 'message', type: 'textarea', label: 'Message', required: true }]} submitLabel="Start the conversation" consentLabel="I agree to the processing of my data according to the" consentLinkHref={`${base}/privacy`} consentLinkText="Privacy Policy" sendingLabel="Sending…" successMessage="Thank you. We will be in touch soon." errorMessage="Something went wrong. Please try again." /></div></RevealOnScroll></div></section>
+
+      <section className="bg-[#100908]"><div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-16 sm:px-8 sm:py-20 lg:flex-row lg:items-center lg:justify-between lg:px-12"><div><p className="text-xs font-bold uppercase tracking-[.3em] text-accent">Ready when you are</p><h2 className="mt-3 font-display text-4xl font-semibold sm:text-5xl">Let’s make the next level possible.</h2></div><a href="#contact" className="inline-flex w-fit rounded-full bg-accent px-6 py-3 text-sm font-bold text-[#1b0c05]">Become a sponsor <Arrow /></a></div></section>
+    </main>
   );
 }

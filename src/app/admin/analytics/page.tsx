@@ -20,6 +20,12 @@ type AnalyticsResponse = {
     countries: Array<{ label: string; value: number }>;
     languages: Array<{ label: string; value: number }>;
   };
+  brochureRequests: {
+    total: number;
+    thisMonth: number;
+    daily: Array<{ day: string; requests: number }>;
+    latest: Array<{ id: string; createdAt: string; page: string | null; source: string | null; version: string; visitor: string }>;
+  };
 };
 
 const RANGES: Array<{ key: string; label: string }> = [
@@ -35,6 +41,7 @@ const EVENT_LABELS: Record<string, string> = {
   newsletter_signup: 'Newsletter',
   contact_form_submit: 'Contact',
   sponsor_form_submit: 'Sponsors',
+  sponsor_brochure_download: 'Sponsorship brochure',
   member_registration: 'Membres',
   event_popup_email_submit: 'Pop-up event',
   ticket_button_click: 'Tickets',
@@ -146,6 +153,17 @@ export default function AdminAnalyticsPage() {
             <Kpi label="Pages vues" value={data.totals.pageViews} />
             <Kpi label="Événements" value={data.totals.events} />
           </div>
+
+          <Card title="Sponsorship Brochure Requests">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Kpi label="Total brochure requests" value={data.brochureRequests.total} />
+              <Kpi label="Requests this month" value={data.brochureRequests.thisMonth} />
+            </div>
+            <div className="mt-5 grid grid-cols-7 items-end gap-2 sm:grid-cols-14">
+              {data.brochureRequests.daily.map((item) => <div key={item.day} className="group flex min-w-0 flex-col items-center gap-1"><div className="w-full rounded-t bg-accent/70 transition group-hover:bg-accent" style={{ height: `${Math.max(4, item.requests * 18)}px` }} title={`${item.day}: ${item.requests}`} /><span className="hidden truncate text-[9px] text-white/35 sm:block">{item.day.slice(5)}</span></div>)}
+            </div>
+            <div className="mt-6 overflow-x-auto"><table className="w-full min-w-[560px] text-left text-xs"><thead className="text-white/40"><tr><th className="pb-2 font-medium">Requested</th><th className="pb-2 font-medium">Version</th><th className="pb-2 font-medium">Page</th><th className="pb-2 font-medium">Source</th></tr></thead><tbody>{data.brochureRequests.latest.map((request) => <tr key={request.id} className="border-t border-white/10"><td className="py-2 text-white/70">{new Date(request.createdAt).toLocaleString('en-GB')}</td><td className="py-2 text-white/70">{request.version}</td><td className="py-2 text-white/50">{request.page ?? '—'}</td><td className="py-2 text-white/50">{request.source ?? 'direct'}</td></tr>)}</tbody></table></div>
+          </Card>
 
           <Card title="Les 7 derniers jours">
             <DailyChart data={data.last7Days} />

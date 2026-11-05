@@ -9,6 +9,7 @@ const ALLOWED = new Set([
   'newsletter_signup',
   'contact_form_submit',
   'sponsor_form_submit',
+  'sponsor_brochure_download',
   'member_registration',
   'event_popup_email_submit',
   'partner_button_click',

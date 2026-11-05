@@ -24,6 +24,7 @@ type AnalyticsRow = {
   country: string | null;
   device: string | null;
   locale: string | null;
+  properties: string | null;
   createdAt: Date;
 };
 
@@ -100,6 +101,7 @@ export async function GET(req: NextRequest) {
         country: true,
         device: true,
         locale: true,
+        properties: true,
         createdAt: true,
       },
     });
@@ -167,6 +169,25 @@ export async function GET(req: NextRequest) {
       source,
       count: allRows.filter((row) => row.name === 'page_view' && row.source?.toLowerCase() === source).length,
     }));
+    const brochureRows = rows.filter((row) => row.name === 'sponsor_brochure_download');
+    const monthStart = new Date();
+    monthStart.setUTCDate(1);
+    monthStart.setUTCHours(0, 0, 0, 0);
+    const brochureDailyMap = new Map<string, number>();
+    for (const row of brochureRows) {
+      const day = row.createdAt.toISOString().slice(0, 10);
+      brochureDailyMap.set(day, (brochureDailyMap.get(day) ?? 0) + 1);
+    }
+    const brochureDaily = Array.from({ length: Math.min(days, 30) }, (_, index) => {
+      const date = new Date(Date.now() - (Math.min(days, 30) - index - 1) * 24 * 60 * 60 * 1000);
+      const day = date.toISOString().slice(0, 10);
+      return { day, requests: brochureDailyMap.get(day) ?? 0 };
+    });
+    const brochureLatest = brochureRows.slice(-10).reverse().map((row) => {
+      let properties: Record<string, unknown> = {};
+      try { properties = row.properties ? JSON.parse(row.properties) as Record<string, unknown> : {}; } catch { /* ignore malformed legacy properties */ }
+      return { id: `${row.createdAt.toISOString()}-${row.visitorHash ?? 'anonymous'}`, createdAt: row.createdAt, page: row.page, source: row.source, version: typeof properties.brochure_version === 'string' ? properties.brochure_version : 'active', visitor: row.visitorHash ? 'anonymous visitor' : 'anonymous' };
+    });
 
     return NextResponse.json({
       ok: true,
@@ -181,6 +202,12 @@ export async function GET(req: NextRequest) {
       last3Months: monthlySeries(filteredNinetyDayRows),
       socialSources,
       audience,
+      brochureRequests: {
+        total: brochureRows.length,
+        thisMonth: brochureRows.filter((row) => row.createdAt >= monthStart).length,
+        daily: brochureDaily,
+        latest: brochureLatest,
+      },
     });
   } catch (e) {
     // eslint-disable-next-line no-console
