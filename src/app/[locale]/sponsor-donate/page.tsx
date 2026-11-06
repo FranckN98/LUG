@@ -7,6 +7,8 @@ import { SponsorshipBrochureButton } from '@/components/SponsorshipBrochureButto
 import { generateMetadataForPath } from '@/lib/seo';
 import { getFeaturedSponsorPdfUrl } from '@/lib/sponsorDocuments';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/sponsor-donate');
 }

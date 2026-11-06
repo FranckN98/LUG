@@ -37,7 +37,7 @@ export async function PATCH(request: Request, { params }: Params) {
         }),
         prisma.sponsorDocument.update({
           where: { id: params.id },
-          data: { ...data, isFeatured: true },
+          data: { ...data, isFeatured: true, isPublic: true },
         }),
       ]);
       const updated = await prisma.sponsorDocument.findUnique({ where: { id: params.id } });
