@@ -72,6 +72,15 @@ const navItems = [
     ),
   },
   {
+    href: '/admin/feedback',
+    label: 'Feedback',
+    icon: (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 8h10M7 12h6m-7 8-3 2 1-4a7 7 0 1113.5-2.5A7 7 0 017 20Z" />
+      </svg>
+    ),
+  },
+  {
     href: '/admin/team',
     label: 'Équipe',
     icon: (
@@ -169,15 +178,6 @@ const navItems = [
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v13m0-13a4 4 0 10-4-4m4 4a4 4 0 114-4M4 12h16v9H4v-9zm-1-4h18v4H3V8z" />
-      </svg>
-    ),
-  },
-  {
-    href: '/admin/feedback',
-    label: 'Feedback',
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 8h10M7 12h6m-9 8l3.6-3H18a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14z" />
       </svg>
     ),
   },

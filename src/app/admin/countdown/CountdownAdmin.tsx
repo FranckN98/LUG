@@ -16,21 +16,40 @@ const EMPTY_FORM: Form = {
   endedMessageFr: '', endedMessageDe: '', endedMessageEn: '',
 };
 
-/** Convert an ISO UTC string into a local `<input type="datetime-local">` value (YYYY-MM-DDTHH:MM). */
+const COUNTDOWN_TIME_ZONE = 'Europe/Berlin';
+
+/** Convert an ISO UTC string into a Berlin `<input type="datetime-local">` value. */
 function isoToLocalInput(iso: string | null): string {
   if (!iso) return '';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const formatted = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: COUNTDOWN_TIME_ZONE,
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
+  }).format(d);
+  return formatted.replace(' ', 'T');
 }
 
-/** Local input value → ISO UTC string (treat input as local time). */
+/** Berlin input value → ISO UTC string, including the correct DST offset. */
 function localInputToIso(value: string): string | null {
   if (!value) return null;
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return null;
-  return d.toISOString();
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return null;
+  const [, year, month, day, hour, minute] = match;
+  const berlinWallTime = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+  let timestamp = berlinWallTime;
+  const formatter = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: COUNTDOWN_TIME_ZONE,
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const berlinValue = formatter.format(new Date(timestamp)).replace(' ', 'T');
+    const berlinMatch = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(berlinValue);
+    if (!berlinMatch) return null;
+    const [, actualYear, actualMonth, actualDay, actualHour, actualMinute] = berlinMatch;
+    timestamp += berlinWallTime - Date.UTC(Number(actualYear), Number(actualMonth) - 1, Number(actualDay), Number(actualHour), Number(actualMinute));
+  }
+  return new Date(timestamp).toISOString();
 }
 
 export function CountdownAdmin() {
