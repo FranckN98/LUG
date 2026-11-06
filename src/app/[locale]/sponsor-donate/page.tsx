@@ -18,19 +18,10 @@ const journey = [
 ];
 
 const benefits = [
-  ['01', 'Access to talent', 'Connect with the people shaping tomorrow.', 'Engage with ambitious professionals, entrepreneurs, researchers, students, innovators and emerging leaders across Europe.'],
-  ['02', 'Employer branding', 'Position your company as an employer of choice.', 'Showcase your culture, career opportunities, workplace values and commitment to diversity through meaningful interactions.'],
-  ['03', 'Brand visibility', 'Build visibility beyond the event.', 'Integrate your brand into the ecosystem before, during and after our events through campaigns, content, acknowledgements and on-site presence, depending on the selected partnership format.'],
-  ['04', 'Community impact', 'Invest in opportunity. Create lasting impact.', 'Support international talent navigating careers, entrepreneurship, integration, education and professional development.'],
-  ['05', 'Thought leadership', 'Put your expertise in the conversation.', 'Bring your experts into talks, panels, workshops, interviews, mentoring and career-focused discussions, subject to agreement.'],
-] as const;
-
-const opportunities = [
-  ['Corporate sponsorship', 'Support our events and initiatives while creating relevant brand visibility and engagement opportunities.'],
-  ['Talent & recruitment partnerships', 'Build relationships with ambitious professionals, graduates and emerging talent.'],
-  ['Knowledge & expertise partnerships', 'Contribute expertise through masterclasses, panels, talks and mentoring initiatives.'],
-  ['Community & strategic partnerships', 'Collaborate on projects that create sustained value for the community.'],
-  ['Media & visibility partnerships', 'Work together on content, interviews, campaigns and digital storytelling.'],
+  ['01', 'Talent & recruitment', 'Meet the people shaping tomorrow.', 'Connect with ambitious professionals, students, entrepreneurs and emerging leaders through career and business events.'],
+  ['02', 'Employer branding', 'Show what makes your company different.', 'Share your culture, opportunities and values through talks, content, mentoring and meaningful conversations.'],
+  ['03', 'Visibility & expertise', 'Put your brand in the conversation.', 'Build visibility before, during and after the event through content, campaigns, panels, masterclasses and interviews.'],
+  ['04', 'Community impact', 'Invest in opportunity.', 'Support international talent in careers, entrepreneurship, integration and professional development.'],
 ] as const;
 
 function Arrow() {
@@ -87,9 +78,8 @@ export default async function SponsorDonatePage({ params }: { params: Promise<{ 
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
           <RevealOnScroll><p className="text-xs font-bold uppercase tracking-[.3em] text-primary">02 · The partnership opportunity</p><h2 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight sm:text-6xl">Why partner with Level Up?</h2><p className="mt-5 max-w-2xl text-base leading-relaxed text-black/60 sm:text-lg">More than event sponsorship. A strategic opportunity to connect your brand with an ambitious international community.</p></RevealOnScroll>
           <h3 className="mt-12 text-xs font-bold uppercase tracking-[.25em] text-primary">What partners gain</h3>
-          <div className="mt-14 grid gap-px overflow-hidden border border-black/10 bg-black/10 md:grid-cols-2 lg:grid-cols-3">{benefits.map(([number, eyebrow, title, body], index) => <RevealOnScroll key={number} delayMs={index * 50}><article className="min-h-[255px] bg-[#f3eee8] p-6 sm:p-8"><span className="font-display text-4xl text-accent">{number}</span><p className="mt-8 text-xs font-bold uppercase tracking-[.2em] text-primary">{eyebrow}</p><h3 className="mt-3 text-2xl font-semibold leading-tight">{title}</h3><p className="mt-3 text-sm leading-relaxed text-black/60">{body}</p></article></RevealOnScroll>)}</div>
+          <div className="mt-8 grid gap-px overflow-hidden border border-black/10 bg-black/10 md:grid-cols-2 lg:grid-cols-4">{benefits.map(([number, eyebrow, title, body], index) => <RevealOnScroll key={number} delayMs={index * 50}><article className="min-h-[230px] bg-[#f3eee8] p-6 sm:p-7"><span className="font-display text-4xl text-accent">{number}</span><p className="mt-6 text-xs font-bold uppercase tracking-[.2em] text-primary">{eyebrow}</p><h3 className="mt-3 text-xl font-semibold leading-tight">{title}</h3><p className="mt-3 text-sm leading-relaxed text-black/60">{body}</p></article></RevealOnScroll>)}</div>
           <div className="mt-8 flex flex-wrap items-end justify-between gap-6 border-t border-black/15 pt-8"><div><strong className="font-display text-6xl font-semibold text-primary">6.7K+</strong><p className="mt-1 text-sm font-semibold">Combined social media following</p></div><p className="max-w-md text-sm leading-relaxed text-black/60">An expanding community across our digital platforms, creating opportunities for partner visibility, storytelling and engagement. Combined total, not verified unique reach.</p></div>
-          <div className="mt-16 border-t border-black/15 pt-10"><h3 className="text-xs font-bold uppercase tracking-[.25em] text-primary">Ways to collaborate</h3><p className="mt-4 max-w-2xl text-sm leading-relaxed text-black/60">Choose the partnership format that best matches your objectives, audience and expertise.</p><div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{opportunities.map(([title, body], index) => <RevealOnScroll key={title} delayMs={index * 50}><article className="border border-black/10 bg-white/40 p-6 transition hover:border-primary/60"><span className="text-sm text-primary">0{index + 1}</span><h4 className="mt-6 text-xl font-semibold">{title}</h4><p className="mt-3 text-sm leading-relaxed text-black/60">{body}</p></article></RevealOnScroll>)}</div></div>
         </div>
       </section>
 
