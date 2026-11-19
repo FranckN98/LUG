@@ -60,10 +60,11 @@ export async function POST(req: NextRequest) {
   }
 
   const res = NextResponse.json({ success: true });
+  const forwardedProto = req.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  const secureCookie = forwardedProto ? forwardedProto === 'https' : req.nextUrl.protocol === 'https:';
   res.cookies.set('admin_session', createAdminSession(), {
     httpOnly: true,
-    // Always secure — admin must only be used over HTTPS.
-    secure: true,
+    secure: secureCookie,
     // Strict prevents the cookie from being sent on cross-site requests,
     // which neutralises CSRF on every admin-only mutation.
     sameSite: 'strict',
