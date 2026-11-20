@@ -80,10 +80,10 @@ export function Footer({ locale, joinWhatsAppUrl }: { locale: Locale; joinWhatsA
 
   const tagline =
     locale === 'de'
-      ? 'Mentoring, Events und Community für Ihren nächsten Schritt in Deutschland.'
+      ? 'Gemeinnütziger Verein. Karriere, Business und Netzwerk, damit die Ambitionen der afrikanischen Diaspora sichtbar werden.'
       : locale === 'en'
-        ? 'Mentoring, events and community for your next step in Germany.'
-        : 'Mentorat, événements et communauté pour votre prochain pas en Allemagne.';
+        ? 'Non-profit association. Career, business and network to help African diaspora ambitions shine.'
+        : 'Association à but non lucratif. Carrière, business et réseau pour faire rayonner les ambitions de la diaspora africaine.';
 
   return (
     <footer className="relative z-20 mt-auto border-t border-white/10 bg-gradient-to-b from-[#141414] via-brand-dark to-black text-brand-grey">

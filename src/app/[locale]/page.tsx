@@ -145,9 +145,9 @@ export default async function LocaleHomePage({
     en: 'NEXT EDITION • FRANKFURT 2026',
   };
   const HERO_INFO_LINE: Record<Locale, string> = {
-    fr: 'Francfort • Octobre 2026 • Networking • Carrière • Business • Communauté',
-    de: 'Frankfurt • Oktober 2026 • Networking • Karriere • Business • Community',
-    en: 'Frankfurt • October 2026 • Networking • Career • Business • Community',
+    fr: 'Francfort • Octobre 2026 • Carrière · Business · Réseau',
+    de: 'Frankfurt • Oktober 2026 • Karriere · Business · Netzwerk',
+    en: 'Frankfurt • October 2026 • Career · Business · Network',
   };
 
   return (

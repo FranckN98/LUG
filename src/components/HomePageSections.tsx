@@ -87,17 +87,17 @@ function FloatingShapes({ tone = 'light' }: { tone?: 'light' | 'dark' }) {
 const momentsCopy: Record<Locale, { eyebrow: string; title: string; hint: string }> = {
   de: {
     eyebrow: 'Mega Konferenz 2025',
-    title: 'Unsere Gemeinschaft in Bildern',
+    title: 'Begegnungen, die Level Up ausmachen.',
     hint: 'Ziehen oder wischen zum Blättern',
   },
   en: {
     eyebrow: 'Mega Conference 2025',
-    title: 'Our Community in Pictures',
+    title: 'The encounters that make Level Up.',
     hint: 'Drag or swipe to explore',
   },
   fr: {
     eyebrow: 'Méga Conférence 2025',
-    title: 'Notre communauté en images',
+    title: 'Les rencontres qui font Level Up.',
     hint: 'Glisser ou balayer pour explorer',
   },
 };
@@ -252,20 +252,20 @@ export function HomePageSections({ t, base, joinWhatsAppUrl, locale, communityPh
               <div className="mt-8 sm:mt-10">
                 <p className="text-white/75 text-base sm:text-lg leading-relaxed text-center max-w-2xl mx-auto mb-6">
                   {locale === 'fr'
-                    ? '🎬 Une immersion authentique au cœur des entreprises, marques et fondateurs qui construisent en silence — avant que le monde ne les remarque.'
+                    ? 'Découvre le travail, les choix et les personnes derrière chaque entreprise.'
                     : locale === 'de'
-                    ? '🎬 Ein authentischer Einblick in Unternehmen, Marken und Gründer:innen, die im Stillen aufbauen – bevor die Welt sie bemerkt.'
-                    : '🎬 An authentic look inside the businesses, brands and founders who build quietly — long before the world notices.'}
+                    ? 'Entdecke die Arbeit, Entscheidungen und Menschen hinter jedem Unternehmen.'
+                    : 'Discover the work, choices and people behind every business.'}
                 </p>
                 <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-2xl mx-auto">
                   {[
                     {
                       icon: '🏭',
                       label:
-                        locale === 'fr' ? 'Entreprises' : locale === 'de' ? 'Betriebe' : 'Businesses',
+                        locale === 'fr' ? 'Entrepreneurs' : locale === 'de' ? 'Unternehmer:innen' : 'Entrepreneurs',
                     },
-                    { icon: '🎥', label: 'Mini-docs' },
-                    { icon: '🌍', label: 'Diaspora' },
+                    { icon: '🎥', label: locale === 'fr' ? 'Immersion' : locale === 'de' ? 'Einblicke' : 'Immersion' },
+                    { icon: '🌍', label: locale === 'fr' ? 'Transmission' : locale === 'de' ? 'Weitergabe' : 'Passing it on' },
                   ].map((item) => (
                     <div
                       key={item.label}
