@@ -35,12 +35,12 @@ export function TeamDirectory({ members, categories, locale }: Props) {
 
   return (
     <div>
-      <div className="mb-8 flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="mb-6 flex flex-nowrap gap-1.5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button
           type="button"
           onClick={() => setActiveCategory('all')}
           aria-pressed={activeCategory === 'all'}
-          className={`shrink-0 rounded-full px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all sm:text-sm ${
+          className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] transition-all sm:px-3.5 sm:text-xs ${
             activeCategory === 'all'
               ? 'bg-accent text-white shadow-[0_8px_30px_rgba(233,140,11,.25)]'
               : 'border border-white/15 bg-white/5 text-white/70 hover:border-accent/50 hover:text-white'
@@ -58,7 +58,7 @@ export function TeamDirectory({ members, categories, locale }: Props) {
               type="button"
               onClick={() => setActiveCategory(category.id)}
               aria-pressed={active}
-              className={`shrink-0 rounded-full px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all sm:text-sm ${
+              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] transition-all sm:px-3.5 sm:text-xs ${
                 active
                   ? 'bg-accent text-white shadow-[0_8px_30px_rgba(233,140,11,.25)]'
                   : 'border border-white/15 bg-white/5 text-white/70 hover:border-accent/50 hover:text-white'
