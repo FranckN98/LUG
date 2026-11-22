@@ -63,6 +63,7 @@ export function TeamMembersEditor({ initialData }: Props) {
   const [activeLang, setActiveLang] = useState<LangTab>('fr');
   const [categories, setCategories] = useState<TeamCategory[]>([]);
   const [categoryDraft, setCategoryDraft] = useState({ nameDe: '', nameEn: '', nameFr: '' });
+  const [savingAll, setSavingAll] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/team-categories')
@@ -113,7 +114,23 @@ export function TeamMembersEditor({ initialData }: Props) {
 
       if (!res.ok) throw new Error('Erreur serveur');
 
-      const savedMember = (await res.json()) as DbMember;
+      const rawSavedMember = (await res.json()) as Partial<DbMember>;
+      const savedMember: DbMember = {
+        id: String(rawSavedMember.id ?? member.id),
+        name: String(rawSavedMember.name ?? member.name),
+        roleDe: String(rawSavedMember.roleDe ?? member.roleDe),
+        roleEn: String(rawSavedMember.roleEn ?? member.roleEn),
+        roleFr: String(rawSavedMember.roleFr ?? member.roleFr),
+        bioDe: String(rawSavedMember.bioDe ?? member.bioDe),
+        bioEn: String(rawSavedMember.bioEn ?? member.bioEn),
+        bioFr: String(rawSavedMember.bioFr ?? member.bioFr),
+        linkedin: String(rawSavedMember.linkedin ?? member.linkedin),
+        imageUrl: String(rawSavedMember.imageUrl ?? member.imageUrl),
+        categoryIds: Array.isArray(rawSavedMember.categoryIds)
+          ? rawSavedMember.categoryIds.map(String)
+          : member.categoryIds,
+      };
+
       setMembers((prev) => prev.map((m) => (m.id === member.id ? savedMember : m)));
       setSaved(savedMember.id);
       setTimeout(() => setSaved(null), 2500);
@@ -149,11 +166,16 @@ export function TeamMembersEditor({ initialData }: Props) {
   }
 
   function toggleCategory(memberId: string, categoryId: string) {
-    setMembers((prev) => prev.map((member) => member.id === memberId
-      ? { ...member, categoryIds: member.categoryIds.includes(categoryId)
-        ? member.categoryIds.filter((id) => id !== categoryId)
-        : [...member.categoryIds, categoryId] }
-      : member));
+    setMembers((prev) => prev.map((member) => {
+      if (member.id !== memberId) return member;
+      const ids = Array.isArray(member.categoryIds) ? member.categoryIds : [];
+      return {
+        ...member,
+        categoryIds: ids.includes(categoryId)
+          ? ids.filter((id) => id !== categoryId)
+          : [...ids, categoryId],
+      };
+    }));
   }
 
   async function createCategory() {
@@ -204,6 +226,68 @@ export function TeamMembersEditor({ initialData }: Props) {
     })));
   }
 
+  async function saveAll() {
+    if (members.some((member) => !member.name.trim())) {
+      adminNotify.error('Tous les membres doivent avoir un nom avant la sauvegarde générale.');
+      return;
+    }
+
+    setSavingAll(true);
+    let successCount = 0;
+
+    try {
+      for (const member of members) {
+        setSaving(member.id);
+        const isDraft = member.id.startsWith('draft-');
+
+        const res = await fetch(isDraft ? '/api/admin/team' : `/api/admin/team?id=${member.id}`, {
+          method: isDraft ? 'POST' : 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: member.name.trim(),
+            roleDe: member.roleDe,
+            roleEn: member.roleEn,
+            roleFr: member.roleFr,
+            bioDe: member.bioDe,
+            bioEn: member.bioEn,
+            bioFr: member.bioFr,
+            linkedin: member.linkedin,
+            imageUrl: member.imageUrl,
+            categoryIds: Array.isArray(member.categoryIds) ? member.categoryIds : [],
+          }),
+        });
+
+        if (!res.ok) throw new Error(`Erreur pour ${member.name}`);
+
+        const rawSaved = await res.json() as Partial<DbMember>;
+        const savedMember: DbMember = {
+          ...member,
+          id: String(rawSaved.id ?? member.id),
+          name: String(rawSaved.name ?? member.name),
+          roleDe: String(rawSaved.roleDe ?? member.roleDe),
+          roleEn: String(rawSaved.roleEn ?? member.roleEn),
+          roleFr: String(rawSaved.roleFr ?? member.roleFr),
+          bioDe: String(rawSaved.bioDe ?? member.bioDe),
+          bioEn: String(rawSaved.bioEn ?? member.bioEn),
+          bioFr: String(rawSaved.bioFr ?? member.bioFr),
+          linkedin: String(rawSaved.linkedin ?? member.linkedin),
+          imageUrl: String(rawSaved.imageUrl ?? member.imageUrl),
+          categoryIds: Array.isArray(rawSaved.categoryIds) ? rawSaved.categoryIds.map(String) : member.categoryIds,
+        };
+
+        setMembers((prev) => prev.map((item) => item.id === member.id ? savedMember : item));
+        successCount += 1;
+      }
+
+      adminNotify.success(`Équipe sauvegardée : ${successCount} membre${successCount > 1 ? 's' : ''}.`);
+    } catch (saveError) {
+      adminNotify.error(saveError instanceof Error ? saveError.message : 'Erreur lors de la sauvegarde générale.');
+    } finally {
+      setSaving(null);
+      setSavingAll(false);
+    }
+  }
+
   return (
     <div className="max-w-5xl px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
       <div className="mb-8">
@@ -220,16 +304,37 @@ export function TeamMembersEditor({ initialData }: Props) {
         <div className="text-xs text-white/35">
           {members.length} membre{members.length > 1 ? 's' : ''}
         </div>
-        <button
-          type="button"
-          onClick={addMember}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-accent/25 bg-accent/15 px-3 py-2 text-xs font-semibold text-accent transition hover:bg-accent/25"
-        >
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Ajouter un membre
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={saveAll}
+            disabled={savingAll || members.length === 0}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs font-semibold text-white shadow-[0_8px_24px_rgba(233,140,11,.18)] transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {savingAll ? (
+              <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            {savingAll ? 'Sauvegarde...' : 'Sauvegarder toute l’équipe'}
+          </button>
+          <button
+            type="button"
+            onClick={addMember}
+            disabled={savingAll}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-accent/25 bg-accent/15 px-3 py-2 text-xs font-semibold text-accent transition hover:bg-accent/25 disabled:opacity-50"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Ajouter un membre
+          </button>
+        </div>
       </div>
 
       {/* Lang tabs */}
