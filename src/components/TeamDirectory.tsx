@@ -1,77 +1,19 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import type { CoreTeamMember } from '@/content/core-team';
 import type { Locale } from '@/i18n/config';
 
-export type PublicTeamCategory = {
-  id: string;
-  nameDe: string;
-  nameEn: string;
-  nameFr: string;
-  sortOrder: number;
-  memberNames: string[];
-};
-
 type Props = {
   members: CoreTeamMember[];
-  categories: PublicTeamCategory[];
   locale: Locale;
 };
 
-export function TeamDirectory({ members, categories, locale }: Props) {
-  const [activeCategory, setActiveCategory] = useState('all');
-
-  const visibleMembers = useMemo(() => {
-    if (activeCategory === 'all') return members;
-    const category = categories.find((item) => item.id === activeCategory);
-    if (!category) return members;
-    const names = new Set(category.memberNames);
-    return members.filter((member) => names.has(member.name));
-  }, [activeCategory, categories, members]);
-
-  const categoryName = (category: PublicTeamCategory) =>
-    locale === 'de' ? category.nameDe : locale === 'fr' ? category.nameFr : category.nameEn;
-
+export function TeamDirectory({ members, locale }: Props) {
   return (
     <div>
-      <div className="mb-6 flex flex-nowrap gap-1.5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <button
-          type="button"
-          onClick={() => setActiveCategory('all')}
-          aria-pressed={activeCategory === 'all'}
-          className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] transition-all sm:px-3.5 sm:text-xs ${
-            activeCategory === 'all'
-              ? 'bg-accent text-white shadow-[0_8px_30px_rgba(233,140,11,.25)]'
-              : 'border border-white/15 bg-white/5 text-white/70 hover:border-accent/50 hover:text-white'
-          }`}
-        >
-          Level Up Team
-        </button>
-        {categories.map((category) => {
-          const hasMembers = category.memberNames.some((name) => members.some((member) => member.name === name));
-          if (!hasMembers) return null;
-          const active = activeCategory === category.id;
-          return (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => setActiveCategory(category.id)}
-              aria-pressed={active}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] transition-all sm:px-3.5 sm:text-xs ${
-                active
-                  ? 'bg-accent text-white shadow-[0_8px_30px_rgba(233,140,11,.25)]'
-                  : 'border border-white/15 bg-white/5 text-white/70 hover:border-accent/50 hover:text-white'
-              }`}
-            >
-              {categoryName(category)}
-            </button>
-          );
-        })}
-      </div>
-
       <div className="grid grid-cols-2 gap-3 transition-opacity sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-        {visibleMembers.map((member) => (
+        {members.map((member) => (
           <article key={member.name} className="group relative flex flex-col overflow-hidden rounded-2xl ring-1 ring-white/10 transition-all duration-300 hover:scale-[1.01] hover:ring-accent/50">
             <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-900">
               <img

@@ -125,7 +125,7 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
-            <TeamDirectory members={sourceMembers} categories={publicCategories} locale={loc} />
+            <TeamDirectory members={sourceMembers} locale={loc} />
           </RevealOnScroll>
         </div>
       </section>
