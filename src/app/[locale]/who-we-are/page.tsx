@@ -108,7 +108,7 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
           className="pointer-events-none select-none absolute right-6 top-1/2 -translate-y-1/2 text-[12rem] sm:text-[18rem] font-black leading-none text-white/[0.03]"
           aria-hidden
         >
-          08
+          TEAM
         </span>
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16 pt-20 sm:pt-24 w-full">

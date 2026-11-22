@@ -24,7 +24,7 @@ export type WhoWeAreStrings = {
 const de: WhoWeAreStrings = {
   title: 'Über uns',
   intro:
-    'Acht Menschen, eine Idee. Eine Community, die nicht allein anfangen will.',
+    'Eine Idee. Ein engagiertes Team. Eine Community, die nicht allein anfangen will.',
   story: {
     heading: 'Unsere Geschichte',
     lines: [
@@ -49,7 +49,7 @@ const de: WhoWeAreStrings = {
   },
   team: {
     heading: 'Lernen Sie das Team kennen',
-    lead: 'Acht Leute, die an dieselbe Sache glauben: eine Diaspora, die in Verbindung bleibt, kommt weiter und macht mehr möglich.',
+    lead: 'Menschen mit unterschiedlichen Fähigkeiten, die an dieselbe Sache glauben: Eine vernetzte Diaspora kommt weiter und öffnet gemeinsam neue Möglichkeiten.',
   },
   ctaContact: 'Kontakt',
 };
@@ -57,7 +57,7 @@ const de: WhoWeAreStrings = {
 const en: WhoWeAreStrings = {
   title: 'About us',
   intro:
-    'Eight people, one idea. A community that does not want to start from scratch alone.',
+    'One idea. A committed team. A community that does not want to start alone.',
   story: {
     heading: 'Our story',
     lines: [
@@ -82,7 +82,7 @@ const en: WhoWeAreStrings = {
   },
   team: {
     heading: 'Get to know the team',
-    lead: 'Eight people who believe in the same thing: a diaspora that stays connected goes further and opens more doors.',
+    lead: 'People with complementary strengths, united by one belief: a connected diaspora goes further and opens more doors together.',
   },
   ctaContact: 'Contact',
 };
@@ -90,7 +90,7 @@ const en: WhoWeAreStrings = {
 const fr: WhoWeAreStrings = {
   title: 'À propos',
   intro:
-    'Huit personnes, une même idée. Une communauté qui ne veut pas tout recommencer toute seule.',
+    'Une idée. Une équipe engagée. Une communauté qui ne veut pas avancer seule.',
   story: {
     heading: 'Notre histoire',
     lines: [
@@ -115,7 +115,7 @@ const fr: WhoWeAreStrings = {
   },
   team: {
     heading: 'Découvrez l’équipe',
-    lead: 'Huit personnes qui croient à la même chose : une diaspora qui reste en lien va plus loin et ouvre plus de portes.',
+    lead: 'Des personnes aux talents complémentaires, réunies par une conviction : une diaspora connectée va plus loin et ouvre davantage de possibilités ensemble.',
   },
   ctaContact: 'Contact',
 };
