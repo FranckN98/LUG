@@ -138,16 +138,11 @@ export default async function LocaleHomePage({
         { label: t.heroBtnAttend, href: `${base}/events` },
       ];
 
-  // ── Hero eyebrow + info-line (hardcoded, trilingual) ───────────────────────
+  // ── Hero eyebrow (hardcoded, trilingual) ───────────────────────────────────
   const HERO_EYEBROW: Record<Locale, string> = {
     fr: 'PROCHAINE ÉDITION • FRANCFORT 2026',
     de: 'NÄCHSTE AUSGABE • FRANKFURT 2026',
     en: 'NEXT EDITION • FRANKFURT 2026',
-  };
-  const HERO_INFO_LINE: Record<Locale, string> = {
-    fr: 'Francfort • Octobre 2026 • Carrière · Business · Réseau',
-    de: 'Frankfurt • Oktober 2026 • Karriere · Business · Netzwerk',
-    en: 'Frankfurt • October 2026 • Career · Business · Network',
   };
 
   return (
@@ -157,7 +152,6 @@ export default async function LocaleHomePage({
         tagline={HERO_EYEBROW[loc]}
         title={heroTitle}
         subtitle={countdownHidesSubtitle ? undefined : heroSubtitle}
-        infoLine={HERO_INFO_LINE[loc]}
         stats={t.stats}
         primaryButton={primaryButton}
         buttons={buttons}
