@@ -45,7 +45,7 @@ function Logo({ logoUrl }: { logoUrl?: string | null }) {
 const navItems: { href: string; de: string; en: string; fr: string }[] = [
   { href: '', de: 'Start', en: 'Home', fr: 'Accueil' },
   { href: '/events', de: 'Events', en: 'Events', fr: 'Événements' },
-  { href: '/who-we-are', de: 'Wer wir sind', en: 'Who we are', fr: 'Qui sommes-nous ?' },
+  { href: '/who-we-are', de: 'Über uns', en: 'About us', fr: 'À propos' },
   { href: '/partners', de: 'Partner', en: 'Partners', fr: 'Partenaires' },
   { href: '/blog-impact', de: 'Blog & Impact', en: 'Blog & Impact', fr: 'Blog & Impact' },
 ];
