@@ -70,7 +70,7 @@ export function TeamDirectory({ members, categories, locale }: Props) {
         })}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 transition-opacity sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 transition-opacity sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
         {visibleMembers.map((member) => (
           <article key={member.name} className="group relative flex flex-col overflow-hidden rounded-2xl ring-1 ring-white/10 transition-all duration-300 hover:scale-[1.01] hover:ring-accent/50">
             <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-900">
