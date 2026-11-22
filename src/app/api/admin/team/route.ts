@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   if (unauthorized) return unauthorized;
 
   const body = await req.json();
-  const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl } = body as {
+  const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl, categoryIds } = body as {
     name: string;
     roleDe?: string;
     roleEn?: string;
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
     bioFr?: string;
     linkedin?: string;
     imageUrl?: string;
+    categoryIds?: string[];
   };
 
   if (!name) {
@@ -44,6 +45,9 @@ export async function POST(req: Request) {
       bioFr: bioFr ?? '',
       linkedin: linkedin ?? '',
       imageUrl: imageUrl ?? '',
+      categories: {
+        set: categoryIds?.map((id) => ({ id })),
+      },
     },
     create: {
       name,
@@ -55,6 +59,9 @@ export async function POST(req: Request) {
       bioFr: bioFr ?? '',
       linkedin: linkedin ?? '',
       imageUrl: imageUrl ?? '',
+      categories: {
+        connect: categoryIds?.map((id) => ({ id })),
+      },
     },
   });
 
@@ -73,7 +80,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl } = body as {
+  const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl, categoryIds } = body as {
     name?: string;
     roleDe?: string;
     roleEn?: string;
@@ -83,6 +90,7 @@ export async function PATCH(req: Request) {
     bioFr?: string;
     linkedin?: string;
     imageUrl?: string;
+    categoryIds?: string[];
   };
 
   const member = await prisma.teamMember.update({
@@ -97,6 +105,9 @@ export async function PATCH(req: Request) {
       ...(typeof bioFr === 'string' ? { bioFr } : {}),
       ...(typeof linkedin === 'string' ? { linkedin } : {}),
       ...(typeof imageUrl === 'string' ? { imageUrl } : {}),
+      categories: {
+        set: categoryIds?.map((id) => ({ id })),
+      },
     },
   });
 

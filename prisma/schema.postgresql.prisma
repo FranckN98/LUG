@@ -136,8 +136,23 @@ model TeamMember {
   bioFr    String? @default("")
   linkedin String? @default("")
   imageUrl String? @default("")
+  roleDe    String? @default("")
+  roleEn    String? @default("")
+  roleFr    String? @default("")
+  categories TeamCategory[]
 
   @@map("team_members")
+}
+
+model TeamCategory {
+  id        String       @id @default(uuid())
+  nameDe    String
+  nameEn    String
+  nameFr    String
+  sortOrder Int          @default(0)
+  members   TeamMember[]
+
+  @@map("team_categories")
 }
 
 model Media {
@@ -162,7 +177,7 @@ model Venue {
   country        String
   googleMapsUrl  String?
   createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
+  updatedAt      DateTime           @map("updated_at")
   events         Event[]
   translations   VenueTranslation[]
 
@@ -278,7 +293,7 @@ model EventHighlight {
   sortOrder    Int                       @default(0) @map("sort_order")
   isVisible    Boolean                   @default(true) @map("is_visible")
   createdAt    DateTime                  @default(now()) @map("created_at")
-  updatedAt    DateTime                  @updatedAt @map("updated_at")
+  updatedAt    DateTime                  @map("updated_at")
   event        Event                     @relation(fields: [eventId], references: [id], onDelete: Cascade)
   translations EventHighlightTranslation[]
 
@@ -476,7 +491,8 @@ model EventOrganization {
   sortOrder      Int                  @default(0) @map("sort_order")
   isVisible      Boolean              @default(true) @map("is_visible")
   createdAt      DateTime             @default(now()) @map("created_at")
-  updatedAt      DateTime             @updatedAt @map("updated_at")
+  updatedAt      DateTime             @map("updated_at")
+
   event          Event                @relation(fields: [eventId], references: [id], onDelete: Cascade)
   organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 

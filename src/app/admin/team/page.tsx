@@ -14,10 +14,11 @@ export default async function AdminTeamPage() {
     bioFr: string;
     linkedin: string;
     imageUrl: string;
+    categoryIds: string[];
   }[] = [];
 
   try {
-    const rows = await prisma.teamMember.findMany();
+    const rows = await prisma.teamMember.findMany({ include: { categories: { select: { id: true } } } });
     const byName = new Map(rows.map((r) => [r.name, r]));
 
     dbMembers = CORE_TEAM_MEMBERS.map((m, index) => {
@@ -33,6 +34,7 @@ export default async function AdminTeamPage() {
         bioFr: row?.bioFr ?? '',
         linkedin: row?.linkedin ?? '',
         imageUrl: row?.imageUrl ?? m.image,
+        categoryIds: row?.categories.map((category) => category.id) ?? [],
       };
     });
   } catch {
@@ -48,6 +50,7 @@ export default async function AdminTeamPage() {
       bioFr: '',
       linkedin: '',
       imageUrl: m.image,
+      categoryIds: [],
     }));
   }
 

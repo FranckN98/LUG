@@ -3,10 +3,10 @@ import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { CORE_TEAM_MEMBERS } from '@/content/core-team';
 import { whoWeAreContent } from '@/content/who-we-are';
-import { CoreTeamGrid } from '@/components/CoreTeamGrid';
 import { RevealOnScroll } from '@/components/RevealOnScroll';
 import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
+import { TeamDirectory } from '@/components/TeamDirectory';
 
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/who-we-are');
@@ -35,6 +35,24 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
     // DB not yet migrated — use static data only
   }
 
+  let publicCategories: { id: string; nameDe: string; nameEn: string; nameFr: string; sortOrder: number; memberNames: string[] }[] = [];
+  try {
+    const categoryRows = await prisma.teamCategory.findMany({
+      orderBy: { sortOrder: 'asc' },
+      include: { members: { select: { name: true } } },
+    });
+    publicCategories = categoryRows.map((category) => ({
+      id: category.id,
+      nameDe: category.nameDe,
+      nameEn: category.nameEn,
+      nameFr: category.nameFr,
+      sortOrder: category.sortOrder,
+      memberNames: category.members.map((member) => member.name),
+    }));
+  } catch {
+    publicCategories = [];
+  }
+
   const members = CORE_TEAM_MEMBERS.map((m) => {
     const db = dbRows.find((r) => r.name === m.name);
     if (!db) return m;
@@ -50,6 +68,23 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
       linkedin: db.linkedin || undefined,
     };
   });
+
+  const staticNames = new Set(CORE_TEAM_MEMBERS.map((member) => member.name));
+  const mergedMembers = members.concat(
+    dbRows
+      .filter((db) => !staticNames.has(db.name))
+      .map((db) => ({
+        name: db.name,
+        image: db.imageUrl || '/team/core-01.png',
+        role: {
+          de: db.roleDe || 'Membre de l’équipe',
+          en: db.roleEn || 'Team member',
+          fr: db.roleFr || 'Membre de l’équipe',
+        },
+        bio: { de: db.bioDe ?? '', en: db.bioEn ?? '', fr: db.bioFr ?? '' },
+        linkedin: db.linkedin || undefined,
+      }))
+  );
 
   return (
     <div className="overflow-hidden">
@@ -104,7 +139,7 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
-            <CoreTeamGrid members={members} locale={loc} />
+            <TeamDirectory members={mergedMembers} categories={publicCategories} locale={loc} />
           </RevealOnScroll>
         </div>
       </section>

@@ -389,7 +389,7 @@ model SiteStat {
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
 
   @@index([page, displayOrder])
   @@map("site_stats")
@@ -406,8 +406,20 @@ model TeamMember {
   bioFr    String? @default("")
   linkedin String? @default("")
   imageUrl String? @default("")
+  categories TeamCategory[]
 
   @@map("team_members")
+}
+
+model TeamCategory {
+  id        String       @id @default(uuid())
+  nameDe    String
+  nameEn    String
+  nameFr    String
+  sortOrder Int          @default(0)
+  members   TeamMember[]
+
+  @@map("team_categories")
 }
 
 model Media {

@@ -22,7 +22,7 @@ export type WhoWeAreStrings = {
 };
 
 const de: WhoWeAreStrings = {
-  title: 'Wer wir sind',
+  title: 'Über uns',
   intro:
     'Acht Menschen, eine Idee. Eine Community, die nicht allein anfangen will.',
   story: {
@@ -48,14 +48,14 @@ const de: WhoWeAreStrings = {
     ],
   },
   team: {
-    heading: 'Die Menschen hinter der Bewegung',
+    heading: 'Lernen Sie das Team kennen',
     lead: 'Acht Leute, die an dieselbe Sache glauben: eine Diaspora, die in Verbindung bleibt, kommt weiter und macht mehr möglich.',
   },
   ctaContact: 'Kontakt',
 };
 
 const en: WhoWeAreStrings = {
-  title: 'Who we are',
+  title: 'About us',
   intro:
     'Eight people, one idea. A community that does not want to start from scratch alone.',
   story: {
@@ -81,14 +81,14 @@ const en: WhoWeAreStrings = {
     ],
   },
   team: {
-    heading: 'The people behind the movement',
+    heading: 'Get to know the team',
     lead: 'Eight people who believe in the same thing: a diaspora that stays connected goes further and opens more doors.',
   },
   ctaContact: 'Contact',
 };
 
 const fr: WhoWeAreStrings = {
-  title: 'Qui sommes-nous ?',
+  title: 'À propos',
   intro:
     'Huit personnes, une même idée. Une communauté qui ne veut pas tout recommencer toute seule.',
   story: {
@@ -114,7 +114,7 @@ const fr: WhoWeAreStrings = {
     ],
   },
   team: {
-    heading: 'Les personnes derrière le mouvement',
+    heading: 'Découvrez l’équipe',
     lead: 'Huit personnes qui croient à la même chose : une diaspora qui reste en lien va plus loin et ouvre plus de portes.',
   },
   ctaContact: 'Contact',
