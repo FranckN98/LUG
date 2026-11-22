@@ -32,7 +32,9 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
     imageUrl: string | null;
   }[] = [];
   try {
-    dbRows = await prisma.teamMember.findMany();
+    dbRows = await prisma.teamMember.findMany({
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    });
   } catch {
     // DB not yet migrated — use static data only
   }

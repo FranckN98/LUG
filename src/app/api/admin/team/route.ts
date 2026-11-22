@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   if (unauthorized) return unauthorized;
 
   const body = await req.json();
-  const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl, categoryIds } = body as {
+  const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl, categoryIds, sortOrder } = body as {
     name: string;
     roleDe?: string;
     roleEn?: string;
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
     linkedin?: string;
     imageUrl?: string;
     categoryIds?: string[];
+    sortOrder?: number;
   };
 
   if (!name) {
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
       bioFr: bioFr ?? '',
       linkedin: linkedin ?? '',
       imageUrl: imageUrl ?? '',
+      sortOrder: typeof sortOrder === 'number' ? sortOrder : 0,
       categories: {
         set: categoryIds?.map((id) => ({ id })),
       },
@@ -63,6 +65,7 @@ export async function POST(req: Request) {
       bioFr: bioFr ?? '',
       linkedin: linkedin ?? '',
       imageUrl: imageUrl ?? '',
+      sortOrder: typeof sortOrder === 'number' ? sortOrder : 0,
       categories: {
         connect: categoryIds?.map((id) => ({ id })),
       },
@@ -94,7 +97,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl, categoryIds } = body as {
+  const { name, roleDe, roleEn, roleFr, bioDe, bioEn, bioFr, linkedin, imageUrl, categoryIds, sortOrder } = body as {
     name?: string;
     roleDe?: string;
     roleEn?: string;
@@ -105,6 +108,7 @@ export async function PATCH(req: Request) {
     linkedin?: string;
     imageUrl?: string;
     categoryIds?: string[];
+    sortOrder?: number;
   };
 
   const member = await prisma.teamMember.update({
@@ -119,6 +123,7 @@ export async function PATCH(req: Request) {
       ...(typeof bioFr === 'string' ? { bioFr } : {}),
       ...(typeof linkedin === 'string' ? { linkedin } : {}),
       ...(typeof imageUrl === 'string' ? { imageUrl } : {}),
+      ...(typeof sortOrder === 'number' ? { sortOrder } : {}),
       categories: {
         set: categoryIds?.map((id) => ({ id })),
       },

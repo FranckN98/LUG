@@ -17,6 +17,7 @@ type DbMember = {
   linkedin: string;
   imageUrl: string;
   categoryIds: string[];
+  sortOrder: number;
 };
 
 type TeamCategory = {
@@ -49,6 +50,7 @@ function createDraftMember(index: number): DbMember {
     linkedin: '',
     imageUrl: '',
     categoryIds: [],
+    sortOrder: 0,
   };
 }
 
@@ -109,6 +111,7 @@ export function TeamMembersEditor({ initialData }: Props) {
           linkedin: member.linkedin,
           imageUrl: member.imageUrl,
           categoryIds: member.categoryIds,
+          sortOrder: member.sortOrder,
         }),
       });
 
@@ -129,6 +132,7 @@ export function TeamMembersEditor({ initialData }: Props) {
         categoryIds: Array.isArray(rawSavedMember.categoryIds)
           ? rawSavedMember.categoryIds.map(String)
           : member.categoryIds,
+        sortOrder: rawSavedMember.sortOrder ?? member.sortOrder,
       };
 
       setMembers((prev) => prev.map((m) => (m.id === member.id ? savedMember : m)));
@@ -226,6 +230,17 @@ export function TeamMembersEditor({ initialData }: Props) {
     })));
   }
 
+  function moveMember(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= members.length) return;
+
+    setMembers((prev) => {
+      const reordered = [...prev];
+      [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+      return reordered.map((member, memberIndex) => ({ ...member, sortOrder: memberIndex * 10 }));
+    });
+  }
+
   async function saveAll() {
     if (members.some((member) => !member.name.trim())) {
       adminNotify.error('Tous les membres doivent avoir un nom avant la sauvegarde générale.');
@@ -254,6 +269,7 @@ export function TeamMembersEditor({ initialData }: Props) {
             linkedin: member.linkedin,
             imageUrl: member.imageUrl,
             categoryIds: Array.isArray(member.categoryIds) ? member.categoryIds : [],
+            sortOrder: member.sortOrder,
           }),
         });
 
@@ -273,6 +289,7 @@ export function TeamMembersEditor({ initialData }: Props) {
           linkedin: String(rawSaved.linkedin ?? member.linkedin),
           imageUrl: String(rawSaved.imageUrl ?? member.imageUrl),
           categoryIds: Array.isArray(rawSaved.categoryIds) ? rawSaved.categoryIds.map(String) : member.categoryIds,
+          sortOrder: rawSaved.sortOrder ?? member.sortOrder,
         };
 
         setMembers((prev) => prev.map((item) => item.id === member.id ? savedMember : item));
@@ -390,7 +407,7 @@ export function TeamMembersEditor({ initialData }: Props) {
       </div>
 
       <div className="space-y-4">
-        {members.map((data) => {
+        {members.map((data, memberIndex) => {
           const roleField = `role${activeLang.charAt(0).toUpperCase()}${activeLang.slice(1)}` as 'roleDe' | 'roleEn' | 'roleFr';
           const bioField = `bio${activeLang.charAt(0).toUpperCase()}${activeLang.slice(1)}` as 'bioDe' | 'bioEn' | 'bioFr';
           const isSaving = saving === data.id;
@@ -478,6 +495,27 @@ export function TeamMembersEditor({ initialData }: Props) {
                         >
                           {isDeleting ? 'Suppression…' : 'Supprimer'}
                         </button>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => moveMember(memberIndex, -1)}
+                            disabled={memberIndex === 0 || savingAll}
+                            className="shrink-0 rounded-full border border-white/10 px-2 py-1.5 text-xs text-white/60 disabled:opacity-25"
+                            aria-label="Monter le membre"
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => moveMember(memberIndex, 1)}
+                            disabled={memberIndex === members.length - 1 || savingAll}
+                            className="shrink-0 rounded-full border border-white/10 px-2 py-1.5 text-xs text-white/60 disabled:opacity-25"
+                            aria-label="Descendre le membre"
+                          >
+                            ↓
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -406,6 +406,8 @@ model TeamMember {
   bioFr    String? @default("")
   linkedin String? @default("")
   imageUrl String? @default("")
+  sortOrder Int      @default(0)
+
   categories TeamCategory[]
 
   @@map("team_members")

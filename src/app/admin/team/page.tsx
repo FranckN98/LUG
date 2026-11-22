@@ -15,10 +15,15 @@ export default async function AdminTeamPage() {
     linkedin: string;
     imageUrl: string;
     categoryIds: string[];
+    sortOrder: number;
   }[] = [];
 
   try {
-    const rows = await prisma.teamMember.findMany({ include: { categories: { select: { id: true } } } });
+    const rows = await prisma.teamMember.findMany({
+      where: {},
+      include: { categories: { select: { id: true } } },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    });
 
     if (rows.length > 0) {
       dbMembers = rows.map((row) => {
@@ -35,6 +40,7 @@ export default async function AdminTeamPage() {
           linkedin: row.linkedin ?? '',
           imageUrl: row.imageUrl || staticMember?.image || '',
           categoryIds: row.categories.map((category) => category.id),
+          sortOrder: typeof row.sortOrder === 'number' ? row.sortOrder : 0,
         };
       });
     } else {
@@ -50,6 +56,7 @@ export default async function AdminTeamPage() {
         linkedin: '',
         imageUrl: m.image,
         categoryIds: [],
+        sortOrder: index * 10,
       }));
     }
   } catch {
@@ -66,6 +73,7 @@ export default async function AdminTeamPage() {
       linkedin: '',
       imageUrl: m.image,
       categoryIds: [],
+      sortOrder: index * 10,
     }));
   }
 
