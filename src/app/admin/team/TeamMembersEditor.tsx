@@ -66,6 +66,8 @@ export function TeamMembersEditor({ initialData }: Props) {
   const [categories, setCategories] = useState<TeamCategory[]>([]);
   const [categoryDraft, setCategoryDraft] = useState({ nameDe: '', nameEn: '', nameFr: '' });
   const [savingAll, setSavingAll] = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const [translateProvider, setTranslateProvider] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/team-categories')
@@ -305,6 +307,71 @@ export function TeamMembersEditor({ initialData }: Props) {
     }
   }
 
+  async function translateTeamFields() {
+    const targets = (['fr', 'de', 'en'] as LangTab[]).filter((lang) => lang !== activeLang);
+    const sourceField = (field: 'role' | 'bio') =>
+      ` ${field}${activeLang.charAt(0).toUpperCase()}${activeLang.slice(1)}`.trim();
+
+    if (!members.some((member) => {
+      const roleField = sourceField('role') as keyof DbMember;
+      const bioField = sourceField('bio') as keyof DbMember;
+      return String(member[roleField] ?? '').trim() || String(member[bioField] ?? '').trim();
+    })) {
+      adminNotify.error(`Aucun rôle ou biographie rempli en ${LANG_LABELS[activeLang]}.`);
+      return;
+    }
+
+    setTranslating(true);
+    setTranslateProvider(null);
+
+    try {
+      let provider: string | null = null;
+
+      for (const member of members) {
+        const roleField = `role${activeLang.charAt(0).toUpperCase()}${activeLang.slice(1)}` as 'roleDe' | 'roleEn' | 'roleFr';
+        const bioField = `bio${activeLang.charAt(0).toUpperCase()}${activeLang.slice(1)}` as 'bioDe' | 'bioEn' | 'bioFr';
+        const fields = {
+          role: String(member[roleField] ?? '').trim(),
+          bio: String(member[bioField] ?? '').trim(),
+        };
+        const cleaned = Object.fromEntries(Object.entries(fields).filter(([, value]) => value));
+        if (Object.keys(cleaned).length === 0) continue;
+
+        for (const target of targets) {
+          const res = await fetch('/api/admin/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ source: activeLang, target, fields: cleaned }),
+          });
+
+          if (!res.ok) {
+            const payload = await res.json().catch(() => null);
+            throw new Error(payload?.error || `Erreur HTTP ${res.status}`);
+          }
+
+          const result = await res.json() as { provider?: string; values?: Record<string, string> };
+          provider = result.provider || provider;
+
+          const roleTarget = `role${target.charAt(0).toUpperCase()}${target.slice(1)}` as 'roleDe' | 'roleEn' | 'roleFr';
+          const bioTarget = `bio${target.charAt(0).toUpperCase()}${target.slice(1)}` as 'bioDe' | 'bioEn' | 'bioFr';
+
+          setMembers((prev) => prev.map((item) => item.id === member.id ? {
+            ...item,
+            [roleTarget]: result.values?.role || item[roleTarget],
+            [bioTarget]: result.values?.bio || item[bioTarget],
+          } : item));
+        }
+      }
+
+      setTranslateProvider(provider);
+      adminNotify.success(provider ? `Traduction terminée via ${provider}.` : 'Traduction terminée.');
+    } catch (error) {
+      adminNotify.error(error instanceof Error ? error.message : 'Erreur lors de la traduction.');
+    } finally {
+      setTranslating(false);
+    }
+  }
+
   return (
     <div className="max-w-5xl px-4 py-5 sm:px-6 sm:py-6 lg:p-8">
       <div className="mb-8">
@@ -355,20 +422,43 @@ export function TeamMembersEditor({ initialData }: Props) {
       </div>
 
       {/* Lang tabs */}
-      <div className="flex gap-1 mb-6 bg-white/5 rounded-xl p-1 w-fit">
-        {(Object.keys(LANG_LABELS) as LangTab[]).map((lang) => (
-          <button
-            key={lang}
-            onClick={() => setActiveLang(lang)}
-            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              activeLang === lang
-                ? 'bg-primary text-white shadow'
-                : 'text-white/40 hover:text-white'
-            }`}
-          >
-            {LANG_LABELS[lang]}
-          </button>
-        ))}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-1 rounded-xl bg-white/5 p-1">
+          {(Object.keys(LANG_LABELS) as LangTab[]).map((lang) => (
+            <button
+              key={lang}
+              type="button"
+              onClick={() => setActiveLang(lang)}
+              className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all ${
+                activeLang === lang
+                  ? 'bg-primary text-white shadow'
+                  : 'text-white/40 hover:text-white'
+              }`}
+            >
+              {LANG_LABELS[lang]}
+            </button>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={translateTeamFields}
+          disabled={translating}
+          className="inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3 py-2 text-xs font-semibold text-accent transition hover:bg-accent/20 disabled:cursor-wait disabled:opacity-50"
+        >
+          {translating ? (
+            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-accent/30 border-t-accent" />
+          ) : (
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+          )}
+          {translating ? 'Traduction...' : 'Traduire les rôles et biographies'}
+        </button>
+
+        {translateProvider && (
+          <span className="text-[0.65rem] text-white/40">✓ via {translateProvider}</span>
+        )}
       </div>
 
       {/* Category management panel */}
