@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/adminAuth';
+import { revalidatePath } from 'next/cache';
 
 // GET /api/admin/team — returns all stored team member records
 export async function GET() {
   const unauthorized = requireAdmin();
   if (unauthorized) return unauthorized;
 
-  const members = await prisma.teamMember.findMany();
-  return NextResponse.json(members);
+  const members = await prisma.teamMember.findMany({ include: { categories: { select: { id: true } } } });
+  return NextResponse.json(members.map((member) => ({
+    ...member,
+    categoryIds: member.categories.map((category) => category.id),
+  })));
 }
 
 // POST /api/admin/team — upsert a team member by name
@@ -65,7 +69,17 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json(member);
+  const saved = await prisma.teamMember.findUnique({
+    where: { id: member.id },
+    include: { categories: { select: { id: true } } },
+  });
+
+  for (const locale of ['fr', 'en', 'de']) revalidatePath(`/${locale}/who-we-are`);
+
+  return NextResponse.json(saved ? {
+    ...saved,
+    categoryIds: saved.categories.map((category) => category.id),
+  } : { ...member, categoryIds: categoryIds ?? [] });
 }
 
 // PATCH /api/admin/team?id=<id> — update a team member by id
@@ -111,7 +125,17 @@ export async function PATCH(req: Request) {
     },
   });
 
-  return NextResponse.json(member);
+  const saved = await prisma.teamMember.findUnique({
+    where: { id: member.id },
+    include: { categories: { select: { id: true } } },
+  });
+
+  for (const locale of ['fr', 'en', 'de']) revalidatePath(`/${locale}/who-we-are`);
+
+  return NextResponse.json(saved ? {
+    ...saved,
+    categoryIds: saved.categories.map((category) => category.id),
+  } : { ...member, categoryIds: categoryIds ?? [] });
 }
 
 // DELETE /api/admin/team?id=<id> — delete a team member by id
@@ -126,5 +150,6 @@ export async function DELETE(req: Request) {
   }
 
   await prisma.teamMember.delete({ where: { id } });
+  for (const locale of ['fr', 'en', 'de']) revalidatePath(`/${locale}/who-we-are`);
   return NextResponse.json({ ok: true });
 }

@@ -8,6 +8,8 @@ import { generateMetadataForPath } from '@/lib/seo';
 import { prisma } from '@/lib/prisma';
 import { TeamDirectory } from '@/components/TeamDirectory';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(props: { params: Promise<{ locale: string }> }) {
   return generateMetadataForPath(props.params, '/who-we-are');
 }
@@ -53,38 +55,20 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
     publicCategories = [];
   }
 
-  const members = CORE_TEAM_MEMBERS.map((m) => {
-    const db = dbRows.find((r) => r.name === m.name);
-    if (!db) return m;
-    return {
-      ...m,
-      role: {
-        de: db.roleDe || m.role.de,
-        en: db.roleEn || m.role.en,
-        fr: db.roleFr || m.role.fr,
-      },
-      image: db.imageUrl || m.image,
-      bio: { de: db.bioDe ?? '', en: db.bioEn ?? '', fr: db.bioFr ?? '' },
-      linkedin: db.linkedin || undefined,
-    };
-  });
-
-  const staticNames = new Set(CORE_TEAM_MEMBERS.map((member) => member.name));
-  const mergedMembers = members.concat(
-    dbRows
-      .filter((db) => !staticNames.has(db.name))
-      .map((db) => ({
-        name: db.name,
-        image: db.imageUrl || '/team/core-01.png',
-        role: {
-          de: db.roleDe || 'Membre de l’équipe',
-          en: db.roleEn || 'Team member',
-          fr: db.roleFr || 'Membre de l’équipe',
-        },
-        bio: { de: db.bioDe ?? '', en: db.bioEn ?? '', fr: db.bioFr ?? '' },
-        linkedin: db.linkedin || undefined,
-      }))
-  );
+  const sourceMembers =
+    dbRows.length > 0
+      ? dbRows.map((db) => ({
+          name: db.name,
+          image: db.imageUrl || '/team/core-01.png',
+          role: {
+            de: db.roleDe || 'Membre de l’équipe',
+            en: db.roleEn || 'Team member',
+            fr: db.roleFr || 'Membre de l’équipe',
+          },
+          bio: { de: db.bioDe ?? '', en: db.bioEn ?? '', fr: db.bioFr ?? '' },
+          linkedin: db.linkedin || undefined,
+        }))
+      : CORE_TEAM_MEMBERS;
 
   return (
     <div className="overflow-hidden">
@@ -139,7 +123,7 @@ export default async function WhoWeArePage({ params }: { params: Promise<{ local
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <RevealOnScroll>
-            <TeamDirectory members={mergedMembers} categories={publicCategories} locale={loc} />
+            <TeamDirectory members={sourceMembers} categories={publicCategories} locale={loc} />
           </RevealOnScroll>
         </div>
       </section>
