@@ -68,7 +68,14 @@ export async function GET(request: Request) {
   }
 
   if (category === 'community') {
-    return NextResponse.json(listCommunityItems());
+    const dbCommunity = await prisma.media.findMany({
+      where: { category: 'community' },
+      orderBy: { createdAt: 'desc' },
+    });
+    const localCommunity = listCommunityItems();
+    const dbUrls = new Set(dbCommunity.map((item) => item.url));
+    const localUnique = localCommunity.filter((item) => !dbUrls.has(item.url));
+    return NextResponse.json([...dbCommunity, ...localUnique]);
   }
 
   const media = await prisma.media.findMany({
@@ -77,7 +84,10 @@ export async function GET(request: Request) {
   });
 
   if (!category || category === 'all') {
-    return NextResponse.json([...listCommunityItems(), ...media]);
+    const localCommunity = listCommunityItems();
+    const dbUrls = new Set(media.map((item) => item.url));
+    const localUnique = localCommunity.filter((item) => !dbUrls.has(item.url));
+    return NextResponse.json([...localUnique, ...media]);
   }
 
   return NextResponse.json(media);
@@ -163,6 +173,25 @@ export async function DELETE(request: Request) {
   const media = await prisma.media.findUnique({ where: { id } });
   if (!media) {
     return NextResponse.json({ error: 'Fichier introuvable' }, { status: 404 });
+  }
+
+  if (media.category === 'community') {
+    if (media.url.startsWith('/community/')) {
+      const fileName = decodeURIComponent(media.url.replace(/^\/community\//, ''));
+      if (!fileName.includes('/') && !fileName.includes('\\') && !fileName.includes('..')) {
+        await unlink(join(process.cwd(), 'public', 'community', fileName)).catch(() => {/* ignore */});
+      }
+    } else if (media.url.startsWith('https://') && process.env.BLOB_READ_WRITE_TOKEN) {
+      try {
+        const { del } = await import('@vercel/blob');
+        await del(media.url);
+      } catch {
+        // Delete DB record even if remote Blob cleanup fails.
+      }
+    }
+
+    await prisma.media.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
   }
 
   // Delete file from disk (only for /media/ uploads, not external URLs)

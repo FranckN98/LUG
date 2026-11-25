@@ -80,10 +80,19 @@ export function MediaLibrary() {
 
   const fetchMedia = useCallback(async (category: string) => {
     setLoading(true);
-    const res = await fetch(`/api/admin/media?category=${category}`);
-    const data = await res.json();
-    setMedia(data);
-    setLoading(false);
+    setUploadError('');
+    try {
+      const res = await fetch(`/api/admin/media?category=${encodeURIComponent(category)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setMedia(Array.isArray(data) ? data : []);
+    } catch {
+      setMedia([]);
+      setUploadError('Impossible de charger les images.');
+      adminNotify.error('Impossible de charger les images.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -122,6 +131,7 @@ export function MediaLibrary() {
       adminNotify.error('Erreur réseau lors de l\'upload.');
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
 
@@ -181,15 +191,21 @@ export function MediaLibrary() {
   async function deleteMedia(item: MediaItem) {
     if (!confirm(`Supprimer "${item.filename}" ?`)) return;
     setDeleting(item.id);
-    const res = await fetch(`/api/admin/media?id=${item.id}`, { method: 'DELETE' });
-    if (res.ok) {
-      setMedia((prev) => prev.filter((m) => m.id !== item.id));
+    try {
+      const res = await fetch(`/api/admin/media?id=${encodeURIComponent(item.id)}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error || 'Suppression impossible.');
+      }
+      setMedia((prev) => prev.filter((mediaItem) => mediaItem.id !== item.id));
       if (selected?.id === item.id) setSelected(null);
+      await fetchMedia(activeCategory);
       adminNotify.success('Média supprimé.');
-    } else {
-      adminNotify.error('Suppression impossible.');
+    } catch (error) {
+      adminNotify.error(error instanceof Error ? error.message : 'Suppression impossible.');
+    } finally {
+      setDeleting(null);
     }
-    setDeleting(null);
   }
 
   return (
